@@ -5,7 +5,7 @@ namespace Svelto.Context
         void NotifyFrameworkInitialized();
         void NotifyFrameworkDeinitialized();
 
-        void AddFrameworkInitializationListener(IWaitForFrameworkInitialization obj); 
+        void AddFrameworkInitializationListener(IWaitForFrameworkInitialization obj);
         void AddFrameworkDestructionListener(IWaitForFrameworkDestruction obj);
     }
 }

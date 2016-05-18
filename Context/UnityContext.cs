@@ -1,64 +1,44 @@
-using UnityEngine;
-using Svelto.Context;
 using System.Collections;
+using Svelto.Context;
+using UnityEngine;
 
-public class UnityContext:MonoBehaviour
-{}
-
-public class UnityContext<T>: UnityContext where T:class, ICompositionRoot, IUnityContextHierarchyChangedListener, new()
+public abstract class UnityContext:MonoBehaviour
 {
-	virtual protected void Awake()
-	{
-		Init();
-	}
+    protected abstract void OnAwake();
 
-	void Init()
-	{
-		_applicationRoot = new T();
-		
-		MonoBehaviour[] behaviours = transform.GetComponentsInChildren<MonoBehaviour>(true);
-
-        for (int i = 0; i < behaviours.Length; i++)
-        {
-            var component = behaviours[i];
-
-            if (component != null)
-                _applicationRoot.OnMonobehaviourAdded(component);
-        }
-
-        Transform[] children = transform.GetComponentsInChildren<Transform>(true);
-
-        for (int i = 0; i < children.Length; i++)
-        {
-            var child = children[i];
-
-            if (child != null)
-                 _applicationRoot.OnGameObjectAdded(child.gameObject);
-        }
+    void Awake()
+    {
+        OnAwake();
     }
-	
-	void OnDestroy()
-	{
-		FrameworkDestroyed();
-	}
+}
 
-	void Start()
-	{
-		if (Application.isPlaying == true)
-			StartCoroutine(WaitForFrameworkInitialization());
-	}
+public class UnityContext<T>: UnityContext where T:class, ICompositionRoot, new()
+{
+    protected override void OnAwake()
+    {
+        _applicationRoot = new T();
 
-	IEnumerator WaitForFrameworkInitialization()
-	{
-		yield return new WaitForEndOfFrame(); //let's wait until next frame, so we are sure that all the awake and starts are called
-		
-		_applicationRoot.OnContextInitialized();
-	}
-	
-	void FrameworkDestroyed()
-	{
-		_applicationRoot.OnContextDestroyed();
-	}
-	
-	private T _applicationRoot = null;
+        _applicationRoot.OnContextCreated(this);
+    }
+
+    void OnDestroy()
+    {
+        _applicationRoot.OnContextDestroyed();
+    }
+
+    void Start()
+    {
+        if (Application.isPlaying == true)
+            StartCoroutine(WaitForFrameworkInitialization());
+    }
+
+    IEnumerator WaitForFrameworkInitialization()
+    {
+        //let's wait until the end of the frame, so we are sure that all the awake and starts are called
+        yield return new WaitForEndOfFrame();
+
+        _applicationRoot.OnContextInitialized();
+    }
+
+    T _applicationRoot;
 }

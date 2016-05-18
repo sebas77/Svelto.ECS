@@ -7,6 +7,6 @@ namespace Svelto.Factories
         void RegisterPrefab(GameObject prefab, string type, GameObject parent = null);
 
         GameObject Build(string type);
-        GameObject Build(GameObject go);
+        GameObject Build(GameObject prefab);
     }
 }

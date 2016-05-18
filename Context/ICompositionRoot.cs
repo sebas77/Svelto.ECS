@@ -1,12 +1,11 @@
-using UnityEngine;
-
 namespace Svelto.Context
 {
-	public interface ICompositionRoot
+    public interface ICompositionRoot
     {
-		void OnContextInitialized();
-		void OnContextDestroyed();
-	}
+        void OnContextCreated(UnityContext contextHolder);
+        void OnContextInitialized();
+        void OnContextDestroyed();
+    }
 }
 
 

@@ -5,9 +5,8 @@ namespace Svelto.ES
         void AddEngine(IEngine engine);
     }
 
-    public interface INodeEnginesRoot: IEnginesRoot
+    public interface IEntityFactory
     {
-        void Add(INode node);
-        void Remove(INode node);
+        void BuildEntity(int ID, EntityDescriptor ED);
     }
 }

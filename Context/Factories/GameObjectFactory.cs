@@ -7,37 +7,19 @@ using UnityEngine;
 
 namespace Svelto.Context
 {
-    public class GameObjectFactory: Factories.IGameObjectFactory
-	{
-		public GameObjectFactory(IUnityContextHierarchyChangedListener root)
-		{
-			_unityContext = root;
+    public class GameObjectFactory : Factories.IGameObjectFactory
+    {
+        public GameObjectFactory()
+        {
+            _prefabs = new Dictionary<string, GameObject[]>();
+        }
 
-			_prefabs = new Dictionary<string, GameObject[]>();
-		} 
-		
-        /// <summary>
-        /// Register a prefab to be built later using a string ID. 
-        /// </summary>
-        /// <param name="prefab">original prefab</param>
-        /// <param name="prefabName">prefab name</param>
-        /// <param name="parent">optional gameobject to specify as parent later</param>
+        public GameObject Build(string prefabName)
+        {
+            DesignByContract.Check.Require(_prefabs.ContainsKey(prefabName), "Svelto.Factories.IGameObjectFactory - Invalid Prefab Type");
 
-		public void RegisterPrefab(GameObject prefab, string prefabName, GameObject parent = null)
-		{
-		 	var objects = new GameObject[2];
-		 	
-		 	objects[0] = prefab; objects[1] = parent;
-			
-			_prefabs.Add(prefabName, objects);
-		}
-		
-		public GameObject Build(string prefabName)
-		{
-			DesignByContract.Check.Require(_prefabs.ContainsKey(prefabName), "Svelto.Factories.IGameObjectFactory - Invalid Prefab Type");
-			
-			var go = Build(_prefabs[prefabName][0]);
-			
+            var go = Build(_prefabs[prefabName][0]);
+
             GameObject parent = _prefabs[prefabName][1];
 
             if (parent != null)
@@ -54,31 +36,34 @@ namespace Svelto.Context
 
                 transform.localPosition = position;
                 transform.localRotation = rotation;
-                transform.localScale    = scale;
+                transform.localScale = scale;
             }
-			
-			return go;
-		}
 
-		public GameObject Build(GameObject go)
-		{
-			var copy = Object.Instantiate(go) as GameObject;
-			var components = copy.GetComponentsInChildren<MonoBehaviour>(true);
+            return go;
+        }
 
-            for (var i = 0; i < components.Length; ++i)
-                if (components[i] != null)
-                    _unityContext.OnMonobehaviourAdded(components[i]);
+        /// <summary>
+        /// Register a prefab to be built later using a string ID.
+        /// </summary>
+        /// <param name="prefab">original prefab</param>
+        public GameObject Build(GameObject prefab)
+        {
+            Profiler.BeginSample("GameObject Factory Build");
 
-            _unityContext.OnGameObjectAdded(copy);
-
-            copy.AddComponent<NotifyComponentsRemoved>().unityContext = _unityContext;
-            copy.AddComponent<NotifyEntityRemoved>().unityContext = _unityContext;
+            var copy = Object.Instantiate(prefab) as GameObject;
 
             return copy;
-		}
+        }
 
-        IUnityContextHierarchyChangedListener   _unityContext;
-        Dictionary<string, GameObject[]>        _prefabs;
+        public void RegisterPrefab(GameObject prefab, string prefabName, GameObject parent = null)
+        {
+            var objects = new GameObject[2];
+
+            objects[0] = prefab; objects[1] = parent;
+
+            _prefabs.Add(prefabName, objects);
+        }
+
+        Dictionary<string, GameObject[]>                        _prefabs;
     }
 }
-

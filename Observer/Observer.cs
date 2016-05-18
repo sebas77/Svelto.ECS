@@ -1,24 +1,24 @@
 using System;
 
-namespace Svelto.Observer
+namespace Svelto.Observer.InterNamespace
 {
-    public abstract class Observer<DispatchType, ActionType>: IObserver<ActionType>
+    public abstract class Observer<DispatchType, ActionType> : IObserver<ActionType>
     {
-        public Observer(Observable<DispatchType> observable)
+        protected Observer(Observable<DispatchType> observable)
         {
-             observable.Notify += OnObservableDispatched;
+            observable.Notify += OnObservableDispatched;
 
             _unsubscribe = () => observable.Notify -= OnObservableDispatched;
         }
 
-        public void AddAction(Action<ActionType> action)
+        public void AddAction(ObserverAction<ActionType> action)
         {
             _actions += action;
         }
 
-        public void RemoveAction(Action<ActionType> action)
+        public void RemoveAction(ObserverAction<ActionType> action)
         {
-            _actions += action;
+            _actions -= action;
         }
 
         public void Unsubscribe()
@@ -26,32 +26,85 @@ namespace Svelto.Observer
             _unsubscribe();
         }
 
-        private void OnObservableDispatched(DispatchType dispatchNotification)
+        void OnObservableDispatched(ref DispatchType dispatchNotification)
         {
-             _actions(TypeMap(dispatchNotification));
+            if (_actions != null)
+            {
+                var actionType = TypeMap(ref dispatchNotification);
+
+                _actions(ref actionType);
+            }
         }
 
-        abstract protected ActionType TypeMap(DispatchType dispatchNotification);
+        protected abstract ActionType TypeMap(ref DispatchType dispatchNotification);
 
-        Action<ActionType>  _actions;
-        Action              _unsubscribe;
+        ObserverAction<ActionType> _actions;
+        Action _unsubscribe;
     }
+}
 
-    public class Observer<DispatchType>: Observer<DispatchType, DispatchType>
+namespace Svelto.Observer.IntraNamespace
+{
+    public class Observer<DispatchType> : InterNamespace.Observer<DispatchType, DispatchType>
     {
-        public Observer(Observable<DispatchType> observable):base(observable)
-        {}
+        public Observer(Observable<DispatchType> observable) : base(observable)
+        { }
 
-        protected override DispatchType TypeMap(DispatchType dispatchNotification)
+        protected override DispatchType TypeMap(ref DispatchType dispatchNotification)
         {
             return dispatchNotification;
         }
     }
+}
+
+namespace Svelto.Observer
+{
+    public class Observer: IObserver
+    {
+        public Observer(Observable observable)
+        {
+             observable.Notify += OnObservableDispatched;
+
+            _unsubscribe = () => observable.Notify -= OnObservableDispatched;
+        }
+
+        public void AddAction(Action action)
+        {
+            _actions += action;
+        }
+
+        public void RemoveAction(Action action)
+        {
+            _actions -= action;
+        }
+
+        public void Unsubscribe()
+        {
+            _unsubscribe();
+        }
+
+        void OnObservableDispatched()
+        {
+            if (_actions != null)
+             _actions();
+        }
+
+        Action  _actions;
+        readonly Action  _unsubscribe;
+    }
 
     public interface IObserver<WatchingType>
     {
-        void AddAction(Action<WatchingType> action);
-        void RemoveAction(Action<WatchingType> action);
+        void AddAction(ObserverAction<WatchingType> action);
+        void RemoveAction(ObserverAction<WatchingType> action);
+
+        void Unsubscribe();
+    }
+
+    public interface IObserver
+    {
+        void AddAction(Action action);
+        void RemoveAction(Action action);
 
         void Unsubscribe();
     }

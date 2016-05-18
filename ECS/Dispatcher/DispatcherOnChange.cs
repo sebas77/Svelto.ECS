@@ -12,7 +12,7 @@ public class DispatcherOnChange<S, T>: Dispatcher<S, T>
             {
                 _value = value;
 
-                Dispatch(value);
+                Dispatch(ref value);
             }
         }
     }
@@ -20,3 +20,15 @@ public class DispatcherOnChange<S, T>: Dispatcher<S, T>
     T _value;
 }
 
+public class DispatcherOnSet<S, T>: Dispatcher<S, T>
+{
+    public DispatcherOnSet(S sender) : base(sender) { }
+
+    public T value
+    {
+        set
+        {
+            Dispatch(ref value);
+        }
+    }
+}
