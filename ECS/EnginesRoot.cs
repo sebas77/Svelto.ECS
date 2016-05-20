@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.Ticker;
+using Nodes.Player;
 
 namespace Svelto.ES
 {
@@ -48,7 +49,7 @@ namespace Svelto.ES
             {
                 var genericType = baseType.GetGenericTypeDefinition();
                 
-                if (genericType == typeof(SingleManagedNodeEngine<>))
+                if (genericType == typeof(SingleNodeEngine<>))
                 {
                     AddEngine(engine as INodeEngine<INode>, baseType.GetGenericArguments(), _nodeEngines);
 

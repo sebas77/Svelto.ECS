@@ -71,7 +71,55 @@ namespace Svelto.DataStructures
         T[] _buffer;
         int _counter;
         int _size;
-        T   _current;
+        T _current;
+    }
+
+    public struct FasterListEnumeratorCast<T, U> : IEnumerator<T> where T:U
+    {
+        public T Current
+        {
+            get { return (T)_buffer.Current; }
+        }
+
+        object IEnumerator.Current
+        {
+            get { return (T)_buffer.Current; }
+        }
+
+        T IEnumerator<T>.Current
+        {
+            get { return (T)_buffer.Current; }
+        }
+
+        public FasterListEnumeratorCast(FasterListEnumerator<U> buffer)
+        {
+            _buffer = buffer;
+        }
+
+        public void Dispose()
+        {}
+
+        bool IEnumerator.MoveNext()
+        {
+            return MoveNext();
+        }
+
+        void IEnumerator.Reset()
+        {
+            Reset();
+        }
+
+        public bool MoveNext()
+        {
+            return _buffer.MoveNext();
+        }
+
+        public void Reset()
+        {
+            _buffer.Reset();
+        }
+
+        FasterListEnumerator<U> _buffer;
     }
 
     public struct FasterReadOnlyList<T> : IList<T>
@@ -142,6 +190,77 @@ namespace Svelto.DataStructures
         public T this[int index] { get { return _list[index]; } set { throw new NotImplementedException(); } }
 
         readonly FasterList<T> _list;
+    }
+
+    public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
+    {
+        public FasterReadOnlyListCast(FasterList<T> list)
+        {
+            _list = list;
+        }
+
+        IEnumerator<U> IEnumerable<U>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public FasterListEnumeratorCast<U, T> GetEnumerator()
+        {
+            return new FasterListEnumeratorCast<U, T>(_list.GetEnumerator());
+        }
+
+        public void Add(U item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(U item)
+        {
+            return _list.Contains(item);
+        }
+
+        public void CopyTo(U[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(U item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Count { get { return _list.Count; } }
+        public bool IsReadOnly { get { return true; } }
+
+        public int IndexOf(U item)
+        {
+            return _list.IndexOf(item);
+        }
+
+        public void Insert(int index, U item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveAt(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public U this[int index] { get { return (U)_list[index]; } set { throw new NotImplementedException(); } }
+
+        readonly FasterList<T> _list;
+        static public FasterList<T> DefaultList = new FasterList<T>();
     }
 
     public class FasterList<T> : IList<T>

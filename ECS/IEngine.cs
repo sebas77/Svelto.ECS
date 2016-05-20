@@ -19,7 +19,7 @@ namespace Svelto.ES
         IEngineNodeDB nodesDB { set; }
     }
 
-    public abstract class SingleManagedNodeEngine<TNodeType> : INodeEngine<INode> where TNodeType:class, INode
+    public abstract class SingleNodeEngine<TNodeType> : INodeEngine<INode> where TNodeType:class, INode
     {
         void INodeEngine<INode>.Add(INode obj)
         {

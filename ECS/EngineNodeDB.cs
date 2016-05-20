@@ -12,14 +12,14 @@ namespace Svelto.ES
             this._nodesDBdic = nodesDBdic;
         }
 
-        public FasterReadOnlyList<INode> QueryNodes<T>() where T:INode
+        public FasterReadOnlyListCast<INode, T> QueryNodes<T>() where T:INode
         {
             var type = typeof(T);
 
             if (_nodesDB.ContainsKey(type) == false)
-                return _defaultEmptyNodeList;
+                return new FasterReadOnlyListCast<INode, T>(FasterReadOnlyListCast<INode, T>.DefaultList);
 
-            return new FasterReadOnlyList<INode>(_nodesDB[type]);
+            return new FasterReadOnlyListCast<INode, T>(_nodesDB[type]);
         }
 
         public ReadOnlyDictionary<int, INode> QueryIndexableNodes<T>() where T:INode
@@ -50,10 +50,21 @@ namespace Svelto.ES
             return false;
         }
 
-        Dictionary<Type, FasterList<INode>>      _nodesDB;
-        Dictionary<Type, Dictionary<int, INode>> _nodesDBdic;
+        public T QueryNode<T>(int ID) where T:INode
+        {
+            var type = typeof(T);
 
-        FasterReadOnlyList<INode>           _defaultEmptyNodeList = new FasterReadOnlyList<INode>(new FasterList<INode>());
-        ReadOnlyDictionary<int, INode>      _defaultEmptyNodeDict = new ReadOnlyDictionary<int, INode>(new Dictionary<int, INode>());
+            INode internalNode;
+
+            if (_nodesDBdic.ContainsKey(type) && _nodesDBdic[type].TryGetValue(ID, out internalNode))
+                return (T)internalNode;
+
+            throw new Exception("Node Not Found");
+        }
+
+        Dictionary<Type, FasterList<INode>>      _nodesDB;
+        Dictionary<Type, Dictionary<int, INode>>     _nodesDBdic;
+
+        ReadOnlyDictionary<int, INode>     _defaultEmptyNodeDict = new ReadOnlyDictionary<int, INode>(new Dictionary<int, INode>());
     }
 }
