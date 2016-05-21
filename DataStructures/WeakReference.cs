@@ -12,6 +12,8 @@ namespace Svelto.DataStructures
     public class WeakReference<T>
         : WeakReference where T : class
     {
+        public bool IsValid { get { return Target != null && IsAlive == true; } }
+
         /// <span class="code-SummaryComment"><summary></span>
         /// Gets or sets the object (the target) referenced by the
         /// current WeakReference{T} object.

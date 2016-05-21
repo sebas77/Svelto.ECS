@@ -20,11 +20,13 @@ namespace Svelto.ES
             _nodesDBdic = new Dictionary<Type, Dictionary<int, INode>>();
 
             _nodesToAdd = new Queue<INode>();
+            _nodesToRemove = new Queue<INode>();
         }
 
         public void EndOfFrameTick(float deltaSec)
         {
             while (_nodesToAdd.Count > 0) InternalAdd(_nodesToAdd.Dequeue());
+            while (_nodesToRemove.Count > 0) InternalRemove(_nodesToRemove.Dequeue());
         }
 
         public void AddEngine(IEngine engine)
@@ -59,7 +61,11 @@ namespace Svelto.ES
 
         public void BuildEntity(int ID, EntityDescriptor ed)
         {
-			var entityNodes = ed.BuildNodes(ID, (node) => _engineRootWeakReference.Target.InternalRemove(node));
+			var entityNodes = ed.BuildNodes(ID, (node) =>
+            {
+                if (_engineRootWeakReference.isValid == true)
+                    _engineRootWeakReference.Target._nodesToRemove.Enqueue(node);
+            });
             
 			for (int i = 0; i < entityNodes.Count; i++)
 				_nodesToAdd.Enqueue(entityNodes[i]);
@@ -158,8 +164,10 @@ namespace Svelto.ES
         Dictionary<Type, Dictionary<int, INode>>             _nodesDBdic;
 
         Queue<INode>                                         _nodesToAdd;
+        Queue<INode>                                         _nodesToRemove;
 
         WeakReference<EnginesRoot>                           _engineRootWeakReference;
+        
         //integrated pooling system
         //add debug panel like Entitas has
         //GCHandle should be used to reduce the number of strong references
