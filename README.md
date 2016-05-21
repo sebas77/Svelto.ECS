@@ -1,11 +1,13 @@
 Svelto Entity Component System for Unity
 =====================================
 
-the relative example can be found here:
+you can find a working example to learn how to use the framework here:
 
 https://github.com/sebas77/Svelto-ECS-Example
 
-I advise to clone the repositories separately under the same Unity project Assets folder.
+I advise to clone the example repositories separately from the framework one, both under the same Unity project Assets folder.
+
+If you want to know more about the theory and rationale behind this framework:
 
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
 
