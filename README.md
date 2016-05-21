@@ -9,6 +9,8 @@ I advise to clone the example repositories separately from the framework one, bo
 
 If you want to know more about the theory and rationale behind this framework:
 
+http://www.sebaslab.com/ecs-1-0/
+
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
 
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-ii-inversion-of-control/
