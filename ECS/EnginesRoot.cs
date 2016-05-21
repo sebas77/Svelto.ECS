@@ -8,9 +8,6 @@ namespace Svelto.ES
 {
 	public sealed class EnginesRoot: IEnginesRoot, IEndOfFrameTickable, IEntityFactory
     {
-        const int _INITIAL_SIZE = 100;
-        const int _INITIAL_INTERNAL_SIZE = 10;
-
         public EnginesRoot(ITicker ticker)
         {
             ticker.Add(this);
@@ -19,10 +16,10 @@ namespace Svelto.ES
             _engineRootWeakReference = new WeakReference<EnginesRoot>(this);
             _otherEnginesReferences = new FasterList<IEngine>();
             
-            _nodesDB = new Dictionary<Type, FasterList<INode>>(_INITIAL_SIZE);
-            _nodesDBdic = new Dictionary<Type, Dictionary<int, INode>>(_INITIAL_SIZE);
+            _nodesDB = new Dictionary<Type, FasterList<INode>>();
+            _nodesDBdic = new Dictionary<Type, Dictionary<int, INode>>();
 
-            _nodesToAdd = new Queue<INode>(_INITIAL_SIZE);
+            _nodesToAdd = new Queue<INode>();
         }
 
         public void EndOfFrameTick(float deltaSec)
@@ -107,7 +104,7 @@ namespace Svelto.ES
         {
             FasterList<INode> nodes;
             if (_nodesDB.TryGetValue(nodeType, out nodes) == false)
-                nodes = _nodesDB[nodeType] = new FasterList<INode>(_INITIAL_INTERNAL_SIZE);
+                nodes = _nodesDB[nodeType] = new FasterList<INode>();
 
             nodes.Add(node);
 
@@ -115,7 +112,7 @@ namespace Svelto.ES
             {
                 Dictionary<int, INode> nodesDic;
                 if (_nodesDBdic.TryGetValue(nodeType, out nodesDic) == false)
-                    nodesDic = _nodesDBdic[nodeType] = new Dictionary<int, INode>(_INITIAL_INTERNAL_SIZE);
+                    nodesDic = _nodesDBdic[nodeType] = new Dictionary<int, INode>();
             
                 nodesDic[(node as NodeWithID).ID] = node;
             }
