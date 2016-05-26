@@ -6,7 +6,7 @@ using Nodes.Player;
 
 namespace Svelto.ES
 {
-	public sealed class EnginesRoot: IEnginesRoot, IEndOfFrameTickable, IEntityFactory
+    public sealed class EnginesRoot: IEnginesRoot, IEndOfFrameTickable, IEntityFactory
     {
         public EnginesRoot(ITicker ticker)
         {
@@ -61,14 +61,14 @@ namespace Svelto.ES
 
         public void BuildEntity(int ID, EntityDescriptor ed)
         {
-			var entityNodes = ed.BuildNodes(ID, (node) =>
+            var entityNodes = ed.BuildNodes(ID, (node) =>
             {
-                if (_engineRootWeakReference.isValid == true)
+                if (_engineRootWeakReference.IsValid == true)
                     _engineRootWeakReference.Target._nodesToRemove.Enqueue(node);
             });
             
-			for (int i = 0; i < entityNodes.Count; i++)
-				_nodesToAdd.Enqueue(entityNodes[i]);
+            for (int i = 0; i < entityNodes.Count; i++)
+                _nodesToAdd.Enqueue(entityNodes[i]);
         }
 
         static void AddEngine<T>(T engine, Type[] types, Dictionary<Type, FasterList<INodeEngine<INode>>> engines) where T:INodeEngine<INode>
