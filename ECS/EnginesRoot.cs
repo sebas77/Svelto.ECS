@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.Ticker;
-using Nodes.Player;
 
 namespace Svelto.ES
 {
