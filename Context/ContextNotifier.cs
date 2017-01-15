@@ -1,6 +1,6 @@
-using Svelto.DataStructures;
 using System;
 using System.Collections.Generic;
+using Svelto.DataStructures;
 
 namespace Svelto.Context
 {
@@ -33,19 +33,17 @@ namespace Svelto.Context
         /// </summary>
         public void NotifyFrameworkDeinitialized()
         {
-            for (int i = _toDeinitialize.Count - 1; i >= 0; --i)
-            {
+            for (var i = _toDeinitialize.Count - 1; i >= 0; --i)
                 try
                 {
                     var obj = _toDeinitialize[i];
-                    if (obj.IsAlive == true)
-                        (obj.Target as IWaitForFrameworkDestruction).OnFrameworkDestroyed();
+                    if (obj.IsAlive)
+                        obj.Target.OnFrameworkDestroyed();
                 }
                 catch (Exception e)
                 {
                     Utility.Console.LogException(e);
                 }
-            }
 
             _toDeinitialize = null;
         }
@@ -55,24 +53,22 @@ namespace Svelto.Context
         /// </summary>
         public void NotifyFrameworkInitialized()
         {
-            for (int i = _toInitialize.Count - 1; i >= 0; --i)
-            {
+            for (var i = _toInitialize.Count - 1; i >= 0; --i)
                 try
                 {
                     var obj = _toInitialize[i];
-                    if (obj.IsAlive == true)
-                        (obj.Target as IWaitForFrameworkInitialization).OnFrameworkInitialized();
+                    if (obj.IsAlive)
+                        obj.Target.OnFrameworkInitialized();
                 }
                 catch (Exception e)
                 {
                     Utility.Console.LogException(e);
                 }
-            }
 
             _toInitialize = null;
         }
 
-        List<WeakReference<IWaitForFrameworkDestruction>> _toDeinitialize;
+        List<WeakReference<IWaitForFrameworkDestruction>>    _toDeinitialize;
         List<WeakReference<IWaitForFrameworkInitialization>> _toInitialize;
     }
 }

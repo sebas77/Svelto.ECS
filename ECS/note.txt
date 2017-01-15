@@ -1,7 +1,7 @@
 systems do not hold component data, but only system states
 systems cannot be injected
 systems are SRP and OCP
-systems communicates between component, mediators, producer/consumer, observers. producer/consumer and observers must be defined in the layer of the engine.
+systems communicates between component, mediators, producer/consumer, Svelto.ECS.Example.Observers. producer/consumer and observers must be defined in the layer of the engine.
 systems can have injected dependencies
 
 components don't have logic

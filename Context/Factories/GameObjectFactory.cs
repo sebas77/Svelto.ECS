@@ -16,7 +16,7 @@ namespace Svelto.Context
 
         public GameObject Build(string prefabName)
         {
-            DesignByContract.Check.Require(_prefabs.ContainsKey(prefabName), "Svelto.Factories.IGameObjectFactory - Invalid Prefab Type");
+            DesignByContract.Check.Require(_prefabs.ContainsKey(prefabName), "Svelto.Factories.IGameObjectFactory -prefab was not found:" + prefabName);
 
             var go = Build(_prefabs[prefabName][0]);
 
@@ -48,7 +48,7 @@ namespace Svelto.Context
         /// <param name="prefab">original prefab</param>
         public GameObject Build(GameObject prefab)
         {
-            Profiler.BeginSample("GameObject Factory Build");
+            UnityEngine.Profiling.Profiler.BeginSample("GameObject Factory Build");
 
             var copy = Object.Instantiate(prefab) as GameObject;
 

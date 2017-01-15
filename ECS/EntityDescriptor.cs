@@ -2,37 +2,37 @@
 using System.Reflection;
 using Svelto.DataStructures;
 
-namespace Svelto.ES
+namespace Svelto.ECS
 {
     public class EntityDescriptor
     {
-        EntityDescriptor()
-		{}
-
-		protected EntityDescriptor(INodeBuilder[] nodesToBuild, params object[] componentsImplementor)
+        protected EntityDescriptor(INodeBuilder[] nodesToBuild, params object[] componentsImplementor)
         {
-			_implementors = componentsImplementor; _nodesToBuild = nodesToBuild;
+            _implementors = componentsImplementor; 
+            _nodesToBuild = nodesToBuild;
         }
 
-		virtual public FasterList<INode> BuildNodes(int ID, Action<INode> removeAction)
-		{
-			var nodes = new FasterList<INode>();
+        public virtual FasterList<INode> BuildNodes(int ID, Action<INode> removeAction)
+        {
+            var nodes = new FasterList<INode>();
 
-			for (int index = 0; index < _nodesToBuild.Length; index++)
-			{
-				var nodeBuilder = _nodesToBuild[index];
-				var node = FillNode(nodeBuilder.Build(ID), () =>
-					{
-						for (int i = 0; i < nodes.Count; i++)
-							removeAction(nodes[i]);
-					}
-				);
+            for (int index = 0; index < _nodesToBuild.Length; index++)
+            {
+                var nodeBuilder = _nodesToBuild[index];
+                var node = FillNode(nodeBuilder.Build(ID), () =>
+                    {
+                        for (int i = 0; i < nodes.Count; i++)
+                            removeAction(nodes[i]);
 
-				nodes.Add (node);
-			}
+                        nodes.Clear();
+                    }
+                );
 
-			return nodes;
-		}
+                nodes.Add (node);
+            }
+
+            return nodes;
+        }
 
         TNode FillNode<TNode>(TNode node, Action removeAction) where TNode: INode
         {
@@ -40,15 +40,15 @@ namespace Svelto.ES
 
             for (int i = fields.Length - 1; i >=0 ; --i)
             {
-                var field = fields[i];
-                Type fieldType = field.FieldType;
-                object component = null;
+                var     field       = fields[i];
+                Type    fieldType   = field.FieldType;
+                object  component   = null;
 
                 for (int j = 0; j < _implementors.Length; j++)
                 {
                     var implementor = _implementors[j];
 
-                    if (fieldType.IsAssignableFrom(implementor.GetType()))
+                    if (implementor != null && fieldType.IsAssignableFrom(implementor.GetType()))
                     {
                         component = implementor;
 
@@ -61,10 +61,8 @@ namespace Svelto.ES
 
                 if (component == null)
                 {
-                    Exception e = new Exception("Svelto.ES: An Entity must hold all the components needed for a Node. " +
-                                                "Type: " + field.FieldType.Name + " Node: " + node.GetType().Name);
-
-                    Utility.Console.LogException(e);
+                    Exception e = new Exception("Svelto.ECS: Implementor not found for a Node. " +
+                                                "Implementor Type: " + field.FieldType.Name + " - Node: " + node.GetType().Name + " - EntityDescriptor " + this);
 
                     throw e;
                 }
@@ -75,9 +73,8 @@ namespace Svelto.ES
             return node;
         }
 
-        readonly object[] _implementors;
-
-		INodeBuilder[] _nodesToBuild;
+        readonly object[]   _implementors;
+        INodeBuilder[]      _nodesToBuild;
     }
 
     public interface INodeBuilder

@@ -1,6 +1,6 @@
 using System;
 
-namespace Svelto.ES
+namespace Svelto.ECS
 {
     public interface IRemoveEntityComponent
     {
