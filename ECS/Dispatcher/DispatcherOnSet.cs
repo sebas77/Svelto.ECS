@@ -1,11 +1,13 @@
+using BetterWeakEvents;
+
 namespace Svelto.ECS
 {
-    public class DispatcherOnSet<T>
+    public class DispatchOnSet<T>
     {
-        public DispatcherOnSet(int senderID)
+        public DispatchOnSet(int senderID)
         {
             _senderID = senderID;
-            _subscribers = new System.Collections.Generic.HashSet<WeakAction<int, T>>();
+            _subscribers = new WeakEvent<int, T>();
         }
 
         public T value
@@ -14,14 +16,7 @@ namespace Svelto.ECS
             {
                 _value = value;
 
-                if (_subscribers != null)
-                {
-                    using (var enumerator = _subscribers.GetEnumerator())
-                    {
-                        while (enumerator.MoveNext() == true)
-                            enumerator.Current.Invoke(_senderID, _value);
-                    }
-                }
+                _subscribers.Invoke(_senderID, value);
             }
 
             get 
@@ -30,19 +25,19 @@ namespace Svelto.ECS
             }
         }
 
-        public void NotifyOnDataChange(System.Action<int, T> action)
+        public void NotifyOnValueSet(System.Action<int, T> action)
         {
-            _subscribers.Add(new WeakAction<int, T>(action));
+            _subscribers += action;
         }
 
-        public void StopNotifyOnDataChange(System.Action<int, T> action)
+        public void StopNotify(System.Action<int, T> action)
         {
-            _subscribers.Remove(new WeakAction<int, T>(action));
+            _subscribers -= action;
         }
 
         protected T      _value;
         protected int    _senderID;
 
-        protected System.Collections.Generic.HashSet<WeakAction<int, T>> _subscribers;
+        protected WeakEvent<int, T> _subscribers;
     }
 }
