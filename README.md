@@ -7,9 +7,15 @@ https://github.com/sebas77/Svelto-ECS-Example
 
 I advise to clone the example repositories separately from the framework one, both under the same Unity project Assets folder.
 
-If you want to know more about the theory and rationale behind this framework:
+relative article:
 
 http://www.sebaslab.com/ecs-1-0/
+
+If you want to know more about the theory and rationale behind this framework:
+
+http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
+
+http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
 
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
 
