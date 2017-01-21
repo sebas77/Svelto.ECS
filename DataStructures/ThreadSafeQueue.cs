@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -88,15 +87,49 @@ namespace Svelto.DataStructures
             }
         }
 
-        public List<T> DequeueAll()
+        public FasterList<T> DequeueAll()
         {
             LockQ.EnterWriteLock();
             try
             {
-                List<T> returnList = new List<T>();
+                FasterList<T> returnList = new FasterList<T>();
 
                 while (m_Queue.Count > 0)
                     returnList.Add(m_Queue.Dequeue());
+
+                return returnList;
+            }
+
+            finally
+            {
+                LockQ.ExitWriteLock();
+            }
+        }
+
+        public void DequeueAllInto(FasterList<T> list)
+        {
+            LockQ.EnterWriteLock();
+            try
+            {
+                while (m_Queue.Count > 0)
+                    list.Add(m_Queue.Dequeue());
+            }
+
+            finally
+            {
+                LockQ.ExitWriteLock();
+            }
+        }
+
+        public FasterList<U> DequeueAllAs<U>() where U:class
+        {
+            LockQ.EnterWriteLock();
+            try
+            {
+                FasterList<U> returnList = new FasterList<U>();
+
+                while (m_Queue.Count > 0)
+                    returnList.Add(m_Queue.Dequeue() as U);
 
                 return returnList;
             }
@@ -118,6 +151,20 @@ namespace Svelto.DataStructures
                     item = m_Queue.Peek();
 
                 return item;
+            }
+
+            finally
+            {
+                LockQ.ExitWriteLock();
+            }
+        }
+
+        public void Clear()
+        {
+            LockQ.EnterWriteLock();
+            try
+            {
+                m_Queue.Clear();
             }
 
             finally

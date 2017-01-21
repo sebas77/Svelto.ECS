@@ -1,4 +1,4 @@
-namespace Svelto.ES
+namespace Svelto.ECS
 {
     public interface IEnginesRoot
     {
@@ -8,5 +8,7 @@ namespace Svelto.ES
     public interface IEntityFactory
     {
         void BuildEntity(int ID, EntityDescriptor ED);
+
+        void BuildEntityGroup(int ID, EntityDescriptor ED);
     }
 }

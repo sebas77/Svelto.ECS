@@ -1,11 +1,11 @@
-namespace Svelto.ES
+namespace Svelto.ECS
 {
     public interface INode
     {}
 
     public class NodeWithID: INode
     {
-        public static TNodeType BuildNode<TNodeType>(int ID) where TNodeType: NodeWithID, new()
+        public static TNodeType BuildNode<TNodeType>(int ID) where TNodeType: NodeWithID, new() 
         {
             return new TNodeType { _ID = ID };
         }

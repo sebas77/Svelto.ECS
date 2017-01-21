@@ -1,7 +1,3 @@
-/**
- * Custom modified version of Michael Lyashenko's BetterList
- **/
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +12,14 @@ namespace Svelto.DataStructures
             get { return _current; }
         }
 
+        public FasterListEnumerator(T[] buffer, int size)
+        {
+            _size = size;
+            _counter = 0;
+            _buffer = buffer;
+            _current = default(T);
+        }
+
         object IEnumerator.Current
         {
             get { return _current; }
@@ -26,27 +30,9 @@ namespace Svelto.DataStructures
             get { return _current; }
         }
 
-        public FasterListEnumerator(T[] buffer, int size)
-        {
-            _size = size;
-            _counter = 0;
-            _buffer = buffer;
-            _current = default(T);
-        }
-
         public void Dispose()
         {
             _buffer = null;
-        }
-
-        bool IEnumerator.MoveNext()
-        {
-            return MoveNext();
-        }
-
-        void IEnumerator.Reset()
-        {
-            Reset();
         }
 
         public bool MoveNext()
@@ -68,6 +54,16 @@ namespace Svelto.DataStructures
             _counter = 0;
         }
 
+        bool IEnumerator.MoveNext()
+        {
+            return MoveNext();
+        }
+
+        void IEnumerator.Reset()
+        {
+            Reset();
+        }
+
         T[] _buffer;
         int _counter;
         int _size;
@@ -81,6 +77,11 @@ namespace Svelto.DataStructures
             get { return (T)_buffer.Current; }
         }
 
+        public FasterListEnumeratorCast(FasterListEnumerator<U> buffer)
+        {
+            _buffer = buffer;
+        }
+
         object IEnumerator.Current
         {
             get { return (T)_buffer.Current; }
@@ -91,23 +92,8 @@ namespace Svelto.DataStructures
             get { return (T)_buffer.Current; }
         }
 
-        public FasterListEnumeratorCast(FasterListEnumerator<U> buffer)
-        {
-            _buffer = buffer;
-        }
-
         public void Dispose()
         {}
-
-        bool IEnumerator.MoveNext()
-        {
-            return MoveNext();
-        }
-
-        void IEnumerator.Reset()
-        {
-            Reset();
-        }
 
         public bool MoveNext()
         {
@@ -119,25 +105,30 @@ namespace Svelto.DataStructures
             _buffer.Reset();
         }
 
+        bool IEnumerator.MoveNext()
+        {
+            return MoveNext();
+        }
+
+        void IEnumerator.Reset()
+        {
+            Reset();
+        }
+
         FasterListEnumerator<U> _buffer;
     }
 
     public struct FasterReadOnlyList<T> : IList<T>
     {
+        public int Count { get { return _list.Count; } }
+        public bool IsReadOnly { get { return true; } }
+
         public FasterReadOnlyList(FasterList<T> list)
         {
             _list = list;
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        public T this[int index] { get { return _list[index]; } set { throw new NotImplementedException(); } }
 
         public FasterListEnumerator<T> GetEnumerator()
         {
@@ -169,9 +160,6 @@ namespace Svelto.DataStructures
             throw new NotImplementedException();
         }
 
-        public int Count { get { return _list.Count; } }
-        public bool IsReadOnly { get { return true; } }
-
         public int IndexOf(T item)
         {
             return _list.IndexOf(item);
@@ -187,19 +175,7 @@ namespace Svelto.DataStructures
             throw new NotImplementedException();
         }
 
-        public T this[int index] { get { return _list[index]; } set { throw new NotImplementedException(); } }
-
-        readonly FasterList<T> _list;
-    }
-
-    public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
-    {
-        public FasterReadOnlyListCast(FasterList<T> list)
-        {
-            _list = list;
-        }
-
-        IEnumerator<U> IEnumerable<U>.GetEnumerator()
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return GetEnumerator();
         }
@@ -208,6 +184,23 @@ namespace Svelto.DataStructures
         {
             return GetEnumerator();
         }
+
+        readonly FasterList<T> _list;
+    }
+
+    public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
+    {
+        public static FasterList<T> DefaultList = new FasterList<T>();
+
+        public int Count { get { return _list.Count; } }
+        public bool IsReadOnly { get { return true; } }
+
+        public FasterReadOnlyListCast(FasterList<T> list)
+        {
+            _list = list;
+        }
+
+        public U this[int index] { get { return (U)_list[index]; } set { throw new NotImplementedException(); } }
 
         public FasterListEnumeratorCast<U, T> GetEnumerator()
         {
@@ -239,9 +232,6 @@ namespace Svelto.DataStructures
             throw new NotImplementedException();
         }
 
-        public int Count { get { return _list.Count; } }
-        public bool IsReadOnly { get { return true; } }
-
         public int IndexOf(U item)
         {
             return _list.IndexOf(item);
@@ -257,14 +247,23 @@ namespace Svelto.DataStructures
             throw new NotImplementedException();
         }
 
-        public U this[int index] { get { return (U)_list[index]; } set { throw new NotImplementedException(); } }
+        IEnumerator<U> IEnumerable<U>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         readonly FasterList<T> _list;
-        static public FasterList<T> DefaultList = new FasterList<T>();
     }
 
     public class FasterList<T> : IList<T>
     {
+        const int MIN_SIZE = 4;
+
         public int Count
         {
             get { return _count; }
@@ -307,6 +306,12 @@ namespace Svelto.DataStructures
             _count = listCopy.Count;
         }
 
+        public T this[int i]
+        {
+            get { DesignByContract.Check.Require(i < _count, "out of bound index"); return _buffer[i]; }
+            set { DesignByContract.Check.Require(i < _count, "out of bound index"); _buffer[i] = value; }
+        }
+
         public void Add(T item)
         {
             if (_count == _buffer.Length)
@@ -315,44 +320,46 @@ namespace Svelto.DataStructures
             _buffer[_count++] = item;
         }
 
+        public static FasterList<T> PreFill<U>(int initialSize) where U:T, new()
+        {
+            var list = new FasterList<T>(initialSize);
+
+            for (int i = 0; i < initialSize; i++)
+                list.Add(new U());
+
+            list.Clear();
+
+            return list;
+        }
+
         public void AddRange(IEnumerable<T> items, int count)
+        {
+            AddRange(items.GetEnumerator(), count);
+        }
+
+        public void AddRange(IEnumerator<T> items, int count)
         {
             if (_count + count >= _buffer.Length)
                 AllocateMore(_count + count);
 
-            for (var i = items.GetEnumerator(); i.MoveNext();)
-            {
-                var item = i.Current;
-                _buffer[_count++] = item;
-            }
+            while (items.MoveNext())
+                _buffer[_count++] = items.Current;
         }
 
         public void AddRange(ICollection<T> items)
         {
-            var count = items.Count;
-            if (_count + count >= _buffer.Length)
-                AllocateMore(_count + count);
-
-            for (var i = items.GetEnumerator(); i.MoveNext();)
-            {
-                var item = i.Current;
-                _buffer[_count++] = item;
-            }
+            AddRange(items.GetEnumerator(), items.Count);
         }
 
         public void AddRange(FasterList<T> items)
         {
-            var count = items.Count;
-            if (_count + count >= _buffer.Length)
-                AllocateMore(_count + count);
-
-            Array.Copy(items._buffer, 0, _buffer, _count, count);
-            _count += count;
+            AddRange(items.ToArrayFast(), items.Count);
         }
 
-        public void AddRange(T[] items)
+        public void AddRange(T[] items, int count)
         {
-            var count = items.Length;
+            if (count == 0) return;
+
             if (_count + count >= _buffer.Length)
                 AllocateMore(_count + count);
 
@@ -365,8 +372,19 @@ namespace Svelto.DataStructures
             return new FasterReadOnlyList<T>(this);
         }
 
+        /// <summary>
+        /// Careful, you could keep on holding references you don't want to hold to anymore
+        /// Use DeepClear in case.
+        /// </summary>
         public void Clear()
         {
+            _count = 0;
+        }
+
+        public void DeepClear()
+        {
+            Array.Clear(_buffer, 0, _buffer.Length);
+
             _count = 0;
         }
 
@@ -385,16 +403,6 @@ namespace Svelto.DataStructures
         public FasterListEnumerator<T> GetEnumerator()
         {
             return new FasterListEnumerator<T>(_buffer, Count);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
         public int IndexOf(T item)
@@ -442,16 +450,19 @@ namespace Svelto.DataStructures
         {
             DesignByContract.Check.Require(index < _count, "out of bound index");
 
-            --_count;
-
-            if (index == _count)
+            if (index == --_count)
                 return;
 
             Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
+
+            _buffer[_count] = default(T);
         }
 
         public void Resize(int newSize)
         {
+            if (newSize < MIN_SIZE)
+                newSize = MIN_SIZE;
+
             Array.Resize(ref _buffer, newSize);
 
             _count = newSize;
@@ -468,10 +479,9 @@ namespace Svelto.DataStructures
             this[index] = value;
         }
 
-        public void Sort(Comparison<T> comparer)
+        public void Sort(IComparer<T> comparer)
         {
-            Trim();
-            Array.Sort(_buffer, comparer);
+            Array.Sort(_buffer, 0, _count, comparer);
         }
 
         public T[] ToArray()
@@ -505,46 +515,70 @@ namespace Svelto.DataStructures
             return true;
         }
 
-        public void UnorderredRemoveAt(int index)
+        public T UnorderredRemoveAt(int index)
         {
-            DesignByContract.Check.Require(index < _count, "out of bound index");
+            DesignByContract.Check.Require(index < _count && _count > 0, "out of bound index");
 
-            _buffer[index] = _buffer[--_count];
+            T item = _buffer[index];
+
+            if (index == --_count)
+                return item;
+
+            T swap = _buffer[index];
+            _buffer[index] = _buffer[_count];
+            _buffer[_count] = swap;
+
+            return item;
         }
 
-        private void AllocateMore()
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void AllocateMore()
         {
             var newList = new T[Mathf.Max(_buffer.Length << 1, MIN_SIZE)];
             if (_count > 0) _buffer.CopyTo(newList, 0);
             _buffer = newList;
         }
 
-        private void AllocateMore(int newSize)
+        void AllocateMore(int newSize)
         {
-            var oldLength = _buffer.Length;
+            var oldLength = Mathf.Max(_buffer.Length, MIN_SIZE);
 
             while (oldLength < newSize)
                 oldLength <<= 1;
 
             var newList = new T[oldLength];
-            if (_count > 0) _buffer.CopyTo(newList, 0);
+            if (_count > 0) Array.Copy(_buffer, newList, _count);
             _buffer = newList;
         }
 
-        private void Trim()
+        public void Trim()
         {
             if (_count < _buffer.Length)
                 Resize(_count);
         }
 
-        public T this[int i]
+        public bool Reuse(int index, out T result)
         {
-            get { DesignByContract.Check.Require(i < _count, "out of bound index"); return _buffer[i]; }
-            set { DesignByContract.Check.Require(i < _count, "out of bound index"); _buffer[i] = value; }
+            result = default(T);
+
+            if (index >= _buffer.Length)
+                return false;
+
+            result = _buffer[index];
+
+            return result != null;
         }
 
-        private const int MIN_SIZE = 32;
-        private T[] _buffer;
-        private int _count;
+        T[] _buffer;
+        int _count;
     }
 }

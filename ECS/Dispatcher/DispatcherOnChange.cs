@@ -1,34 +1,24 @@
 using System.Collections.Generic;
 
-public class DispatcherOnChange<S, T>: Dispatcher<S, T>
+namespace Svelto.ECS
 {
-    public DispatcherOnChange(S sender) : base(sender) { }
-
-    public T value
+    public class DispatchOnChange<T> : DispatchOnSet<T>
     {
-        set
+        public DispatchOnChange(int senderID) : base(senderID)
+        { }
+
+        public new T value
         {
-            if (EqualityComparer<T>.Default.Equals(value, _value) == false)
+            set
             {
-                _value = value;
-
-                Dispatch(ref value);
+                if (EqualityComparer<T>.Default.Equals(value, _value) == false)
+                    base.value = value;
             }
-        }
-    }
 
-    T _value;
-}
-
-public class DispatcherOnSet<S, T>: Dispatcher<S, T>
-{
-    public DispatcherOnSet(S sender) : base(sender) { }
-
-    public T value
-    {
-        set
-        {
-            Dispatch(ref value);
+            get 
+            {
+                return _value;
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 public static class FastConcatUtility
 {
@@ -65,20 +65,78 @@ public static class FastConcatUtility
             return _stringBuilder.ToString();
         }
     }
+
+    public static string FastJoin(this string[] str)
+    {
+        lock (_stringBuilder)
+        {
+            _stringBuilder.Length = 0;
+
+            for (int i = 0; i < str.Length; i++)
+                _stringBuilder.Append(str[i]);
+
+            return _stringBuilder.ToString();
+        }
+    }
+
+    public static string FastJoin(this string[] str, string str1)
+    {
+        lock (_stringBuilder)
+        {
+            _stringBuilder.Length = 0;
+
+            for (int i = 0; i < str.Length; i++)
+                _stringBuilder.Append(str[i]);
+
+            _stringBuilder.Append(str1);
+
+            return _stringBuilder.ToString();
+        }
+    }
 }
 
 namespace Utility
 {
+    public interface ILogger
+    {
+        void Log (string txt, string stack = null, LogType type = LogType.Log);
+    }
+
+    public class SlowLogger : ILogger
+    {
+        public void Log(string txt, string stack = null, LogType type = LogType.Log)
+        {
+            switch (type)
+            {
+                case LogType.Log:
+                    UnityEngine.Debug.Log(stack != null ? txt.FastConcat(stack) : txt);
+                break;
+                case LogType.Exception:
+                    UnityEngine.Debug.LogError("Log of exceptions not supported");
+                break;
+                case LogType.Warning:
+                    UnityEngine.Debug.LogWarning(stack != null ? txt.FastConcat(stack) : txt);
+                break;
+                case LogType.Error:
+                    UnityEngine.Debug.LogError(stack != null ? txt.FastConcat(stack) : txt);
+                break;
+            }
+        }
+    }
+
     public static class Console
     {
         static StringBuilder _stringBuilder = new StringBuilder(256);
 
+        public static ILogger logger = new SlowLogger();
+        public static volatile bool BatchLog = false;
+
         public static void Log(string txt)
         {
-            Debug.Log(txt);
+            logger.Log(txt);
         }
 
-        public static void LogError(string txt)
+        public static void LogError(string txt, bool showCurrentStack = true)
         {
             string toPrint;
         
@@ -90,8 +148,24 @@ namespace Utility
 
                 toPrint = _stringBuilder.ToString();
             }
-                
-            Debug.LogError(toPrint);
+
+            logger.Log(toPrint, showCurrentStack == true ? new StackTrace().ToString() : null, LogType.Error);
+        }
+
+        public static void LogError(string txt, string stack)
+        {
+            string toPrint;
+
+            lock (_stringBuilder)
+            {
+                _stringBuilder.Length = 0;
+                _stringBuilder.Append("-!!!!!!-> ");
+                _stringBuilder.Append(txt);
+
+                toPrint = _stringBuilder.ToString();
+            }
+
+            logger.Log(toPrint, stack, LogType.Error);
         }
 
         public static void LogException(Exception e)
@@ -101,20 +175,7 @@ namespace Utility
 
         public static void LogException(Exception e, UnityEngine.Object obj)
         {
-            string toPrint;
-
-            lock (_stringBuilder)
-            {
-                _stringBuilder.Length = 0;
-                _stringBuilder.Append("-!!!!!!-> ").Append(e);
-
-                toPrint = _stringBuilder.ToString();
-            }
-
-            Exception ex = new Exception(e.ToString());
-
-            Debug.Log(toPrint);
-            Debug.LogException(ex, obj); 
+            UnityEngine.Debug.LogException(e, obj);
         }
 
         public static void LogWarning(string txt)
@@ -130,11 +191,11 @@ namespace Utility
                 toPrint = _stringBuilder.ToString();
             }
 
-            Debug.LogWarning(toPrint);
+            logger.Log(toPrint, null, LogType.Warning);
         }
 
         /// <summary>
-        /// This function should never be used explicitly
+        /// Use this function if you don't want the message to be batched
         /// </summary>
         /// <param name="txt"></param>
         public static void SystemLog(string txt)
@@ -144,7 +205,7 @@ namespace Utility
             lock (_stringBuilder)
             {
                 string currentTimeString = DateTime.UtcNow.ToLongTimeString(); //ensure includes seconds
-                string processTimeString = (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString();
+                string processTimeString = (DateTime.UtcNow - Process.GetCurrentProcess().StartTime).ToString();
 
                 _stringBuilder.Length = 0;
                 _stringBuilder.Append("[").Append(currentTimeString);
@@ -158,7 +219,7 @@ namespace Utility
 #if !UNITY_EDITOR
             System.Console.WriteLine(toPrint);
 #else
-            Debug.Log(toPrint);
+            UnityEngine.Debug.Log(toPrint);
 #endif
         }
     }

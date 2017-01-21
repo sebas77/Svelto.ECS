@@ -55,4 +55,9 @@ namespace Svelto.DataStructures
             : base(info, context)
         { }
     }
+
+    public static class WeakReferenceUtility
+    {
+        public static bool IsValid(this WeakReference obj) { return obj != null && obj.IsAlive == true && obj.Target != null;  }
+    }
 }
