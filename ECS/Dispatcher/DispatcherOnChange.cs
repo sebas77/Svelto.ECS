@@ -12,7 +12,7 @@ namespace Svelto.ECS
             set
             {
                 if (EqualityComparer<T>.Default.Equals(value, _value) == false)
-                    base.value = _value;
+                    base.value = value;
             }
 
             get 
