@@ -46,8 +46,13 @@ namespace Svelto.ECS
             go.AddComponent<Scheduler>().OnTick += SubmitNodes;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-            GameObject debugEngineObject = new GameObject("Engine Debugger");
-            debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
+            var debugEngineObject = GameObject.Find("Svelto.ECS.Profiler");
+            if (debugEngineObject == null)
+            {
+                debugEngineObject = new GameObject("Svelto.ECS.Profiler");
+                debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
+                UnityEngine.Object.DontDestroyOnLoad(debugEngineObject);
+            }
 #endif
         }
 
