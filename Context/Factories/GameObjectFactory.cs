@@ -1,9 +1,5 @@
-#region
-
 using System.Collections.Generic;
 using UnityEngine;
-
-#endregion
 
 namespace Svelto.Context
 {
@@ -48,8 +44,6 @@ namespace Svelto.Context
         /// <param name="prefab">original prefab</param>
         public GameObject Build(GameObject prefab)
         {
-            UnityEngine.Profiling.Profiler.BeginSample("GameObject Factory Build");
-
             var copy = Object.Instantiate(prefab) as GameObject;
 
             return copy;
