@@ -47,7 +47,6 @@ namespace Svelto.ECS.Profiler
             EngineInfo[] engines = new EngineInfo[engineProfilerBehaviour.engines.Count];
             engineProfilerBehaviour.engines.CopyTo(engines, 0);
 
-            DrawEnginesMonitor(engines);
             DrawEngineList(engineProfilerBehaviour, engines);
             EditorUtility.SetDirty(target);
         }
@@ -84,20 +83,6 @@ namespace Svelto.ECS.Profiler
                 }
                 ProfilerEditorLayout.EndHorizontal();
 
-                _showTickEngines = EditorGUILayout.Foldout(_showTickEngines, "Engines Ticks");
-                if (_showTickEngines && ShouldShowSystems(engines))
-                {
-                    ProfilerEditorLayout.BeginVerticalBox();
-                    {
-                        var systemsDrawn = DrawUpdateEngineInfos(engines);
-                        if (systemsDrawn == 0)
-                        {
-                            EditorGUILayout.LabelField(string.Empty);
-                        }
-                    }
-                    ProfilerEditorLayout.EndVertical();
-                }
-
                 _showAddEngines = EditorGUILayout.Foldout(_showAddEngines, "Engines Add");
                 if (_showAddEngines && ShouldShowSystems(engines))
                 {
@@ -127,94 +112,6 @@ namespace Svelto.ECS.Profiler
                 }
             }
             ProfilerEditorLayout.EndVertical();
-        }
-
-        void DrawEnginesMonitor(EngineInfo[] engines)
-        {
-            if (_enginesMonitor == null)
-            {
-                _enginesMonitor = new EnginesMonitor(SYSTEM_MONITOR_DATA_LENGTH);
-                _engineMonitorData = new Queue<float>(new float[SYSTEM_MONITOR_DATA_LENGTH]);
-                if (EditorApplication.update != Repaint)
-                {
-                    EditorApplication.update += Repaint;
-                }
-            }
-            double totalDuration = 0;
-            for (int i = 0; i < engines.Length; i++)
-            {
-                totalDuration += engines[i].lastUpdateDuration;
-            }
-
-            ProfilerEditorLayout.BeginVerticalBox();
-            {
-                EditorGUILayout.LabelField("Execution duration", EditorStyles.boldLabel);
-
-                ProfilerEditorLayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("Total", totalDuration.ToString());
-                }
-                ProfilerEditorLayout.EndHorizontal();
-
-                ProfilerEditorLayout.BeginHorizontal();
-                {
-                    _axisUpperBounds = EditorGUILayout.FloatField("Axis Upper Bounds", _axisUpperBounds);
-                }
-                ProfilerEditorLayout.EndHorizontal();
-
-                if (!EditorApplication.isPaused)
-                {
-                    if (_engineMonitorData.Count >= SYSTEM_MONITOR_DATA_LENGTH)
-                    {
-                        _engineMonitorData.Dequeue();
-                    }
-
-                    _engineMonitorData.Enqueue((float) totalDuration);
-                }
-                _enginesMonitor.Draw(_engineMonitorData.ToArray(), 80f, _axisUpperBounds);
-            }
-            ProfilerEditorLayout.EndVertical();
-        }
-
-        int DrawUpdateEngineInfos(EngineInfo[] engines)
-        {
-            if (_sortingOption != SORTING_OPTIONS.NONE)
-            {
-                SortUpdateEngines(engines);
-            }
-
-            string title =
-                updateTitle.FastConcat(lateUpdateTitle)
-                    .FastConcat(fixedupdateTitle)
-                    .FastConcat(minTitle)
-                    .FastConcat(maxTitle);
-            EditorGUILayout.LabelField("Engine Name", title, EditorStyles.boldLabel);
-
-            int enginesDrawn = 0;
-            for (int i = 0; i < engines.Length; i++)
-            {
-                EngineInfo engineInfo = engines[i];
-
-                if (engineInfo.engineName.ToLower().Contains(_systemNameSearchTerm.ToLower()))
-                {
-                    ProfilerEditorLayout.BeginHorizontal();
-                    {
-                        var avg = string.Format("{0:0.000}", engineInfo.averageUpdateDuration).PadRight(15);
-                        var avgLate = string.Format("{0:0.000}", engineInfo.averageLateUpdateDuration).PadRight(15);
-                        var avgFixed = string.Format("{0:0.000}", engineInfo.averageFixedUpdateDuration).PadRight(15);
-                        var min = string.Format("{0:0.000}", engineInfo.minUpdateDuration).PadRight(15);
-                        var max = string.Format("{0:0.000}", engineInfo.maxUpdateDuration);
-
-                        string output = avg.FastConcat(avgLate).FastConcat(avgFixed).FastConcat(min).FastConcat(max);
-
-                        EditorGUILayout.LabelField(engineInfo.engineName, output, GetEngineStyle());
-                    }
-                    ProfilerEditorLayout.EndHorizontal();
-
-                    enginesDrawn += 1;
-                }
-            }
-            return enginesDrawn;
         }
 
         int DrawAddEngineInfos(EngineInfo[] engines)
@@ -303,28 +200,6 @@ namespace Svelto.ECS.Profiler
         }
 
 #region Sorting Engines
-        void SortUpdateEngines(EngineInfo[] engines)
-        {
-            switch (_sortingOption)
-            {
-                case SORTING_OPTIONS.AVERAGE:
-                    Array.Sort(engines,
-                        (engine1, engine2) => engine2.averageUpdateDuration.CompareTo(engine1.averageUpdateDuration));
-                    break;
-                case SORTING_OPTIONS.MIN:
-                    Array.Sort(engines,
-                        (engine1, engine2) => engine2.minUpdateDuration.CompareTo(engine1.minUpdateDuration));
-                    break;
-                case SORTING_OPTIONS.MAX:
-                    Array.Sort(engines,
-                        (engine1, engine2) => engine2.maxUpdateDuration.CompareTo(engine1.maxUpdateDuration));
-                    break;
-                case SORTING_OPTIONS.NAME:
-                    Array.Sort(engines, StringComparer.InvariantCulture);
-                    break;
-            }
-        }
-
         void SortAddEngines(EngineInfo[] engines)
         {
             switch (_sortingOption)
@@ -342,7 +217,8 @@ namespace Svelto.ECS.Profiler
                         (engine1, engine2) => engine2.maxAddDuration.CompareTo(engine1.maxAddDuration));
                     break;
                 case SORTING_OPTIONS.NAME:
-                    Array.Sort(engines, StringComparer.InvariantCulture);
+                    Array.Sort(engines,
+                        (engine1, engine2) => String.Compare(engine1.engineName, engine2.engineName, StringComparison.Ordinal));
                     break;
             }
         }
@@ -364,7 +240,8 @@ namespace Svelto.ECS.Profiler
                         (engine1, engine2) => engine2.maxRemoveDuration.CompareTo(engine1.maxRemoveDuration));
                     break;
                 case SORTING_OPTIONS.NAME:
-                    Array.Sort(engines, StringComparer.InvariantCulture);
+                    Array.Sort(engines,
+                        (engine1, engine2) => String.Compare(engine1.engineName, engine2.engineName, StringComparison.Ordinal));
                     break;
             }
         }
