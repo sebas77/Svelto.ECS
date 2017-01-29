@@ -27,11 +27,6 @@ namespace Svelto.ECS.Profiler
 
         static string _systemNameSearchTerm = string.Empty;
 
-        float _axisUpperBounds = 2f;
-
-        string updateTitle = "Update".PadRight(15, ' ');
-        string lateUpdateTitle = "Late".PadRight(13, ' ');
-        string fixedupdateTitle = "Fixed".PadRight(15, ' ');
         string minTitle = "Min".PadRight(15, ' ');
         string maxTitle = "Max".PadRight(15, ' ');
         string avgTitle = "Avg".PadRight(15, ' ');

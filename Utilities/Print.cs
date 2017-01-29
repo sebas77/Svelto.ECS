@@ -148,8 +148,11 @@ namespace Utility
 
                 toPrint = _stringBuilder.ToString();
             }
-
+#if !NETFX_CORE
             logger.Log(toPrint, showCurrentStack == true ? new StackTrace().ToString() : null, LogType.Error);
+#else
+            logger.Log(toPrint, null, LogType.Error);
+#endif
         }
 
         public static void LogError(string txt, string stack)
@@ -200,6 +203,7 @@ namespace Utility
         /// <param name="txt"></param>
         public static void SystemLog(string txt)
         {
+#if !NETFX_CORE
             string toPrint;
 
             lock (_stringBuilder)
@@ -216,10 +220,13 @@ namespace Utility
                 toPrint = _stringBuilder.ToString();
             }
 
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR 
             System.Console.WriteLine(toPrint);
 #else
             UnityEngine.Debug.Log(toPrint);
+#endif
+#else
+            UnityEngine.Debug.Log(txt);
 #endif
         }
     }

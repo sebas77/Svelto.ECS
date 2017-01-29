@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using UnityEngine;
+using WeakReference = Svelto.DataStructures.WeakReference<Svelto.ECS.EnginesRoot>;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
 using Svelto.ECS.Profiler;
@@ -30,7 +31,7 @@ namespace Svelto.ECS
         public EnginesRoot()
         {
             _nodeEngines = new Dictionary<Type, FasterList<INodeEngine<INode>>>();
-            _engineRootWeakReference = new WeakReference<EnginesRoot>(this);
+            _engineRootWeakReference = new WeakReference(this);
             _otherEnginesReferences = new FasterList<IEngine>();
 
             _nodesDB = new Dictionary<Type, FasterList<INode>>();
@@ -122,7 +123,7 @@ namespace Svelto.ECS
                 return;
             }
 
-            var baseType = engine.GetType().BaseType;
+/*            var baseType = engine.GetType().BaseType;
             if (baseType.IsGenericType)
             {
                 var genericType = baseType.GetGenericTypeDefinition();
@@ -133,7 +134,7 @@ namespace Svelto.ECS
 
                     return;
                 }
-            }
+            }*/
 
             _otherEnginesReferences.Add(engine);
         }
@@ -314,7 +315,7 @@ namespace Svelto.ECS
         FasterList<INode>                                    _nodesToAdd;
         FasterList<INode>                                    _groupNodesToAdd;
 
-        WeakReference<EnginesRoot>                           _engineRootWeakReference;
+        WeakReference                                        _engineRootWeakReference;
 
         //integrated pooling system
         //add debug panel like Entitas has

@@ -349,113 +349,29 @@ namespace DesignByContract
 
 		#endregion // Implementation
 
-		#region Obsolete
-
-		/// <summary>
-		/// Precondition check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Require")]
-		[Conditional("DBC_CHECK_ALL"), 
-		Conditional("DBC_CHECK_INVARIANT"), 
-		Conditional("DBC_CHECK_POSTCONDITION"), 
-		Conditional("DBC_CHECK_PRECONDITION")]
-		public static void RequireTrace(bool assertion, string message)
-		{
-			Trace.Assert(assertion, "Precondition: " + message);
-		}
-
-
-		/// <summary>
-		/// Precondition check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Require")]
-		[Conditional("DBC_CHECK_ALL"),
-		Conditional("DBC_CHECK_INVARIANT"), 
-		Conditional("DBC_CHECK_POSTCONDITION"), 
-		Conditional("DBC_CHECK_PRECONDITION")]
-		public static void RequireTrace(bool assertion)
-		{
-			Trace.Assert(assertion, "Precondition failed.");
-		}
-		
-		/// <summary>
-		/// Postcondition check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Ensure")]
-		[Conditional("DBC_CHECK_ALL"),
-		Conditional("DBC_CHECK_INVARIANT"), 
-		Conditional("DBC_CHECK_POSTCONDITION")] 
-		public static void EnsureTrace(bool assertion, string message)
-		{
-			Trace.Assert(assertion, "Postcondition: " + message);
-		}
-
-		/// <summary>
-		/// Postcondition check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Ensure")]
-		[Conditional("DBC_CHECK_ALL"),
-		Conditional("DBC_CHECK_INVARIANT"), 
-		Conditional("DBC_CHECK_POSTCONDITION")] 
-		public static void EnsureTrace(bool assertion)
-		{
-			Trace.Assert(assertion, "Postcondition failed.");
-		}
-		
-		/// <summary>
-		/// Invariant check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Invariant")]
-		[Conditional("DBC_CHECK_ALL"),
-		Conditional("DBC_CHECK_INVARIANT")] 
-		public static void InvariantTrace(bool assertion, string message)
-		{
-			Trace.Assert(assertion, "Invariant: " + message);
-		}
-
-		/// <summary>
-		/// Invariant check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Invariant")]
-		[Conditional("DBC_CHECK_ALL"),
-		Conditional("DBC_CHECK_INVARIANT")] 
-		public static void InvariantTrace(bool assertion)
-		{
-			Trace.Assert(assertion, "Invariant failed.");
-		}
-
-		/// <summary>
-		/// Assertion check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Assert")]
-		[Conditional("DBC_CHECK_ALL")]
-		public static void AssertTrace(bool assertion, string message)
-		{
-			Trace.Assert(assertion, "Assertion: " + message);
-		}
-
-		/// <summary>
-		/// Assertion check.
-		/// </summary>
-		[Obsolete("Set Check.UseAssertions = true and then call Check.Assert")]
-		[Conditional("DBC_CHECK_ALL")]
-		public static void AssertTrace(bool assertion)
-		{
-			Trace.Assert(assertion, "Assertion failed.");
-		}
-		#endregion // Obsolete
-
 	} // End Check
 
-	#region Exceptions
+    internal class Trace
+    {
+        internal static void Assert(bool assertion, string v)
+        {
+#if NETFX_CORE
+            System.Diagnostics.Contracts.Contract.Assert(assertion, v);
+#else
+            System.Diagnostics.Trace.Assert(assertion, v);
+#endif      
+        }
+    }
 
-	/// <summary>
-	/// Exception raised when a contract is broken.
-	/// Catch this exception type if you wish to differentiate between 
-	/// any DesignByContract exception and other runtime exceptions.
-	///  
-	/// </summary>
-	public class DesignByContractException : ApplicationException
+    #region Exceptions
+
+    /// <summary>
+    /// Exception raised when a contract is broken.
+    /// Catch this exception type if you wish to differentiate between 
+    /// any DesignByContract exception and other runtime exceptions.
+    ///  
+    /// </summary>
+    public class DesignByContractException : ApplicationException
 	{
 		protected DesignByContractException() {}
 		protected DesignByContractException(string message) : base(message) {}

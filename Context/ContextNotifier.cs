@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Svelto.DataStructures;
+using WeakReferenceI = Svelto.DataStructures.WeakReference<Svelto.Context.IWaitForFrameworkInitialization>;
+using WeakReferenceD = Svelto.DataStructures.WeakReference<Svelto.Context.IWaitForFrameworkDestruction>;
 
 namespace Svelto.Context
 {
@@ -8,14 +9,14 @@ namespace Svelto.Context
     {
         public ContextNotifier()
         {
-            _toInitialize = new List<WeakReference<IWaitForFrameworkInitialization>>();
-            _toDeinitialize = new List<WeakReference<IWaitForFrameworkDestruction>>();
+            _toInitialize = new List<WeakReferenceI>();
+            _toDeinitialize = new List<WeakReferenceD>();
         }
 
         public void AddFrameworkDestructionListener(IWaitForFrameworkDestruction obj)
         {
             if (_toDeinitialize != null)
-                _toDeinitialize.Add(new WeakReference<IWaitForFrameworkDestruction>(obj));
+                _toDeinitialize.Add(new WeakReferenceD(obj));
             else
                 throw new Exception("An object is expected to be initialized after the framework has been deinitialized. Type: " + obj.GetType());
         }
@@ -23,7 +24,7 @@ namespace Svelto.Context
         public void AddFrameworkInitializationListener(IWaitForFrameworkInitialization obj)
         {
             if (_toInitialize != null)
-                _toInitialize.Add(new WeakReference<IWaitForFrameworkInitialization>(obj));
+                _toInitialize.Add(new WeakReferenceI(obj));
             else
                 throw new Exception("An object is expected to be initialized after the framework has been initialized. Type: " + obj.GetType());
         }
@@ -68,7 +69,7 @@ namespace Svelto.Context
             _toInitialize = null;
         }
 
-        List<WeakReference<IWaitForFrameworkDestruction>>    _toDeinitialize;
-        List<WeakReference<IWaitForFrameworkInitialization>> _toInitialize;
+        List<WeakReferenceD> _toDeinitialize;
+        List<WeakReferenceI> _toInitialize;
     }
 }
