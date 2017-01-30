@@ -123,7 +123,7 @@ namespace Svelto.ECS
                 return;
             }
 
-/*            var baseType = engine.GetType().BaseType;
+            var baseType = engine.GetType().BaseType;
             if (baseType.IsGenericType)
             {
                 var genericType = baseType.GetGenericTypeDefinition();
@@ -134,7 +134,7 @@ namespace Svelto.ECS
 
                     return;
                 }
-            }*/
+            }
 
             _otherEnginesReferences.Add(engine);
         }
