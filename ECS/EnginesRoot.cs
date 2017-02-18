@@ -8,6 +8,9 @@ using WeakReference = Svelto.DataStructures.WeakReference<Svelto.ECS.EnginesRoot
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
 using Svelto.ECS.Profiler;
 #endif
+#if NETFX_CORE
+using System.Reflection;
+#endif
 
 namespace Svelto.ECS
 {
@@ -122,9 +125,16 @@ namespace Svelto.ECS
 
                 return;
             }
-
+#if !NETFX_CORE
             var baseType = engine.GetType().BaseType;
+
             if (baseType.IsGenericType)
+#else
+            var baseType = engine.GetType().GetTypeInfo().BaseType;
+
+            if (baseType.IsConstructedGenericType)
+#endif
+            
             {
                 var genericType = baseType.GetGenericTypeDefinition();
 

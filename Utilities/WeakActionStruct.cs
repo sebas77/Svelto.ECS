@@ -12,16 +12,11 @@ namespace BetterWeakEvents
         public WeakAction(Action<T1, T2> listener)
         {
             ObjectRef = GCHandle.Alloc(listener.Target, GCHandleType.Weak);
+
 #if !NETFX_CORE
             Method = listener.Method;
-
-            if (Method.DeclaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length != 0)
-                throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #else
             Method = listener.GetMethodInfo();
-        
-            if (CustomAttributeExtensions.IsDefined(Method, typeof(CompilerGeneratedAttribute), false) == false)
-                throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #endif
         }
 
@@ -58,14 +53,8 @@ namespace BetterWeakEvents
             ObjectRef = GCHandle.Alloc(listener.Target, GCHandleType.Weak);
 #if !NETFX_CORE
             Method = listener.Method;
-
-            if (Method.DeclaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length != 0)
-                throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #else
             Method = listener.GetMethodInfo();
-        
-            if (CustomAttributeExtensions.IsDefined(Method, typeof(CompilerGeneratedAttribute), false) == false)
-                throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #endif
         }
 
@@ -102,14 +91,8 @@ namespace BetterWeakEvents
             ObjectRef = GCHandle.Alloc(listener.Target, GCHandleType.Weak);
 #if !NETFX_CORE
             Method = listener.Method;
-
-            if (Method.DeclaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length != 0)
-                throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #else
             Method = listener.GetMethodInfo();
-        
-            if (CustomAttributeExtensions.IsDefined(Method, typeof(CompilerGeneratedAttribute), false) == false)
-                throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #endif
         }
 
