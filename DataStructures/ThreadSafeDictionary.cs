@@ -1,6 +1,9 @@
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
+
+//note, rewrite like ThreadSafeQueue
 
 namespace Svelto.DataStructures
 {
@@ -13,6 +16,16 @@ namespace Svelto.DataStructures
     [Serializable]
     public class ThreadSafeDictionary<TKey, TValue>
     {
+        public ThreadSafeDictionary(int v)
+        {
+            dict = new Dictionary<TKey, TValue>(v);
+        }
+
+        public ThreadSafeDictionary()
+        {
+            dict = new Dictionary<TKey, TValue>();
+        }
+
         // setup the lock;
         public virtual int Count
         {
@@ -183,7 +196,7 @@ namespace Svelto.DataStructures
         }
 
         // This is the internal dictionary that we are wrapping
-        readonly IDictionary<TKey, TValue> dict = new Dictionary<TKey, TValue>();
+        readonly IDictionary<TKey, TValue> dict;
 
         [NonSerialized] readonly ReaderWriterLockSlim dictionaryLock = Locks.GetLockInstance(LockRecursionPolicy.NoRecursion);
     }

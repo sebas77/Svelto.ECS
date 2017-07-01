@@ -122,31 +122,32 @@ namespace Svelto.ECS
                 var nodesEngine = engine as INodesEngine;
 
                 AddEngine(nodesEngine, nodesEngine.AcceptedNodes(), _nodeEngines);
-
-                return;
             }
-#if !NETFX_CORE
-            var baseType = engine.GetType().BaseType;
-
-            if (baseType.IsGenericType)
-#else
-            var baseType = engine.GetType().GetTypeInfo().BaseType;
-
-            if (baseType.IsConstructedGenericType)
-#endif
-            
+            else
             {
-                var genericType = baseType.GetGenericTypeDefinition();
 
-                if (genericType == typeof(SingleNodeEngine<>))
+                var engineType = engine.GetType();
+//                Type baseInterface = null;
+
+#if !NETFX_CORE
+                var baseType = engineType.BaseType;
+
+                if (baseType.IsGenericType
+#else
+                var baseType = engineType.GetTypeInfo().BaseType;
+
+                if (baseType.IsConstructedGenericType
+#endif
+                && baseType.GetGenericTypeDefinition() == typeof (SingleNodeEngine<>))
                 {
                     AddEngine(engine as INodeEngine<INode>, baseType.GetGenericArguments(), _nodeEngines);
-
-                    return;
                 }
+                else
+                    _otherEnginesReferences.Add(engine);
             }
-
-            _otherEnginesReferences.Add(engine);
+            
+            if (engine is ICallBackOnAddEngine)
+                (engine as ICallBackOnAddEngine).Ready();
         }
 
         public void BuildEntity(int ID, EntityDescriptor ed)
@@ -160,6 +161,19 @@ namespace Svelto.ECS
             _nodesToAdd.AddRange(entityNodes);
         }
 
+        /// <summary>
+        /// An entity group is a meta entity. It's a way to create a set of entitites that
+        /// are not easily queriable otherwise. For example you may group existing entities
+        /// by size and type and then use the groupID to retrieve a single node that is shared
+        /// among the single entities of the same type and size. This willwd prevent the scenario
+        /// where the coder is forced to parse all the entities to find the ones of the same
+        /// size and type. Since the entity group is managed through the shared node, the same
+        /// shared node must be found on the single entities of the same type and size.
+        /// The shared node is then used by engines that are meant to manage a group of entities
+        /// through a single node. The same engine can manage several groups of entitites.
+        /// </summary>
+        /// <param name="groupID"></param>
+        /// <param name="ed"></param>
         public void BuildEntityGroup(int groupID, EntityDescriptor ed)
         {
             var entityNodes = ed.BuildNodes(groupID, (node) =>
@@ -234,7 +248,7 @@ namespace Svelto.ECS
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
                     EngineProfiler.MonitorAddDuration(AddNodeToEngine, enginesForNode[j], node);
-#else 
+#else
                     enginesForNode[j].Add(node);
 #endif
                 }
@@ -280,7 +294,7 @@ namespace Svelto.ECS
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
                     EngineProfiler.MonitorRemoveDuration(RemoveNodeFromEngine, enginesForNode[j], node);
-#else 
+#else
                     enginesForNode[j].Remove(node);
 #endif
                 }
@@ -317,22 +331,15 @@ namespace Svelto.ECS
         Dictionary<Type, FasterList<INodeEngine<INode>>>     _nodeEngines;
         FasterList<IEngine>                                  _otherEnginesReferences;
 
-        Dictionary<Type, FasterList<INode>>                  _nodesDB;
-        Dictionary<Type, Dictionary<int, INode>>             _nodesDBdic;
+        Dictionary<Type, FasterList<INode>>       _nodesDB;
+        Dictionary<Type, Dictionary<int, INode>>  _nodesDBdic;
 
-        Dictionary<Type, FasterList<INode>>                  _nodesDBgroups;
+        Dictionary<Type, FasterList<INode>>       _nodesDBgroups;
 
-        FasterList<INode>                                    _nodesToAdd;
-        FasterList<INode>                                    _groupNodesToAdd;
+        FasterList<INode>                         _nodesToAdd;
+        FasterList<INode>                         _groupNodesToAdd;
 
-        WeakReference                                        _engineRootWeakReference;
-
-        //integrated pooling system
-        //add debug panel like Entitas has
-        //GCHandle should be used to reduce the number of strong references
-        //datastructure could be thread safe
-
-        //future enhancements:
+        WeakReference                             _engineRootWeakReference;
     }
 }
 

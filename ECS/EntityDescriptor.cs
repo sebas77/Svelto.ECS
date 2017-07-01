@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using Svelto.DataStructures;
+#if NETFX_CORE
+using BindingFlags = System.Reflection.BindingFlags;
+#endif
 
 namespace Svelto.ECS
 {
@@ -10,6 +13,16 @@ namespace Svelto.ECS
         {
             _implementors = componentsImplementor; 
             _nodesToBuild = nodesToBuild;
+        }
+
+        public void AddImplementors(params object[] componentsImplementor)
+        {
+            var implementors = new object[componentsImplementor.Length + _implementors.Length];
+
+            Array.Copy(_implementors, implementors, _implementors.Length);
+            Array.Copy(componentsImplementor, 0, implementors, _implementors.Length, componentsImplementor.Length);
+
+            _implementors = implementors;
         }
 
         public virtual FasterList<INode> BuildNodes(int ID, Action<INode> removeAction)
@@ -73,8 +86,9 @@ namespace Svelto.ECS
             return node;
         }
 
-        readonly object[]   _implementors;
-        INodeBuilder[]      _nodesToBuild;
+        object[]       _implementors;
+
+        readonly INodeBuilder[] _nodesToBuild;
     }
 
     public interface INodeBuilder

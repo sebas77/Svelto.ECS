@@ -5,14 +5,11 @@
     {
         static GenericEntityDescriptor()
         {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new NodeBuilder<T>()
-            };
+            _nodesToBuild = new INodeBuilder[] { new NodeBuilder<T>() };
         }
         public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {
-        }
+        {}
+
         static INodeBuilder[] _nodesToBuild;
     }
 
@@ -28,9 +25,10 @@
                 new NodeBuilder<U>()
             };
         }
+
         public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {
-        }
+        {}
+
         static INodeBuilder[] _nodesToBuild;
     }
 

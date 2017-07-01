@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -6,9 +5,9 @@ namespace Svelto.DataStructures
 {
     public class ThreadSafeQueue<T>
     {
-        private readonly Queue<T> m_Queue;
+        readonly Queue<T> m_Queue;
 
-        private readonly ReaderWriterLockSlim LockQ = new ReaderWriterLockSlim();
+        readonly ReaderWriterLockSlim LockQ = new ReaderWriterLockSlim();
 
         public ThreadSafeQueue()
         {
@@ -114,6 +113,22 @@ namespace Svelto.DataStructures
                 while (m_Queue.Count > 0)
                     list.Add(m_Queue.Dequeue());
             }
+
+            finally
+            {
+                LockQ.ExitWriteLock();
+            }
+        }
+
+        public void DequeueInto(FasterList<T> list, int count)
+        {
+            LockQ.EnterWriteLock();
+            try
+            {
+                int originalSize = m_Queue.Count;
+                while (m_Queue.Count > 0 && originalSize - m_Queue.Count < count)
+                    list.Add(m_Queue.Dequeue());
+            }   
 
             finally
             {

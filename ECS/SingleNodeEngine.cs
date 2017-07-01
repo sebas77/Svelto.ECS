@@ -12,9 +12,7 @@
             Remove(obj as TNodeType);
         }
 
-        protected virtual void Add(TNodeType node)
-        {}
-        protected virtual void Remove(TNodeType node)
-        {}
+        protected abstract void Add(TNodeType node);
+        protected abstract void Remove(TNodeType node);
     }
 }

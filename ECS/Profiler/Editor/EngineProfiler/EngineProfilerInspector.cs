@@ -21,7 +21,6 @@ namespace Svelto.ECS.Profiler
         }
 
         static bool _hideEmptyEngines = true;
-        static bool _showTickEngines;
         static bool _showAddEngines;
         static bool _showRemoveEngines;
 
@@ -31,9 +30,6 @@ namespace Svelto.ECS.Profiler
         string maxTitle = "Max".PadRight(15, ' ');
         string avgTitle = "Avg".PadRight(15, ' ');
 
-        EnginesMonitor _enginesMonitor;
-        Queue<float> _engineMonitorData;
-        const int SYSTEM_MONITOR_DATA_LENGTH = 300;
         SORTING_OPTIONS _sortingOption = SORTING_OPTIONS.AVERAGE;
 
         public override void OnInspectorGUI()

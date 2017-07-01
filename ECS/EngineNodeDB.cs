@@ -94,6 +94,10 @@ namespace Svelto.ECS
         Dictionary<Type, Dictionary<int, INode>> _nodesDBdic;
         Dictionary<Type, FasterList<INode>>      _nodesDBgroups;
 
+        //Dictionary<Type, ThreadSafeFasterList<INode>>       _nodesDB;
+        //Dictionary<Type, ThreadsSafeDictionary<int, INode>> _nodesDBdic;
+//        Dictionary<Type, ThreadSafeFasterList<INode>>       _nodesDBgroups;
+
         ReadOnlyDictionary<int, INode> _defaultEmptyNodeDict = new ReadOnlyDictionary<int, INode>(new Dictionary<int, INode>());
     }
 }
