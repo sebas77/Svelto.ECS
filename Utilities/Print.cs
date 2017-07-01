@@ -7,7 +7,7 @@ public static class FastConcatUtility
 {
     static readonly StringBuilder _stringBuilder = new StringBuilder(256);
 
-    public static string FastConcat(this string str1, string str2)
+    public static string FastConcat<T>(this string str1, T str2)
     {
         lock (_stringBuilder)
         {
