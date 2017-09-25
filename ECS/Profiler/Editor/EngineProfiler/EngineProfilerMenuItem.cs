@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace Svelto.ECS.Profiler
 {
-    internal class EngineProfilerMenuItem
+    class EngineProfilerMenuItem
     {
         [MenuItem("Engines/Enable Profiler")]
         public static void EnableProfiler()

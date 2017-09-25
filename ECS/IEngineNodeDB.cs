@@ -11,6 +11,8 @@ namespace Svelto.ECS
         
         FasterReadOnlyListCast<INode, T> QueryNodes<T>() where T:INode;
 
+//        FasterReadOnlyList<T> QueryStructNodes<T>() where T : struct;
+
         bool QueryNodeFromGroup<T>(int ID, out T node) where T : INode;
         T QueryNodeFromGroup<T>(int ID) where T : INode;
         FasterReadOnlyListCast<INode, T> QueryNodesFromGroups<T>() where T : INode;

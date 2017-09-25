@@ -193,7 +193,8 @@ namespace Svelto.DataStructures
     {
         public FasterListThreadSafe(FasterList<T> list)
         {
-            _list = list;
+            if (list == null) throw new ArgumentException("invalid list");
+            _list = list; 
             _lockQ = new ReaderWriterLockSlim();
         }
 
@@ -288,14 +289,14 @@ namespace Svelto.DataStructures
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            _lockQ.EnterWriteLock();
+            _lockQ.EnterReadLock();
             try
             {
                 _list.CopyTo(array, arrayIndex);
             }
             finally
             {
-                _lockQ.ExitWriteLock();
+                _lockQ.ExitReadLock();
             }
         }
 
@@ -351,6 +352,19 @@ namespace Svelto.DataStructures
             }
         }
 
+        public void UnorderredRemoveAt(int index)
+        {
+            _lockQ.EnterWriteLock();
+            try
+            {
+                _list.UnorderredRemoveAt(index);
+            }
+            finally
+            {
+                _lockQ.ExitWriteLock();
+            }
+        }
+
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             throw new NotImplementedException();
@@ -368,8 +382,6 @@ namespace Svelto.DataStructures
 
     public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
     {
-        public static FasterList<T> DefaultList = new FasterList<T>();
-
         public int Count { get { return _list.Count; } }
         public bool IsReadOnly { get { return true; } }
 
@@ -402,7 +414,7 @@ namespace Svelto.DataStructures
 
         public void CopyTo(U[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            Array.Copy(_list.ToArrayFast(), 0, array, arrayIndex, _list.Count);
         }
 
         public bool Remove(U item)
@@ -440,6 +452,8 @@ namespace Svelto.DataStructures
 
     public class FasterList<T> : IList<T>
     {
+        public static FasterList<T> DefaultList = new FasterList<T>();
+
         const int MIN_SIZE = 4;
 
         public int Count
@@ -752,14 +766,15 @@ namespace Svelto.DataStructures
                 Resize(_count);
         }
 
-        public bool Reuse(int index, out T result)
+        public bool Reuse<U>(int index, out U result)
+            where U:class, T
         {
-            result = default(T);
+            result = default(U);
 
             if (index >= _buffer.Length)
                 return false;
 
-            result = _buffer[index];
+            result = (U)_buffer[index];
 
             return result != null;
         }

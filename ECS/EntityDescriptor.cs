@@ -15,6 +15,11 @@ namespace Svelto.ECS
             _nodesToBuild = nodesToBuild;
         }
 
+  /*      protected EntityDescriptor(IStructNodeBuilder[] structNodesToBuild)
+        {
+            _structNodesToBuild = structNodesToBuild;
+        }*/
+
         public void AddImplementors(params object[] componentsImplementor)
         {
             var implementors = new object[componentsImplementor.Length + _implementors.Length];
@@ -25,23 +30,22 @@ namespace Svelto.ECS
             _implementors = implementors;
         }
 
-        public virtual FasterList<INode> BuildNodes(int ID, Action<INode> removeAction)
+        public virtual FasterList<INode> BuildNodes(int ID, Action<FasterReadOnlyList<INode>> removeAction)
         {
             var nodes = new FasterList<INode>();
 
-            for (int index = 0; index < _nodesToBuild.Length; index++)
+            for (int index = _nodesToBuild.Length - 1; index >= 0; index--)
             {
                 var nodeBuilder = _nodesToBuild[index];
                 var node = FillNode(nodeBuilder.Build(ID), () =>
                     {
-                        for (int i = 0; i < nodes.Count; i++)
-                            removeAction(nodes[i]);
+                        removeAction(new FasterReadOnlyList<INode>());
 
                         nodes.Clear();
                     }
                 );
 
-                nodes.Add (node);
+                nodes.Add(node);
             }
 
             return nodes;
@@ -88,7 +92,8 @@ namespace Svelto.ECS
 
         object[]       _implementors;
 
-        readonly INodeBuilder[] _nodesToBuild;
+        readonly INodeBuilder[]         _nodesToBuild;
+   //     readonly IStructNodeBuilder[]   _structNodesToBuild;
     }
 
     public interface INodeBuilder
@@ -105,4 +110,15 @@ namespace Svelto.ECS
             return (NodeType)node;
         }
     }
+/*
+    public interface IStructNodeBuilder
+    {}
+
+    public class StructNodeBuilder<NodeType> : IStructNodeBuilder where NodeType : struct
+    {
+        public NodeType Build()
+        {
+            return new NodeType();
+        }
+    }*/
 }
