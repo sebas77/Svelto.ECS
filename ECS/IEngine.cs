@@ -1,27 +1,14 @@
-namespace Svelto.ECS
+using Svelto.ECS.Internal;
+
+namespace Svelto.ECS.Internal
 {
-    public interface IEngine
-    {}
-
-    public interface INodeEngine<in TNodeType>:IEngine where TNodeType:INode
+    public interface IActivableNodeEngine : IEngine
     {
-        void Add(TNodeType obj);
-        void Remove(TNodeType obj);
+        void Enable(INode obj);
+        void Disable(INode obj);
     }
 
-    public interface INodeEngine<in T, in U>:INodeEngine<U> where T:INode where U:INode
-    {
-        void Add(T obj);
-        void Remove(T obj);
-    }
-
-    public interface INodeEngine<in T, in U, in V>:INodeEngine<U, V> where T:INode where U:INode where V:INode
-    {
-        void Add(T obj);
-        void Remove(T obj);
-    }
-
-    public interface INodeEngine:IEngine
+    public interface INodeEngine : IEngine
     {
         void Add(INode obj);
         void Remove(INode obj);
@@ -31,9 +18,19 @@ namespace Svelto.ECS
     {
         System.Type[] AcceptedNodes();
     }
+}
+
+namespace Svelto.ECS
+{
+    public interface IEngine
+    {}
+
+    public interface IActivableNodeEngine<in TNodeType> : IActivableNodeEngine where TNodeType : INode
+    { }
 
     public interface IQueryableNodeEngine:IEngine
     {
         IEngineNodeDB nodesDB { set; }
     }
 }
+

@@ -352,12 +352,12 @@ namespace Svelto.DataStructures
             }
         }
 
-        public void UnorderredRemoveAt(int index)
+        public void UnorderedRemoveAt(int index)
         {
             _lockQ.EnterWriteLock();
             try
             {
-                _list.UnorderredRemoveAt(index);
+                _list.UnorderedRemoveAt(index);
             }
             finally
             {
@@ -450,10 +450,12 @@ namespace Svelto.DataStructures
         readonly FasterList<T> _list;
     }
 
-    public class FasterList<T> : IList<T>
+    public interface IFasterList
+    {}
+
+    public class FasterList<T> : IList<T>, IFasterList
     {
         public static FasterList<T> DefaultList = new FasterList<T>();
-
         const int MIN_SIZE = 4;
 
         public int Count
@@ -565,6 +567,11 @@ namespace Svelto.DataStructures
 
             Array.Copy(items, 0, _buffer, _count, count);
             _count += count;
+        }
+
+        public void AddRange(T[] items)
+        {
+            AddRange(items, items.Length);
         }
 
         public FasterReadOnlyList<T> AsReadOnly()
@@ -703,32 +710,30 @@ namespace Svelto.DataStructures
             return _buffer;
         }
 
-        public bool UnorderredRemove(T item)
+        public bool UnorderedRemove(T item)
         {
             var index = IndexOf(item);
 
             if (index == -1)
                 return false;
 
-            UnorderredRemoveAt(index);
+            UnorderedRemoveAt(index);
 
             return true;
         }
 
-        public T UnorderredRemoveAt(int index)
+        public bool UnorderedRemoveAt(int index)
         {
             DesignByContract.Check.Require(index < _count && _count > 0, "out of bound index");
 
-            T item = _buffer[index];
-
             if (index == --_count)
-                return item;
+                return false;
 
             T swap = _buffer[index];
             _buffer[index] = _buffer[_count];
             _buffer[_count] = swap;
 
-            return item;
+            return true;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -1,15 +1,18 @@
-﻿namespace Svelto.ECS
+﻿using Svelto.ECS.Internal;
+
+namespace Svelto.ECS
 {
-    public abstract class SingleNodeEngine<TNodeType> : INodeEngine where TNodeType : class, INode
+    public abstract class SingleNodeEngine<TNodeType> : INodeEngine 
+        where TNodeType : class, INode
     {
-        void INodeEngine.Add(INode obj)
+        public void Add(INode obj)
         {
-            Add(obj as TNodeType);
+            Add((TNodeType) obj);
         }
 
-        void INodeEngine.Remove(INode obj)
+        public void Remove(INode obj)
         {
-            Remove(obj as TNodeType);
+            Remove((TNodeType) obj);
         }
 
         protected abstract void Add(TNodeType node);

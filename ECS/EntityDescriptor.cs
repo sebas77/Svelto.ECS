@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Svelto.DataStructures;
 #if NETFX_CORE
@@ -11,39 +12,53 @@ namespace Svelto.ECS
     {
         protected EntityDescriptor(INodeBuilder[] nodesToBuild, params object[] componentsImplementor)
         {
-            _implementors = componentsImplementor; 
-            _nodesToBuild = nodesToBuild;
-        }
+            _nodesToBuild = new FasterList<INodeBuilder>(nodesToBuild);
 
-  /*      protected EntityDescriptor(IStructNodeBuilder[] structNodesToBuild)
-        {
-            _structNodesToBuild = structNodesToBuild;
-        }*/
+            ProcessImplementors(componentsImplementor);
+        }
 
         public void AddImplementors(params object[] componentsImplementor)
         {
-            var implementors = new object[componentsImplementor.Length + _implementors.Length];
-
-            Array.Copy(_implementors, implementors, _implementors.Length);
-            Array.Copy(componentsImplementor, 0, implementors, _implementors.Length, componentsImplementor.Length);
-
-            _implementors = implementors;
+            ProcessImplementors(componentsImplementor);
         }
 
-        public virtual FasterList<INode> BuildNodes(int ID, Action<FasterReadOnlyList<INode>> removeAction)
+        void ProcessImplementors(object[] implementors)
+        {
+            for (int index = 0; index < implementors.Length; index++)
+            {
+                var implementor = implementors[index];
+                if (implementor is IRemoveEntityComponent)
+                    _removingImplementors.Add(implementor as IRemoveEntityComponent);
+                if (implementor is IDisableEntityComponent)
+                    _disablingImplementors.Add(implementor as IDisableEntityComponent);
+                if (implementor is IEnableEntityComponent)
+                    _enablingImplementors.Add(implementor as IEnableEntityComponent);
+
+                var interfaces = implementor.GetType().GetInterfaces();
+
+                for (int iindex = 0; iindex < interfaces.Length; iindex++)
+                {
+                    _implementorsByType[interfaces[iindex]] = implementor;
+                }
+            }
+        }
+
+        public void AddNodes(params INodeBuilder[] nodesWithID)
+        {
+            _nodesToBuild.AddRange(nodesWithID);
+        }
+
+        public virtual FasterList<INode> BuildNodes(int ID)
         {
             var nodes = new FasterList<INode>();
 
-            for (int index = _nodesToBuild.Length - 1; index >= 0; index--)
+            for (int index = 0; index < _nodesToBuild.Count; index++)
             {
                 var nodeBuilder = _nodesToBuild[index];
-                var node = FillNode(nodeBuilder.Build(ID), () =>
-                    {
-                        removeAction(new FasterReadOnlyList<INode>());
+                var node = nodeBuilder.Build(ID);
 
-                        nodes.Clear();
-                    }
-                );
+                if (nodeBuilder.reflects != FillNodeMode.None)
+                    node = FillNode(node, nodeBuilder.reflects);
 
                 nodes.Add(node);
             }
@@ -51,74 +66,116 @@ namespace Svelto.ECS
             return nodes;
         }
 
-        TNode FillNode<TNode>(TNode node, Action removeAction) where TNode: INode
+        internal FasterList<INode> BuildNodes(int ID,
+            Action<FasterList<INode>> removeEntity,
+            Action<FasterList<INode>> enableEntity,
+            Action<FasterList<INode>> disableEntity)
+        {
+            var nodes = BuildNodes(ID);
+
+            SetupImplementors(removeEntity, enableEntity, disableEntity, nodes);
+
+            return nodes;
+        }
+
+        void SetupImplementors(
+            Action<FasterList<INode>> removeEntity, 
+            Action<FasterList<INode>> enableEntity, 
+            Action<FasterList<INode>> disableEntity, 
+            FasterList<INode> nodes)
+        {
+            Action removeEntityAction = () =>
+            { removeEntity(nodes); nodes.Clear(); };
+            Action disableEntityAction = () =>
+            { disableEntity(nodes); };
+            Action enableEntityAction = () =>
+            { enableEntity(nodes); };
+
+            for (int index = 0; index < _removingImplementors.Count; index++)
+                _removingImplementors[index].removeEntity = removeEntityAction;
+            for (int index = 0; index < _disablingImplementors.Count; index++)
+                _disablingImplementors[index].disableEntity = disableEntityAction;
+            for (int index = 0; index < _enablingImplementors.Count; index++)
+                _enablingImplementors[index].enableEntity = enableEntityAction;
+        }
+
+        INode FillNode(INode node, FillNodeMode mode)
         {
             var fields = node.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
-            for (int i = fields.Length - 1; i >=0 ; --i)
+            for (int i = fields.Length - 1; i >= 0; --i)
             {
-                var     field       = fields[i];
-                Type    fieldType   = field.FieldType;
-                object  component   = null;
-
-                for (int j = 0; j < _implementors.Length; j++)
+                var field = fields[i];
+                Type fieldType = field.FieldType;
+                object component;
+               
+                if ((_implementorsByType.TryGetValue(fieldType, out component)) == false)
                 {
-                    var implementor = _implementors[j];
-
-                    if (implementor != null && fieldType.IsAssignableFrom(implementor.GetType()))
+                    if (mode == FillNodeMode.Strict)
                     {
-                        component = implementor;
+                        Exception e =
+                            new Exception("Svelto.ECS: Implementor not found for a Node. " + "Implementor Type: " +
+                                          field.FieldType.Name + " - Node: " + node.GetType().Name +
+                                          " - EntityDescriptor " + this);
 
-                        if (fieldType.IsAssignableFrom(typeof(IRemoveEntityComponent)))
-                            (component as IRemoveEntityComponent).removeEntity = removeAction;
-
-                        break;
+                        throw e;
                     }
                 }
-
-                if (component == null)
-                {
-                    Exception e = new Exception("Svelto.ECS: Implementor not found for a Node. " +
-                                                "Implementor Type: " + field.FieldType.Name + " - Node: " + node.GetType().Name + " - EntityDescriptor " + this);
-
-                    throw e;
-                }
-
-                field.SetValue(node, component);
+                else
+                    field.SetValue(node, component);
             }
 
             return node;
         }
 
-        object[]       _implementors;
-
-        readonly INodeBuilder[]         _nodesToBuild;
-   //     readonly IStructNodeBuilder[]   _structNodesToBuild;
+        readonly FasterList<IDisableEntityComponent> _disablingImplementors = new FasterList<IDisableEntityComponent>();
+        readonly FasterList<IRemoveEntityComponent>  _removingImplementors = new FasterList<IRemoveEntityComponent>();
+        readonly FasterList<IEnableEntityComponent>  _enablingImplementors = new FasterList<IEnableEntityComponent>();
+        
+        readonly Dictionary<Type, object> _implementorsByType = new Dictionary<Type, object>();
+        readonly FasterList<INodeBuilder> _nodesToBuild;
     }
 
     public interface INodeBuilder
     {
-        NodeWithID Build(int ID);
+        INodeWithID Build(int ID);
+
+        FillNodeMode reflects { get; }
     }
 
-    public class NodeBuilder<NodeType> : INodeBuilder where NodeType:NodeWithID, new()
+    public class NodeBuilder<NodeType> : INodeBuilder where NodeType : NodeWithID, new()
     {
-        public NodeWithID Build(int ID)
+        public INodeWithID Build(int ID)
         {
             NodeWithID node = NodeWithID.BuildNode<NodeType>(ID);
 
             return (NodeType)node;
         }
-    }
-/*
-    public interface IStructNodeBuilder
-    {}
 
-    public class StructNodeBuilder<NodeType> : IStructNodeBuilder where NodeType : struct
+        public FillNodeMode reflects { get { return FillNodeMode.Strict; } }
+    }
+
+    //To Do: Probably I will need to add an
+    //FastStructNodeBuilder where reflects is false
+    public class StructNodeBuilder<NodeType> : INodeBuilder
+        where NodeType : struct, IStructNodeWithID
     {
-        public NodeType Build()
+        public INodeWithID Build(int ID)
         {
-            return new NodeType();
+            IStructNodeWithID node = default(NodeType);
+            node.ID = ID;
+
+            return node;
         }
-    }*/
+
+        public FillNodeMode reflects { get { return FillNodeMode.Relaxed; } }
+    }
+
+    public enum FillNodeMode
+    {
+        Strict,
+        Relaxed,
+
+        None
+    }
 }

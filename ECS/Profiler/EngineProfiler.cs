@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Svelto.ECS.Internal;
 
 //This profiler is based on the Entitas Visual Debugging tool 
 //https://github.com/sschmid/Entitas-CSharp

@@ -3,7 +3,22 @@ namespace Svelto.ECS
     public interface INode
     {}
 
-    public class NodeWithID: INode
+    public interface INodeWithID:INode
+    {
+        int ID { get; }
+    }
+
+    public interface IStructNodeWithID : INodeWithID
+    {
+        new int ID { get; set; }
+    }
+
+    public interface IGroupedStructNodeWithID : IStructNodeWithID
+    {
+        int groupID { get; set; }
+    }
+
+    public class NodeWithID: INodeWithID
     {
         public static TNodeType BuildNode<TNodeType>(int ID) where TNodeType: NodeWithID, new() 
         {

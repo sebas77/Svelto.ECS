@@ -324,18 +324,18 @@ namespace DesignByContract
 				useAssertions = value;
 			}
 		}
+		
+		#endregion // Interface
 
-        #endregion // Interface
+		#region Implementation
 
-        #region Implementation
+		// No creation
+		private Check() {}
 
-        // No creation
-        Check() { }
-
-        /// <summary>
-        /// Is exception handling being used?
-        /// </summary>
-        private static bool UseExceptions
+		/// <summary>
+		/// Is exception handling being used?
+		/// </summary>
+		private static bool UseExceptions
 		{
 			get
 			{
@@ -343,15 +343,15 @@ namespace DesignByContract
 			}
 		}
 
-        // Are trace assertion statements being used? 
-        // Default is to use exception handling.
-        static bool useAssertions = false;
+		// Are trace assertion statements being used? 
+		// Default is to use exception handling.
+		private static bool useAssertions = false;
 
-        #endregion // Implementation
+		#endregion // Implementation
 
-    } // End Check
+	} // End Check
 
-    class Trace
+    internal class Trace
     {
         internal static void Assert(bool assertion, string v)
         {

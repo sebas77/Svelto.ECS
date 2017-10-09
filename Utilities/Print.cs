@@ -136,7 +136,7 @@ namespace Utility
             logger.Log(txt);
         }
 
-        public static void LogError(string txt, bool showCurrentStack = true)
+        public static void LogError(string txt)
         {
             string toPrint;
         
@@ -148,11 +148,8 @@ namespace Utility
 
                 toPrint = _stringBuilder.ToString();
             }
-#if !NETFX_CORE
-            logger.Log(toPrint, showCurrentStack == true ? new StackTrace().ToString() : null, LogType.Error);
-#else
+
             logger.Log(toPrint, null, LogType.Error);
-#endif
         }
 
         public static void LogError(string txt, string stack)

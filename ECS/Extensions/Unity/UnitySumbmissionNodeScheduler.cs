@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_5 || UNITY_5_3_OR_NEWER
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -24,15 +25,17 @@ namespace Svelto.ECS.NodeSchedulers
             {
                 while (true)
                 {
-                    yield return new WaitForEndOfFrame();
+                    yield return _wait;
 
                     OnTick();
                 }
             }
 
             internal Action OnTick;
+            WaitForEndOfFrame _wait = new WaitForEndOfFrame();
         }
 
         Scheduler _scheduler;
     }
 }
+#endif

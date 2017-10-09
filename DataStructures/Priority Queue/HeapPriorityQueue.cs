@@ -13,9 +13,9 @@ namespace Svelto.DataStructures
     public sealed class HeapPriorityQueue<T> : IPriorityQueue<T> 
 		where T : PriorityQueueNode
     {
-        int _numNodes;
-        private readonly FasterList<T> _nodes;
-        long _numNodesEverEnqueued;
+        private int _numNodes;
+		private readonly FasterList<T> _nodes;
+        private long _numNodesEverEnqueued;
 
         /// <summary>
         /// Instantiate a new Priority Queue
@@ -101,10 +101,10 @@ namespace Svelto.DataStructures
             CascadeUp(_nodes[_numNodes]);
         }
 
-#if NET_VERSION_4_5
+        #if NET_VERSION_4_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        void Swap(T node1, T node2)
+        #endif
+        private void Swap(T node1, T node2)
         {
             //Swap the nodes
             _nodes[node1.QueueIndex] = node2;
@@ -117,14 +117,14 @@ namespace Svelto.DataStructures
         }
 
         //Performance appears to be slightly better when this is NOT inlined o_O
-        void CascadeUp(T node)
+        private void CascadeUp(T node)
         {
             //aka Heapify-up
             int parent = node.QueueIndex / 2;
-            while (parent >= 1)
+            while(parent >= 1)
             {
                 T parentNode = _nodes[parent];
-                if (HasHigherPriority(parentNode, node))
+                if(HasHigherPriority(parentNode, node))
                     break;
 
                 //Node has lower priority value, so move it up the heap
@@ -134,9 +134,9 @@ namespace Svelto.DataStructures
             }
         }
 
-#if NET_VERSION_4_5
+        #if NET_VERSION_4_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+        #endif
         private void CascadeDown(T node)
         {
             //aka Heapify-down
@@ -198,10 +198,10 @@ namespace Svelto.DataStructures
         /// Returns true if 'higher' has higher priority than 'lower', false otherwise.
         /// Note that calling HasHigherPriority(node, node) (ie. both arguments the same node) will return false
         /// </summary>
-#if NET_VERSION_4_5
+        #if NET_VERSION_4_5
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        bool HasHigherPriority(T higher, T lower)
+        #endif
+        private bool HasHigherPriority(T higher, T lower)
         {
             return (higher.Priority < lower.Priority ||
                 (higher.Priority == lower.Priority && higher.InsertionIndex < lower.InsertionIndex));
@@ -242,13 +242,13 @@ namespace Svelto.DataStructures
             OnNodeUpdated(node);
         }
 
-        void OnNodeUpdated(T node)
+        private void OnNodeUpdated(T node)
         {
             //Bubble the updated node up or down as appropriate
             int parentIndex = node.QueueIndex / 2;
             T parentNode = _nodes[parentIndex];
 
-            if (parentIndex > 0 && HasHigherPriority(node, parentNode))
+            if(parentIndex > 0 && HasHigherPriority(node, parentNode))
             {
                 CascadeUp(node);
             }
