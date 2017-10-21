@@ -176,8 +176,7 @@ namespace Svelto.ECS
 
                 var genericTypeDefinition = interfaceType.GetGenericTypeDefinition();
 
-                _implementedInterfaceTypes.Add(genericTypeDefinition,
-                    interfaceType.GetGenericArguments());
+                _implementedInterfaceTypes[genericTypeDefinition] = interfaceType.GetGenericArguments();
             }
         }
 

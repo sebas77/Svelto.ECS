@@ -10,6 +10,9 @@ namespace Svelto.ECS
 {
     public class EntityDescriptor
     {
+        protected EntityDescriptor()
+        {
+        }
         protected EntityDescriptor(INodeBuilder[] nodesToBuild)
         {
             _nodesToBuild = new FasterList<INodeBuilder>(nodesToBuild);
@@ -29,6 +32,8 @@ namespace Svelto.ECS
             for (int index = 0; index < implementors.Length; index++)
             {
                 var implementor = implementors[index];
+                if (implementor == null) continue;
+
                 if (implementor is IRemoveEntityComponent)
                     _removingImplementors.Add(implementor as IRemoveEntityComponent);
                 if (implementor is IDisableEntityComponent)
