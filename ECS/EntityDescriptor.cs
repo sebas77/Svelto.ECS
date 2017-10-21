@@ -10,10 +10,12 @@ namespace Svelto.ECS
 {
     public class EntityDescriptor
     {
-        protected EntityDescriptor(INodeBuilder[] nodesToBuild, params object[] componentsImplementor)
+        protected EntityDescriptor(INodeBuilder[] nodesToBuild)
         {
             _nodesToBuild = new FasterList<INodeBuilder>(nodesToBuild);
-
+        }
+        protected EntityDescriptor(INodeBuilder[] nodesToBuild, params object[] componentsImplementor):this(nodesToBuild)
+        {
             ProcessImplementors(componentsImplementor);
         }
 
@@ -84,12 +86,9 @@ namespace Svelto.ECS
             Action<FasterList<INode>> disableEntity, 
             FasterList<INode> nodes)
         {
-            Action removeEntityAction = () =>
-            { removeEntity(nodes); nodes.Clear(); };
-            Action disableEntityAction = () =>
-            { disableEntity(nodes); };
-            Action enableEntityAction = () =>
-            { enableEntity(nodes); };
+            Action removeEntityAction = () => { removeEntity(nodes); nodes.Clear(); };
+            Action disableEntityAction = () => disableEntity(nodes);
+            Action enableEntityAction = () => enableEntity(nodes); 
 
             for (int index = 0; index < _removingImplementors.Count; index++)
                 _removingImplementors[index].removeEntity = removeEntityAction;
@@ -99,7 +98,7 @@ namespace Svelto.ECS
                 _enablingImplementors[index].enableEntity = enableEntityAction;
         }
 
-        INode FillNode(INode node, FillNodeMode mode)
+        TNode FillNode<TNode>(TNode node, FillNodeMode mode) where TNode : INode
         {
             var fields = node.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
@@ -131,21 +130,21 @@ namespace Svelto.ECS
         readonly FasterList<IDisableEntityComponent> _disablingImplementors = new FasterList<IDisableEntityComponent>();
         readonly FasterList<IRemoveEntityComponent>  _removingImplementors = new FasterList<IRemoveEntityComponent>();
         readonly FasterList<IEnableEntityComponent>  _enablingImplementors = new FasterList<IEnableEntityComponent>();
-        
         readonly Dictionary<Type, object> _implementorsByType = new Dictionary<Type, object>();
+
         readonly FasterList<INodeBuilder> _nodesToBuild;
     }
 
     public interface INodeBuilder
     {
-        INodeWithID Build(int ID);
+        INode Build(int ID);
 
         FillNodeMode reflects { get; }
     }
 
     public class NodeBuilder<NodeType> : INodeBuilder where NodeType : NodeWithID, new()
     {
-        public INodeWithID Build(int ID)
+        public INode Build(int ID)
         {
             NodeWithID node = NodeWithID.BuildNode<NodeType>(ID);
 
@@ -155,20 +154,25 @@ namespace Svelto.ECS
         public FillNodeMode reflects { get { return FillNodeMode.Strict; } }
     }
 
-    //To Do: Probably I will need to add an
-    //FastStructNodeBuilder where reflects is false
     public class StructNodeBuilder<NodeType> : INodeBuilder
         where NodeType : struct, IStructNodeWithID
     {
-        public INodeWithID Build(int ID)
+        public INode Build(int ID)
         {
+            var shortID = (short)ID;
             IStructNodeWithID node = default(NodeType);
-            node.ID = ID;
+            node.ID = shortID;
 
             return node;
         }
 
-        public FillNodeMode reflects { get { return FillNodeMode.Relaxed; } }
+        public virtual FillNodeMode reflects { get { return FillNodeMode.Relaxed; } }
+    }
+
+    public class FastStructNodeBuilder<NodeType> : StructNodeBuilder<NodeType>
+        where NodeType : struct, IStructNodeWithID
+    {
+        public override FillNodeMode reflects { get { return FillNodeMode.None; } }
     }
 
     public enum FillNodeMode

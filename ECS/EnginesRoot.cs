@@ -16,23 +16,6 @@ using System.Reflection;
 
 namespace Svelto.ECS
 {
-    class Scheduler : MonoBehaviour
-    {
-        IEnumerator Start()
-        {
-            while (true)
-            {
-                yield return _waitForEndOfFrame;
-
-                OnTick();
-            }
-        }
-
-        internal Action OnTick;
-
-        readonly WaitForEndOfFrame _waitForEndOfFrame = new WaitForEndOfFrame();
-    }
-
     public sealed class EnginesRoot : IEnginesRoot, IEntityFactory
     {
         public EnginesRoot(NodeSubmissionScheduler nodeScheduler)
@@ -50,7 +33,8 @@ namespace Svelto.ECS
             _metaNodesToAdd = new FasterList<INode>();
 
             _metaNodesDB = new Dictionary<Type, FasterList<INode>>();
-            _structNodesDB = new Dictionary<Type, IStructGroupNodes>();
+            _sharedStructNodeLists = new SharedStructNodeLists();
+            _sharedGroupedStructNodeLists = new SharedGroupedStructNodesLists();
 
             _internalRemove = InternalRemove;
             _internalDisable = InternalDisable;
@@ -60,6 +44,8 @@ namespace Svelto.ECS
             _scheduler = nodeScheduler;
             _scheduler.Schedule(SubmitNodes);
 
+            _structNodeEngineType = typeof(IStructNodeEngine<>);
+            _groupedStructNodesEngineType = typeof(IGroupedStructNodesEngine<>);
             _activableNodeEngineType = typeof(IActivableNodeEngine<>);
             
             _implementedInterfaceTypes = new Dictionary<Type, Type[]>();
@@ -84,9 +70,11 @@ namespace Svelto.ECS
 
             do
             {
+                var nodesToAdd = _nodesToAdd.ToArrayFast();
+
                 for (int i = startNodes; i < nodesCount; i++)
                 {
-                    var node = _nodesToAdd[i];
+                    var node = nodesToAdd[i];
                     var nodeType = node.GetType();
 
                     AddNodeToTheDB(node, nodeType);
@@ -95,9 +83,11 @@ namespace Svelto.ECS
                         AddNodeToNodesDictionary(nodeWithId, nodeType);
                 }
 
+                var metaNodesToAdd = _metaNodesToAdd.ToArrayFast();
+
                 for (int i = startMetaNodes; i < metaNodesCount; i++)
                 {
-                    var node = _metaNodesToAdd[i];
+                    var node = metaNodesToAdd[i];
                     var nodeType = node.GetType();
 
                     AddNodeToMetaDB(node, nodeType);
@@ -108,13 +98,13 @@ namespace Svelto.ECS
 
                 for (int i = startNodes; i < nodesCount; i++)
                 {
-                    var node = _nodesToAdd[i];
+                    var node = nodesToAdd[i];
                     AddNodeToTheSuitableEngines(node, node.GetType());
                 }
 
                 for (int i = startMetaNodes; i < metaNodesCount; i++)
                 {
-                    var node = _metaNodesToAdd[i];
+                    var node = metaNodesToAdd[i];
                     AddNodeToTheSuitableEngines(node, node.GetType());
                 }
 
@@ -147,7 +137,7 @@ namespace Svelto.ECS
             var queryableNodeEngine = engine as IQueryableNodeEngine;
             if (queryableNodeEngine != null)
                 queryableNodeEngine.nodesDB =
-                    new EngineNodeDB(_nodesDB, _nodesDBdic, _metaNodesDB, _structNodesDB);
+                    new EngineNodeDB(_nodesDB, _nodesDBdic, _metaNodesDB);
 
             var engineType = engine.GetType();
             var implementedInterfaces = engineType.GetInterfaces();
@@ -185,8 +175,6 @@ namespace Svelto.ECS
                 }
 
                 var genericTypeDefinition = interfaceType.GetGenericTypeDefinition();
-                var a = interfaceType.GetGenericArguments();
-                var b = genericTypeDefinition.GetGenericArguments();
 
                 _implementedInterfaceTypes.Add(genericTypeDefinition,
                     interfaceType.GetGenericArguments());
@@ -198,6 +186,18 @@ namespace Svelto.ECS
             if (_implementedInterfaceTypes.Count == 0) return false;
 
             bool engineAdded = false;
+
+            if (_implementedInterfaceTypes.ContainsKey(_structNodeEngineType))
+            {
+                ((IStructNodeEngine)engine).CreateStructNodes
+                    (_sharedStructNodeLists);
+            }
+
+            if (_implementedInterfaceTypes.ContainsKey(_groupedStructNodesEngineType))
+            {
+                ((IGroupedStructNodesEngine)engine).CreateStructNodes
+                    (_sharedGroupedStructNodeLists);
+            }
 
             Type[] arguments;
             if (_implementedInterfaceTypes.TryGetValue(_activableNodeEngineType, 
@@ -298,7 +298,7 @@ namespace Svelto.ECS
         /// <param name="entityID"></param>
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
-        public void BuildEntityInGroup(int entityID, int groupID, 
+        public void BuildEntityInGroup(short entityID, short groupID, 
             EntityDescriptor ed)
         {
             var entityNodes = ed.BuildNodes(entityID,
@@ -349,19 +349,10 @@ namespace Svelto.ECS
         void AddNodeToTheDB<T>(T node, Type nodeType) where T : INode
         {
             FasterList<INode> nodes;
+            if (_nodesDB.TryGetValue(nodeType, out nodes) == false)
+                nodes = _nodesDB[nodeType] = new FasterList<INode>();
 
-            if (node is IStructNodeWithID == false)
-            {
-                if (_nodesDB.TryGetValue(nodeType, out nodes) == false)
-                    nodes = _nodesDB[nodeType] = new FasterList<INode>();
-
-                nodes.Add(node);
-            }
-            else
-            {
-                if (_nodesDB.TryGetValue(nodeType, out nodes) == false)
-                    nodes = _nodesDB[nodeType] = new FasterList<INode>();
-            }
+            nodes.Add(node);
         }
 
         void AddNodeToNodesDictionary<T>(T node, Type nodeType) where T : INodeWithID
@@ -535,14 +526,15 @@ namespace Svelto.ECS
 
         readonly Dictionary<Type, FasterList<INode>> _nodesDB;
         readonly Dictionary<Type, FasterList<INode>> _metaNodesDB;
-        readonly Dictionary<Type, IStructGroupNodes> _structNodesDB;
 
         readonly Dictionary<Type, Dictionary<int, INode>> _nodesDBdic;
 
         readonly FasterList<INode> _nodesToAdd;
         readonly FasterList<INode> _metaNodesToAdd;
 
-        readonly WeakReference     _engineRootWeakReference;
+        readonly WeakReference _engineRootWeakReference;
+        readonly SharedStructNodeLists _sharedStructNodeLists;
+        readonly SharedGroupedStructNodesLists _sharedGroupedStructNodeLists;
 
         readonly NodeSubmissionScheduler _scheduler;
 
@@ -551,6 +543,8 @@ namespace Svelto.ECS
         readonly Action<FasterList<INode>> _internalDisable;
         readonly Action<FasterList<INode>> _internalMetaRemove;
 
+        readonly Type _structNodeEngineType;
+        readonly Type _groupedStructNodesEngineType;
         readonly Type _activableNodeEngineType;
 
         readonly Dictionary<Type, Type[]> _implementedInterfaceTypes;

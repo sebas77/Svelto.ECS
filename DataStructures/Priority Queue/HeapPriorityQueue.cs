@@ -66,7 +66,7 @@ namespace Svelto.DataStructures
         #endif
         public void Clear()
         {
-            _nodes.Clear();
+            _nodes.FastClear();
 
             _numNodes = 0;
         }

@@ -5,8 +5,8 @@ namespace Svelto.ECS.Internal
     public abstract class MultiNodesEngine<T>
         where T : INode
     {
-        protected internal abstract void Add(T node);
-        protected internal abstract void Remove(T node);
+        protected abstract void AddNode(T node);
+        protected abstract void RemoveNode(T node);
     }
 }
 
@@ -20,28 +20,28 @@ namespace Svelto.ECS
         public abstract void Remove(INode node);
     }
 
-    public abstract class MultiNodesEngine<T, U> : MultiNodesEngine<U>, 
+    public abstract class MultiNodesEngine<T, U> : MultiNodesEngine<T>, 
         INodeEngine 
-        where T : INode 
+        where T : INode
         where U : INode
     {
-        protected abstract void Add(T node);
-        protected abstract void Remove(T node);
+        protected abstract void AddNode(U node);
+        protected abstract void RemoveNode(U node);
 
         public void Add(INode node)
         {
             if (node is T)
-                Add((T) node);
+                AddNode((T)node);
             else
-                ((MultiNodesEngine<U>)(this)).Add((U)node);
+                AddNode((U)node);
         }
 
         public void Remove(INode node)
         {
             if (node is T)
-                Remove((T)node);
+                RemoveNode((T)node);
             else
-                ((MultiNodesEngine<U>)(this)).Remove((U)node);
+                RemoveNode((U)node);
         }
     }
 }

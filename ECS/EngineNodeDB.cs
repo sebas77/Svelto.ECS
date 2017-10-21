@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -9,13 +8,11 @@ namespace Svelto.ECS
     {
         internal EngineNodeDB(  Dictionary<Type, FasterList<INode>> nodesDB, 
                                 Dictionary<Type, Dictionary<int, INode>> nodesDBdic,
-                                Dictionary<Type, FasterList<INode>> metaNodesDB,
-                                Dictionary<Type, IStructGroupNodes> structNodesDB)
+                                Dictionary<Type, FasterList<INode>> metaNodesDB)
         {
             _nodesDB = nodesDB;
             _nodesDBdic = nodesDBdic;
             _metaNodesDB = metaNodesDB;
-            _structNodesDB = structNodesDB;
         }
 
         public FasterReadOnlyListCast<INode, T> QueryNodes<T>() where T:INode
@@ -102,13 +99,12 @@ namespace Svelto.ECS
 
         static FasterReadOnlyListCast<INode, T> RetrieveEmptyNodeList<T>() where T : INode
         {
-            return new FasterReadOnlyListCast<INode, T>(FasterList<INode>.DefaultList);
+            return FasterReadOnlyListCast<INode, T>.DefaultList;
         }
 
         readonly Dictionary<Type, FasterList<INode>>      _nodesDB;
         readonly Dictionary<Type, Dictionary<int, INode>> _nodesDBdic;
         readonly Dictionary<Type, FasterList<INode>>      _metaNodesDB;
-        readonly Dictionary<Type, IStructGroupNodes>      _structNodesDB;
 
         readonly ReadOnlyDictionary<int, INode> _defaultEmptyNodeDict = new ReadOnlyDictionary<int, INode>(new Dictionary<int, INode>());
     }

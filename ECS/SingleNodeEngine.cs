@@ -3,7 +3,7 @@
 namespace Svelto.ECS
 {
     public abstract class SingleNodeEngine<TNodeType> : INodeEngine 
-        where TNodeType : class, INode
+        where TNodeType : INode
     {
         public void Add(INode obj)
         {

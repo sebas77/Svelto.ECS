@@ -121,6 +121,8 @@ namespace Svelto.DataStructures
 
     public struct FasterReadOnlyList<T> : IList<T>
     {
+        public static FasterReadOnlyList<T> DefaultList = new FasterReadOnlyList<T>(new FasterList<T>());
+
         public int Count { get { return _list.Count; } }
         public bool IsReadOnly { get { return true; } }
 
@@ -274,6 +276,19 @@ namespace Svelto.DataStructures
             }
         }
 
+        public void FastClear()
+        {
+            _lockQ.EnterWriteLock();
+            try
+            {
+                _list.FastClear();
+            }
+            finally
+            {
+                _lockQ.ExitWriteLock();
+            }
+        }
+
         public bool Contains(T item)
         {
             _lockQ.EnterReadLock();
@@ -382,6 +397,8 @@ namespace Svelto.DataStructures
 
     public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
     {
+        public static FasterReadOnlyListCast<T, U> DefaultList = new FasterReadOnlyListCast<T, U>(new FasterList<T>());
+
         public int Count { get { return _list.Count; } }
         public bool IsReadOnly { get { return true; } }
 
@@ -455,7 +472,6 @@ namespace Svelto.DataStructures
 
     public class FasterList<T> : IList<T>, IFasterList
     {
-        public static FasterList<T> DefaultList = new FasterList<T>();
         const int MIN_SIZE = 4;
 
         public int Count
@@ -529,7 +545,7 @@ namespace Svelto.DataStructures
             for (int i = 0; i < initialSize; i++)
                 list.Add(new U());
 
-            list.Clear();
+            list._count = 0;
 
             return list;
         }
@@ -583,12 +599,12 @@ namespace Svelto.DataStructures
         /// Careful, you could keep on holding references you don't want to hold to anymore
         /// Use DeepClear in case.
         /// </summary>
-        public void Clear()
+        public void FastClear()
         {
             _count = 0;
         }
 
-        public void DeepClear()
+        public void Clear()
         {
             Array.Clear(_buffer, 0, _buffer.Length);
 
@@ -727,11 +743,13 @@ namespace Svelto.DataStructures
             DesignByContract.Check.Require(index < _count && _count > 0, "out of bound index");
 
             if (index == --_count)
+            {
+                _buffer[_count] = default(T);
                 return false;
+            }
 
-            T swap = _buffer[index];
             _buffer[index] = _buffer[_count];
-            _buffer[_count] = swap;
+            _buffer[_count] = default(T);
 
             return true;
         }

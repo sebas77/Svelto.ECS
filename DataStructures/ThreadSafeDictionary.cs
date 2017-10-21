@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-//note, rewrite like ThreadSafeQueue
-
 namespace Svelto.DataStructures
 {
     /// <summary>
