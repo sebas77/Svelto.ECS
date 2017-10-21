@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Svelto.ECS.Internal;
 
 //This profiler is based on the Entitas Visual Debugging tool 
 //https://github.com/sschmid/Entitas-CSharp
@@ -11,7 +12,7 @@ namespace Svelto.ECS.Profiler
     {
         static readonly Stopwatch _stopwatch = new Stopwatch();
 
-        public static void MonitorAddDuration(Action<INodeEngine<INode>, INode> addingFunc, INodeEngine<INode> engine, INode node)
+        public static void MonitorAddDuration(Action<INodeEngine, INode> addingFunc, INodeEngine engine, INode node)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))
@@ -25,7 +26,7 @@ namespace Svelto.ECS.Profiler
             }
         }
 
-        public static void MonitorRemoveDuration(Action<INodeEngine<INode>, INode> removeFunc, INodeEngine<INode> engine, INode node)
+        public static void MonitorRemoveDuration(Action<INodeEngine, INode> removeFunc, INodeEngine engine, INode node)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))

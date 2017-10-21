@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS
 {
-    interface ICallBackOnAddEngine
+    public interface ICallBackOnAddEngine
     {
         void Ready();
     }

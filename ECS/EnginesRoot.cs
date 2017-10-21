@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
+using Svelto.ECS.NodeSchedulers;
 using UnityEngine;
 using WeakReference = Svelto.DataStructures.WeakReference<Svelto.ECS.EnginesRoot>;
 
@@ -14,40 +16,39 @@ using System.Reflection;
 
 namespace Svelto.ECS
 {
-    class Scheduler : MonoBehaviour
-    {
-        IEnumerator Start()
-        {
-            while (true)
-            {
-                yield return new WaitForEndOfFrame();
-
-                OnTick();
-            }
-        }
-
-        internal Action OnTick;
-    }
-
     public sealed class EnginesRoot : IEnginesRoot, IEntityFactory
     {
-        public EnginesRoot()
+        public EnginesRoot(NodeSubmissionScheduler nodeScheduler)
         {
-            _nodeEngines = new Dictionary<Type, FasterList<INodeEngine<INode>>>();
+            _nodeEngines = new Dictionary<Type, FasterList<IEngine>>();
+            _activableEngines = new Dictionary<Type, FasterList<IEngine>>();
+            _otherEngines = new FasterList<IEngine>();
+
             _engineRootWeakReference = new WeakReference(this);
-            _otherEnginesReferences = new FasterList<IEngine>();
 
             _nodesDB = new Dictionary<Type, FasterList<INode>>();
             _nodesDBdic = new Dictionary<Type, Dictionary<int, INode>>();
 
             _nodesToAdd = new FasterList<INode>();
-            _groupNodesToAdd = new FasterList<INode>();
+            _metaNodesToAdd = new FasterList<INode>();
 
-            _nodesDBgroups = new Dictionary<Type, FasterList<INode>>();
+            _metaNodesDB = new Dictionary<Type, FasterList<INode>>();
+            _sharedStructNodeLists = new SharedStructNodeLists();
+            _sharedGroupedStructNodeLists = new SharedGroupedStructNodesLists();
 
-            GameObject go = new GameObject("ECSScheduler");
+            _internalRemove = InternalRemove;
+            _internalDisable = InternalDisable;
+            _internalEnable = InternalEnable;
+            _internalMetaRemove = InternalMetaRemove;
 
-            go.AddComponent<Scheduler>().OnTick += SubmitNodes;
+            _scheduler = nodeScheduler;
+            _scheduler.Schedule(SubmitNodes);
+
+            _structNodeEngineType = typeof(IStructNodeEngine<>);
+            _groupedStructNodesEngineType = typeof(IGroupedStructNodesEngine<>);
+            _activableNodeEngineType = typeof(IActivableNodeEngine<>);
+            
+            _implementedInterfaceTypes = new Dictionary<Type, Type[]>();
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
             GameObject debugEngineObject = new GameObject("Engine Debugger");
@@ -57,56 +58,75 @@ namespace Svelto.ECS
 
         void SubmitNodes()
         {
-            int groupNodesCount;
-            int nodesCount;
+            int metaNodesCount = _metaNodesToAdd.Count;
+            int nodesCount = _nodesToAdd.Count;
+
+            if (metaNodesCount + nodesCount == 0) return;
+
             bool newNodesHaveBeenAddedWhileIterating;
             int startNodes = 0;
-            int startGroupNodes = 0;
+            int startMetaNodes = 0;
             int numberOfReenteringLoops = 0;
 
             do
             {
-                groupNodesCount = _groupNodesToAdd.Count;
-                nodesCount = _nodesToAdd.Count;
+                var nodesToAdd = _nodesToAdd.ToArrayFast();
 
                 for (int i = startNodes; i < nodesCount; i++)
                 {
-                    var node = _nodesToAdd[i];
-                    AddNodeToTheDB(node, node.GetType());
+                    var node = nodesToAdd[i];
+                    var nodeType = node.GetType();
+
+                    AddNodeToTheDB(node, nodeType);
+                    var nodeWithId = node as INodeWithID;
+                    if (nodeWithId != null)
+                        AddNodeToNodesDictionary(nodeWithId, nodeType);
                 }
 
-                for (int i = startGroupNodes; i < groupNodesCount; i++)
+                var metaNodesToAdd = _metaNodesToAdd.ToArrayFast();
+
+                for (int i = startMetaNodes; i < metaNodesCount; i++)
                 {
-                    var node = _groupNodesToAdd[i];
-                    AddNodeToGroupDB(node, node.GetType());
+                    var node = metaNodesToAdd[i];
+                    var nodeType = node.GetType();
+
+                    AddNodeToMetaDB(node, nodeType);
+                    var nodeWithId = node as INodeWithID;
+                    if (nodeWithId != null)
+                        AddNodeToNodesDictionary(nodeWithId, nodeType);
                 }
 
                 for (int i = startNodes; i < nodesCount; i++)
                 {
-                    var node = _nodesToAdd[i];
+                    var node = nodesToAdd[i];
                     AddNodeToTheSuitableEngines(node, node.GetType());
                 }
 
-                for (int i = startGroupNodes; i < groupNodesCount; i++)
+                for (int i = startMetaNodes; i < metaNodesCount; i++)
                 {
-                    var node = _groupNodesToAdd[i];
+                    var node = metaNodesToAdd[i];
                     AddNodeToTheSuitableEngines(node, node.GetType());
                 }
 
-                newNodesHaveBeenAddedWhileIterating = _groupNodesToAdd.Count > groupNodesCount || _nodesToAdd.Count > nodesCount;
+                newNodesHaveBeenAddedWhileIterating =
+                    _metaNodesToAdd.Count > metaNodesCount ||
+                    _nodesToAdd.Count > nodesCount;
 
                 startNodes = nodesCount;
-                startGroupNodes = groupNodesCount;
+                startMetaNodes = metaNodesCount;
 
                 if (numberOfReenteringLoops > 5)
                     throw new Exception("possible infinite loop found creating Entities inside INodesEngine Add method, please consider building entities outside INodesEngine Add method");
 
-                 numberOfReenteringLoops++;
+                numberOfReenteringLoops++;
+
+                metaNodesCount = _metaNodesToAdd.Count;
+                nodesCount = _nodesToAdd.Count;
 
             } while (newNodesHaveBeenAddedWhileIterating);
 
             _nodesToAdd.Clear();
-            _groupNodesToAdd.Clear();
+            _metaNodesToAdd.Clear();
         }
 
         public void AddEngine(IEngine engine)
@@ -114,88 +134,201 @@ namespace Svelto.ECS
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
             EngineProfiler.AddEngine(engine);
 #endif
-            if (engine is IQueryableNodeEngine)
-                (engine as IQueryableNodeEngine).nodesDB = new EngineNodeDB(_nodesDB, _nodesDBdic, _nodesDBgroups);
+            var queryableNodeEngine = engine as IQueryableNodeEngine;
+            if (queryableNodeEngine != null)
+                queryableNodeEngine.nodesDB =
+                    new EngineNodeDB(_nodesDB, _nodesDBdic, _metaNodesDB);
 
-            if (engine is INodesEngine)
+            var engineType = engine.GetType();
+            var implementedInterfaces = engineType.GetInterfaces();
+
+            CollectImplementedInterfaces(implementedInterfaces);
+
+            var engineAdded = CheckGenericEngines(engine);
+
+            if (CheckLegacyNodesEngine(engine, ref engineAdded) == false)
+                CheckNodesEngine(engine, engineType, ref engineAdded);
+
+            if (engineAdded == false)
+                _otherEngines.Add(engine);
+
+            var callBackOnAddEngine = engine as ICallBackOnAddEngine;
+            if (callBackOnAddEngine != null)
+                callBackOnAddEngine.Ready();
+        }
+
+        void CollectImplementedInterfaces(Type[] implementedInterfaces)
+        {
+            _implementedInterfaceTypes.Clear();
+
+            for (int index = 0; index < implementedInterfaces.Length; index++)
             {
-                var nodesEngine = engine as INodesEngine;
-
-                AddEngine(nodesEngine, nodesEngine.AcceptedNodes(), _nodeEngines);
-            }
-            else
-            {
-
-                var engineType = engine.GetType();
-//                Type baseInterface = null;
-
+                var interfaceType = implementedInterfaces[index];
 #if !NETFX_CORE
-                var baseType = engineType.BaseType;
 
-                if (baseType.IsGenericType
+                if (false == interfaceType.IsGenericType)
+#else
+                if (false == interfaceType.IsConstructedGenericType)
+#endif
+                {
+                    continue;
+                }
+
+                var genericTypeDefinition = interfaceType.GetGenericTypeDefinition();
+
+                _implementedInterfaceTypes.Add(genericTypeDefinition,
+                    interfaceType.GetGenericArguments());
+            }
+        }
+
+        bool CheckGenericEngines(IEngine engine)
+        {
+            if (_implementedInterfaceTypes.Count == 0) return false;
+
+            bool engineAdded = false;
+
+            if (_implementedInterfaceTypes.ContainsKey(_structNodeEngineType))
+            {
+                ((IStructNodeEngine)engine).CreateStructNodes
+                    (_sharedStructNodeLists);
+            }
+
+            if (_implementedInterfaceTypes.ContainsKey(_groupedStructNodesEngineType))
+            {
+                ((IGroupedStructNodesEngine)engine).CreateStructNodes
+                    (_sharedGroupedStructNodeLists);
+            }
+
+            Type[] arguments;
+            if (_implementedInterfaceTypes.TryGetValue(_activableNodeEngineType, 
+                out arguments))
+            {
+                AddEngine(engine, arguments, _activableEngines);
+
+                engineAdded = true;
+            }
+
+            return engineAdded;
+        }
+
+        bool CheckLegacyNodesEngine(IEngine engine, ref bool engineAdded)
+        {
+            var nodesEngine = engine as INodesEngine;
+            if (nodesEngine != null)
+            {
+                AddEngine(nodesEngine, nodesEngine.AcceptedNodes(), _nodeEngines);
+
+                engineAdded = true;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        bool CheckNodesEngine(IEngine engine, Type engineType, ref bool engineAdded)
+        {
+#if !NETFX_CORE
+            var baseType = engineType.BaseType;
+            
+            if (baseType.IsGenericType
 #else
                 var baseType = engineType.GetTypeInfo().BaseType;
 
                 if (baseType.IsConstructedGenericType
 #endif
-                && baseType.GetGenericTypeDefinition() == typeof (SingleNodeEngine<>))
-                {
-                    AddEngine(engine as INodeEngine<INode>, baseType.GetGenericArguments(), _nodeEngines);
-                }
-                else
-                    _otherEnginesReferences.Add(engine);
+                && engine is INodeEngine)
+            {
+                AddEngine(engine as INodeEngine, baseType.GetGenericArguments(), _nodeEngines);
+
+                engineAdded = true;
+
+                return true;
             }
-            
-            if (engine is ICallBackOnAddEngine)
-                (engine as ICallBackOnAddEngine).Ready();
+
+            return false;
         }
 
         public void BuildEntity(int ID, EntityDescriptor ed)
         {
-            var entityNodes = ed.BuildNodes(ID, (node) =>
-            {
-                if (_engineRootWeakReference.IsValid == true)
-                    InternalRemove(node);
-            });
-            
+            var entityNodes = ed.BuildNodes(ID,
+                _internalRemove,
+                _internalEnable,
+                _internalDisable
+            );
+
             _nodesToAdd.AddRange(entityNodes);
         }
 
         /// <summary>
-        /// An entity group is a meta entity. It's a way to create a set of entitites that
-        /// are not easily queriable otherwise. For example you may group existing entities
-        /// by size and type and then use the groupID to retrieve a single node that is shared
-        /// among the single entities of the same type and size. This willwd prevent the scenario
-        /// where the coder is forced to parse all the entities to find the ones of the same
-        /// size and type. Since the entity group is managed through the shared node, the same
+        /// A meta entity is a way to manage a set of entitites that are not easily 
+        /// queriable otherwise. For example you may want to group existing entities
+        /// by size and type and then use the meta entity node to manage the data 
+        /// shared among the single entities of the same type and size. This will 
+        /// prevent the scenario where the coder is forced to parse all the entities to 
+        /// find the ones of the same size and type. 
+        /// Since the entities are managed through the shared node, the same
         /// shared node must be found on the single entities of the same type and size.
-        /// The shared node is then used by engines that are meant to manage a group of entities
-        /// through a single node. The same engine can manage several groups of entitites.
+        /// The shared node of the meta entity is then used by engines that are meant 
+        /// to manage a group of entities through a single node. 
+        /// The same engine can manage several meta entities nodes too.
+        /// The Engine manages the logic of the Meta Node data and other engines
+        /// can read back this data through the normal entity as the shared node
+        /// will be present in their descriptor too.
         /// </summary>
-        /// <param name="groupID"></param>
+        /// <param name="metaEntityID"></param>
         /// <param name="ed"></param>
-        public void BuildEntityGroup(int groupID, EntityDescriptor ed)
+        public void BuildMetaEntity(int metaEntityID, EntityDescriptor ed)
         {
-            var entityNodes = ed.BuildNodes(groupID, (node) =>
-            {
-                if (_engineRootWeakReference.IsValid == true)
-                    InternalGroupRemove(node);
-            });
+            var entityNodes = ed.BuildNodes(metaEntityID,
+                _internalMetaRemove,
+                _internalEnable,
+                _internalDisable
+                );
 
-            _groupNodesToAdd.AddRange(entityNodes);
+            _metaNodesToAdd.AddRange(entityNodes);
         }
 
-        static void AddEngine<T>(T engine, Type[] types, Dictionary<Type, FasterList<INodeEngine<INode>>> engines) where T : INodeEngine<INode>
+        /// <summary>
+        /// Using this function is like building a normal entity, but the nodes
+        /// are grouped by groupID to be better processed inside engines and
+        /// improve cache locality. Only IGroupStructNodeWithID nodes are grouped
+        /// other nodes are managed as usual.
+        /// </summary>
+        /// <param name="entityID"></param>
+        /// <param name="groupID"></param>
+        /// <param name="ed"></param>
+        public void BuildEntityInGroup(short entityID, short groupID, 
+            EntityDescriptor ed)
+        {
+            var entityNodes = ed.BuildNodes(entityID,
+                _internalRemove,
+                _internalEnable,
+                _internalDisable
+                );
+
+            _nodesToAdd.AddRange(entityNodes);
+
+            for (int i = 0; i < entityNodes.Count; i++)
+            {
+                var groupNode = entityNodes[i] as IGroupedStructNodeWithID;
+                if (groupNode != null)
+                    groupNode.groupID = groupID;
+            }
+        }
+
+        static void AddEngine(IEngine engine, Type[] types,
+            Dictionary<Type, FasterList<IEngine>> engines)
         {
             for (int i = 0; i < types.Length; i++)
             {
-                FasterList<INodeEngine<INode>> list;
+                FasterList<IEngine> list;
 
                 var type = types[i];
 
                 if (engines.TryGetValue(type, out list) == false)
                 {
-                    list = new FasterList<INodeEngine<INode>>();
+                    list = new FasterList<IEngine>();
 
                     engines.Add(type, list);
                 }
@@ -204,15 +337,13 @@ namespace Svelto.ECS
             }
         }
 
-        void AddNodeToGroupDB(INode node, Type nodeType)
+        void AddNodeToMetaDB(INode node, Type nodeType)
         {
             FasterList<INode> nodes;
-            if (_nodesDBgroups.TryGetValue(nodeType, out nodes) == false)
-                nodes = _nodesDBgroups[nodeType] = new FasterList<INode>();
+            if (_metaNodesDB.TryGetValue(nodeType, out nodes) == false)
+                nodes = _metaNodesDB[nodeType] = new FasterList<INode>();
 
             nodes.Add(node);
-
-            AddNodeToNodesDictionary(node, nodeType);
         }
 
         void AddNodeToTheDB<T>(T node, Type nodeType) where T : INode
@@ -222,34 +353,30 @@ namespace Svelto.ECS
                 nodes = _nodesDB[nodeType] = new FasterList<INode>();
 
             nodes.Add(node);
-
-            AddNodeToNodesDictionary(node, nodeType);
         }
 
-        void AddNodeToNodesDictionary<T>(T node, Type nodeType) where T : INode
+        void AddNodeToNodesDictionary<T>(T node, Type nodeType) where T : INodeWithID
         {
-            if (node is NodeWithID)
-            {
-                Dictionary<int, INode> nodesDic;
-                if (_nodesDBdic.TryGetValue(nodeType, out nodesDic) == false)
-                    nodesDic = _nodesDBdic[nodeType] = new Dictionary<int, INode>();
+            Dictionary<int, INode> nodesDic;
 
-                nodesDic[(node as NodeWithID).ID] = node;
-            }
+            if (_nodesDBdic.TryGetValue(nodeType, out nodesDic) == false)
+                nodesDic = _nodesDBdic[nodeType] = new Dictionary<int, INode>();
+
+            nodesDic.Add(node.ID, node);
         }
 
-        void AddNodeToTheSuitableEngines<T>(T node, Type nodeType) where T : INode
+        void AddNodeToTheSuitableEngines(INode node, Type nodeType)
         {
-            FasterList<INodeEngine<INode>> enginesForNode;
+            FasterList<IEngine> enginesForNode;
 
             if (_nodeEngines.TryGetValue(nodeType, out enginesForNode))
             {
                 for (int j = 0; j < enginesForNode.Count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                    EngineProfiler.MonitorAddDuration(AddNodeToEngine, enginesForNode[j], node);
+                    EngineProfiler.MonitorAddDuration(AddNodeToEngine, enginesForNode[j] as INodeEngine, node);
 #else
-                    enginesForNode[j].Add(node);
+                    (enginesForNode[j] as INodeEngine).Add(node);
 #endif
                 }
             }
@@ -259,87 +386,168 @@ namespace Svelto.ECS
         {
             FasterList<INode> nodes;
             if (_nodesDB.TryGetValue(nodeType, out nodes) == true)
-                nodes.UnorderredRemove(node); //should I remove it from the dictionary if length is zero?
-
-            RemoveNodeFromNodesDictionary(node, nodeType);
+                nodes.UnorderedRemove(node); //should I remove it from the dictionary if length is zero?
         }
 
-        void RemoveNodeFromNodesDictionary<T>(T node, Type nodeType) where T : INode
-        {
-            if (node is NodeWithID)
-            {
-                Dictionary<int, INode> nodesDic;
-
-                if (_nodesDBdic.TryGetValue(nodeType, out nodesDic))
-                    nodesDic.Remove((node as NodeWithID).ID);
-            }
-        }
-
-        void RemoveNodeFromGroupDB<T>(T node, Type nodeType) where T : INode
+        void RemoveNodeFromMetaDB<T>(T node, Type nodeType) where T : INode
         {
             FasterList<INode> nodes;
-            if (_nodesDBgroups.TryGetValue(nodeType, out nodes) == true)
-                nodes.UnorderredRemove(node); //should I remove it from the dictionary if length is zero?
+            if (_metaNodesDB.TryGetValue(nodeType, out nodes) == true)
+                nodes.UnorderedRemove(node); //should I remove it from the dictionary if length is zero?
+        }
 
-            RemoveNodeFromNodesDictionary(node, nodeType);
+        void RemoveNodeFromNodesDictionary<T>(T node, Type nodeType) where T : INodeWithID
+        {
+            Dictionary<int, INode> nodesDic;
+
+            if (_nodesDBdic.TryGetValue(nodeType, out nodesDic))
+                nodesDic.Remove(node.ID);
         }
 
         void RemoveNodeFromEngines<T>(T node, Type nodeType) where T : INode
         {
-            FasterList<INodeEngine<INode>> enginesForNode;
+            FasterList<IEngine> enginesForNode;
 
             if (_nodeEngines.TryGetValue(nodeType, out enginesForNode))
             {
                 for (int j = 0; j < enginesForNode.Count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                    EngineProfiler.MonitorRemoveDuration(RemoveNodeFromEngine, enginesForNode[j], node);
+                    EngineProfiler.MonitorRemoveDuration(RemoveNodeFromEngine, (enginesForNode[j] as INodeEngine), node);
 #else
-                    enginesForNode[j].Remove(node);
+                    (enginesForNode[j] as INodeEngine).Remove(node);
 #endif
                 }
             }
         }
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-        void AddNodeToEngine(INodeEngine<INode> engine, INode node)
+
+        void DisableNodeFromEngines(INode node, Type nodeType)
         {
-            engine.Add(node);
+            FasterList<IEngine> enginesForNode;
+
+            if (_activableEngines.TryGetValue(nodeType, out enginesForNode))
+            {
+                for (int j = 0; j < enginesForNode.Count; j++)
+                {
+                    (enginesForNode[j] as IActivableNodeEngine).Disable(node);
+                }
+            }
         }
 
-        void RemoveNodeFromEngine(INodeEngine<INode> engine, INode node)
+        void EnableNodeFromEngines(INode node, Type nodeType)
         {
-            engine.Remove(node);
+            FasterList<IEngine> enginesForNode;
+
+            if (_activableEngines.TryGetValue(nodeType, out enginesForNode))
+            {
+                for (int j = 0; j < enginesForNode.Count; j++)
+                {
+                    (enginesForNode[j] as IActivableNodeEngine).Enable(node);
+                }
+            }
+        }
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
+        void AddNodeToEngine(IEngine engine, INode node)
+        {
+            (engine as INodeEngine).Add(node);
+        }
+
+        void RemoveNodeFromEngine(IEngine engine, INode node)
+        {
+            (engine as INodeEngine).Remove(node);
         }
 #endif
-        
-        void InternalRemove<T>(T node) where T : INode
-        {
-            Type nodeType = node.GetType();
 
-            RemoveNodeFromEngines(node, nodeType);
-            RemoveNodeFromTheDB(node, node.GetType());
+        void InternalDisable(FasterList<INode> nodes)
+        {
+            if (_engineRootWeakReference.IsValid == false)
+                return;
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+                Type nodeType = node.GetType();
+                DisableNodeFromEngines(node, nodeType);
+            }
         }
 
-        void InternalGroupRemove<T>(T node) where T : INode
+        void InternalEnable(FasterList<INode> nodes)
         {
-            Type nodeType = node.GetType();
+            if (_engineRootWeakReference.IsValid == false)
+                return;
 
-            RemoveNodeFromEngines(node, nodeType);
-            RemoveNodeFromGroupDB(node, node.GetType());
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+                Type nodeType = node.GetType();
+                EnableNodeFromEngines(node, nodeType);
+            }
         }
 
-        Dictionary<Type, FasterList<INodeEngine<INode>>>     _nodeEngines;
-        FasterList<IEngine>                                  _otherEnginesReferences;
+        void InternalRemove(FasterList<INode> nodes)
+        {
+            if (_engineRootWeakReference.IsValid == false)
+                return;
 
-        Dictionary<Type, FasterList<INode>>       _nodesDB;
-        Dictionary<Type, Dictionary<int, INode>>  _nodesDBdic;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+                Type nodeType = node.GetType();
 
-        Dictionary<Type, FasterList<INode>>       _nodesDBgroups;
+                RemoveNodeFromEngines(node, nodeType);
+                RemoveNodeFromTheDB(node, node.GetType());
 
-        FasterList<INode>                         _nodesToAdd;
-        FasterList<INode>                         _groupNodesToAdd;
+                var nodeWithId = node as INodeWithID;
+                if (nodeWithId != null)
+                    RemoveNodeFromNodesDictionary(nodeWithId, nodeType);
+            }
+        }
 
-        WeakReference                             _engineRootWeakReference;
+        void InternalMetaRemove(FasterList<INode> nodes)
+        {
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+                Type nodeType = node.GetType();
+
+                RemoveNodeFromEngines(node, nodeType);
+                RemoveNodeFromMetaDB(node, nodeType);
+
+                var nodeWithId = node as INodeWithID;
+                if (nodeWithId != null)
+                    RemoveNodeFromNodesDictionary(nodeWithId, nodeType);
+            }
+        }
+
+        readonly Dictionary<Type, FasterList<IEngine>> _nodeEngines;
+        readonly Dictionary<Type, FasterList<IEngine>> _activableEngines;
+
+        readonly FasterList<IEngine> _otherEngines;
+
+        readonly Dictionary<Type, FasterList<INode>> _nodesDB;
+        readonly Dictionary<Type, FasterList<INode>> _metaNodesDB;
+
+        readonly Dictionary<Type, Dictionary<int, INode>> _nodesDBdic;
+
+        readonly FasterList<INode> _nodesToAdd;
+        readonly FasterList<INode> _metaNodesToAdd;
+
+        readonly WeakReference _engineRootWeakReference;
+        readonly SharedStructNodeLists _sharedStructNodeLists;
+        readonly SharedGroupedStructNodesLists _sharedGroupedStructNodeLists;
+
+        readonly NodeSubmissionScheduler _scheduler;
+
+        readonly Action<FasterList<INode>> _internalRemove;
+        readonly Action<FasterList<INode>> _internalEnable;
+        readonly Action<FasterList<INode>> _internalDisable;
+        readonly Action<FasterList<INode>> _internalMetaRemove;
+
+        readonly Type _structNodeEngineType;
+        readonly Type _groupedStructNodesEngineType;
+        readonly Type _activableNodeEngineType;
+
+        readonly Dictionary<Type, Type[]> _implementedInterfaceTypes;
     }
 }
 

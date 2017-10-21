@@ -26,10 +26,10 @@
 //
 // Alternatively, you can define these in the project properties dialog.
 
-#if UNITY_EDITOR || ROBO_TEST_BUILD
-#define DBC_CHECK_ALL  
+#if DEBUG && !PROFILER
+#define DBC_CHECK_ALL
 #endif
-  
+
 using System;
 using System.Diagnostics;
 

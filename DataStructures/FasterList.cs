@@ -121,6 +121,8 @@ namespace Svelto.DataStructures
 
     public struct FasterReadOnlyList<T> : IList<T>
     {
+        public static FasterReadOnlyList<T> DefaultList = new FasterReadOnlyList<T>(new FasterList<T>());
+
         public int Count { get { return _list.Count; } }
         public bool IsReadOnly { get { return true; } }
 
@@ -193,7 +195,8 @@ namespace Svelto.DataStructures
     {
         public FasterListThreadSafe(FasterList<T> list)
         {
-            _list = list;
+            if (list == null) throw new ArgumentException("invalid list");
+            _list = list; 
             _lockQ = new ReaderWriterLockSlim();
         }
 
@@ -273,6 +276,19 @@ namespace Svelto.DataStructures
             }
         }
 
+        public void FastClear()
+        {
+            _lockQ.EnterWriteLock();
+            try
+            {
+                _list.FastClear();
+            }
+            finally
+            {
+                _lockQ.ExitWriteLock();
+            }
+        }
+
         public bool Contains(T item)
         {
             _lockQ.EnterReadLock();
@@ -288,14 +304,14 @@ namespace Svelto.DataStructures
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            _lockQ.EnterWriteLock();
+            _lockQ.EnterReadLock();
             try
             {
                 _list.CopyTo(array, arrayIndex);
             }
             finally
             {
-                _lockQ.ExitWriteLock();
+                _lockQ.ExitReadLock();
             }
         }
 
@@ -351,6 +367,19 @@ namespace Svelto.DataStructures
             }
         }
 
+        public void UnorderedRemoveAt(int index)
+        {
+            _lockQ.EnterWriteLock();
+            try
+            {
+                _list.UnorderedRemoveAt(index);
+            }
+            finally
+            {
+                _lockQ.ExitWriteLock();
+            }
+        }
+
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             throw new NotImplementedException();
@@ -368,7 +397,7 @@ namespace Svelto.DataStructures
 
     public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
     {
-        public static FasterList<T> DefaultList = new FasterList<T>();
+        public static FasterReadOnlyListCast<T, U> DefaultList = new FasterReadOnlyListCast<T, U>(new FasterList<T>());
 
         public int Count { get { return _list.Count; } }
         public bool IsReadOnly { get { return true; } }
@@ -402,7 +431,7 @@ namespace Svelto.DataStructures
 
         public void CopyTo(U[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            Array.Copy(_list.ToArrayFast(), 0, array, arrayIndex, _list.Count);
         }
 
         public bool Remove(U item)
@@ -438,7 +467,10 @@ namespace Svelto.DataStructures
         readonly FasterList<T> _list;
     }
 
-    public class FasterList<T> : IList<T>
+    public interface IFasterList
+    {}
+
+    public class FasterList<T> : IList<T>, IFasterList
     {
         const int MIN_SIZE = 4;
 
@@ -513,7 +545,7 @@ namespace Svelto.DataStructures
             for (int i = 0; i < initialSize; i++)
                 list.Add(new U());
 
-            list.Clear();
+            list._count = 0;
 
             return list;
         }
@@ -553,6 +585,11 @@ namespace Svelto.DataStructures
             _count += count;
         }
 
+        public void AddRange(T[] items)
+        {
+            AddRange(items, items.Length);
+        }
+
         public FasterReadOnlyList<T> AsReadOnly()
         {
             return new FasterReadOnlyList<T>(this);
@@ -562,12 +599,12 @@ namespace Svelto.DataStructures
         /// Careful, you could keep on holding references you don't want to hold to anymore
         /// Use DeepClear in case.
         /// </summary>
-        public void Clear()
+        public void FastClear()
         {
             _count = 0;
         }
 
-        public void DeepClear()
+        public void Clear()
         {
             Array.Clear(_buffer, 0, _buffer.Length);
 
@@ -689,32 +726,32 @@ namespace Svelto.DataStructures
             return _buffer;
         }
 
-        public bool UnorderredRemove(T item)
+        public bool UnorderedRemove(T item)
         {
             var index = IndexOf(item);
 
             if (index == -1)
                 return false;
 
-            UnorderredRemoveAt(index);
+            UnorderedRemoveAt(index);
 
             return true;
         }
 
-        public T UnorderredRemoveAt(int index)
+        public bool UnorderedRemoveAt(int index)
         {
             DesignByContract.Check.Require(index < _count && _count > 0, "out of bound index");
 
-            T item = _buffer[index];
-
             if (index == --_count)
-                return item;
+            {
+                _buffer[_count] = default(T);
+                return false;
+            }
 
-            T swap = _buffer[index];
             _buffer[index] = _buffer[_count];
-            _buffer[_count] = swap;
+            _buffer[_count] = default(T);
 
-            return item;
+            return true;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -752,14 +789,15 @@ namespace Svelto.DataStructures
                 Resize(_count);
         }
 
-        public bool Reuse(int index, out T result)
+        public bool Reuse<U>(int index, out U result)
+            where U:class, T
         {
-            result = default(T);
+            result = default(U);
 
             if (index >= _buffer.Length)
                 return false;
 
-            result = _buffer[index];
+            result = (U)_buffer[index];
 
             return result != null;
         }

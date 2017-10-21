@@ -9,7 +9,7 @@ namespace Svelto.DataStructures
     // isn't taken into account (we would have to do a shift in both arrays)
     // Could be added as an option?
 
-    class CircularBufferIndexer<TKey, TVal> : IDictionary<TKey, TVal>
+    public class CircularBufferIndexer<TKey, TVal> : IDictionary<TKey, TVal>
     {
         public ICollection<TKey> Keys
         {

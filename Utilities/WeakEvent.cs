@@ -1,5 +1,6 @@
 ﻿using Svelto.DataStructures;
 using System;
+using System.Collections.Generic;
 
 namespace BetterWeakEvents
 {
@@ -13,7 +14,7 @@ namespace BetterWeakEvents
 
         public static WeakEvent<T1, T2> operator-(WeakEvent<T1, T2> c1, Action<T1, T2> x)
         {
-            c1._subscribers.UnorderredRemove(new WeakAction<T1, T2>(x));
+            c1._subscribers.UnorderedRemove(new WeakAction<T1, T2>(x));
             return c1;
         }
 
@@ -21,7 +22,7 @@ namespace BetterWeakEvents
         {
             for (int i = 0; i < _subscribers.Count; i++)
                 if (_subscribers[i].Invoke(arg1, arg2) == false)
-                    _subscribers.UnorderredRemoveAt(i--);
+                    _subscribers.UnorderedRemoveAt(i--);
         }
 
         ~WeakEvent()
