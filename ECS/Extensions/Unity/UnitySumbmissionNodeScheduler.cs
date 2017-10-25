@@ -1,4 +1,4 @@
-﻿#if UNITY_5 || UNITY_5_3_OR_NEWER
+#if UNITY_5 || UNITY_5_3_OR_NEWER
 using System;
 using System.Collections;
 using UnityEngine;

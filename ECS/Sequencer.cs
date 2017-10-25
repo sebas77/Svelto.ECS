@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Steps = System.Collections.Generic.Dictionary<Svelto.ECS.IEngine, System.Collections.Generic.Dictionary<System.Enum, Svelto.ECS.IStep[]>>;
 
 namespace Svelto.ECS

@@ -1,5 +1,3 @@
-using Svelto.ECS.Internal;
-
 namespace Svelto.ECS
 {
     public interface IEnginesRoot
@@ -13,6 +11,6 @@ namespace Svelto.ECS
 
         void BuildMetaEntity(int metaEntityID, EntityDescriptor ED);
 
-        void BuildEntityInGroup(short entityID, short groupID, EntityDescriptor ED);
+        void BuildEntityInGroup(int entityID, int groupID, EntityDescriptor ED);
     }
 }

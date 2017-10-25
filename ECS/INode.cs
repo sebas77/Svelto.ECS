@@ -10,12 +10,12 @@ namespace Svelto.ECS
 
     public interface IStructNodeWithID : INode
     {
-        short ID { get; set; }
+        int ID { get; set; }
     }
 
     public interface IGroupedStructNodeWithID : IStructNodeWithID
     {
-        short groupID { get; set; }
+        int groupID { get; set; }
     }
 
     public class NodeWithID: INodeWithID

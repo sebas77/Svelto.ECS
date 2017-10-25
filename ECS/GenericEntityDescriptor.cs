@@ -1,4 +1,4 @@
-﻿namespace Svelto.ECS
+namespace Svelto.ECS
 {
     public class GenericEntityDescriptor<T> : EntityDescriptor
         where T : NodeWithID, new()

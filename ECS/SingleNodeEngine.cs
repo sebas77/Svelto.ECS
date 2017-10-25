@@ -1,4 +1,4 @@
-﻿using Svelto.ECS.Internal;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {

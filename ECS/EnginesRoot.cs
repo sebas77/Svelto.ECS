@@ -1,10 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.ECS.NodeSchedulers;
-using UnityEngine;
 using WeakReference = Svelto.DataStructures.WeakReference<Svelto.ECS.EnginesRoot>;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
@@ -297,7 +295,7 @@ namespace Svelto.ECS
         /// <param name="entityID"></param>
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
-        public void BuildEntityInGroup(short entityID, short groupID, 
+        public void BuildEntityInGroup(int entityID, int groupID, 
             EntityDescriptor ed)
         {
             var entityNodes = ed.BuildNodes(entityID,

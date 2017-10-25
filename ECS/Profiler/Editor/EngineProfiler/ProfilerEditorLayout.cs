@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+#if UNITY_EDITOR
+using UnityEditor;
 using UnityEngine;
 
 //This profiler is based on the Entitas Visual Debugging tool 
@@ -63,3 +64,4 @@ namespace Svelto.ECS.Profiler
         }
     }
 }
+#endif

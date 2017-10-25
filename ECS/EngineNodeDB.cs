@@ -19,20 +19,24 @@ namespace Svelto.ECS
         {
             var type = typeof(T);
 
-            if (_nodesDB.ContainsKey(type) == false)
+            FasterList<INode> nodes;
+
+            if (_nodesDB.TryGetValue(type, out nodes) == false)
                 return RetrieveEmptyNodeList<T>();
 
-            return new FasterReadOnlyListCast<INode, T>(_nodesDB[type]);
+            return new FasterReadOnlyListCast<INode, T>(nodes);
         }
 
         public ReadOnlyDictionary<int, INode> QueryIndexableNodes<T>() where T:INode
         {
             var type = typeof(T);
 
-            if (_nodesDBdic.ContainsKey(type) == false)
+            Dictionary<int, INode> nodes;
+
+            if (_nodesDBdic.TryGetValue(type, out nodes) == false)
                 return _defaultEmptyNodeDict;
 
-            return new ReadOnlyDictionary<int, INode>(_nodesDBdic[type]);
+            return new ReadOnlyDictionary<int, INode>(nodes);
         }
 
         public T QueryMetaNode<T>(int metaEntityID) where T : INode 
@@ -49,10 +53,12 @@ namespace Svelto.ECS
         {
             var type = typeof(T);
 
-            if (_metaNodesDB.ContainsKey(type) == false)
+            FasterList<INode> nodes;
+
+            if (_metaNodesDB.TryGetValue(type, out nodes) == false)
                 return RetrieveEmptyNodeList<T>();
 
-            return new FasterReadOnlyListCast<INode, T>(_metaNodesDB[type]);
+            return new FasterReadOnlyListCast<INode, T>(nodes);
         }
 
         public bool TryQueryNode<T>(int ID, out T node) where T:INode
@@ -61,8 +67,10 @@ namespace Svelto.ECS
 
             INode internalNode;
 
-            if (_nodesDBdic.ContainsKey(type) && 
-                _nodesDBdic[type].TryGetValue(ID, out internalNode))
+            Dictionary<int, INode> nodes;
+
+            if (_nodesDBdic.TryGetValue(type, out nodes) &&
+                nodes.TryGetValue(ID, out internalNode))
             {
                 node = (T)internalNode;
 
@@ -78,23 +86,13 @@ namespace Svelto.ECS
         {
             var type = typeof(T);
 
-            INode internalNode;
+            INode internalNode; Dictionary<int, INode> nodes;
 
-            if (_nodesDBdic.ContainsKey(type) && 
-                _nodesDBdic[type].TryGetValue(ID, out internalNode))
+            if (_nodesDBdic.TryGetValue(type, out nodes) &&
+                nodes.TryGetValue(ID, out internalNode))
                 return (T)internalNode;
 
             throw new Exception("Node Not Found");
-        }
-
-        public FasterReadOnlyListCast<INode, T> QueryGroupNodes<T>(int groupID) where T : INode
-        {
-            var type = typeof(T);
-
-            if (_nodesDB.ContainsKey(type) == false)
-                return RetrieveEmptyNodeList<T>();
-
-            return new FasterReadOnlyListCast<INode, T>(_nodesDB[type]);
         }
 
         static FasterReadOnlyListCast<INode, T> RetrieveEmptyNodeList<T>() where T : INode

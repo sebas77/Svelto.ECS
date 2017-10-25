@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Svelto.DataStructures;
@@ -32,20 +32,23 @@ namespace Svelto.ECS
             for (int index = 0; index < implementors.Length; index++)
             {
                 var implementor = implementors[index];
-                if (implementor == null) continue;
-
-                if (implementor is IRemoveEntityComponent)
-                    _removingImplementors.Add(implementor as IRemoveEntityComponent);
-                if (implementor is IDisableEntityComponent)
-                    _disablingImplementors.Add(implementor as IDisableEntityComponent);
-                if (implementor is IEnableEntityComponent)
-                    _enablingImplementors.Add(implementor as IEnableEntityComponent);
-
-                var interfaces = implementor.GetType().GetInterfaces();
-
-                for (int iindex = 0; iindex < interfaces.Length; iindex++)
+                if (implementor == null)
+                    Utility.Console.LogWarning(
+                        "Null implementor, are you using a wild GetComponents<Monobehaviour> to fetch it?");
+                else
                 {
-                    _implementorsByType[interfaces[iindex]] = implementor;
+                    if (implementor is IRemoveEntityComponent)
+                        _removingImplementors.Add(implementor as IRemoveEntityComponent);
+                    if (implementor is IDisableEntityComponent)
+                        _disablingImplementors.Add(implementor as IDisableEntityComponent);
+                    if (implementor is IEnableEntityComponent)
+                        _enablingImplementors.Add(implementor as IEnableEntityComponent);
+
+                    var interfaces = implementor.GetType().GetInterfaces();
+                    for (int iindex = 0; iindex < interfaces.Length; iindex++)
+                    {
+                        _implementorsByType[interfaces[iindex]] = implementor;
+                    }
                 }
             }
         }
