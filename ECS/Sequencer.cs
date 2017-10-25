@@ -43,10 +43,4 @@ namespace Svelto.ECS
     {
         always
     }
-
-    public enum DamageCondition
-    {
-        damage,
-        dead
-    }
 }   
