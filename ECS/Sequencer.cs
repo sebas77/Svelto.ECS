@@ -13,9 +13,6 @@ namespace Svelto.ECS
 
     public class Sequencer
     {
-        public Sequencer()
-        {}
-
         public void SetSequence(Steps steps)       
         {
             _steps = steps;
@@ -39,6 +36,7 @@ namespace Svelto.ECS
         Steps     _steps;
     }
 
+    //you can inherit from Condition and add yours
     public enum Condition
     {
         always
