@@ -34,7 +34,7 @@ namespace Svelto.ECS
                 var implementor = implementors[index];
                 if (implementor == null)
                     Utility.Console.LogWarning(
-                        "Null implementor, are you using a wild GetComponents<Monobehaviour> to fetch it?");
+                        "Null implementor, are you using a wild GetComponents<Monobehaviour> to fetch it? ").FastConcat(ToString()));
                 else
                 {
                     if (implementor is IRemoveEntityComponent)
