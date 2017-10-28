@@ -1,7 +1,7 @@
 Svelto Entity Component System for Unity
 =====================================
 
-Real Entity-Component-System for c# and Unity (it can be adapted for other c# platforms too). Enables to write encapsulated, uncoupled, highly-performant, data oriented, cache friendly, multi-threaded, code without pain.
+Real Entity-Component-System for c# and Unity (it can be adapted for other c# platforms too). Enables to write encapsulated, uncoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain.
 
 you can find a working example to learn how to use the framework here:
 
