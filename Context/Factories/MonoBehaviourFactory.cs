@@ -1,3 +1,4 @@
+#if UNITY_5 || UNITY_5_3_OR_NEWER
 #region
 
 using System;
@@ -18,3 +19,4 @@ namespace Svelto.Context
         }
     }
 }
+#endif

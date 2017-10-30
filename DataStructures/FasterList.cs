@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEngine;
 
 namespace Svelto.DataStructures
 {
@@ -766,14 +765,14 @@ namespace Svelto.DataStructures
 
         void AllocateMore()
         {
-            var newList = new T[Mathf.Max(_buffer.Length << 1, MIN_SIZE)];
+            var newList = new T[Math.Max(_buffer.Length << 1, MIN_SIZE)];
             if (_count > 0) _buffer.CopyTo(newList, 0);
             _buffer = newList;
         }
 
         void AllocateMore(int newSize)
         {
-            var oldLength = Mathf.Max(_buffer.Length, MIN_SIZE);
+            var oldLength = Math.Max(_buffer.Length, MIN_SIZE);
 
             while (oldLength < newSize)
                 oldLength <<= 1;

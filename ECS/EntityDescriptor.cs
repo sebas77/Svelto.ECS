@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Svelto.DataStructures;
-#if NETFX_CORE
-using BindingFlags = System.Reflection.BindingFlags;
-#endif
 
 namespace Svelto.ECS
 {
@@ -33,8 +30,11 @@ namespace Svelto.ECS
             {
                 var implementor = implementors[index];
                 if (implementor == null)
+                {
                     Utility.Console.LogWarning(
-                        "Null implementor, are you using a wild GetComponents<Monobehaviour> to fetch it? ").FastConcat(ToString()));
+                "Null implementor, are you using a wild GetComponents<Monobehaviour> to fetch it? "
+                           .FastConcat(ToString()));
+                }
                 else
                 {
                     if (implementor is IRemoveEntityComponent)

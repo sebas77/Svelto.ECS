@@ -1,3 +1,4 @@
+#if UNITY_5 || UNITY_5_3_OR_NEWER
 namespace Svelto.Context
 {
     public interface ICompositionRoot
@@ -7,5 +8,4 @@ namespace Svelto.Context
         void OnContextDestroyed();
     }
 }
-
-
+#endif

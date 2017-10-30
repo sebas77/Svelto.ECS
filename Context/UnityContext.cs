@@ -1,3 +1,4 @@
+#if UNITY_5 || UNITY_5_3_OR_NEWER
 using System.Collections;
 using Svelto.Context;
 using UnityEngine;
@@ -42,3 +43,4 @@ public class UnityContext<T>: UnityContext where T:class, ICompositionRoot, new(
 
     T _applicationRoot;
 }
+#endif

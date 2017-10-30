@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-using UnityEngine;
 
 public static class FastConcatUtility
 {
@@ -101,8 +100,8 @@ namespace Utility
     {
         void Log (string txt, string stack = null, LogType type = LogType.Log);
     }
-
-    public class SlowLogger : ILogger
+#if UNITY_5 || UNITY_5_3_OR_NEWER
+    public class SlowLoggerUnity : ILogger
     {
         public void Log(string txt, string stack = null, LogType type = LogType.Log)
         {
@@ -123,12 +122,45 @@ namespace Utility
             }
         }
     }
+#endif
+    public class SimpleLogger : ILogger
+    {
+        public void Log(string txt, string stack = null, LogType type = LogType.Log)
+        {
+            switch (type)
+            {
+                case LogType.Log:
+                    Console.SystemLog(stack != null ? txt.FastConcat(stack) : txt);
+                    break;
+                case LogType.Exception:
+                    Console.SystemLog("Log of exceptions not supported");
+                    break;
+                case LogType.Warning:
+                    Console.SystemLog(stack != null ? txt.FastConcat(stack) : txt);
+                    break;
+                case LogType.Error:
+                    Console.SystemLog(stack != null ? txt.FastConcat(stack) : txt);
+                    break;
+            }
+        }
+    }
+
+    public enum LogType
+    {
+        Log,
+        Exception,
+        Warning,
+        Error
+    }
 
     public static class Console
     {
         static StringBuilder _stringBuilder = new StringBuilder(256);
-
-        public static ILogger logger = new SlowLogger();
+#if UNITY_5 || UNITY_5_3_OR_NEWER
+        public static ILogger logger = new SlowLoggerUnity();
+#else
+        public static ILogger logger = new SimpleLogger();
+#endif
         public static volatile bool BatchLog = false;
 
         public static void Log(string txt)
@@ -167,17 +199,18 @@ namespace Utility
 
             logger.Log(toPrint, stack, LogType.Error);
         }
-
         public static void LogException(Exception e)
         {
+#if UNITY_5 || UNITY_5_3_OR_NEWER
             LogException(e, null);
+#endif
         }
-
+#if UNITY_5 || UNITY_5_3_OR_NEWER
         public static void LogException(Exception e, UnityEngine.Object obj)
         {
             UnityEngine.Debug.LogException(e, obj);
         }
-
+#endif
         public static void LogWarning(string txt)
         {
             string toPrint;
@@ -217,13 +250,11 @@ namespace Utility
                 toPrint = _stringBuilder.ToString();
             }
 
-#if !UNITY_EDITOR 
+#if !UNITY_EDITOR
             System.Console.WriteLine(toPrint);
 #else
             UnityEngine.Debug.Log(toPrint);
 #endif
-#else
-            UnityEngine.Debug.Log(txt);
 #endif
         }
     }

@@ -1,3 +1,4 @@
+#if UNITY_5 || UNITY_5_3_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -61,3 +62,4 @@ namespace Svelto.Context
         Dictionary<string, GameObject[]>                        _prefabs;
     }
 }
+#endif

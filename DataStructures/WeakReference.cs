@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 /// <span class="code-SummaryComment"><summary></span>
 /// Represents a weak reference, which references an object while still allowing
 /// that object to be reclaimed by garbage collection.
@@ -8,7 +7,7 @@ using System.Runtime.Serialization;
 
 namespace Svelto.DataStructures
 {
-    [Serializable]
+#if !NETFX_CORE
     public class WeakReference<T>
         : WeakReference where T : class
     {
@@ -50,15 +49,31 @@ namespace Svelto.DataStructures
         public WeakReference(T target, bool trackResurrection)
             : base(target, trackResurrection)
         { }
-#if !NETFX_CORE
-        protected WeakReference(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        { }
-#endif
     }
-
-    public static class WeakReferenceUtility
+#else
+    public class WeakReference<T> : System.WeakReference where T : class
     {
-        public static bool IsValid(this WeakReference obj) { return obj != null && obj.IsAlive == true && obj.Target != null;  }
+        public bool IsValid { get { return Target != null && IsAlive == true; } }
+
+        public new T Target
+        {
+            get
+            {
+                return (T)base.Target;
+            }
+            set
+            {
+                base.Target = value;
+            }
+        }
+
+        public WeakReference(T target)
+        : base(target)
+        { }
+
+        public WeakReference(T target, bool trackResurrection)
+            : base(target, trackResurrection)
+        { }
     }
+#endif
 }

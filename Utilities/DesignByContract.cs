@@ -371,7 +371,7 @@ namespace DesignByContract
     /// any DesignByContract exception and other runtime exceptions.
     ///  
     /// </summary>
-    public class DesignByContractException : ApplicationException
+    public class DesignByContractException : Exception
 	{
 		protected DesignByContractException() {}
 		protected DesignByContractException(string message) : base(message) {}

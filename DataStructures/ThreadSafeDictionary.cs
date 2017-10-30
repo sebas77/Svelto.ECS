@@ -1,5 +1,4 @@
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -11,7 +10,7 @@ namespace Svelto.DataStructures
     /// </summary>
     /// <typeparam name = "TKey"></typeparam>
     /// <typeparam name = "TValue"></typeparam>
-    [Serializable]
+
     public class ThreadSafeDictionary<TKey, TValue>
     {
         public ThreadSafeDictionary(int v)
