@@ -159,9 +159,14 @@ namespace Svelto.ECS
         {
             _implementedInterfaceTypes.Clear();
 
+            var type = typeof(IEngine);
+
             for (int index = 0; index < implementedInterfaces.Length; index++)
             {
                 var interfaceType = implementedInterfaces[index];
+
+                if (interfaceType.IsAssignableFrom(type) == false)
+                    continue;
 #if !NETFX_CORE
 
                 if (false == interfaceType.IsGenericType)
@@ -174,7 +179,7 @@ namespace Svelto.ECS
 
                 var genericTypeDefinition = interfaceType.GetGenericTypeDefinition();
 
-                _implementedInterfaceTypes[genericTypeDefinition] = interfaceType.GetGenericArguments();
+                _implementedInterfaceTypes.Add(genericTypeDefinition, interfaceType.GetGenericArguments());
             }
         }
 
