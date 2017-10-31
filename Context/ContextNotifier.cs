@@ -5,7 +5,7 @@ using WeakReferenceD = Svelto.DataStructures.WeakReference<Svelto.Context.IWaitF
 
 namespace Svelto.Context
 {
-    class ContextNotifier : IContextNotifer
+    public class ContextNotifier : IContextNotifer
     {
         public ContextNotifier()
         {
