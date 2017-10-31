@@ -165,7 +165,7 @@ namespace Svelto.ECS
             {
                 var interfaceType = implementedInterfaces[index];
 
-                if (interfaceType.IsAssignableFrom(type) == false)
+                if (type.IsAssignableFrom(interfaceType) == false)
                     continue;
 #if !NETFX_CORE
 
