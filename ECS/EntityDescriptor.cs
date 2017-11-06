@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Svelto.DataStructures;
+#if NETFX_CORE
+using BindingFlags = System.Reflection.BindingFlags;
+#endif
 
 namespace Svelto.ECS
 {

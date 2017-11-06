@@ -1,4 +1,4 @@
-using BetterWeakEvents;
+using Svelto.WeakEvents;
 
 namespace Svelto.ECS
 {
