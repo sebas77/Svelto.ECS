@@ -17,7 +17,7 @@ namespace Svelto.WeakEvents
         public static WeakEvent operator-(WeakEvent c1, Action x)
         {
             DesignByContract.Check.Require(x != null);
-            c1.Remove(x.Target, x.Method);
+            c1.Remove(x.Target, x.GetMethodInfoEx());
 
             return c1;
         }
@@ -66,7 +66,7 @@ namespace Svelto.WeakEvents
         public static WeakEvent<T1> operator-(WeakEvent<T1> c1, Action<T1> x)
         {
             DesignByContract.Check.Require(x != null);
-            c1.Remove(x.Target, x.Method);
+            c1.Remove(x.Target, x.GetMethodInfoEx());
 
             return c1;
         }
@@ -119,7 +119,7 @@ namespace Svelto.WeakEvents
         public static WeakEvent<T1, T2> operator-(WeakEvent<T1, T2> c1, Action<T1, T2> x)
         {
             DesignByContract.Check.Require(x != null);
-            c1.Remove(x.Target, x.Method);
+            c1.Remove(x.Target, x.GetMethodInfoEx());
 
             return c1;
         }

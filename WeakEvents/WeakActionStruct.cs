@@ -10,7 +10,7 @@ namespace Svelto.WeakEvents
     {
         public WeakActionStruct(Action<T1, T2> listener)
         {
-            WeakActionStructUtility.Init(listener.Target, listener.Method, out _objectRef, out _method);
+            WeakActionStructUtility.Init(listener.Target, listener.GetMethodInfoEx(), out _objectRef, out _method);
         }
 
         public bool Invoke(object[] args)
@@ -43,7 +43,7 @@ namespace Svelto.WeakEvents
     {
         public WeakActionStruct(Action<T> listener)
         {
-            WeakActionStructUtility.Init(listener.Target, listener.Method, 
+            WeakActionStructUtility.Init(listener.Target, listener.GetMethodInfoEx(), 
                 out _objectRef, out _method);
         }
 
@@ -77,7 +77,8 @@ namespace Svelto.WeakEvents
     {
         public WeakActionStruct(Action listener)
         {
-            WeakActionStructUtility.Init(listener.Target, listener.Method, out _objectRef, out _method);
+            WeakActionStructUtility.Init(listener.Target, listener.GetMethodInfoEx(), 
+                out _objectRef, out _method);
         }
 
         public bool Invoke()
@@ -121,7 +122,7 @@ namespace Svelto.WeakEvents
             if(attributes.Length != 0)
                 throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #else
-            if (method.DeclaringType.GetCustomAttributes(typeof (CompilerGeneratedAttribute), false).Length != 0)
+            if (method.DeclaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length != 0)
                 throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
 #endif
 #endif

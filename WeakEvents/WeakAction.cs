@@ -7,11 +7,7 @@ namespace Svelto.WeakEvents
     public class WeakAction<T1, T2> : WeakAction
     {
         public WeakAction(Action<T1, T2> listener)
-#if NETFX_CORE
-        : base(listener.Target, listener.GetMethodInfo())
-#else
-            : base(listener.Target, listener.Method)
-#endif
+            : base(listener.Target, listener.GetMethodInfoEx())
         {}
 
         public void Invoke(T1 data1, T2 data2)
@@ -28,11 +24,7 @@ namespace Svelto.WeakEvents
     public class WeakAction<T> : WeakActionBase
     {
         public WeakAction(Action<T> listener)
-#if NETFX_CORE
-        : base(listener.Target, listener.GetMethodInfo())
-#else
-            : base(listener.Target, listener.Method)
-#endif
+            : base(listener.Target, listener.GetMethodInfoEx())
         {}
 
         public void Invoke(T data)
@@ -70,11 +62,7 @@ namespace Svelto.WeakEvents
         }
 
         protected WeakActionBase(Action listener)
-#if NETFX_CORE
-        : this(listener.Target, listener.GetMethodInfo())
-#else
-            : this(listener.Target, listener.Method)
-#endif
+            : this(listener.Target, listener.GetMethodInfoEx())
         {}
 
         protected WeakActionBase(object listener, MethodInfo method)

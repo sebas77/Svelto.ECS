@@ -1,5 +1,9 @@
 using System;
+#if NETFX_CORE
+using Windows.System.Diagnostics;
+#else
 using System.Diagnostics;
+#endif
 using System.Text;
 
 namespace Utility
