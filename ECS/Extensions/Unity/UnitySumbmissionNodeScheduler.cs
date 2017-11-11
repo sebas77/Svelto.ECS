@@ -5,6 +5,14 @@ using UnityEngine;
 
 namespace Svelto.ECS.NodeSchedulers
 {
+    //The NodeSubmissionScheduler has been introduced to make
+    //the node submission logic platform indipendent.
+    //Please don't be tempted to create your own submission to 
+    //adapt to your game level code design. For example,
+    //you may be tempted to write a submission logic to submit
+    //the nodes immediatly just because convenient for your game
+    //logic. This is not how it works.
+    
     public class UnitySumbmissionNodeScheduler : NodeSubmissionScheduler
     {
         public UnitySumbmissionNodeScheduler()

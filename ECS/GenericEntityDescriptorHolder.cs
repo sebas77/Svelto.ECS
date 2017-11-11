@@ -3,7 +3,8 @@ using System;
 
 namespace Svelto.ECS
 {
-    public class GenericEntityDescriptorHolder<T, I>: UnityEngine.MonoBehaviour, IEntityDescriptorHolder where T:EntityDescriptor
+    public class GenericEntityDescriptorHolder<T, I>: 
+        UnityEngine.MonoBehaviour, IEntityDescriptorHolder where T:EntityDescriptor
     {
         public EntityDescriptor BuildDescriptorType(object[] externalImplentors)
         {

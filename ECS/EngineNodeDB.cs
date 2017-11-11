@@ -6,104 +6,102 @@ namespace Svelto.ECS
 {
     public class EngineNodeDB : IEngineNodeDB
     {
-        internal EngineNodeDB(  Dictionary<Type, FasterList<INode>> nodesDB, 
-                                Dictionary<Type, Dictionary<int, INode>> nodesDBdic,
-                                Dictionary<Type, FasterList<INode>> metaNodesDB)
+        internal EngineNodeDB(  Dictionary<Type, ITypeSafeList> nodesDB, 
+                                Dictionary<Type, ITypeSafeDictionary> nodesDBdic,
+                                Dictionary<Type, ITypeSafeList> metaNodesDB)
         {
             _nodesDB = nodesDB;
             _nodesDBdic = nodesDBdic;
             _metaNodesDB = metaNodesDB;
         }
 
-        public FasterReadOnlyListCast<INode, T> QueryNodes<T>() where T:INode
+        public FasterReadOnlyList<T> QueryNodes<T>()
         {
             var type = typeof(T);
 
-            FasterList<INode> nodes;
+            ITypeSafeList nodes;
 
             if (_nodesDB.TryGetValue(type, out nodes) == false)
                 return RetrieveEmptyNodeList<T>();
 
-            return new FasterReadOnlyListCast<INode, T>(nodes);
+            return new FasterReadOnlyList<T>((FasterList<T>)nodes);
         }
 
-        public ReadOnlyDictionary<int, INode> QueryIndexableNodes<T>() where T:INode
+        public ReadOnlyDictionary<int, T> QueryIndexableNodes<T>()
         {
             var type = typeof(T);
 
-            Dictionary<int, INode> nodes;
+            ITypeSafeDictionary nodes;
 
             if (_nodesDBdic.TryGetValue(type, out nodes) == false)
-                return _defaultEmptyNodeDict;
+                return TypeSafeDictionary<int, T>.Default;
 
-            return new ReadOnlyDictionary<int, INode>(nodes);
+            return new ReadOnlyDictionary<int, T>(nodes as Dictionary<int, T>);
         }
 
-        public T QueryMetaNode<T>(int metaEntityID) where T : INode 
+        public T QueryMetaNode<T>(int metaEntityID)
         {
             return QueryNode<T>(metaEntityID);
         }
 
-        public bool TryQueryMetaNode<T>(int metaEntityID, out T node) where T : INode
+        public bool TryQueryMetaNode<T>(int metaEntityID, out T node)
         {
             return TryQueryNode(metaEntityID, out node);
         }
 
-        public FasterReadOnlyListCast<INode, T> QueryMetaNodes<T>() where T : INode
+        public FasterReadOnlyList<T> QueryMetaNodes<T>() 
         {
             var type = typeof(T);
 
-            FasterList<INode> nodes;
+            ITypeSafeList nodes;
 
             if (_metaNodesDB.TryGetValue(type, out nodes) == false)
                 return RetrieveEmptyNodeList<T>();
 
-            return new FasterReadOnlyListCast<INode, T>(nodes);
+            return new FasterReadOnlyList<T>((FasterList<T>)nodes);
         }
 
-        public bool TryQueryNode<T>(int ID, out T node) where T:INode
+        public bool TryQueryNode<T>(int ID, out T node)
         {
             var type = typeof(T);
 
-            INode internalNode;
+            T internalNode;
 
-            Dictionary<int, INode> nodes;
+            ITypeSafeDictionary nodes;
 
             if (_nodesDBdic.TryGetValue(type, out nodes) &&
-                nodes.TryGetValue(ID, out internalNode))
+                (nodes as Dictionary<int, T>).TryGetValue(ID, out internalNode))
             {
-                node = (T)internalNode;
+                node = internalNode;
 
                 return true;
             }
-
+            
             node = default(T);
 
             return false;
         }
 
-        public T QueryNode<T>(int ID) where T:INode
+        public T QueryNode<T>(int ID)
         {
             var type = typeof(T);
 
-            INode internalNode; Dictionary<int, INode> nodes;
+            T internalNode; ITypeSafeDictionary nodes;
 
             if (_nodesDBdic.TryGetValue(type, out nodes) &&
-                nodes.TryGetValue(ID, out internalNode))
+                (nodes as Dictionary<int, T>).TryGetValue(ID, out internalNode))
                 return (T)internalNode;
 
             throw new Exception("Node Not Found");
         }
 
-        static FasterReadOnlyListCast<INode, T> RetrieveEmptyNodeList<T>() where T : INode
+        static FasterReadOnlyList<T> RetrieveEmptyNodeList<T>()
         {
-            return FasterReadOnlyListCast<INode, T>.DefaultList;
+            return FasterReadOnlyList<T>.DefaultList;
         }
 
-        readonly Dictionary<Type, FasterList<INode>>      _nodesDB;
-        readonly Dictionary<Type, Dictionary<int, INode>> _nodesDBdic;
-        readonly Dictionary<Type, FasterList<INode>>      _metaNodesDB;
-
-        readonly ReadOnlyDictionary<int, INode> _defaultEmptyNodeDict = new ReadOnlyDictionary<int, INode>(new Dictionary<int, INode>());
+        readonly Dictionary<Type, ITypeSafeList>              _nodesDB;
+        readonly Dictionary<Type, ITypeSafeDictionary>        _nodesDBdic;
+        readonly Dictionary<Type, ITypeSafeList>              _metaNodesDB;
     }
 }

@@ -11,22 +11,25 @@ namespace Utility
     public static class Console
     {
         static StringBuilder _stringBuilder = new StringBuilder(256);
-#if UNITY_5_3_OR_NEWER || UNITY_5
-        public static ILogger logger = new SlowLoggerUnity();
-#else
-        public static ILogger logger = new SimpleLogger();
-#endif
+
+        public static ILogger logger;
+
         public static volatile bool BatchLog = false;
 
         //Hack, have to find the right solution
-        public static Action<Exception, object, string, string> onException;
+        public static Action<Exception, string, string> onException;
 
         static Console()
         {
-            onException = (e, obj, message, stack) =>
-            {
-                UnityEngine.Debug.LogException(e, (UnityEngine.Object)obj);
-            };
+#if UNITY_5_3_OR_NEWER || UNITY_5
+            logger = new SlowLoggerUnity();
+            onException = (e, message, stack) =>
+                {
+                    UnityEngine.Debug.LogException(e, null);
+                };
+#else
+            logger = new SimpleLogger();
+#endif
         }
 
         public static void Log(string txt)
@@ -68,11 +71,6 @@ namespace Utility
 
         public static void LogException(Exception e)
         {
-            LogException(e, null);
-        }
-
-        public static void LogException(Exception e, UnityEngine.Object obj)
-        {
             string toPrint;
             string stackTrace;
 
@@ -96,7 +94,8 @@ namespace Utility
                 toPrint = _stringBuilder.ToString();
             }
 
-            onException(e, obj, toPrint, stackTrace);
+            if (onException != null)
+                onException(e, toPrint, stackTrace);
         }
 
         public static void LogWarning(string txt)
@@ -142,8 +141,12 @@ namespace Utility
                 toPrint = _stringBuilder.ToString();
             }
 
-#if !UNITY_EDITOR && !NETFX_CORE
+#if !UNITY_EDITOR
+#if !NETFX_CORE
             System.Console.WriteLine(toPrint);
+#else
+            //find a way to adopt a logger externally, if this is still needed
+#endif
 #else
             UnityEngine.Debug.Log(toPrint);
 #endif

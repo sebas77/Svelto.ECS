@@ -1,3 +1,4 @@
+#if UNITY_5_3_OR_NEWER || UNITY_5
 using UnityEngine;
 
 namespace Svelto.Factories
@@ -10,3 +11,4 @@ namespace Svelto.Factories
         GameObject Build(GameObject prefab);
     }
 }
+#endif

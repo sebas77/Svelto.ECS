@@ -1,3 +1,4 @@
+using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Internal
@@ -14,14 +15,14 @@ namespace Svelto.ECS.Internal
 
     public interface IActivableNodeEngine : IEngine
     {
-        void Enable(INode obj);
-        void Disable(INode obj);
+        void Enable(ITypeSafeList nodes);
+        void Disable(ITypeSafeList nodes);
     }
 
     public interface INodeEngine : IEngine
     {
-        void Add(INode obj);
-        void Remove(INode obj);
+        void Add(ITypeSafeList nodes);
+        void Remove(ITypeSafeList nodes);
     }
 
     public interface INodesEngine : INodeEngine
@@ -56,7 +57,7 @@ namespace Svelto.ECS
     /// usually the ID is the owner of the nodes of that
     /// group
     /// </summary>
-    public interface IGroupedStructNodesEngine<T> : IGroupedStructNodesEngine where T:struct, IGroupedStructNodeWithID
+    public interface IGroupedStructNodesEngine<T> : IGroupedStructNodesEngine where T:struct, IGroupedNode
     { }
 }
 

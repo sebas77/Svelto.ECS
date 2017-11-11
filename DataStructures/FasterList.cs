@@ -466,10 +466,7 @@ namespace Svelto.DataStructures
         readonly FasterList<T> _list;
     }
 
-    public interface IFasterList
-    {}
-
-    public class FasterList<T> : IList<T>, IFasterList
+    public class FasterList<T> : IList<T>
     {
         const int MIN_SIZE = 4;
 
@@ -562,7 +559,7 @@ namespace Svelto.DataStructures
             while (items.MoveNext())
                 _buffer[_count++] = items.Current;
         }
-
+        
         public void AddRange(ICollection<T> items)
         {
             AddRange(items.GetEnumerator(), items.Count);
@@ -803,5 +800,18 @@ namespace Svelto.DataStructures
 
         T[] _buffer;
         int _count;
+
+        public static class NoVirt
+        {
+            public static int Count(FasterList<T> fasterList)
+            {
+                return fasterList._count;
+            }
+
+            public static T[] ToArrayFast(FasterList<T> fasterList)
+            {
+                return fasterList._buffer;
+            }
+        }
     }
 }

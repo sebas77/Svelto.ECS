@@ -5,7 +5,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public class StructNodes<T> where T:struct, IStructNodeWithID
+    public sealed class StructNodes<T> where T:struct, IStructNodeWithID
     {
         public T[] GetList(out int numberOfItems)
         {
@@ -15,7 +15,7 @@ namespace Svelto.ECS
 
         public StructNodes(SharedStructNodeLists container)
         {
-            _internalList = container.GetList<T>();
+            _internalList = SharedStructNodeLists.NoVirt.GetList<T>(container);
         }
 
         public void Add(T node)
@@ -28,19 +28,20 @@ namespace Svelto.ECS
         readonly FasterList<T> _internalList;
     }
 
-    public class StructGroupNodes<T>
-        where T : struct, IGroupedStructNodeWithID
+    public struct StructGroupNodes<T>
+        where T : struct, IStructNodeWithID
     {
         public StructGroupNodes(SharedGroupedStructNodesLists container)
         {
             _container = container;
+            indices = new Dictionary<int, int>();
         }
 
         public void Add(int groupID, T node)
         {
             T convert = (T)node;
 
-            var fasterList = (_container.GetList<T>(groupID) as FasterList<T>);
+            var fasterList = (SharedGroupedStructNodesLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
             indices[node.ID] = fasterList.Count;
 
             fasterList.Add(convert);
@@ -48,7 +49,7 @@ namespace Svelto.ECS
 
         public void Remove(int groupID, T node)
         {
-            var fasterList = (_container.GetList<T>(groupID) as FasterList<T>);
+            var fasterList = (SharedGroupedStructNodesLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
             var index = indices[node.ID];
             indices.Remove(node.ID);
 
@@ -58,77 +59,83 @@ namespace Svelto.ECS
 
         public T[] GetList(int groupID, out int numberOfItems)
         {
-            var fasterList = (_container.GetList<T>(groupID) as FasterList<T>);
-            numberOfItems = fasterList.Count;
-            return fasterList.ToArrayFast();
+            var fasterList = (SharedGroupedStructNodesLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
+            numberOfItems = FasterList<T>.NoVirt.Count(fasterList);
+            return FasterList<T>.NoVirt.ToArrayFast(fasterList);
         }
 
         readonly SharedGroupedStructNodesLists  _container;
-        readonly Dictionary<int, int> indices = new Dictionary<int, int>();
+        readonly Dictionary<int, int> indices;
     }
 
     public class SharedStructNodeLists
     {
-        readonly Dictionary<Type, IFasterList> _collection;
-
         internal SharedStructNodeLists()
         {
-            _collection = new Dictionary<Type, IFasterList>();
+            _collection = new Dictionary<Type, ITypeSafeList>();
         }
 
-        internal FasterList<T> GetList<T>() where T:struct
+        internal static class NoVirt
         {
-            IFasterList list;
-            if (_collection.TryGetValue(typeof (T), out list))
+            internal static FasterList<T> GetList<T>(SharedStructNodeLists obj) where T : struct
             {
-                return list as FasterList<T>;
+                ITypeSafeList list;
+                if (obj._collection.TryGetValue(typeof(T), out list))
+                {
+                    return list as FasterList<T>;
+                }
+
+                list = new TypeSafeFasterList<T>();
+
+                obj._collection.Add(typeof(T), list);
+
+                return (FasterList<T>)list;
             }
-
-            list = new FasterList<T>();
-
-            _collection.Add(typeof (T), list);
-
-            return (FasterList<T>) list;
         }
+
+        readonly Dictionary<Type, ITypeSafeList> _collection;
     }
 
     public class SharedGroupedStructNodesLists
     {
         internal SharedGroupedStructNodesLists()
         {
-            _collection = new Dictionary<Type, Dictionary<int, IFasterList>>();
+            _collection = new Dictionary<Type, Dictionary<int, ITypeSafeList>>();
         }
 
-        internal IFasterList GetList<T>(int groupID) where T : struct
+        internal static class NoVirt
         {
-            Dictionary<int, IFasterList> dic = GetGroup<T>();
-            IFasterList localList;
-
-            if (dic.TryGetValue(groupID, out localList))
-                return localList;
-
-            localList = new FasterList<T>();
-            dic.Add(groupID, localList);
-
-            return localList;
-        }
-
-        internal Dictionary<int, IFasterList> GetGroup<T>() where T : struct
-        {
-            Dictionary<int, IFasterList> dic;
-
-            if (_collection.TryGetValue(typeof(T), out dic))
+            internal static ITypeSafeList GetList<T>(SharedGroupedStructNodesLists list, int groupID) where T : struct
             {
-                return dic;
+                Dictionary<int, ITypeSafeList> dic = GetGroup<T>(list);
+                ITypeSafeList localList;
+
+                if (dic.TryGetValue(groupID, out localList))
+                    return localList;
+
+                localList = new TypeSafeFasterList<T>();
+                dic.Add(groupID, localList);
+
+                return localList;
             }
 
-            dic = new Dictionary<int, IFasterList>();
+            internal static Dictionary<int, ITypeSafeList> GetGroup<T>(SharedGroupedStructNodesLists list) where T : struct
+            {
+                Dictionary<int, ITypeSafeList> dic;
 
-            _collection.Add(typeof(T), dic);
+                if (list._collection.TryGetValue(typeof(T), out dic))
+                {
+                    return dic;
+                }
 
-            return dic;
+                dic = new Dictionary<int, ITypeSafeList>();
+
+                list._collection.Add(typeof(T), dic);
+
+                return dic;
+            }
         }
 
-        readonly Dictionary<Type, Dictionary<int, IFasterList>> _collection;
+        readonly Dictionary<Type, Dictionary<int, ITypeSafeList>> _collection;
     }
 }

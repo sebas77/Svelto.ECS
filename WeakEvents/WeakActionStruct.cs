@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Svelto.Utilities;
 
 //careful, you must handle the destruction of the GCHandles!
 namespace Svelto.WeakEvents
@@ -116,15 +117,8 @@ namespace Svelto.WeakEvents
             methodOut = method;
 
 #if DEBUG && !PROFILER
-#if NETFX_CORE
-            Method = listener.GetMethodInfo();
-            var attributes = (CompilerGeneratedAttribute[])Method.GetType().GetTypeInfo().GetCustomAttributes(typeof(CompilerGeneratedAttribute), false);
-            if(attributes.Length != 0)
+            if (method.IsCompilerGenerated() == true)
                 throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
-#else
-            if (method.DeclaringType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Length != 0)
-                throw new ArgumentException("Cannot create weak event to anonymous method with closure.");
-#endif
 #endif
         }
 

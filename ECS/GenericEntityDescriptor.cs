@@ -140,6 +140,25 @@ namespace Svelto.ECS
 
         static readonly INodeBuilder[] _nodesToBuild;
     }
+    
+    public class GenericMixedEntityDescriptor<T, U> : EntityDescriptor
+        where T : INodeBuilder, new()
+        where U : INodeBuilder, new()
+    {
+        static GenericMixedEntityDescriptor()
+        {
+            _nodesToBuild = new INodeBuilder[]
+            {
+                new T(),
+                new U(),
+            };
+        }
+        public GenericMixedEntityDescriptor(params object[] componentsImplementor) :
+            base(_nodesToBuild, componentsImplementor)
+        { }
+
+        static readonly INodeBuilder[] _nodesToBuild;
+    }
 
     public class GenericMixedEntityDescriptor<T, U, V> : EntityDescriptor
         where T : INodeBuilder, new()
