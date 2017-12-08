@@ -8,9 +8,75 @@ namespace Svelto.ECS
 {
     public class EntityDescriptor
     {
-        protected EntityDescriptor()
-        {}
+        public void AddImplementors(params object[] componentsImplementor)
+        {
+            ProcessImplementors(componentsImplementor);
+        }
+        
+        public void AddNodes(params INodeBuilder[] nodesWithID)
+        {
+            _nodesToBuild.AddRange(nodesWithID);
+        }
 
+        internal void BuildGroupedNodes
+            (int entityID, int groupID, 
+             Dictionary<int, Dictionary<Type, ITypeSafeList>> groupNodesByType, 
+             ref BuildNodeCallbackStruct callBackstruct)
+        {
+            for (int index = 0; index < _nodesToBuild.Count; index++)
+            {
+                var nodeBuilder = _nodesToBuild[index];
+                var nodeType = nodeBuilder.GetNodeType();
+                
+                Dictionary<Type, ITypeSafeList> groupedNodesTyped;
+                  
+                if (groupNodesByType.TryGetValue(groupID, out groupedNodesTyped) == false)
+                {
+                    groupedNodesTyped = new Dictionary<Type, ITypeSafeList>(); 
+                      
+                    groupNodesByType.Add(groupID, groupedNodesTyped);
+                };
+                
+                BuildAndFillNode(entityID, groupedNodesTyped, nodeType, nodeBuilder);
+            }
+            
+            SetupImplementors(ref callBackstruct, entityID);
+        }
+
+        internal void BuildNodes(int entityID, 
+             Dictionary<Type, ITypeSafeList> nodesByType, 
+             ref BuildNodeCallbackStruct callBackstruct)
+        {
+            int count = _nodesToBuild.Count;
+            
+            for (int index = 0; index < count; index++)
+            {
+                var nodeBuilder = _nodesToBuild[index];
+                var nodeType = nodeBuilder.GetNodeType();
+                
+                BuildAndFillNode(entityID, nodesByType, nodeType, nodeBuilder);
+            }
+            
+            SetupImplementors(ref callBackstruct, entityID);
+        }
+        
+        void BuildAndFillNode(int entityID, Dictionary<Type, ITypeSafeList> groupedNodesTyped, Type nodeType, INodeBuilder nodeBuilder)
+        {
+            ITypeSafeList nodes;
+
+            var nodesPoolWillBeCreated = groupedNodesTyped.TryGetValue(nodeType, out nodes) == false;
+            var nodeObjectToFill = nodeBuilder.BuildNodeAndAddToList(ref nodes, entityID);
+
+            if (nodesPoolWillBeCreated)
+                groupedNodesTyped.Add(nodeType, nodes);
+
+            //the semantic of this code must still be improved
+            //but only classes can be filled, so I am aware
+            //it's a NodeWithID
+            if (nodeObjectToFill != null)
+                FillNode(nodeObjectToFill as NodeWithID);
+        }
+        
         /// <summary>
         /// if you want to avoid allocation in run-time, you can prebuild
         /// EntityDescriptors and use them to build entities at different
@@ -24,84 +90,6 @@ namespace Svelto.ECS
                                    params object[] componentsImplementor):this(nodesToBuild)
         {
             ProcessImplementors(componentsImplementor);
-        }
-
-        public void AddImplementors(params object[] componentsImplementor)
-        {
-            ProcessImplementors(componentsImplementor);
-        }
-        
-        public void AddNodes(params INodeBuilder[] nodesWithID)
-        {
-            _nodesToBuild.AddRange(nodesWithID);
-        }
-
-        internal void BuildGroupedNodes
-            (int entityID, int groupID, 
-             Dictionary<Type, Dictionary<int, ITypeSafeList>> groupNodes, 
-             ref BuildNodeCallbackStruct callBackstruct)
-        {
-            for (int index = 0; index < _nodesToBuild.Count; index++)
-            {
-                var nodeBuilder = _nodesToBuild[index];
-                var nodeType = nodeBuilder.GetNodeType();
-                
-                Dictionary<int, ITypeSafeList> groupedNodesTyped;
-                  
-                if (groupNodes.TryGetValue(nodeType, out groupedNodesTyped) == false)
-                {
-                    groupedNodesTyped = new Dictionary<int, ITypeSafeList>(); 
-                      
-                    groupNodes.Add(nodeType, groupedNodesTyped);
-                };
-                  
-                ITypeSafeList nodes;
-
-                var mustAdd = groupedNodesTyped.TryGetValue(groupID, out nodes) == false;
-
-                var node = nodeBuilder.BuildAndAddToList(ref nodes, entityID);
-
-                if (mustAdd)
-                    groupedNodesTyped[groupID] = nodes;
-
-                if (node != null && nodeBuilder.reflects != FillNodeMode.None)
-                {
-                    node = FillNode(node, nodeBuilder.reflects);
-                    
-                    SetupImplementors(ref callBackstruct, nodes);
-                }
-
-            /*    var groupNode = node as IGroupedNode;
-                if (groupNode != null)
-                    groupNode.groupID = groupID;*/
-            }
-        }
-
-        internal void BuildNodes(int entityID, 
-             Dictionary<Type, ITypeSafeList> nodesToAdd, 
-             ref BuildNodeCallbackStruct callBackstruct)
-        {
-            for (int index = 0; index < _nodesToBuild.Count; index++)
-            {
-                var nodeBuilder = _nodesToBuild[index];
-                var nodeType = nodeBuilder.GetNodeType();
-
-                ITypeSafeList nodes;
-
-                var mustAdd = nodesToAdd.TryGetValue(nodeType, out nodes) == false;
-                 
-                var node = nodeBuilder.BuildAndAddToList(ref nodes, entityID);
-
-                if (mustAdd)
-                    nodesToAdd[nodeType] = nodes;
-
-                if (node != null && nodeBuilder.reflects != FillNodeMode.None)
-                {
-                    FillNode(node, nodeBuilder.reflects);
-                    
-                    SetupImplementors(ref callBackstruct, nodes);
-                }
-            }
         }
         
         void ProcessImplementors(object[] implementors)
@@ -144,30 +132,41 @@ namespace Svelto.ECS
 
         void SetupImplementors(
             ref BuildNodeCallbackStruct callBackstruct, 
-            ITypeSafeList nodes)
+            int entityID)
         {
-            var RemoveEntity = callBackstruct._internalRemove;
-            var DisableEntity = callBackstruct._internalDisable;
-            var EnableEntity = callBackstruct._internalEnable;
+            var RemoveEntity = callBackstruct.internalRemove;
+            var DisableEntity = callBackstruct.internalDisable;
+            var EnableEntity = callBackstruct.internalEnable;
             
-            Action removeEntityAction = () => { RemoveEntity(nodes); nodes.Clear(); };
-            Action disableEntityAction = () => DisableEntity(nodes);
-            Action enableEntityAction = () => EnableEntity(nodes);
-
             int removingImplementorsCount = _removingImplementors.Count;
-            for (int index = 0; index < removingImplementorsCount; index++)
-                _removingImplementors[index].Target.removeEntity = removeEntityAction;
-            
+            if (removingImplementorsCount > 0)
+            {
+                Action removeEntityAction = () => RemoveEntity(_nodesToBuild, entityID);
+                
+                for (int index = 0; index < removingImplementorsCount; index++)
+                    _removingImplementors[index].Target.removeEntity = removeEntityAction;
+            }
+
             int disablingImplementorsCount = _disablingImplementors.Count;
-            for (int index = 0; index < disablingImplementorsCount; index++)
-                _disablingImplementors[index].Target.disableEntity = disableEntityAction;
-            
+            if (disablingImplementorsCount > 0)
+            {
+                Action disableEntityAction = () => DisableEntity(_nodesToBuild, entityID);
+                
+                for (int index = 0; index < disablingImplementorsCount; index++)
+                    _disablingImplementors[index].Target.disableEntity = disableEntityAction;
+            }
+
             int enablingImplementorsCount = _enablingImplementors.Count;
-            for (int index = 0; index < enablingImplementorsCount; index++)
-                _enablingImplementors[index].Target.enableEntity = enableEntityAction;
+            if (enablingImplementorsCount > 0)
+            {
+                Action enableEntityAction = () => EnableEntity(_nodesToBuild, entityID);
+                
+                for (int index = 0; index < enablingImplementorsCount; index++)
+                    _enablingImplementors[index].Target.enableEntity = enableEntityAction;
+            }
         }
 
-        TNode FillNode<TNode>(TNode node, FillNodeMode mode) where TNode : INode
+        void FillNode<TNode>(TNode node) where TNode : NodeWithID
         {
             var fields = node.GetType().GetFields(BindingFlags.Public |
                                                   BindingFlags.Instance);
@@ -180,15 +179,12 @@ namespace Svelto.ECS
                 
                 if (_implementorsByType.TryGetValue(fieldType, out component) == false)
                 {
-                    if (mode == FillNodeMode.Strict)
-                    {
                         Exception e =
                             new Exception(NOT_FOUND_EXCEPTION +
                                           field.FieldType.Name + " - Node: " + node.GetType().Name +
                                           " - EntityDescriptor " + this);
 
                         throw e;
-                    }
                 }
                 else
                     field.SetValue(node, component.Target);
@@ -205,10 +201,8 @@ namespace Svelto.ECS
 #endif
 
             }
-
-            return node;
         }
-
+        
         readonly FasterList<DataStructures.WeakReference<IDisableEntityComponent>> _disablingImplementors = new FasterList<DataStructures.WeakReference<IDisableEntityComponent>>();
         readonly FasterList<DataStructures.WeakReference<IRemoveEntityComponent>>  _removingImplementors = new FasterList<DataStructures.WeakReference<IRemoveEntityComponent>>();
         readonly FasterList<DataStructures.WeakReference<IEnableEntityComponent>>  _enablingImplementors = new FasterList<DataStructures.WeakReference<IEnableEntityComponent>>();
@@ -217,8 +211,8 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER        
         readonly Dictionary<Type, int>  _implementorCounterByType = new Dictionary<Type, int>();
 #endif        
-        readonly FasterList<INodeBuilder> _nodesToBuild;       
-
+        readonly FasterList<INodeBuilder> _nodesToBuild;
+      
         const string DUPLICATE_IMPLEMENTOR_ERROR = "the same component is implemented with more than one implementor. This is considered an error and MUST be fixed. ";
         const string NULL_IMPLEMENTOR_ERROR = "Null implementor, are you using a wild GetComponents<Monobehaviour> to fetch it? ";
         const string NOT_FOUND_EXCEPTION = "Svelto.ECS: Implementor not found for a Node. Implementor Type: ";

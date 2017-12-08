@@ -1,16 +1,18 @@
 namespace Svelto.ECS
 {
     public interface INode
-    {}
-
-    public interface IStructNodeWithID : INode
     {
-        int ID { get; set; }
+        int ID { get; }
     }
-
+    
     public interface IGroupedNode
     {
         int groupID { get; set; }
+    }
+    
+    public interface IStructNodeWithID : INode
+    {
+        new int ID { get; set; }
     }
 
     public class NodeWithID: INode

@@ -1,28 +1,17 @@
-using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public abstract class SingleNodeEngine<T> : INodeEngine where T:class
+    public abstract class SingleNodeEngine<T> : INodeEngine where T:NodeWithID
     {
-        public void Add(ITypeSafeList nodes)
+        public void Add(NodeWithID node)
         {
-            var strongTypeNodes = (FasterList<T>)nodes;
-
-            for (int i = 0; i < strongTypeNodes.Count; i++)
-            {
-                Add(strongTypeNodes[i]); //when byref returns will be vailable, this should be passed by reference, not copy!
-            }
+            Add((T)node); //when byref returns will be vailable, this should be passed by reference, not copy!
         }
 
-        public void Remove(ITypeSafeList nodes)
+        public void Remove(NodeWithID node)
         {
-            /*
-            T node;
-            
-            nodeWrapper.GetNode(out node);
-            
-            Remove(node);*/
+            Remove((T)node);
         }
 
         protected abstract void Add(T node);

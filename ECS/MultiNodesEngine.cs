@@ -3,102 +3,83 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Internal
 {
-    public abstract class MultiNodesEngine<T> where T:class
+    public abstract class MultiNodesEngine<T>:INodeEngine where T:NodeWithID
     {
-        protected abstract void AddNode(T node);
-        protected abstract void RemoveNode(T node);
+        protected abstract void Add(T node);
+        protected abstract void Remove(T node);
+        
+        public virtual void Add(NodeWithID node)
+        {
+            Add((T) node);
+        }
+
+        public virtual void Remove(NodeWithID node)
+        {
+            Remove((T) node);
+        }
     }
 }
 
 namespace Svelto.ECS
 {
-    public abstract class MultiNodesEngine : INodesEngine
+    public abstract class MultiNodesEngine<T, U> : MultiNodesEngine<T>
+        where T:NodeWithID where U:NodeWithID
     {
-        public abstract System.Type[] AcceptedNodes();
+        protected abstract void Add(U node);
+        protected abstract void Remove(U node);
 
-        public abstract void Add(ITypeSafeList nodeWrapper);
-        public abstract void Remove(ITypeSafeList nodeWrapper);
-    }
-
-    public abstract class MultiNodesEngine<T, U> : MultiNodesEngine<T>, 
-        INodeEngine where T:class where U:class
-    {
-        protected abstract void AddNode(U node);
-        protected abstract void RemoveNode(U node);
-
-        public virtual void Add(ITypeSafeList nodes)
+        public override void Add(NodeWithID node)
         {
-            if (nodes is FasterList<U>)
+            var castedNode = node as U;
+            if (castedNode != null)
             {
-                var strongTypeNodes = (FasterList<U>)nodes;
-
-                for (int i = 0; i < strongTypeNodes.Count; i++)
-                {
-                    AddNode(strongTypeNodes[i]);
-                }
+                Add(castedNode);
             }
             else
-            if (nodes is FasterList<T>)
             {
-                var strongTypeNodes = (FasterList<T>)nodes;
-
-                for (int i = 0; i < strongTypeNodes.Count; i++)
-                {
-                    AddNode(strongTypeNodes[i]);
-                }
+                base.Add(node);
             }
         }
 
-        public virtual void Remove(ITypeSafeList nodeWrapper)
+        public override void Remove(NodeWithID node)
         {
-        /*    if (nodeWrapper is NodeWrapper<T>)
+            if (node is U)
             {
-                T node;
-                nodeWrapper.GetNode<T>(out node);
-
-                RemoveNode(ref node);
+                Remove((U) node);
             }
             else
             {
-                U node;
-                nodeWrapper.GetNode<U>(out node);
-
-                RemoveNode(ref node);
-            }*/
+                base.Remove(node);
+            }
         }
     }
 
-    public abstract class MultiNodesEngine<T, U, V> : MultiNodesEngine<T, U> where T: class where U : class
+    public abstract class MultiNodesEngine<T, U, V> : MultiNodesEngine<T, U> 
+        where T: NodeWithID where U : NodeWithID where V:NodeWithID
     {
-        protected abstract void AddNode(V node);
-        protected abstract void RemoveNode(V node);
+        protected abstract void Add(V node);
+        protected abstract void Remove(V node);
 
-        public override void Add(ITypeSafeList nodes)
+        public override void Add(NodeWithID node)
         {
-            if (nodes is FasterList<V>)
+            var castedNode = node as V;
+            if (castedNode != null)
             {
-                var strongTypeNodes = (FasterList<V>)nodes;
-
-                for (int i = 0; i < strongTypeNodes.Count; i++)
-                {
-                    AddNode(strongTypeNodes[i]); 
-                }
+                Add(castedNode);
             }
             else
-                base.Add(nodes);
+                base.Add(node);
         }
 
-        public override void Remove(ITypeSafeList nodeWrapper)
+        public override void Remove(NodeWithID node)
         {
-          /*  if (nodeWrapper is V)
+            var castedNode = node as V;
+            if (castedNode != null)
             {
-                V node;
-                nodeWrapper.GetNode<V>(out node);
-
-                RemoveNode(ref node);
+                Remove(castedNode);
             }
             else
-                base.Remove(nodeWrapper);*/
+                base.Remove(node);
         }
     }
 }

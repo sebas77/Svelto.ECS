@@ -6,32 +6,25 @@ namespace Svelto.ECS
 {
     public interface INodeBuilder
     {
-        INode BuildAndAddToList(ref ITypeSafeList list, int entityID);
+        INode BuildNodeAndAddToList(ref ITypeSafeList list, int entityID);
 
         Type GetNodeType();
-
-        FillNodeMode reflects { get; }
     }
 
     public class NodeBuilder<NodeType> : INodeBuilder where NodeType : NodeWithID, new()
     {
-        public INode BuildAndAddToList(ref ITypeSafeList list, int entityID)
+        public INode BuildNodeAndAddToList(ref ITypeSafeList list, int entityID)
         {
             if (list == null)
-                list = new TypeSafeFasterList<NodeType>();
+                list = new TypeSafeFasterListForECSForClasses<NodeType>();
 
-            var castedList = list as FasterList<NodeType>;
+            var castedList = list as TypeSafeFasterListForECSForClasses<NodeType>;
 
             var node = NodeWithID.BuildNode<NodeType>(entityID);
 
             castedList.Add(node);
 
             return node;
-        }
-
-        public FillNodeMode reflects
-        {
-            get { return FillNodeMode.Strict; }
         }
 
         public Type GetNodeType()
@@ -42,15 +35,15 @@ namespace Svelto.ECS
 
     public class StructNodeBuilder<NodeType> : INodeBuilder where NodeType : struct, IStructNodeWithID
     {
-        public INode BuildAndAddToList(ref ITypeSafeList list, int entityID)
+        public INode BuildNodeAndAddToList(ref ITypeSafeList list, int entityID)
         {
             var node = default(NodeType);
             node.ID = entityID;
             
             if (list == null)
-                list = new TypeSafeFasterList<NodeType>();
+                list = new TypeSafeFasterListForECSForStructs<NodeType>();
 
-            var castedList = list as FasterList<NodeType>;
+            var castedList = list as TypeSafeFasterListForECSForStructs<NodeType>;
 
             castedList.Add(node);
 
@@ -61,17 +54,5 @@ namespace Svelto.ECS
         {
             return typeof(NodeType);
         }
-
-        public virtual FillNodeMode reflects
-        {
-            get { return FillNodeMode.None; }
-        }
-    }
-    
-    public enum FillNodeMode
-    {
-        Strict,
-    
-        None
     }
 }

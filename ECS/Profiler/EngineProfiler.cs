@@ -1,4 +1,3 @@
-#if asdDEBUG
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,10 +12,9 @@ namespace Svelto.ECS.Profiler
     {
         static readonly Stopwatch _stopwatch = new Stopwatch();
 
-        public static void MonitorAddDuration(Action<INodeEngine, INodeWrapper> addingFunc, INodeEngine engine, INodeWrapper node)
+        public static void MonitorAddDuration(Action<INodeEngine, INode> addingFunc, INodeEngine engine, INode node)
         {
             EngineInfo info;
-            
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
@@ -27,15 +25,14 @@ namespace Svelto.ECS.Profiler
             }
         }
 
-        public static void MonitorRemoveDuration(Action<INodeEngine, INodeWrapper> removeFunc, INodeEngine engine, INodeWrapper node)
+        public static void MonitorRemoveDuration(Action<INodeEngine, INode> removeFunc, INodeEngine engine, NodeWithID node)
         {
             EngineInfo info;
-            
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
                 removeFunc(engine, node);
-              //  engine.Remove(node);
+                engine.Remove(node);
                 _stopwatch.Reset();
 
                 info.AddRemoveDuration(_stopwatch.Elapsed.TotalMilliseconds);
@@ -61,4 +58,3 @@ namespace Svelto.ECS.Profiler
         public static readonly Dictionary<Type, EngineInfo> engineInfos = new Dictionary<Type, EngineInfo>();
     }
 }
-#endif
