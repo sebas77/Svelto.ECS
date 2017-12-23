@@ -2,6 +2,8 @@ namespace Svelto.ECS
 {   
     public interface IEntityFactory
     {
+        void Preallocate<T>(int size) where T : IEntityDescriptor, new();
+
         void BuildEntity<T>(int entityID, object[] implementors = null) where T:IEntityDescriptor, new();
         void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors = null);
 
@@ -20,12 +22,5 @@ namespace Svelto.ECS
         void RemoveMetaEntity<T>(int metaEntityID) where T:IEntityDescriptor, new();
 
         void RemoveEntityFromGroup<T>(int entityID, int groupID) where T:IEntityDescriptor, new();
-#if EXPERIMENTAL        
-        void SetEntityActiveState<T>(int entityID, bool state) where T:IEntityDescriptor, new();
-        
-        void SetMetaEntityActiveState<T>(int metaEntityID, bool state) where T:IEntityDescriptor, new();
-        
-        void SetEntityInGroupActiveState<T>(int entityID, int group,  bool state) where T:IEntityDescriptor, new();
-#endif    
     }
 }

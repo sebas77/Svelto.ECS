@@ -101,17 +101,17 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        static IEntityView BuildEntityView(int entityID, Dictionary<Type, ITypeSafeList> groupedEntityViewsTyped,
+        static IEntityView BuildEntityView(int entityID, Dictionary<Type, ITypeSafeList> entityViewsByType,
                                                  Type entityViewType, IEntityViewBuilder entityViewBuilderId)
         {
-            ITypeSafeList entityViews;
+            ITypeSafeList entityViewsList;
 
             var entityViewsPoolWillBeCreated =
-                groupedEntityViewsTyped.TryGetValue(entityViewType, out entityViews) == false;
-            var entityViewObjectToFill = entityViewBuilderId.BuildEntityViewAndAddToList(ref entityViews, entityID);
+                entityViewsByType.TryGetValue(entityViewType, out entityViewsList) == false;
+            var entityViewObjectToFill = entityViewBuilderId.BuildEntityViewAndAddToList(ref entityViewsList, entityID);
 
             if (entityViewsPoolWillBeCreated)
-                groupedEntityViewsTyped.Add(entityViewType, entityViews);
+                entityViewsByType.Add(entityViewType, entityViewsList);
 
             return entityViewObjectToFill as IEntityView;
         }
@@ -163,13 +163,13 @@ namespace Svelto.ECS.Internal
                 var keyValuePair = setters[i];
                 Type fieldType = keyValuePair.Key;
                 
-                if (fieldType == removeEntityComponentType)
+                if (fieldType != removeEntityComponentType)
                 {
-                    keyValuePair.Value(entityView, removeEntity);
-                }
-                else
-                {
+#if DEBUG && !PROFILER
                     Tuple<object, int> component;
+#else
+                    object component;
+#endif
 
                     if (implementorsByType.TryGetValue(fieldType, out component) == false)
                     {
@@ -178,21 +178,28 @@ namespace Svelto.ECS.Internal
 
                         throw e;
                     }
-
+#if DEBUG && !PROFILER
                     if (component.item2 > 1)
                         Utility.Console.LogError(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
                                                      "Component Type: ", fieldType.Name, " implementor: ",
                                                      component.item1.ToString()) + " - EntityView: " +
                                                      entityView.GetType().Name + " - EntityDescriptor " + entityDescriptorName);
-
+#endif
+#if DEBUG && !PROFILER
                     keyValuePair.Value(entityView, component.item1);
+#else
+                    keyValuePair.Value(entityView, component);
+#endif
                 }
-
+                else
+                {
+                    keyValuePair.Value(entityView, removeEntity);
+                }
             }
 
             implementorsByType.Clear();
         }
-
+#if DEBUG && !PROFILER
         struct Tuple<T1, T2>
         {
             public T1 item1;
@@ -204,9 +211,13 @@ namespace Svelto.ECS.Internal
                 item2 = v;
             }
         }
-
+#endif
         //this is used to avoid newing a dictionary every time, but it's used locally only
+#if DEBUG && !PROFILER
         static readonly Dictionary<Type, Tuple<object, int>> implementorsByType = new Dictionary<Type, Tuple<object, int>>();
+#else
+        static readonly Dictionary<Type, object> implementorsByType = new Dictionary<Type, object>();
+#endif
         static Dictionary<Type, Type[]> _cachedTypes = new Dictionary<Type, Type[]>();
 
         const string DUPLICATE_IMPLEMENTOR_ERROR =

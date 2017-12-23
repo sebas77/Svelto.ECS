@@ -788,7 +788,7 @@ namespace Svelto.DataStructures
             _buffer = newList;
         }
 
-        public void Trim()
+        public void Trim() 
         {
             if (_count < _buffer.Length)
                 Resize(_count);

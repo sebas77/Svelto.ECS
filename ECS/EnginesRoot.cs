@@ -18,9 +18,9 @@ using Svelto.ECS.Profiler;
 
 namespace Svelto.ECS
 {
-    public sealed class EnginesRoot : IEntityFunctions, IEntityFactory, IDisposable
+    public sealed class EnginesRoot : IDisposable
     {
-        public EnginesRoot(EntityViewSubmissionScheduler entityViewScheduler)
+        public EnginesRoot(EntitySubmissionScheduler entityViewScheduler)
         {
             _entityViewEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngine>>();
             _otherEngines = new FasterList<IEngine>();
@@ -66,13 +66,13 @@ namespace Svelto.ECS
             return new GenericEntityFunctions(new DataStructures.WeakReference<EnginesRoot>(this));
         }
         
-        public void BuildEntity<T>(int entityID, object[] implementors = null) where T:IEntityDescriptor, new()
+        void BuildEntity<T>(int entityID, object[] implementors = null) where T:IEntityDescriptor, new()
         {
             EntityFactory.BuildEntityViews
                 (entityID, _entityViewsToAdd.current, EntityDescriptorTemplate<T>.Default, implementors);
         }
 
-        public void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors = null) 
+        void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors = null) 
         {
             EntityFactory.BuildEntityViews
                 (entityID, _entityViewsToAdd.current, entityDescriptor, implementors);
@@ -103,7 +103,7 @@ namespace Svelto.ECS
         /// <param name="metaEntityID"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        public void BuildMetaEntity<T>(int metaEntityID, object[] implementors) where T:IEntityDescriptor, new()
+        void BuildMetaEntity<T>(int metaEntityID, object[] implementors) where T:IEntityDescriptor, new()
         {
             EntityFactory.BuildEntityViews(metaEntityID, _entityViewsToAdd.current, 
                                            EntityDescriptorTemplate<T>.Default, implementors);
@@ -119,7 +119,7 @@ namespace Svelto.ECS
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        public void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors = null) where T:IEntityDescriptor, new()
+        void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors = null) where T:IEntityDescriptor, new()
         {
             EntityFactory.BuildGroupedEntityViews(entityID, groupID, 
                                                   _groupedEntityViewsToAdd.current,
@@ -127,14 +127,14 @@ namespace Svelto.ECS
                                                   implementors);
         }
 
-        public void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
+        void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
         {
             EntityFactory.BuildGroupedEntityViews(entityID, groupID,
                                                   _groupedEntityViewsToAdd.current,
                                                   entityDescriptor, implementors);
         }
 
-        public void RemoveEntity(int entityID, IRemoveEntityComponent removeInfo)
+        void RemoveEntity(int entityID, IRemoveEntityComponent removeInfo)
         {
             var removeEntityImplementor = removeInfo as RemoveEntityImplementor;
 
@@ -144,21 +144,44 @@ namespace Svelto.ECS
                 InternalRemove(removeEntityImplementor.removeEntityInfo.descriptor.entityViewsToBuild, entityID, _entityViewsDB);
         }
 
-        public void RemoveEntity<T>(int entityID) where T : IEntityDescriptor, new()
+        void RemoveEntity<T>(int entityID) where T : IEntityDescriptor, new()
         {
             InternalRemove(EntityDescriptorTemplate<T>.Default.descriptor.entityViewsToBuild, entityID, _entityViewsDB);
         }
 
-        public void RemoveMetaEntity<T>(int metaEntityID) where T : IEntityDescriptor, new()
+        void RemoveMetaEntity<T>(int metaEntityID) where T : IEntityDescriptor, new()
         {
             InternalRemove(EntityDescriptorTemplate<T>.Default.descriptor.entityViewsToBuild, metaEntityID, _metaEntityViewsDB);
         }
 
-        public void RemoveEntityFromGroup<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
+        void RemoveEntityFromGroup<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
         {
             InternalRemove(EntityDescriptorTemplate<T>.Default.descriptor.entityViewsToBuild, entityID, _groupEntityViewsDB[groupID]);
         }
-        
+
+        void Preallocate<T>(int size) where T : IEntityDescriptor, new()
+        {
+            var entityViewsToBuild = EntityDescriptorTemplate<T>.Default.descriptor.entityViewsToBuild;
+            int count = entityViewsToBuild.Length;
+
+            for (int index = 0; index < count; index++)
+            {
+                var entityViewBuilder = entityViewsToBuild[index];
+                var entityViewType = entityViewBuilder.GetEntityViewType();
+
+                ITypeSafeList dbList;
+                if (_entityViewsDB.TryGetValue(entityViewType, out dbList) == false)
+                    _entityViewsDB[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
+                else
+                    dbList.ReserveCapacity(size);
+
+                if (_entityViewsToAdd.current.TryGetValue(entityViewType, out dbList) == false)
+                    _entityViewsToAdd.current[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
+                else
+                    dbList.ReserveCapacity(size);
+            }
+        }
+
         public void AddEngine(IEngine engine)
         {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
@@ -323,7 +346,7 @@ namespace Svelto.ECS
                 groupedEntityViewsByType.Add(entityView.Key, entityView.Value);
             }
         }
-
+        
         static void AddEntityViewToDB(Dictionary<Type, ITypeSafeList> entityViewsDB, KeyValuePair<Type, ITypeSafeList> entityViewList)
         {
             ITypeSafeList dbList;
@@ -508,7 +531,7 @@ namespace Svelto.ECS
         readonly DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>> _metaEntityViewsToAdd;
         readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>> _groupedEntityViewsToAdd;
       
-        readonly EntityViewSubmissionScheduler _scheduler;
+        readonly EntitySubmissionScheduler _scheduler;
 #if EXPERIMENTAL
         readonly Type _structEntityViewEngineType;
         readonly Type _groupedStructEntityViewsEngineType;
@@ -579,6 +602,11 @@ namespace Svelto.ECS
             public void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
             {
                 _weakEngine.Target.BuildEntityInGroup(entityID, groupID, entityDescriptor, implementors);
+            }
+
+            public void Preallocate<T>(int size) where T : IEntityDescriptor, new()
+            {
+                _weakEngine.Target.Preallocate<T>(size);
             }
         }
         

@@ -1,13 +1,14 @@
+using System.Collections.Generic;
 using System.Threading;
 
 //from unify wiki
 namespace Svelto.DataStructures
 {
-    public class SingleLinkEntityView<T>
+    public class SingleLinkNode<T>
     {
         // Note; the Next member cannot be a property since
         // it participates in many CAS operations
-        public SingleLinkEntityView<T> Next;
+        public SingleLinkNode<T> Next;
         public T Item;
     }
 
@@ -23,33 +24,33 @@ namespace Svelto.DataStructures
 
     public class LockFreeLinkPool<T>
     {
-        private SingleLinkEntityView<T> head;
+        private SingleLinkNode<T> head;
 
         public LockFreeLinkPool()
         {
-            head = new SingleLinkEntityView<T>();
+            head = new SingleLinkNode<T>();
         }
 
-        public void Push(SingleLinkEntityView<T> newEntityView)
+        public void Push(SingleLinkNode<T> newNode)
         {
-            newEntityView.Item = default(T);
+            newNode.Item = default(T);
             do
             {
-                newEntityView.Next = head.Next;
-            } while (!SyncMethods.CAS<SingleLinkEntityView<T>>(ref head.Next, newEntityView.Next, newEntityView));
+                newNode.Next = head.Next;
+            } while (!SyncMethods.CAS<SingleLinkNode<T>>(ref head.Next, newNode.Next, newNode));
             return;
         }
 
-        public bool Pop(out SingleLinkEntityView<T> entityView)
+        public bool Pop(out SingleLinkNode<T> node)
         {
             do
             {
-                entityView = head.Next;
-                if (entityView == null)
+                node = head.Next;
+                if (node == null)
                 {
                     return false;
                 }
-            } while (!SyncMethods.CAS<SingleLinkEntityView<T>>(ref head.Next, entityView, entityView.Next));
+            } while (!SyncMethods.CAS<SingleLinkNode<T>>(ref head.Next, node, node.Next));
             return true;
         }
     }
@@ -57,35 +58,35 @@ namespace Svelto.DataStructures
     public class LockFreeQueue<T>
     {
 
-        SingleLinkEntityView<T> head;
-        SingleLinkEntityView<T> tail;
+        SingleLinkNode<T> head;
+        SingleLinkNode<T> tail;
         LockFreeLinkPool<T> trash;
 
         public LockFreeQueue()
         {
-            head = new SingleLinkEntityView<T>();
+            head = new SingleLinkNode<T>();
             tail = head;
             trash = new LockFreeLinkPool<T>();
         }
 
         public void Enqueue(T item)
         {
-            SingleLinkEntityView<T> oldTail = null;
-            SingleLinkEntityView<T> oldTailNext;
+            SingleLinkNode<T> oldTail = null;
+            SingleLinkNode<T> oldTailNext;
 
-            SingleLinkEntityView<T> newEntityView;
-            if (!trash.Pop(out newEntityView))
+            SingleLinkNode<T> newNode;
+            if (!trash.Pop(out newNode))
             {
-                newEntityView = new SingleLinkEntityView<T>();
+                newNode = new SingleLinkNode<T>();
             }
             else
             {
-                newEntityView.Next = null;
+                newNode.Next = null;
             }
-            newEntityView.Item = item;
+            newNode.Item = item;
 
-            bool newEntityViewWasAdded = false;
-            while (!newEntityViewWasAdded)
+            bool newNodeWasAdded = false;
+            while (!newNodeWasAdded)
             {
                 oldTail = tail;
                 oldTailNext = oldTail.Next;
@@ -93,26 +94,26 @@ namespace Svelto.DataStructures
                 if (tail == oldTail)
                 {
                     if (oldTailNext == null)
-                        newEntityViewWasAdded = SyncMethods.CAS<SingleLinkEntityView<T>>(ref tail.Next, null, newEntityView);
+                        newNodeWasAdded = SyncMethods.CAS<SingleLinkNode<T>>(ref tail.Next, null, newNode);
                     else
-                        SyncMethods.CAS<SingleLinkEntityView<T>>(ref tail, oldTail, oldTailNext);
+                        SyncMethods.CAS<SingleLinkNode<T>>(ref tail, oldTail, oldTailNext);
                 }
             }
-            SyncMethods.CAS<SingleLinkEntityView<T>>(ref tail, oldTail, newEntityView);
+            SyncMethods.CAS<SingleLinkNode<T>>(ref tail, oldTail, newNode);
         }
 
         public bool Dequeue(out T item)
         {
             item = default(T);
-            SingleLinkEntityView<T> oldHead = null;
+            SingleLinkNode<T> oldHead = null;
 
             bool haveAdvancedHead = false;
             while (!haveAdvancedHead)
             {
 
                 oldHead = head;
-                SingleLinkEntityView<T> oldTail = tail;
-                SingleLinkEntityView<T> oldHeadNext = oldHead.Next;
+                SingleLinkNode<T> oldTail = tail;
+                SingleLinkNode<T> oldHeadNext = oldHead.Next;
 
                 if (oldHead == head)
                 {
@@ -122,12 +123,12 @@ namespace Svelto.DataStructures
                         {
                             return false;
                         }
-                        SyncMethods.CAS<SingleLinkEntityView<T>>(ref tail, oldTail, oldHeadNext);
+                        SyncMethods.CAS<SingleLinkNode<T>>(ref tail, oldTail, oldHeadNext);
                     }
                     else
                     {
                         item = oldHeadNext.Item;
-                        haveAdvancedHead = SyncMethods.CAS<SingleLinkEntityView<T>>(ref head, oldHead, oldHeadNext);
+                        haveAdvancedHead = SyncMethods.CAS<SingleLinkNode<T>>(ref head, oldHead, oldHeadNext);
                         if (haveAdvancedHead)
                         {
                             trash.Push(oldHead);

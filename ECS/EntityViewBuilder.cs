@@ -6,6 +6,7 @@ namespace Svelto.ECS
     public interface IEntityViewBuilder
     {
         IEntityView BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID);
+        ITypeSafeList Preallocate(ref ITypeSafeList list, int size);
 
         Type GetEntityViewType();
     }
@@ -24,6 +25,16 @@ namespace Svelto.ECS
             castedList.Add(entityView);
 
             return entityView;
+        }
+
+        public ITypeSafeList Preallocate(ref ITypeSafeList list, int size)
+        {
+            if (list == null)
+                list = new TypeSafeFasterListForECSForClasses<EntityViewType>(size);
+            else
+                list.ReserveCapacity(size);
+
+            return list;
         }
 
         public Type GetEntityViewType()
@@ -49,6 +60,16 @@ namespace Svelto.ECS
             castedList.Add(entityView);
 
             return null;
+        }
+
+        public ITypeSafeList Preallocate(ref ITypeSafeList list, int size)
+        {
+            if (list == null)
+                list = new TypeSafeFasterListForECSForStructs<EntityViewType>(size);
+            else
+                list.ReserveCapacity(size);
+
+            return list;
         }
 
         public Type GetEntityViewType()
