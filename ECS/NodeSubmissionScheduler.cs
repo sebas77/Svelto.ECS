@@ -1,9 +1,9 @@
-using System;
+using Svelto.WeakEvents;
 
-namespace Svelto.ECS.NodeSchedulers
+namespace Svelto.ECS.Schedulers
 {
-    public abstract class NodeSubmissionScheduler
+    public abstract class EntityViewSubmissionScheduler
     {
-        abstract public void Schedule(Action submitNodes);
+        abstract public void Schedule(WeakAction submitEntityViews);
     }
 }

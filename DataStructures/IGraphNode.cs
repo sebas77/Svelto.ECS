@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 using System;
 
-public interface IGraphNode<T>
+public interface IGraphEntityView<T>
 {
 	void VisitNeighbours(System.Action<T> onVisiting);
 }

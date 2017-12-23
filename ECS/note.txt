@@ -27,7 +27,7 @@ producer/consumer has the inconvienent to force check the number of jobs availab
 
 Engine can't be removed, they can only be disabled, but the logic of disabling must be handled by the engine itself
 
-Should components have just one element? Should engines use just nodes? Components are ditacted by the entities and Nodes by the engines
+Should components have just one element? Should engines use just entityViews? Components are ditacted by the entities and EntityViews by the engines
 
 http://thelinuxlich.github.io/artemis_CSharp/
 
@@ -42,7 +42,7 @@ http://entity-systems.wikidot.com/es-articles
 
 http://www.ashframework.org/
 
-it's very important to give a namespace to the engines. In this way it's impossible to create semantically wrong nodes (PlayerNode Vs TargetNode)
+it's very important to give a namespace to the engines. In this way it's impossible to create semantically wrong entityViews (PlayerEntityView Vs TargetEntityView)
 
 ToDo:
 

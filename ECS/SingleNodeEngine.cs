@@ -2,19 +2,19 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public abstract class SingleNodeEngine<T> : INodeEngine where T:NodeWithID
+    public abstract class SingleEntityViewEngine<T> : IHandleEntityViewEngine where T:EntityView<T>, new()
     {
-        public void Add(NodeWithID node)
+        public void Add(IEntityView entityView)
         {
-            Add((T)node); //when byref returns will be vailable, this should be passed by reference, not copy!
+            Add((T)entityView); //when byref returns will be vailable, this should be passed by reference, not copy!
         }
 
-        public void Remove(NodeWithID node)
+        public void Remove(IEntityView entityView)
         {
-            Remove((T)node);
+            Remove((T)entityView);
         }
 
-        protected abstract void Add(T node);
-        protected abstract void Remove(T node);
+        protected abstract void Add(T entityView);
+        protected abstract void Remove(T entityView);
     }
 }

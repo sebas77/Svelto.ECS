@@ -120,17 +120,20 @@ namespace Svelto.DataStructures
 
     public struct FasterReadOnlyList<T> : IList<T>
     {
-        public static FasterReadOnlyList<T> DefaultList = new FasterReadOnlyList<T>(new FasterList<T>());
-
+        public static FasterReadOnlyList<T> DefaultList = new FasterReadOnlyList<T>(FasterList<T>.DefaultList);
+        
         public int Count { get { return _list.Count; } }
         public bool IsReadOnly { get { return true; } }
 
         public FasterReadOnlyList(FasterList<T> list)
         {
             _list = list;
+
+            int count;
+            _buffer = FasterList<T>.NoVirt.ToArrayFast(list, out count);
         }
 
-        public T this[int index] { get { return _list[index]; } set { throw new NotImplementedException(); } }
+        public T this[int index] { get { return _buffer[index]; } set { throw new NotImplementedException(); } }
 
         public FasterListEnumerator<T> GetEnumerator()
         {
@@ -188,6 +191,7 @@ namespace Svelto.DataStructures
         }
 
         readonly FasterList<T> _list;
+        private readonly T[] _buffer;
     }
 
     public struct FasterListThreadSafe<T> : IList<T>
@@ -396,7 +400,7 @@ namespace Svelto.DataStructures
 
     public struct FasterReadOnlyListCast<T, U> : IList<U> where U:T
     {
-        public static FasterReadOnlyListCast<T, U> DefaultList = new FasterReadOnlyListCast<T, U>(new FasterList<T>());
+        public static readonly FasterReadOnlyListCast<T, U> DefaultList = new FasterReadOnlyListCast<T, U>(new FasterList<T>());
 
         public int Count { get { return _list.Count; } }
         public bool IsReadOnly { get { return true; } }
@@ -471,6 +475,8 @@ namespace Svelto.DataStructures
 
     public class FasterList<T> : IList<T>, IFasterList
     {
+        public static readonly FasterList<T> DefaultList = new FasterList<T>();
+        
         const int MIN_SIZE = 4;
 
         public int Count
@@ -631,7 +637,7 @@ namespace Svelto.DataStructures
         {
             var comp = EqualityComparer<T>.Default;
 
-            for (var index = _count - 1; index >= 0; --index)
+            for (var index = 0; index < _count; index++)
                 if (comp.Equals(_buffer[index], item))
                     return index;
 

@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Svelto.Utilities;
 
 namespace Svelto.WeakEvents

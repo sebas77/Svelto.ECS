@@ -7,51 +7,57 @@ namespace Svelto.ECS.Internal
 {
     public interface ITypeSafeList: IEnumerable
     {
-        void AddRange(ITypeSafeList nodeListValue);
+        void AddRange(ITypeSafeList entityViewListValue);
 
         ITypeSafeList Create();
-        bool isQueryiableNode { get; }
-        void UnorderedRemove(int index);
+        bool isQueryiableEntityView { get; }
+        bool UnorderedRemove(int entityID);
         ITypeSafeDictionary CreateIndexedDictionary();
+        IEntityView[] ToArrayFast(out int count);
     }
 
-    class TypeSafeFasterListForECS<T>: FasterList<T> where T:INode
+    class TypeSafeFasterListForECS<T>: FasterList<T> where T:IEntityView
     {
         protected TypeSafeFasterListForECS()
         {
             _mappedIndices = new Dictionary<int, int>();
         }
         
-        public void UnorderedRemove(int mappedIndex)
+        public bool UnorderedRemove(int entityID)
         {
-            var index = _mappedIndices[mappedIndex];
-            _mappedIndices.Remove(mappedIndex);
+            var index = _mappedIndices[entityID];
+
+            DesignByContract.Check.Assert(entityID == this[index].ID, "Something went wrong with the Svelto.ECS code, please contact the author");
+
+            _mappedIndices.Remove(entityID);
 
             if (UnorderedRemoveAt(index))
                 _mappedIndices[this[index].ID] = index;
+
+            return this.Count > 0;
         }
         
-        public void AddRange(ITypeSafeList nodeListValue)
+        public void AddRange(ITypeSafeList entityViewListValue)
         {
             var index = this.Count;
             
-            AddRange(nodeListValue as FasterList<T>);
+            AddRange(entityViewListValue as FasterList<T>);
             
             for (int i = index; i < Count; ++i)
-                _mappedIndices[this[i].ID] = this.Count;
+                _mappedIndices[this[i].ID] = i;
         }
 
         readonly Dictionary<int, int> _mappedIndices;
     }
 
-    class TypeSafeFasterListForECSForStructs<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:struct, INode
+    class TypeSafeFasterListForECSForStructs<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:struct, IEntityStruct
     {
         public ITypeSafeList Create()
         {
             return new TypeSafeFasterListForECSForStructs<T>();
         }
 
-        public bool isQueryiableNode
+        public bool isQueryiableEntityView
         {
             get { return false; }
         }
@@ -60,16 +66,21 @@ namespace Svelto.ECS.Internal
         {
             throw new Exception("Not Allowed");
         }
+
+        public IEntityView[] ToArrayFast(out int count)
+        {
+            throw new Exception("Not Allowed");
+        }
     }
     
-    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:NodeWithID
+    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:EntityView, new()
     {
         public ITypeSafeList Create()
         {
             return new TypeSafeFasterListForECSForClasses<T>();
         }
 
-        public bool isQueryiableNode
+        public bool isQueryiableEntityView
         {
             get { return true; }
         }
@@ -77,6 +88,13 @@ namespace Svelto.ECS.Internal
         public ITypeSafeDictionary CreateIndexedDictionary()
         {
             return new TypeSafeDictionary<T>();
+        }
+
+        public IEntityView[] ToArrayFast(out int count)
+        {
+            count = this.Count;
+            
+            return this.ToArrayFast();
         }
     }
 }

@@ -1,258 +1,110 @@
+﻿using System.Runtime.InteropServices;
+
 namespace Svelto.ECS
 {
-    public class GenericEntityDescriptor<T> : EntityDescriptor
-        where T : NodeWithID, new()
+    public class GenericEntityDescriptor<T>:IEntityDescriptor where T : EntityView<T>, new()
     {
         static GenericEntityDescriptor()
         {
-            _nodesToBuild = new INodeBuilder[] { new NodeBuilder<T>() };
+            entityViewBuilders = new IEntityViewBuilder[] { new EntityViewBuilder<T>() };
         }
-        public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {}
+        
+        public IEntityViewBuilder[] entityViewsToBuild
+        {
+            get { return entityViewBuilders; }
+        }
 
-        static readonly INodeBuilder[] _nodesToBuild;
+        public static readonly IEntityViewBuilder[] entityViewBuilders;
+        
     }
 
-    public class GenericEntityDescriptor<T, U> : EntityDescriptor
-        where T : NodeWithID, new()
-        where U : NodeWithID, new()
+    public class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : EntityView<T>, new() 
+                                                                       where U : EntityView<U>, new()
     {
         static GenericEntityDescriptor()
         {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new NodeBuilder<T>(),
-                new NodeBuilder<U>()
-            };
+            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>()};
         }
 
-        public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {}
-
-        static readonly INodeBuilder[] _nodesToBuild;
+        public IEntityViewBuilder[] entityViewsToBuild
+        {
+            get { return entityViewBuilders; }
+        }
+        
+        public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V> : EntityDescriptor
-        where T : NodeWithID, new()
-        where U : NodeWithID, new()
-        where V : NodeWithID, new()
+    public class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : EntityView<T>, new()
+                                                                          where U : EntityView<U>, new()
+                                                                          where V : EntityView<V>, new()
     {
         static GenericEntityDescriptor()
         {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new NodeBuilder<T>(),
-                new NodeBuilder<U>(),
-                new NodeBuilder<V>()
-            };
+            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>()};
         }
-        public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {}
 
-        static readonly INodeBuilder[] _nodesToBuild;
+        public IEntityViewBuilder[] entityViewsToBuild
+        {
+            get { return entityViewBuilders; }
+        }
+        
+        public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V, W> : EntityDescriptor
-        where T : NodeWithID, new()
-        where U : NodeWithID, new()
-        where V : NodeWithID, new()
-        where W : NodeWithID, new()
+    public class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : EntityView<T>, new()
+                                                                             where U : EntityView<U>, new()
+                                                                             where V : EntityView<V>, new()
+                                                                             where W : EntityView<W>, new()
     {
         static GenericEntityDescriptor()
         {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new NodeBuilder<T>(),
-                new NodeBuilder<U>(),
-                new NodeBuilder<V>(),
-                new NodeBuilder<W>()
-            };
+            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>(), new EntityViewBuilder<W>()};
         }
-        public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {}
 
-        static readonly INodeBuilder[] _nodesToBuild;
+        public IEntityViewBuilder[] entityViewsToBuild
+        {
+            get { return entityViewBuilders; }
+        }
+        
+        public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V, W, X> : EntityDescriptor
-        where T : NodeWithID, new()
-        where U : NodeWithID, new()
-        where V : NodeWithID, new()
-        where W : NodeWithID, new()
-        where X : NodeWithID, new()
+    public class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : EntityView<T>, new()
+                                                                                where U : EntityView<U>, new()
+                                                                                where V : EntityView<V>, new()
+                                                                                where W : EntityView<W>, new()
+                                                                                where X : EntityView<X>, new()
     {
         static GenericEntityDescriptor()
         {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new NodeBuilder<T>(),
-                new NodeBuilder<U>(),
-                new NodeBuilder<V>(),
-                new NodeBuilder<W>(),
-                new NodeBuilder<X>()
-            };
+            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>(), new EntityViewBuilder<W>(), new EntityViewBuilder<X>()};
         }
-        public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {}
 
-        static readonly INodeBuilder[] _nodesToBuild;
+        public IEntityViewBuilder[] entityViewsToBuild
+        {
+            get { return entityViewBuilders; }
+        }
+        
+        public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V, W, X, Y> : EntityDescriptor
-        where T : NodeWithID, new()
-        where U : NodeWithID, new()
-        where V : NodeWithID, new()
-        where W : NodeWithID, new()
-        where X : NodeWithID, new()
-        where Y : NodeWithID, new()
+    public class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : EntityView<T>, new()
+                                                                                   where U : EntityView<U>, new()
+                                                                                   where V : EntityView<V>, new()
+                                                                                   where W : EntityView<W>, new()
+                                                                                   where X : EntityView<X>, new()
+                                                                                   where Y : EntityView<Y>, new()
     {
         static GenericEntityDescriptor()
         {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new NodeBuilder<T>(),
-                new NodeBuilder<U>(),
-                new NodeBuilder<V>(),
-                new NodeBuilder<W>(),
-                new NodeBuilder<X>(),
-                new NodeBuilder<Y>()
-            };
+            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>(), new EntityViewBuilder<W>(), new EntityViewBuilder<X>(), new EntityViewBuilder<Y>()};
         }
-        public GenericEntityDescriptor(params object[] componentsImplementor) : base(_nodesToBuild, componentsImplementor)
-        {}
 
-        static readonly INodeBuilder[] _nodesToBuild;
-    }
-
-    public class GenericMixedEntityDescriptor<T> : EntityDescriptor
-        where T : INodeBuilder, new()
-    {
-        static GenericMixedEntityDescriptor()
+        public IEntityViewBuilder[] entityViewsToBuild
         {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new T(),
-            };
+            get { return entityViewBuilders; }
         }
-        public GenericMixedEntityDescriptor(params object[] componentsImplementor) :
-            base(_nodesToBuild, componentsImplementor)
-        { }
-
-        static readonly INodeBuilder[] _nodesToBuild;
-    }
-    
-    public class GenericMixedEntityDescriptor<T, U> : EntityDescriptor
-        where T : INodeBuilder, new()
-        where U : INodeBuilder, new()
-    {
-        static GenericMixedEntityDescriptor()
-        {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new T(),
-                new U(),
-            };
-        }
-        public GenericMixedEntityDescriptor(params object[] componentsImplementor) :
-            base(_nodesToBuild, componentsImplementor)
-        { }
-
-        static readonly INodeBuilder[] _nodesToBuild;
-    }
-
-    public class GenericMixedEntityDescriptor<T, U, V> : EntityDescriptor
-        where T : INodeBuilder, new()
-        where U : INodeBuilder, new()
-        where V : INodeBuilder, new()
-    {
-        static GenericMixedEntityDescriptor()
-        {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new T(),
-                new U(),
-                new V()
-            };
-        }
-        public GenericMixedEntityDescriptor(params object[] componentsImplementor) :
-            base(_nodesToBuild, componentsImplementor)
-        { }
-
-        static readonly INodeBuilder[] _nodesToBuild;
-    }
-
-    public class GenericMixedEntityDescriptor<T, U, V, W> : EntityDescriptor
-        where T : INodeBuilder, new()
-        where U : INodeBuilder, new()
-        where V : INodeBuilder, new()
-        where W : INodeBuilder, new()
-    {
-        static GenericMixedEntityDescriptor()
-        {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new T(),
-                new U(),
-                new V(),
-                new W()
-            };
-        }
-        public GenericMixedEntityDescriptor(params object[] componentsImplementor) :
-            base(_nodesToBuild, componentsImplementor)
-        { }
-
-        static readonly INodeBuilder[] _nodesToBuild;
-    }
-
-    public class GenericMixedEntityDescriptor<T, U, V, W, X> : EntityDescriptor
-        where T : INodeBuilder, new()
-        where U : INodeBuilder, new()
-        where V : INodeBuilder, new()
-        where W : INodeBuilder, new()
-        where X : INodeBuilder, new()
-    {
-        static GenericMixedEntityDescriptor()
-        {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new T(),
-                new U(),
-                new V(),
-                new W(),
-                new X()
-            };
-        }
-        public GenericMixedEntityDescriptor(params object[] componentsImplementor) :
-            base(_nodesToBuild, componentsImplementor)
-        { }
-
-        static readonly INodeBuilder[] _nodesToBuild;
-    }
-
-    public class GenericMixedEntityDescriptor<T, U, V, W, X, Y> : EntityDescriptor
-        where T : INodeBuilder, new()
-        where U : INodeBuilder, new()
-        where V : INodeBuilder, new()
-        where W : INodeBuilder, new()
-        where X : INodeBuilder, new()
-        where Y : INodeBuilder, new()
-    {
-        static GenericMixedEntityDescriptor()
-        {
-            _nodesToBuild = new INodeBuilder[]
-            {
-                new T(),
-                new U(),
-                new V(),
-                new W(),
-                new X(),
-                new Y()
-            };
-        }
-        public GenericMixedEntityDescriptor(params object[] componentsImplementor) :
-            base(_nodesToBuild, componentsImplementor)
-        { }
-
-        static readonly INodeBuilder[] _nodesToBuild;
+        
+        public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 }

@@ -8,16 +8,16 @@ namespace Svelto.DataStructures
     /// (theoretically?) optimize method calls from concrete-types slightly better.
     /// </summary>
     public interface IPriorityQueue<T> : IEnumerable<T>
-        where T : PriorityQueueNode
+        where T : PriorityQueueEntityView
     {
-        void Remove(T node);
-        void UpdatePriority(T node, double priority);
-        void Enqueue(T node, double priority);
+        void Remove(T entityView);
+        void UpdatePriority(T entityView, double priority);
+        void Enqueue(T entityView, double priority);
         T Dequeue();
         T First { get; }
         int Count { get; }
         int MaxSize { get; }
         void Clear();
-        bool Contains(T node);
+        bool Contains(T entityView);
     }
 }

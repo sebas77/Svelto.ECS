@@ -12,27 +12,27 @@ namespace Svelto.ECS.Profiler
     {
         static readonly Stopwatch _stopwatch = new Stopwatch();
 
-        public static void MonitorAddDuration(Action<INodeEngine, INode> addingFunc, INodeEngine engine, INode node)
+        public static void MonitorAddDuration(Action<IHandleEntityViewEngine, IEntityView> addingFunc, IHandleEntityViewEngine engine, IEntityView entityView)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
-                addingFunc(engine, node);
+                addingFunc(engine, entityView);
                 _stopwatch.Reset();
 
                 info.AddAddDuration(_stopwatch.Elapsed.TotalMilliseconds);
             }
         }
 
-        public static void MonitorRemoveDuration(Action<INodeEngine, INode> removeFunc, INodeEngine engine, NodeWithID node)
+        public static void MonitorRemoveDuration(Action<IHandleEntityViewEngine, IEntityView> removeFunc, IHandleEntityViewEngine engine, IEntityView entityView)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
-                removeFunc(engine, node);
-                engine.Remove(node);
+                removeFunc(engine, entityView);
+                engine.Remove(entityView);
                 _stopwatch.Reset();
 
                 info.AddRemoveDuration(_stopwatch.Elapsed.TotalMilliseconds);

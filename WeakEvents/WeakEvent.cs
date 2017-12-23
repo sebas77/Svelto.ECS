@@ -1,7 +1,6 @@
 using Svelto.DataStructures;
 using System;
 using System.Reflection;
-using Svelto.Utilities;
 
 namespace Svelto.WeakEvents
 {

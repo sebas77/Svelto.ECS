@@ -1,167 +1,200 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
-using Svelto.ECS.Legacy;
-using Svelto.ECS.NodeSchedulers;
-using Svelto.ECS.Profiler;
+using Svelto.ECS.Schedulers;
 using Svelto.Utilities;
+using Svelto.WeakEvents;
+
+#if EXPERIMENTAL
+using Svelto.ECS.Experimental;
+using Svelto.ECS.Experimental.Internal;
+#endif
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
 using Svelto.ECS.Profiler;
 #endif
 
-namespace Svelto.ECS.Internal
-{
-    struct BuildNodeCallbackStruct
-    {
-        public Action<FasterList<INodeBuilder>, int> internalRemove;
-        public Action<FasterList<INodeBuilder>, int> internalEnable;
-        public Action<FasterList<INodeBuilder>, int> internalDisable;            
-    }
-}
-
 namespace Svelto.ECS
 {
-    public sealed class EnginesRoot : IEnginesRoot, IEntityFactory
+    public sealed class EnginesRoot : IEntityFunctions, IEntityFactory, IDisposable
     {
-        public EnginesRoot(NodeSubmissionScheduler nodeScheduler)
+        public EnginesRoot(EntityViewSubmissionScheduler entityViewScheduler)
         {
-            _nodeEngines = new Dictionary<Type, FasterList<IEngine>>();
-            _activableEngines = new Dictionary<Type, FasterList<IEngine>>();
+            _entityViewEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngine>>();
             _otherEngines = new FasterList<IEngine>();
 
-            _engineRootWeakReference = new DataStructures.WeakReference<EnginesRoot>(this);
-
-            _nodesDB = new Dictionary<Type, ITypeSafeList>();
-            _metaNodesDB = new Dictionary<Type, ITypeSafeList>();
-            _groupNodesDB = new Dictionary<int, Dictionary<Type, ITypeSafeList>>();
-            _nodesDBdic = new Dictionary<Type, ITypeSafeDictionary>();
+            _entityViewsDB = new Dictionary<Type, ITypeSafeList>();
+            _metaEntityViewsDB = new Dictionary<Type, ITypeSafeList>();
+            _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeList>>();
+            _entityViewsDBdic = new Dictionary<Type, ITypeSafeDictionary>();
             
-            _sharedStructNodeLists = new SharedStructNodeLists();
-            _sharedGroupedStructNodeLists = new SharedGroupedStructNodesLists();
+            _entityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>>();           
+            _metaEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>>();
+            _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>>();
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
+            _addEntityViewToEngine = AddEntityViewToEngine;
+            _removeEntityViewFromEngine = RemoveEntityViewFromEngine;
+#endif                 
+            _engineEntityViewDB = new EngineEntityViewDB(_entityViewsDB, _entityViewsDBdic, _metaEntityViewsDB, _groupEntityViewsDB);
 
-            _nodesToAdd = new DoubleBufferedNodes<Dictionary<Type, ITypeSafeList>>();           
-            _metaNodesToAdd = new DoubleBufferedNodes<Dictionary<Type, ITypeSafeList>>();
-            _groupedNodesToAdd = new DoubleBufferedNodes<Dictionary<int, Dictionary<Type, ITypeSafeList>>>(); 
-            
-            _callBackStructForBuiltGroupedNodes = new BuildNodeCallbackStruct();
+            _scheduler = entityViewScheduler;
+            _scheduler.Schedule(new WeakAction(SubmitEntityViews));
+#if EXPERIMENTAL            
+            _sharedStructEntityViewLists = new SharedStructEntityViewLists();
+            _sharedGroupedStructEntityViewLists = new SharedGroupedStructEntityViewsLists();
 
-            _callBackStructForBuiltGroupedNodes.internalRemove = InternalRemove;
-            _callBackStructForBuiltGroupedNodes.internalDisable = InternalDisable;
-            _callBackStructForBuiltGroupedNodes.internalEnable = InternalEnable;            
-            
-            _callBackStructForBuiltNodes = new BuildNodeCallbackStruct();
-
-            _callBackStructForBuiltNodes.internalRemove = InternalGroupedRemove;
-            _callBackStructForBuiltNodes.internalDisable = InternalDisable;
-            _callBackStructForBuiltNodes.internalEnable = InternalEnable;
-            
-            _callBackStructForBuiltMetaNodes = new BuildNodeCallbackStruct();
-
-            _callBackStructForBuiltMetaNodes.internalRemove = InternalMetaRemove;
-            _callBackStructForBuiltMetaNodes.internalDisable = InternalDisable;
-            _callBackStructForBuiltMetaNodes.internalEnable = InternalEnable;
-
-            _scheduler = nodeScheduler;
-            _scheduler.Schedule(SubmitNodes);
-
-            _structNodeEngineType = typeof(IStructNodeEngine<>);
-            _groupedStructNodesEngineType = typeof(IGroupedStructNodesEngine<>);
-            _activableNodeEngineType = typeof(IActivableNodeEngine<>);
+            _structEntityViewEngineType = typeof(IStructEntityViewEngine<>);
+            _groupedStructEntityViewsEngineType = typeof(IGroupedStructEntityViewsEngine<>);
             
             _implementedInterfaceTypes = new Dictionary<Type, Type[]>();
-
-#if UNITY_EDITOR
+#endif
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
             UnityEngine.GameObject debugEngineObject = new UnityEngine.GameObject("Engine Debugger");
             debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
 #endif
         }
 
-        public void BuildEntity(int ID, EntityDescriptor ed)
+        public IEntityFactory GenerateEntityFactory()
         {
-            ed.BuildNodes(ID, _nodesToAdd.other, ref _callBackStructForBuiltNodes);
+            return new GenericEntityFactory(new DataStructures.WeakReference<EnginesRoot>(this));
+        }
+
+        public IEntityFunctions GenerateEntityFunctions()
+        {
+            return new GenericEntityFunctions(new DataStructures.WeakReference<EnginesRoot>(this));
+        }
+        
+        public void BuildEntity<T>(int entityID, object[] implementors = null) where T:IEntityDescriptor, new()
+        {
+            EntityFactory.BuildEntityViews
+                (entityID, _entityViewsToAdd.current, EntityDescriptorTemplate<T>.Default, implementors);
+        }
+
+        public void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors = null) 
+        {
+            EntityFactory.BuildEntityViews
+                (entityID, _entityViewsToAdd.current, entityDescriptor, implementors);
         }
 
         /// <summary>
         /// A meta entity is a way to manage a set of entitites that are not easily 
         /// queriable otherwise. For example you may want to group existing entities
-        /// by size and type and then use the meta entity node to manage the data 
+        /// by size and type and then use the meta entity entityView to manage the data 
         /// shared among the single entities of the same type and size. This will 
         /// prevent the scenario where the coder is forced to parse all the entities to 
         /// find the ones of the same size and type. 
-        /// Since the entities are managed through the shared node, the same
-        /// shared node must be found on the single entities of the same type and size.
-        /// The shared node of the meta entity is then used by engines that are meant 
-        /// to manage a group of entities through a single node. 
-        /// The same engine can manage several meta entities nodes too.
-        /// The Engine manages the logic of the Meta Node data and other engines
-        /// can read back this data through the normal entity as the shared node
+        /// Since the entities are managed through the shared entityView, the same
+        /// shared entityView must be found on the single entities of the same type and size.
+        /// The shared entityView of the meta entity is then used by engines that are meant 
+        /// to manage a group of entities through a single entityView. 
+        /// The same engine can manage several meta entities entityViews too.
+        /// The Engine manages the logic of the Meta EntityView data and other engines
+        /// can read back this data through the normal entity as the shared entityView
         /// will be present in their descriptor too.
-        /// It's a way to control a group of Entities through a node only.
-        /// This set of entities can share exactly the same node reference if 
+        /// It's a way to control a group of Entities through a entityView only.
+        /// This set of entities can share exactly the same entityView reference if 
         /// built through this function. In this way, if you need to set a variable
-        /// on a group of entities, instead to inject N nodes and iterate over
-        /// them to set the same value, you can inject just one node, set the value
+        /// on a group of entities, instead to inject N entityViews and iterate over
+        /// them to set the same value, you can inject just one entityView, set the value
         /// and be sure that the value is shared between entities.
         /// </summary>
         /// <param name="metaEntityID"></param>
         /// <param name="ed"></param>
-        public void BuildMetaEntity(int metaEntityID, EntityDescriptor ed)
+        /// <param name="implementors"></param>
+        public void BuildMetaEntity<T>(int metaEntityID, object[] implementors) where T:IEntityDescriptor, new()
         {
-            ed.BuildNodes(metaEntityID, _metaNodesToAdd.other, ref _callBackStructForBuiltMetaNodes);
+            EntityFactory.BuildEntityViews(metaEntityID, _entityViewsToAdd.current, 
+                                           EntityDescriptorTemplate<T>.Default, implementors);
         }
 
         /// <summary>
-        /// Using this function is like building a normal entity, but the nodes
+        /// Using this function is like building a normal entity, but the entityViews
         /// are grouped by groupID to be better processed inside engines and
-        /// improve cache locality. Only IGroupStructNodeWithID nodes are grouped
-        /// other nodes are managed as usual.
+        /// improve cache locality. Only IGroupStructEntityViewWithID entityViews are grouped
+        /// other entityViews are managed as usual.
         /// </summary>
         /// <param name="entityID"></param>
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
-        public void BuildEntityInGroup(int entityID, int groupID,
-                    EntityDescriptor ed)
+        /// <param name="implementors"></param>
+        public void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors = null) where T:IEntityDescriptor, new()
         {
-            ed.BuildGroupedNodes(entityID, groupID, _groupedNodesToAdd.other, ref _callBackStructForBuiltGroupedNodes);
+            EntityFactory.BuildGroupedEntityViews(entityID, groupID, 
+                                                  _groupedEntityViewsToAdd.current,
+                                                  EntityDescriptorTemplate<T>.Default,
+                                                  implementors);
         }
 
+        public void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
+        {
+            EntityFactory.BuildGroupedEntityViews(entityID, groupID,
+                                                  _groupedEntityViewsToAdd.current,
+                                                  entityDescriptor, implementors);
+        }
+
+        public void RemoveEntity(int entityID, IRemoveEntityComponent removeInfo)
+        {
+            var removeEntityImplementor = removeInfo as RemoveEntityImplementor;
+
+            if (removeEntityImplementor.removeEntityInfo.isInAGroup)
+                InternalRemove(removeEntityImplementor.removeEntityInfo.descriptor.entityViewsToBuild, entityID, removeEntityImplementor.removeEntityInfo.groupID, _entityViewsDB);
+            else
+                InternalRemove(removeEntityImplementor.removeEntityInfo.descriptor.entityViewsToBuild, entityID, _entityViewsDB);
+        }
+
+        public void RemoveEntity<T>(int entityID) where T : IEntityDescriptor, new()
+        {
+            InternalRemove(EntityDescriptorTemplate<T>.Default.descriptor.entityViewsToBuild, entityID, _entityViewsDB);
+        }
+
+        public void RemoveMetaEntity<T>(int metaEntityID) where T : IEntityDescriptor, new()
+        {
+            InternalRemove(EntityDescriptorTemplate<T>.Default.descriptor.entityViewsToBuild, metaEntityID, _metaEntityViewsDB);
+        }
+
+        public void RemoveEntityFromGroup<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
+        {
+            InternalRemove(EntityDescriptorTemplate<T>.Default.descriptor.entityViewsToBuild, entityID, _groupEntityViewsDB[groupID]);
+        }
+        
         public void AddEngine(IEngine engine)
         {
-#if UNITY_EDITOR
-            EngineProfiler.AddEngine(engine);
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
+            Profiler.EngineProfiler.AddEngine(engine);
 #endif
-            var queryableNodeEngine = engine as IQueryableNodeEngine;
-                    if (queryableNodeEngine != null)
-                          queryableNodeEngine.nodesDB =
-                                new EngineNodeDB(_nodesDB, _nodesDBdic, _metaNodesDB, _groupNodesDB);
-
             var engineType = engine.GetType();
+#if EXPERIMENTAL
+            bool engineAdded;
+    
             var implementedInterfaces = engineType.GetInterfaces();
-
+            
             CollectImplementedInterfaces(implementedInterfaces);
-
-            var engineAdded = CheckGenericEngines(engine);
-
-            if (CheckLegacyNodesEngine(engine, ref engineAdded) == false)
-                CheckNodesEngine(engine, engineType, ref engineAdded);
-
-            if (engineAdded == false)
+    
+            engineAdded = CheckSpecialEngine(engine);
+#endif
+            var viewEngine = engine as IHandleEntityViewEngine;
+            
+            if (viewEngine != null)
+                CheckEntityViewsEngine(viewEngine, engineType);
+            else            
                 _otherEngines.Add(engine);
-
-            var callBackOnAddEngine = engine as ICallBackOnAddEngine;
-            if (callBackOnAddEngine != null)
-                callBackOnAddEngine.Ready();
+            
+            var queryableEntityViewEngine = engine as IQueryingEntityViewEngine;
+            if (queryableEntityViewEngine != null)
+            {
+                queryableEntityViewEngine.entityViewsDB = _engineEntityViewDB;
+                queryableEntityViewEngine.Ready();
+            }
         }
-
-        void CollectImplementedInterfaces(Type[] implementedInterfaces)
+       
+#if EXPERIMENTAL
+         void CollectImplementedInterfaces(Type[] implementedInterfaces)
         {
             _implementedInterfaceTypes.Clear();
 
-            var type = typeof(IEngine);
+            var type = typeof(IHandleEntityViewEngine);
 
             for (int index = 0; index < implementedInterfaces.Length; index++)
             {
@@ -180,81 +213,60 @@ namespace Svelto.ECS
                 _implementedInterfaceTypes.Add(genericTypeDefinition, interfaceType.GetGenericArguments());
             }
         }
-
-        bool CheckGenericEngines(IEngine engine)
+    
+        bool CheckSpecialEngine(IEngine engine)
         {
             if (_implementedInterfaceTypes.Count == 0) return false;
 
             bool engineAdded = false;
 
-            if (_implementedInterfaceTypes.ContainsKey(_structNodeEngineType))
+            if (_implementedInterfaceTypes.ContainsKey(_structEntityViewEngineType))
             {
-                ((IStructNodeEngine)engine).CreateStructNodes
-                    (_sharedStructNodeLists);
+                ((IStructEntityViewEngine)engine).CreateStructEntityViews
+                    (_sharedStructEntityViewLists);
             }
 
-            if (_implementedInterfaceTypes.ContainsKey(_groupedStructNodesEngineType))
+            if (_implementedInterfaceTypes.ContainsKey(_groupedStructEntityViewsEngineType))
             {
-                ((IGroupedStructNodesEngine)engine).CreateStructNodes
-                    (_sharedGroupedStructNodeLists);
-            }
-
-            Type[] arguments;
-            if (_implementedInterfaceTypes.TryGetValue(_activableNodeEngineType, 
-                                                       out arguments))
-            {
-                AddEngine(engine, arguments, _activableEngines);
-
-                engineAdded = true;
+                ((IGroupedStructEntityViewsEngine)engine).CreateStructEntityViews
+                    (_sharedGroupedStructEntityViewLists);
             }
 
             return engineAdded;
         }
-
-        bool CheckLegacyNodesEngine(IEngine engine, ref bool engineAdded)
-        {
-            var nodesEngine = engine as INodesEngine;
-            if (nodesEngine != null)
-            {
-                AddEngine(nodesEngine, nodesEngine.AcceptedNodes(), _nodeEngines);
-
-                engineAdded = true;
-
-                return true;
-            }
-
-            return false;
-        }
-
-        bool CheckNodesEngine(IEngine engine, Type engineType, ref bool engineAdded)
+#endif
+        void CheckEntityViewsEngine(IEngine engine, Type engineType)
         {
             var baseType = engineType.GetBaseType();
-            
-            if (baseType.IsGenericTypeEx()
-                && engine is INodeEngine)
+
+            if (baseType.IsGenericTypeEx())
             {
-                AddEngine(engine as INodeEngine, baseType.GetGenericArguments(), _nodeEngines);
+                var genericArguments = baseType.GetGenericArguments();
+                AddEngine(engine as IHandleEntityViewEngine, genericArguments, _entityViewEngines);
+#if EXPERIMENTAL
+                var activableEngine = engine as IHandleActivableEntityEngine;
+                if (activableEngine != null)
+                    AddEngine(activableEngine, genericArguments, _activableViewEntitiesEngines);
+#endif    
 
-                engineAdded = true;
-
-                return true;
+                return;
             }
 
-            return false;
+            throw new Exception("Not Supported Engine");
         }
 
-        static void AddEngine(IEngine engine, Type[] types,
-                              Dictionary<Type, FasterList<IEngine>> engines)
+        static void AddEngine<T>(T engine, Type[] types,
+                              Dictionary<Type, FasterList<T>> engines)
         {
             for (int i = 0; i < types.Length; i++)
             {
-                FasterList<IEngine> list;
+                FasterList<T> list;
 
                 var type = types[i];
 
                 if (engines.TryGetValue(type, out list) == false)
                 {
-                    list = new FasterList<IEngine>();
+                    list = new FasterList<T>();
 
                     engines.Add(type, list);
                 }
@@ -263,309 +275,362 @@ namespace Svelto.ECS
             }
         }
 
-        static void AddNodesToTheDBAndSuitableEngines(Dictionary<Type, ITypeSafeList> nodesToAdd,
-            Dictionary<Type, FasterList<IEngine>> nodeEngines, 
-            Dictionary<Type, ITypeSafeDictionary> nodesDBdic, 
-            Dictionary<Type, ITypeSafeList> nodesDB)
+        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<Type, ITypeSafeList> entityViewsToAdd,
+            Dictionary<Type, ITypeSafeList> entityViewsDB)
         {
-            foreach (var nodeList in nodesToAdd)
+            foreach (var entityViewList in entityViewsToAdd)
             {
-                AddNodeToDB(nodesDB, nodeList);
+                AddEntityViewToDB(entityViewsDB, entityViewList);
 
-                if (nodeList.Value.isQueryiableNode)
+                if (entityViewList.Value.isQueryiableEntityView)
                 {
-                    AddNodeToNodesDictionary(nodesDBdic, nodeList.Value, nodeList.Key);
-                    
-                    foreach (var node in nodeList.Value)
-                        AddNodeToTheSuitableEngines(nodeEngines, node as NodeWithID, nodeList.Key);
+                    AddEntityViewToEntityViewsDictionary(_entityViewsDBdic, entityViewList.Value, entityViewList.Key);
+                }
+            }
+
+            foreach (var entityViewList in entityViewsToAdd)
+            {
+                if (entityViewList.Value.isQueryiableEntityView)
+                {
+                    AddEntityViewToTheSuitableEngines(_entityViewEngines, entityViewList.Value,
+                                                          entityViewList.Key);
                 }
             }
         }
 
-        static void AddGroupNodesToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupedNodesToAdd,
-                                                      Dictionary<Type, FasterList<IEngine>> nodeEngines, 
-                                                      Dictionary<Type, ITypeSafeDictionary> nodesDBdic, 
-                                                      Dictionary<int, Dictionary<Type, ITypeSafeList>> groupNodesDB,
-                                                      Dictionary<Type, ITypeSafeList> nodesDB)
+        void AddGroupEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupedEntityViewsToAdd,
+                                                      Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsDB,
+                                                      Dictionary<Type, ITypeSafeList> entityViewsDB)
         {
-            foreach (var group in groupedNodesToAdd)
+            foreach (var group in groupedEntityViewsToAdd)
             {
-                AddNodesToTheDBAndSuitableEngines(group.Value, nodeEngines, nodesDBdic, nodesDB);
+                AddEntityViewsToTheDBAndSuitableEngines(group.Value, entityViewsDB);
 
-                AddNodesToGroupDB(groupNodesDB, @group);
+                AddEntityViewsToGroupDB(groupEntityViewsDB, @group);
             }
         }
 
-        static void AddNodesToGroupDB(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupNodesDB, 
+        static void AddEntityViewsToGroupDB(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsDB, 
                                       KeyValuePair<int, Dictionary<Type, ITypeSafeList>> @group)
         {
-            Dictionary<Type, ITypeSafeList> groupedNodesByType;
+            Dictionary<Type, ITypeSafeList> groupedEntityViewsByType;
 
-            if (groupNodesDB.TryGetValue(@group.Key, out groupedNodesByType) == false)
-                groupedNodesByType = groupNodesDB[@group.Key] = new Dictionary<Type, ITypeSafeList>();
+            if (groupEntityViewsDB.TryGetValue(@group.Key, out groupedEntityViewsByType) == false)
+                groupedEntityViewsByType = groupEntityViewsDB[@group.Key] = new Dictionary<Type, ITypeSafeList>();
 
-            foreach (var node in @group.Value)
+            foreach (var entityView in @group.Value)
             {
-                groupedNodesByType.Add(node.Key, node.Value);
+                groupedEntityViewsByType.Add(entityView.Key, entityView.Value);
             }
         }
 
-        static void AddNodeToDB(Dictionary<Type, ITypeSafeList> nodesDB, KeyValuePair<Type, ITypeSafeList> nodeList)
+        static void AddEntityViewToDB(Dictionary<Type, ITypeSafeList> entityViewsDB, KeyValuePair<Type, ITypeSafeList> entityViewList)
         {
             ITypeSafeList dbList;
 
-            if (nodesDB.TryGetValue(nodeList.Key, out dbList) == false)
-                dbList = nodesDB[nodeList.Key] = nodeList.Value.Create();
+            if (entityViewsDB.TryGetValue(entityViewList.Key, out dbList) == false)
+                dbList = entityViewsDB[entityViewList.Key] = entityViewList.Value.Create();
 
-            dbList.AddRange(nodeList.Value);
+            dbList.AddRange(entityViewList.Value);
         }
         
-        static void AddNodeToNodesDictionary(Dictionary<Type, ITypeSafeDictionary> nodesDBdic, 
-                                             ITypeSafeList nodes, Type nodeType) 
+        static void AddEntityViewToEntityViewsDictionary(Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic, 
+                                             ITypeSafeList entityViews, Type entityViewType) 
         {
-            ITypeSafeDictionary nodesDic;
+            ITypeSafeDictionary entityViewsDic;
             
-            if (nodesDBdic.TryGetValue(nodeType, out nodesDic) == false)
-                nodesDic = nodesDBdic[nodeType] = nodes.CreateIndexedDictionary();
+            if (entityViewsDBdic.TryGetValue(entityViewType, out entityViewsDic) == false)
+                entityViewsDic = entityViewsDBdic[entityViewType] = entityViews.CreateIndexedDictionary();
 
-            nodesDic.FillWithIndexedNodes(nodes);
+            entityViewsDic.FillWithIndexedEntityViews(entityViews);
         }
 
-        static void AddNodeToTheSuitableEngines(Dictionary<Type, FasterList<IEngine>> nodeEngines, NodeWithID node, Type nodeType)
+        static void AddEntityViewToTheSuitableEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines, ITypeSafeList entityViewsList, Type entityViewType)
         {
-            FasterList<IEngine> enginesForNode;
+            FasterList<IHandleEntityViewEngine> enginesForEntityView;
 
-            if (nodeEngines.TryGetValue(nodeType, out enginesForNode))
+            if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
             {
-                for (int j = 0; j < enginesForNode.Count; j++)
+                int viewsCount;
+
+                var entityViews = entityViewsList.ToArrayFast(out viewsCount);
+
+                for (int i = 0; i < viewsCount; i++)
                 {
+                    int count;
+                    var fastList = FasterList<IHandleEntityViewEngine>.NoVirt.ToArrayFast(enginesForEntityView, out count);
+                    IEntityView entityView = entityViews[i];
+                    for (int j = 0; j < count; j++)
+                    {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                    EngineProfiler.MonitorRemoveDuration(RemoveNodeFromEngine, (enginesForNode[j] as INodeEngine), node);
+                      EngineProfiler.MonitorAddDuration(_addEntityViewToEngine, fastList[j], entityView);
 #else
-                    (enginesForNode[j] as INodeEngine).Add(node);
+                      fastList[j].Add(entityView);
 #endif
+                    }
                 }
             }
         }
-/*
-        void DisableNodeFromEngines(INode node, Type nodeType)
-        {
-            ITypeSafeList enginesForNode;
 
-            if (_activableEngines.TryGetValue(nodeType, out enginesForNode))
+        void InternalRemove(IEntityViewBuilder[] entityViewBuilders, int entityID, 
+                            Dictionary<Type, ITypeSafeList> entityViewsDB)
+        {
+            int entityViewBuildersCount = entityViewBuilders.Length;
+            
+            for (int i = 0; i < entityViewBuildersCount; i++)
             {
-                for (int j = 0; j < enginesForNode.Count; j++)
+                Type entityViewType = entityViewBuilders[i].GetEntityViewType();
+
+                ITypeSafeList entityViews = entityViewsDB[entityViewType];
+                if (entityViews.UnorderedRemove(entityID) == false)
+                    entityViewsDB.Remove(entityViewType);
+
+                if (entityViews.isQueryiableEntityView)
                 {
-                    (enginesForNode[j] as IActivableNodeEngine).Disable(node);
+                    var typeSafeDictionary = _entityViewsDBdic[entityViewType];
+                    var entityView = typeSafeDictionary.GetIndexedEntityView(entityID);
+
+                    if (typeSafeDictionary.Remove(entityID) == false)
+                        _entityViewsDBdic.Remove(entityViewType);
+
+                    RemoveEntityViewFromEngines(_entityViewEngines, entityView, entityViewType);
                 }
             }
         }
 
-        void EnableNodeFromEngines(INode node, Type nodeType)
+        void InternalRemove(IEntityViewBuilder[] entityViewBuilders, int entityID, int groupID,
+                            Dictionary<Type, ITypeSafeList> entityViewsDB)
         {
-            ITypeSafeList enginesForNode;
+            int entityViewBuildersCount = entityViewBuilders.Length;
 
-            if (_activableEngines.TryGetValue(nodeType, out enginesForNode))
+            for (int i = 0; i < entityViewBuildersCount; i++)
             {
-                for (int j = 0; j < enginesForNode.Count; j++)
-                {
-                    (enginesForNode[j] as IActivableNodeEngine).Enable(node);
-                }
+                Type entityViewType = entityViewBuilders[i].GetEntityViewType();
+                Dictionary<Type, ITypeSafeList> dictionary = _groupEntityViewsDB[groupID];
+
+                if (dictionary[entityViewType].UnorderedRemove(entityID) == false)
+                    dictionary.Remove(entityViewType);
+
+                if (dictionary.Count == 0) _groupEntityViewsDB.Remove(groupID);
             }
-        }*/
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-        void AddNodeToEngine(IEngine engine, INode node)
-        {
-            (engine as INodeEngine).Add(node);
+
+            InternalRemove(entityViewBuilders, entityID, entityViewsDB);
         }
 
-        void RemoveNodeFromEngine(IEngine engine, INode node)
+        static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines, 
+                                                IEntityView entityView, Type entityViewType)
         {
-            (engine as INodeEngine).Remove(node);
-        }
-#endif
+            FasterList<IHandleEntityViewEngine> enginesForEntityView;
 
-        void InternalDisable(FasterList<INodeBuilder> nodeBuilders, int entityID)
-        {
-/*            if (_engineRootWeakReference.IsValid == false)
-                return;
-
-            for (int i = 0; i < nodes.Count; i++)
+            if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
             {
-                var node = nodes[i];
-                Type nodeType = node.GetType();
+                int count;
+                var fastList = FasterList<IHandleEntityViewEngine>.NoVirt.ToArrayFast(enginesForEntityView, out count);
                 
-                DisableNodeFromEngines(node, nodeType);
-            }*/
-        }
-
-        void InternalEnable(FasterList<INodeBuilder> nodeBuilders, int entityID)
-        {/*
-            if (_engineRootWeakReference.IsValid == false)
-                return;
-
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                var node = nodes[i];
-                Type nodeType = node.GetType();
-                EnableNodeFromEngines(node, nodeType);
-            }*/
-        }
-
-        void InternalRemove(FasterList<INodeBuilder> nodeBuilders, int entityID)
-        {
-            if (_engineRootWeakReference.IsValid == false)
-                return;
-
-            int nodeBuildersCount = nodeBuilders.Count;
-            for (int i = 0; i < nodeBuildersCount; i++)
-            {
-                Type nodeType = nodeBuilders[i].GetType();
-
-                ITypeSafeList nodes;
-                if (_nodesDB.TryGetValue(nodeType, out nodes) == true)
-                    nodes.UnorderedRemove(entityID);
-
-                if (nodes.isQueryiableNode)
-                {
-                    var node = _nodesDBdic[nodeType].GetIndexedNode(entityID);
-                    
-                    _nodesDBdic[nodeType].Remove(entityID);
-
-                    RemoveNodeFromEngines(_nodeEngines, node, nodeType);
-                }
-            }
-        }
-        
-        void InternalGroupedRemove(FasterList<INodeBuilder> nodeBuilders, int entityID)
-        {
-        }
-
-        void InternalMetaRemove(FasterList<INodeBuilder> nodeBuilders, int entityID)
-        {
-        }
-        
-        static void RemoveNodeFromEngines(Dictionary<Type, FasterList<IEngine>> nodeEngines, NodeWithID node, Type nodeType)
-        {
-            FasterList<IEngine> enginesForNode;
-
-            if (nodeEngines.TryGetValue(nodeType, out enginesForNode))
-            {
-                for (int j = 0; j < enginesForNode.Count; j++)
+                for (int j = 0; j < count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                    EngineProfiler.MonitorRemoveDuration(RemoveNodeFromEngine, (enginesForNode[j] as INodeEngine), node);
+                    EngineProfiler.MonitorRemoveDuration(_removeEntityViewFromEngine, fastList[j], entityView);
 #else
-                    (enginesForNode[j] as INodeEngine).Remove(node);
+                    fastList[j].Remove(entityView);
 #endif
                 }
             }
         }
 
-        void SubmitNodes()
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
+        static void AddEntityViewToEngine(IHandleEntityViewEngine engine, IEntityView entityView)
         {
-            _nodesToAdd.Swap();
-            _metaNodesToAdd.Swap();
-            _groupedNodesToAdd.Swap();
-            
-            bool newNodesHaveBeenAddedWhileIterating =
-                _metaNodesToAdd.Count > 0 
-                || _nodesToAdd.Count > 0
-                || _groupedNodesToAdd.Count > 0;
+            engine.Add(entityView);
+        }
+
+        static void RemoveEntityViewFromEngine(IHandleEntityViewEngine engine, IEntityView entityView)
+        {
+            engine.Remove(entityView);
+        }
+#endif
+
+        void SubmitEntityViews()
+        {
+            bool newEntityViewsHaveBeenAddedWhileIterating =
+                _metaEntityViewsToAdd.current.Count > 0 
+                || _entityViewsToAdd.current.Count > 0
+                || _groupedEntityViewsToAdd.current.Count > 0;
 
             int numberOfReenteringLoops = 0;
 
-            while (newNodesHaveBeenAddedWhileIterating)
+            while (newEntityViewsHaveBeenAddedWhileIterating)
             {
-                if ( _nodesToAdd.Count > 0)
-                    AddNodesToTheDBAndSuitableEngines(_nodesToAdd.current, _nodeEngines, _nodesDBdic, _nodesDB);
-                
-                if ( _metaNodesToAdd.Count > 0)
-                    AddNodesToTheDBAndSuitableEngines(_metaNodesToAdd.current, _nodeEngines, _nodesDBdic, _metaNodesDB);
-                
-                if (_groupedNodesToAdd.Count > 0)
-                    AddGroupNodesToTheDBAndSuitableEngines(_groupedNodesToAdd.current, _nodeEngines, _nodesDBdic, _groupNodesDB, _nodesDB);
-                
-                _nodesToAdd.Clear();
-                _metaNodesToAdd.Clear();
-                _groupedNodesToAdd.Clear();
+                //use other as source from now on
+                //current will be use to write new entityViews
+                _entityViewsToAdd.Swap();
+                _metaEntityViewsToAdd.Swap();
+                _groupedEntityViewsToAdd.Swap();
 
-                _nodesToAdd.Swap();
-                _metaNodesToAdd.Swap();
-                _groupedNodesToAdd.Swap();
+                if ( _entityViewsToAdd.other.Count > 0)
+                    AddEntityViewsToTheDBAndSuitableEngines(_entityViewsToAdd.other, _entityViewsDB);
                 
-                newNodesHaveBeenAddedWhileIterating =
-                    _metaNodesToAdd.Count > 0 
-                    || _nodesToAdd.Count > 0
-                    || _groupedNodesToAdd.Count > 0;
+                if ( _metaEntityViewsToAdd.other.Count > 0)
+                    AddEntityViewsToTheDBAndSuitableEngines(_metaEntityViewsToAdd.other, _metaEntityViewsDB);
+                
+                if (_groupedEntityViewsToAdd.other.Count > 0)
+                    AddGroupEntityViewsToTheDBAndSuitableEngines(_groupedEntityViewsToAdd.other, _groupEntityViewsDB, _entityViewsDB);
+                
+                //other can be cleared now
+                _entityViewsToAdd.other.Clear();
+                _metaEntityViewsToAdd.other.Clear();
+                _groupedEntityViewsToAdd.other.Clear();
+
+                //has current new entityViews?
+                newEntityViewsHaveBeenAddedWhileIterating =
+                    _metaEntityViewsToAdd.current.Count > 0 
+                    || _entityViewsToAdd.current.Count > 0
+                    || _groupedEntityViewsToAdd.current.Count > 0;
 
                 if (numberOfReenteringLoops > 5)
-                    throw new Exception("possible infinite loop found creating Entities inside INodesEngine Add method, please consider building entities outside INodesEngine Add method");
+                    throw new Exception("possible infinite loop found creating Entities inside IEntityViewsEngine Add method, please consider building entities outside IEntityViewsEngine Add method");
 
                 numberOfReenteringLoops++;
             } 
         }
 
-        readonly Dictionary<Type, FasterList<IEngine>> _nodeEngines;
-        readonly Dictionary<Type, FasterList<IEngine>> _activableEngines;
+        readonly Dictionary<Type, FasterList<IHandleEntityViewEngine>> _entityViewEngines;    
 
         readonly FasterList<IEngine> _otherEngines;
 
-        readonly Dictionary<Type, ITypeSafeList> _nodesDB;
-        readonly Dictionary<Type, ITypeSafeList> _metaNodesDB;
-        readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupNodesDB;
+        readonly Dictionary<Type, ITypeSafeList> _entityViewsDB;
+        readonly Dictionary<Type, ITypeSafeList> _metaEntityViewsDB;
+        readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
         
-        readonly Dictionary<Type, ITypeSafeDictionary> _nodesDBdic;
+        readonly Dictionary<Type, ITypeSafeDictionary> _entityViewsDBdic;
 
-        readonly DoubleBufferedNodes<Dictionary<Type, ITypeSafeList>> _nodesToAdd;
-        readonly DoubleBufferedNodes<Dictionary<Type, ITypeSafeList>> _metaNodesToAdd;
-        readonly DoubleBufferedNodes<Dictionary<int, Dictionary<Type, ITypeSafeList>>> _groupedNodesToAdd;
+        readonly DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>> _entityViewsToAdd;
+        readonly DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>> _metaEntityViewsToAdd;
+        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>> _groupedEntityViewsToAdd;
       
-        readonly NodeSubmissionScheduler _scheduler;
-
-        readonly Type _structNodeEngineType;
-        readonly Type _groupedStructNodesEngineType;
-        readonly Type _activableNodeEngineType;
+        readonly EntityViewSubmissionScheduler _scheduler;
+#if EXPERIMENTAL
+        readonly Type _structEntityViewEngineType;
+        readonly Type _groupedStructEntityViewsEngineType;
         
-        readonly SharedStructNodeLists _sharedStructNodeLists;
-        readonly SharedGroupedStructNodesLists _sharedGroupedStructNodeLists;
+        readonly SharedStructEntityViewLists _sharedStructEntityViewLists;
+        readonly SharedGroupedStructEntityViewsLists _sharedGroupedStructEntityViewLists;
 
-        readonly Dictionary<Type, Type[]>                     _implementedInterfaceTypes;
-        readonly DataStructures.WeakReference<EnginesRoot>    _engineRootWeakReference;
-        
-        BuildNodeCallbackStruct _callBackStructForBuiltNodes;
-        BuildNodeCallbackStruct _callBackStructForBuiltGroupedNodes;
-        BuildNodeCallbackStruct _callBackStructForBuiltMetaNodes;
+        readonly Dictionary<Type, Type[]>  _implementedInterfaceTypes;
+#endif    
+ 
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR       
+        static Action<IHandleEntityViewEngine, IEntityView> _addEntityViewToEngine;
+        static Action<IHandleEntityViewEngine, IEntityView> _removeEntityViewFromEngine;
+#endif
+        readonly EngineEntityViewDB _engineEntityViewDB;
 
-        class DoubleBufferedNodes<T> where T : class, IDictionary, new()
+        class DoubleBufferedEntityViews<T> where T : class, IDictionary, new()
         {
-            readonly T _nodesToAddBufferA = new T();
-            readonly T _nodesToAddBufferB = new T();
+            readonly T _entityViewsToAddBufferA = new T();
+            readonly T _entityViewsToAddBufferB = new T();
 
-            public DoubleBufferedNodes()
+            public DoubleBufferedEntityViews()
             {
-                this.other = _nodesToAddBufferA;
-                this.current = _nodesToAddBufferB;
+                this.other = _entityViewsToAddBufferA;
+                this.current = _entityViewsToAddBufferB;
             }
 
             public T other  { get; private set; }
             public T current { get; private set; }
-
-            public int Count
-            {
-                get { return current.Count; }
-            }
-            
-            public void Clear()
-            {
-                current.Clear();
-            }
-
+           
             public void Swap()
             {
                 var toSwap = other;
                 other = current;
                 current = toSwap;
+            }
+        }
+        
+        class GenericEntityFactory : IEntityFactory
+        {
+            DataStructures.WeakReference<EnginesRoot> _weakEngine;
+
+            public GenericEntityFactory(DataStructures.WeakReference<EnginesRoot> weakReference)
+            {
+                _weakEngine = weakReference;
+            }
+
+            public void BuildEntity<T>(int entityID, object[] implementors = null) where T : IEntityDescriptor, new()
+            {
+                _weakEngine.Target.BuildEntity<T>(entityID, implementors);
+            }
+
+            public void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
+            {
+                _weakEngine.Target.BuildEntity(entityID, entityDescriptor, implementors);
+            }
+
+            public void BuildMetaEntity<T>(int metaEntityID, object[] implementors = null) where T : IEntityDescriptor, new()
+            {
+                _weakEngine.Target.BuildMetaEntity<T>(metaEntityID, implementors);
+            }
+
+            public void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors = null) where T : IEntityDescriptor, new()
+            {
+                _weakEngine.Target.BuildEntityInGroup<T>(entityID, groupID, implementors);
+            }
+
+            public void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
+            {
+                _weakEngine.Target.BuildEntityInGroup(entityID, groupID, entityDescriptor, implementors);
+            }
+        }
+        
+        class GenericEntityFunctions : IEntityFunctions
+        {
+            public GenericEntityFunctions(DataStructures.WeakReference<EnginesRoot> weakReference)
+            {
+                _weakReference = weakReference;
+            }
+
+            public void RemoveEntity(int entityID, IRemoveEntityComponent entityTemplate)
+            {
+                _weakReference.Target.RemoveEntity(entityID, entityTemplate);
+            }
+
+            public void RemoveEntity<T>(int entityID) where T : IEntityDescriptor, new()
+            {
+                _weakReference.Target.RemoveEntity<T>(entityID);
+            }
+
+            public void RemoveMetaEntity<T>(int metaEntityID) where T : IEntityDescriptor, new()
+            {
+                _weakReference.Target.RemoveEntity<T>(metaEntityID);
+            }
+
+            public void RemoveEntityFromGroup<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
+            {
+                _weakReference.Target.RemoveEntity<T>(entityID);
+            }
+  
+            readonly DataStructures.WeakReference<EnginesRoot> _weakReference;
+        }
+
+        public void Dispose()
+        {
+            foreach (var entity in _entityViewsDB)
+            {
+                if (entity.Value.isQueryiableEntityView == true)
+                {
+                    foreach (var entityView in entity.Value)
+                    {
+                        RemoveEntityViewFromEngines(_entityViewEngines, entityView as EntityView, entity.Key);
+                    }
+                }
+            }
+
+            foreach (var entity in _metaEntityViewsDB)
+            {
+                foreach (var entityView in entity.Value)
+                {
+                    RemoveEntityViewFromEngines(_entityViewEngines, entityView as EntityView, entity.Key);
+                }
             }
         }
     }

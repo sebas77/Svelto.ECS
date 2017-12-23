@@ -1,6 +1,5 @@
 ﻿using Svelto.DataStructures;
 using System.Collections.Generic;
-using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Internal
 {
@@ -14,35 +13,37 @@ namespace Svelto.ECS.Internal
 
     public interface ITypeSafeDictionary
     {
-        void FillWithIndexedNodes(ITypeSafeList nodes);
-        void Remove(int entityId);
-        NodeWithID GetIndexedNode(int entityID);
+        void FillWithIndexedEntityViews(ITypeSafeList entityViews);
+        bool Remove(int entityId);
+        IEntityView GetIndexedEntityView(int entityID);
     }
 
-    class TypeSafeDictionary<TValue> : Dictionary<int, TValue>, ITypeSafeDictionary where TValue:NodeWithID
+    class TypeSafeDictionary<TValue> : Dictionary<int, TValue>, ITypeSafeDictionary where TValue:IEntityView
     {
         internal static readonly ReadOnlyDictionary<int, TValue> Default = 
             new ReadOnlyDictionary<int, TValue>(new Dictionary<int, TValue>());
         
-        public void FillWithIndexedNodes(ITypeSafeList nodes)
+        public void FillWithIndexedEntityViews(ITypeSafeList entityViews)
         {
             int count;
-            var buffer = FasterList<TValue>.NoVirt.ToArrayFast((FasterList<TValue>) nodes, out count);
+            var buffer = FasterList<TValue>.NoVirt.ToArrayFast((FasterList<TValue>) entityViews, out count);
 
             for (int i = 0; i < count; i++)
             {
-                var node = buffer[i];
+                var entityView = buffer[i];
 
-                Add(node.ID, node);
+                Add(entityView.ID, entityView);
             }
         }
 
-        public void Remove(int entityId)
+        new public bool Remove(int entityId)
         {
-            throw new System.NotImplementedException();
+            base.Remove(entityId);
+
+            return this.Count > 0;
         }
 
-        public NodeWithID GetIndexedNode(int entityID)
+        public IEntityView GetIndexedEntityView(int entityID)
         {
             return this[entityID];
         }

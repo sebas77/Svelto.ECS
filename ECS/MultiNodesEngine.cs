@@ -1,85 +1,87 @@
-using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Internal
 {
-    public abstract class MultiNodesEngine<T>:INodeEngine where T:NodeWithID
+    public abstract class MultiEntityViewsEngine<T>:IHandleEntityViewEngine where T:EntityView<T>, new()
     {
-        protected abstract void Add(T node);
-        protected abstract void Remove(T node);
+        protected abstract void Add(T entityView);
+        protected abstract void Remove(T entityView);
         
-        public virtual void Add(NodeWithID node)
+        public virtual void Add(IEntityView entityView)
         {
-            Add((T) node);
+            Add((T) entityView);
         }
 
-        public virtual void Remove(NodeWithID node)
+        public virtual void Remove(IEntityView entityView)
         {
-            Remove((T) node);
+            Remove((T) entityView);
         }
     }
 }
 
 namespace Svelto.ECS
 {
-    public abstract class MultiNodesEngine<T, U> : MultiNodesEngine<T>
-        where T:NodeWithID where U:NodeWithID
+    public abstract class MultiEntityViewsEngine<T, U> : MultiEntityViewsEngine<T>
+        where T:EntityView<T>, new()
+        where U:EntityView<U>, new()
     {
-        protected abstract void Add(U node);
-        protected abstract void Remove(U node);
+        protected abstract void Add(U entityView);
+        protected abstract void Remove(U entityView);
 
-        public override void Add(NodeWithID node)
+        public override void Add(IEntityView entityView)
         {
-            var castedNode = node as U;
-            if (castedNode != null)
+            var castedEntityView = entityView as U;
+            if (castedEntityView != null)
             {
-                Add(castedNode);
+                Add(castedEntityView);
             }
             else
             {
-                base.Add(node);
+                base.Add(entityView);
             }
         }
 
-        public override void Remove(NodeWithID node)
+        public override void Remove(IEntityView entityView)
         {
-            if (node is U)
+            if (entityView is U)
             {
-                Remove((U) node);
+                Remove((U) entityView);
             }
             else
             {
-                base.Remove(node);
+                base.Remove(entityView);
             }
         }
     }
 
-    public abstract class MultiNodesEngine<T, U, V> : MultiNodesEngine<T, U> 
-        where T: NodeWithID where U : NodeWithID where V:NodeWithID
+    public abstract class MultiEntityViewsEngine<T, U, V> : MultiEntityViewsEngine<T, U>
+        where T : EntityView<T>, new()
+        where U : EntityView<U>, new()
+        where V : EntityView<V>, new()
     {
-        protected abstract void Add(V node);
-        protected abstract void Remove(V node);
+        protected abstract void Add(V entityView);
+        protected abstract void Remove(V entityView);
 
-        public override void Add(NodeWithID node)
+        public override void Add(IEntityView entityView)
         {
-            var castedNode = node as V;
-            if (castedNode != null)
+            var castedEntityView = entityView as V;
+            if (castedEntityView != null)
             {
-                Add(castedNode);
+                Add(castedEntityView);
             }
             else
-                base.Add(node);
+                base.Add(entityView);
         }
 
-        public override void Remove(NodeWithID node)
+        public override void Remove(IEntityView entityView)
         {
-            var castedNode = node as V;
-            if (castedNode != null)
+            var castedEntityView = entityView as V;
+            if (castedEntityView != null)
             {
-                Remove(castedNode);
+                Remove(castedEntityView);
             }
             else
-                base.Remove(node);
+                base.Remove(entityView);
         }
     }
 }

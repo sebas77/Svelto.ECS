@@ -1,58 +1,61 @@
 ﻿using System;
-using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public interface INodeBuilder
+    public interface IEntityViewBuilder
     {
-        INode BuildNodeAndAddToList(ref ITypeSafeList list, int entityID);
+        IEntityView BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID);
 
-        Type GetNodeType();
+        Type GetEntityViewType();
     }
 
-    public class NodeBuilder<NodeType> : INodeBuilder where NodeType : NodeWithID, new()
+    public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : EntityView<EntityViewType>, new()
     {
-        public INode BuildNodeAndAddToList(ref ITypeSafeList list, int entityID)
+        public IEntityView BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID)
         {
             if (list == null)
-                list = new TypeSafeFasterListForECSForClasses<NodeType>();
+                list = new TypeSafeFasterListForECSForClasses<EntityViewType>();
 
-            var castedList = list as TypeSafeFasterListForECSForClasses<NodeType>;
+            var castedList = list as TypeSafeFasterListForECSForClasses<EntityViewType>;
 
-            var node = NodeWithID.BuildNode<NodeType>(entityID);
+            var entityView = EntityView<EntityViewType>.BuildEntityView<EntityViewType>(entityID);
 
-            castedList.Add(node);
+            castedList.Add(entityView);
 
-            return node;
+            return entityView;
         }
 
-        public Type GetNodeType()
+        public Type GetEntityViewType()
         {
-            return typeof(NodeType);
+            return _entityViewType;
         }
+
+        readonly Type _entityViewType = typeof(EntityViewType);
     }
 
-    public class StructNodeBuilder<NodeType> : INodeBuilder where NodeType : struct, IStructNodeWithID
+    public class EntityStructBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : struct, IEntityStruct
     {
-        public INode BuildNodeAndAddToList(ref ITypeSafeList list, int entityID)
+        public IEntityView BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID)
         {
-            var node = default(NodeType);
-            node.ID = entityID;
+            var entityView = default(EntityViewType);
+            entityView.ID = entityID;
             
             if (list == null)
-                list = new TypeSafeFasterListForECSForStructs<NodeType>();
+                list = new TypeSafeFasterListForECSForStructs<EntityViewType>();
 
-            var castedList = list as TypeSafeFasterListForECSForStructs<NodeType>;
+            var castedList = list as TypeSafeFasterListForECSForStructs<EntityViewType>;
 
-            castedList.Add(node);
+            castedList.Add(entityView);
 
             return null;
         }
 
-        public Type GetNodeType()
+        public Type GetEntityViewType()
         {
-            return typeof(NodeType);
+            return _entityViewType;
         }
-    }
+
+        readonly Type _entityViewType = typeof(EntityViewType);
+    }    
 }

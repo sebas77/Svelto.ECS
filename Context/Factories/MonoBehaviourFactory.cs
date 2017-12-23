@@ -2,7 +2,6 @@
 #region
 
 using System;
-using Svelto.DataStructures;
 using UnityEngine;
 
 #endregion

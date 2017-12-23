@@ -33,12 +33,12 @@ namespace Svelto.ECS.Profiler
         double _accumulatedAddDuration;
         double _minAddDuration;
         double _maxAddDuration;
-        int _nodesAddedCount;
+        int _entityViewsAddedCount;
 
         double _accumulatedRemoveDuration;
         double _minRemoveDuration;
         double _maxRemoveDuration;
-        int _nodesRemovedCount;
+        int _entityViewsRemovedCount;
 
         public IEngine engine { get { return _engine; } }
         public string engineName { get { return _engineName; } }
@@ -56,8 +56,8 @@ namespace Svelto.ECS.Profiler
         public double maxRemoveDuration { get { return _maxRemoveDuration; } }
         public double maxUpdateDuration { get { return _maxUpdateDuration[(int)UpdateType.Update]; } }
 
-        public double averageAddDuration { get { return _nodesAddedCount == 0 ? 0 : _accumulatedAddDuration / _nodesAddedCount; } }
-        public double averageRemoveDuration { get { return _nodesRemovedCount == 0 ? 0 : _accumulatedRemoveDuration / _nodesRemovedCount; } }
+        public double averageAddDuration { get { return _entityViewsAddedCount == 0 ? 0 : _accumulatedAddDuration / _entityViewsAddedCount; } }
+        public double averageRemoveDuration { get { return _entityViewsRemovedCount == 0 ? 0 : _accumulatedRemoveDuration / _entityViewsRemovedCount; } }
         public double averageUpdateDuration { get { return _updateFrameTimes[(int)UpdateType.Update].Count == 0 ? 0 : _accumulatedUpdateDuration[(int)UpdateType.Update] / _updateFrameTimes[(int)UpdateType.Update].Count; } }
         public double averageLateUpdateDuration { get { return _updateFrameTimes[(int)UpdateType.LateUpdate].Count == 0 ? 0 : _accumulatedUpdateDuration[(int)UpdateType.LateUpdate] / _updateFrameTimes[(int)UpdateType.LateUpdate].Count; } }
         public double averageFixedUpdateDuration { get { return _updateFrameTimes[(int)UpdateType.FixedUpdate].Count == 0 ? 0 : _accumulatedUpdateDuration[(int)UpdateType.FixedUpdate] / _updateFrameTimes[(int)UpdateType.FixedUpdate].Count; } }
@@ -126,7 +126,7 @@ namespace Svelto.ECS.Profiler
                 _maxAddDuration = duration;
             }
             _accumulatedAddDuration += duration;
-            _nodesAddedCount += 1;
+            _entityViewsAddedCount += 1;
         }
 
         public void AddRemoveDuration(double duration)
@@ -140,7 +140,7 @@ namespace Svelto.ECS.Profiler
                 _maxRemoveDuration = duration;
             }
             _accumulatedRemoveDuration += duration;
-            _nodesRemovedCount += 1;
+            _entityViewsRemovedCount += 1;
         }
 
         public void ResetDurations()
@@ -156,12 +156,12 @@ namespace Svelto.ECS.Profiler
             _accumulatedAddDuration = 0;
             _minAddDuration = 0;
             _maxAddDuration = 0;
-            _nodesAddedCount = 0;
+            _entityViewsAddedCount = 0;
 
             _accumulatedRemoveDuration = 0;
             _minRemoveDuration = 0;
             _maxRemoveDuration = 0;
-            _nodesRemovedCount = 0;
+            _entityViewsRemovedCount = 0;
         }
     }
 }

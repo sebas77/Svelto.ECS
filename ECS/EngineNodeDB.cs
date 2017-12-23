@@ -5,137 +5,164 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public class EngineNodeDB : IEngineNodeDB
+    public class EngineEntityViewDB : IEngineEntityViewDB
     {
-        internal EngineNodeDB(  Dictionary<Type, ITypeSafeList> nodesDB, 
-                                Dictionary<Type, ITypeSafeDictionary> nodesDBdic,
-                                Dictionary<Type, ITypeSafeList> metaNodesDB,
-                                Dictionary<int, Dictionary<Type, ITypeSafeList>>  groupNodesDB)
+        internal EngineEntityViewDB(  Dictionary<Type, ITypeSafeList> entityViewsDB, 
+                                Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
+                                Dictionary<Type, ITypeSafeList> metaEntityViewsDB,
+                                Dictionary<int, Dictionary<Type, ITypeSafeList>>  groupEntityViewsDB)
         {
-            _nodesDB = nodesDB;
-            _nodesDBdic = nodesDBdic;
-            _metaNodesDB = metaNodesDB;
-            _groupNodesDB = groupNodesDB;
+            _entityViewsDB = entityViewsDB;
+            _entityViewsDBdic = entityViewsDBdic;
+            _metaEntityViewsDB = metaEntityViewsDB;
+            _groupEntityViewsDB = groupEntityViewsDB;
         }
 
-        public FasterReadOnlyList<T> QueryNodes<T>()
+        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:EntityView<T>, new()
         {
             var type = typeof(T);
 
-            ITypeSafeList nodes;
+            ITypeSafeList entityViews;
 
-            if (_nodesDB.TryGetValue(type, out nodes) == false)
-                return RetrieveEmptyNodeList<T>();
+            if (_entityViewsDB.TryGetValue(type, out entityViews) == false)
+                return RetrieveEmptyEntityViewList<T>();
 
-            return new FasterReadOnlyList<T>((FasterList<T>)nodes);
+            return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
         }
 
-        public FasterReadOnlyList<T> QueryGroupedNodes<T>(int @group)
+        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:EntityView<T>, new()
         {
-            return new FasterReadOnlyList<T>(_groupNodesDB[group] as FasterList<T>);
+            Dictionary<Type, ITypeSafeList> entityViews;
+
+            if (_groupEntityViewsDB.TryGetValue(group, out entityViews) == false)
+                return RetrieveEmptyEntityViewList<T>();
+            
+            return new FasterReadOnlyList<T>(entityViews as FasterList<T>);
         }
 
-        public T[] QueryNodesAsArray<T>(out int count) where T : struct
+        public T[] QueryEntityViewsAsArray<T>(out int count) where T : IEntityView
         {
             var type = typeof(T);
             count = 0;
             
-            ITypeSafeList nodes;
+            ITypeSafeList entityViews;
 
-            if (_nodesDB.TryGetValue(type, out nodes) == false)
-                return null;
+            if (_entityViewsDB.TryGetValue(type, out entityViews) == false)
+                return RetrieveEmptyEntityViewArray<T>();
             
-            var castedNodes = (FasterList<T>)nodes;
+            var castedEntityViews = (FasterList<T>)entityViews;
 
-            count = castedNodes.Count;
+            count = castedEntityViews.Count;
 
-            return castedNodes.ToArrayFast();
+            return castedEntityViews.ToArrayFast();
+        }
+        
+        public T[] QueryGroupedEntityViewsAsArray<T>(int @group, out int count) where T : IEntityView
+        {
+            var type = typeof(T);
+            count = 0;
+            
+            Dictionary<Type, ITypeSafeList> entityViews;
+            
+            if (_groupEntityViewsDB.TryGetValue(group, out entityViews) == false)
+                return RetrieveEmptyEntityViewArray<T>();
+                       
+            var castedEntityViews = (FasterList<T>)entityViews[type];
+
+            count = castedEntityViews.Count;
+
+            return castedEntityViews.ToArrayFast();
         }
 
-        public ReadOnlyDictionary<int, T> QueryIndexableNodes<T>() where T:NodeWithID
+        public ReadOnlyDictionary<int, T> QueryIndexableEntityViews<T>() where T:IEntityView
         {
             var type = typeof(T);
 
-            ITypeSafeDictionary nodes;
+            ITypeSafeDictionary entityViews;
 
-            if (_nodesDBdic.TryGetValue(type, out nodes) == false)
+            if (_entityViewsDBdic.TryGetValue(type, out entityViews) == false)
                 return TypeSafeDictionary<T>.Default;
 
-            return new ReadOnlyDictionary<int, T>(nodes as Dictionary<int, T>);
+            return new ReadOnlyDictionary<int, T>(entityViews as Dictionary<int, T>);
         }
 
-        public T QueryMetaNode<T>(int metaEntityID) where T:NodeWithID
-        {
-            return QueryNode<T>(metaEntityID);
-        }
-
-        public bool TryQueryMetaNode<T>(int metaEntityID, out T node) where T:NodeWithID
-        {
-            return TryQueryNode(metaEntityID, out node);
-        }
-
-        public FasterReadOnlyList<T> QueryMetaNodes<T>() 
+        public bool TryQueryEntityView<T>(int ID, out T entityView) where T : IEntityView
         {
             var type = typeof(T);
 
-            ITypeSafeList nodes;
+            T internalEntityView;
 
-            if (_metaNodesDB.TryGetValue(type, out nodes) == false)
-                return RetrieveEmptyNodeList<T>();
-
-            return new FasterReadOnlyList<T>((FasterList<T>)nodes);
-        }
-
-        public bool TryQueryNode<T>(int ID, out T node) where T:NodeWithID
-        {
-            var type = typeof(T);
-
-            T internalNode;
-
-            ITypeSafeDictionary nodes;
+            ITypeSafeDictionary entityViews;
             TypeSafeDictionary<T> casted;
 
-            _nodesDBdic.TryGetValue(type, out nodes);
-            casted = nodes as TypeSafeDictionary<T>;
+            _entityViewsDBdic.TryGetValue(type, out entityViews);
+            casted = entityViews as TypeSafeDictionary<T>;
 
             if (casted != null &&
-                casted.TryGetValue(ID, out internalNode))
+                casted.TryGetValue(ID, out internalEntityView))
             {
-                node = (T) internalNode;
+                entityView = (T)internalEntityView;
 
                 return true;
             }
-            
-            node = default(T);
+
+            entityView = default(T);
 
             return false;
         }
 
-        public T QueryNode<T>(int ID) where T:NodeWithID
+        public T QueryEntityView<T>(int ID) where T : IEntityView
         {
             var type = typeof(T);
 
-            T internalNode; ITypeSafeDictionary nodes;
+            T internalEntityView; ITypeSafeDictionary entityViews;
             TypeSafeDictionary<T> casted;
 
-            _nodesDBdic.TryGetValue(type, out nodes);
-            casted = nodes as TypeSafeDictionary<T>;
+            _entityViewsDBdic.TryGetValue(type, out entityViews);
+            casted = entityViews as TypeSafeDictionary<T>;
 
             if (casted != null &&
-                casted.TryGetValue(ID, out internalNode))
-                return (T)internalNode;
+                casted.TryGetValue(ID, out internalEntityView))
+                return (T)internalEntityView;
 
-            throw new Exception("Node Not Found");
+            throw new Exception("EntityView Not Found");
         }
 
-        static FasterReadOnlyList<T> RetrieveEmptyNodeList<T>()
+        public T QueryMetaEntityView<T>(int metaEntityID) where T:EntityView<T>, new()
+        {
+            return QueryEntityView<T>(metaEntityID);
+        }
+
+        public bool TryQueryMetaEntityView<T>(int metaEntityID, out T entityView) where T:EntityView<T>, new()
+        {
+            return TryQueryEntityView(metaEntityID, out entityView);
+        }
+
+        public FasterReadOnlyList<T> QueryMetaEntityViews<T>() where T:EntityView<T>, new()
+        {
+            var type = typeof(T);
+
+            ITypeSafeList entityViews;
+
+            if (_metaEntityViewsDB.TryGetValue(type, out entityViews) == false)
+                return RetrieveEmptyEntityViewList<T>();
+
+            return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
+        }
+
+        static FasterReadOnlyList<T> RetrieveEmptyEntityViewList<T>()
         {
             return FasterReadOnlyList<T>.DefaultList;
         }
 
-        readonly Dictionary<Type, ITypeSafeList>              _nodesDB;
-        readonly Dictionary<Type, ITypeSafeDictionary>        _nodesDBdic;
-        readonly Dictionary<Type, ITypeSafeList>              _metaNodesDB;
-        readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupNodesDB;
+        static T[] RetrieveEmptyEntityViewArray<T>()
+        {
+            return FasterList<T>.DefaultList.ToArrayFast();
+        }
+
+        readonly Dictionary<Type, ITypeSafeList>              _entityViewsDB;
+        readonly Dictionary<Type, ITypeSafeDictionary>        _entityViewsDBdic;
+        readonly Dictionary<Type, ITypeSafeList>              _metaEntityViewsDB;
+        readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
     }
 }

@@ -1,6 +1,6 @@
 ﻿// Uncomment this to enable the following debugging aids:
 //   LeftLeaningRedBlackTree.HtmlFragment
-//   LeftLeaningRedBlackTree.Node.HtmlFragment
+//   LeftLeaningRedBlackTree.EntityView.HtmlFragment
 //   LeftLeaningRedBlackTree.AssertInvariants
 // #define DEBUGGING
 
@@ -32,52 +32,52 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     private Comparison<TValue> _valueComparison;
 
     /// <summary>
-    /// Stores the root node of the tree.
+    /// Stores the root entityView of the tree.
     /// </summary>
-    private Node _rootNode;
+    private EntityView _rootEntityView;
 
     /// <summary>
-    /// Represents a node of the tree.
+    /// Represents a entityView of the tree.
     /// </summary>
     /// <remarks>
     /// Using fields instead of properties drops execution time by about 40%.
     /// </remarks>
     [DebuggerDisplay("Key={Key}, Value={Value}, Siblings={Siblings}")]
-    private class Node
+    private class EntityView
     {
         /// <summary>
-        /// Gets or sets the node's key.
+        /// Gets or sets the entityView's key.
         /// </summary>
         public TKey Key;
 
         /// <summary>
-        /// Gets or sets the node's value.
+        /// Gets or sets the entityView's value.
         /// </summary>
         public TValue Value;
 
         /// <summary>
-        /// Gets or sets the left node.
+        /// Gets or sets the left entityView.
         /// </summary>
-        public Node Left;
+        public EntityView Left;
 
         /// <summary>
-        /// Gets or sets the right node.
+        /// Gets or sets the right entityView.
         /// </summary>
-        public Node Right;
+        public EntityView Right;
 
         /// <summary>
-        /// Gets or sets the color of the node.
+        /// Gets or sets the color of the entityView.
         /// </summary>
         public bool IsBlack;
 
         /// <summary>
-        /// Gets or sets the number of "siblings" (nodes with the same key/value).
+        /// Gets or sets the number of "siblings" (entityViews with the same key/value).
         /// </summary>
         public int Siblings;
 
 #if DEBUGGING
         /// <summary>
-        /// Gets an HTML fragment representing the node and its children.
+        /// Gets an HTML fragment representing the entityView and its children.
         /// </summary>
         public string HtmlFragment
         {
@@ -141,8 +141,8 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     /// <param name="value">Value to add.</param>
     public void Add(TKey key, TValue value)
     {
-        _rootNode = Add(_rootNode, key, value);
-        _rootNode.IsBlack = true;
+        _rootEntityView = Add(_rootEntityView, key, value);
+        _rootEntityView.IsBlack = true;
 #if DEBUGGING
         AssertInvariants();
 #endif
@@ -171,12 +171,12 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     public bool Remove(TKey key, TValue value)
     {
         int initialCount = Count;
-        if (null != _rootNode)
+        if (null != _rootEntityView)
         {
-            _rootNode = Remove(_rootNode, key, value);
-            if (null != _rootNode)
+            _rootEntityView = Remove(_rootEntityView, key, value);
+            if (null != _rootEntityView)
             {
-                _rootNode.IsBlack = true;
+                _rootEntityView.IsBlack = true;
             }
         }
 #if DEBUGGING
@@ -186,11 +186,11 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     }
 
     /// <summary>
-    /// Removes all nodes in the tree.
+    /// Removes all entityViews in the tree.
     /// </summary>
     public void Clear()
     {
-        _rootNode = null;
+        _rootEntityView = null;
         Count = 0;
 #if DEBUGGING
         AssertInvariants();
@@ -206,7 +206,7 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
         TKey lastKey = default(TKey);
         bool lastKeyValid = false;
         return Traverse(
-            _rootNode,
+            _rootEntityView,
             n => !lastKeyValid || !object.Equals(lastKey, n.Key),
             n =>
             {
@@ -227,10 +227,10 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
         {
             throw new InvalidOperationException("GetValueForKey is only supported when acting as a normal (non-multi) dictionary.");
         }
-        Node node = GetNodeForKey(key);
-        if (null != node)
+        EntityView entityView = GetEntityViewForKey(key);
+        if (null != entityView)
         {
-            return node.Value;
+            return entityView.Value;
         }
         else
         {
@@ -245,7 +245,7 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     /// <returns>Sequence of values.</returns>
     public IEnumerable<TValue> GetValuesForKey(TKey key)
     {
-        return Traverse(GetNodeForKey(key), n => 0 == _keyComparison(n.Key, key), n => n.Value);
+        return Traverse(GetEntityViewForKey(key), n => 0 == _keyComparison(n.Key, key), n => n.Value);
     }
 
     /// <summary>
@@ -254,7 +254,7 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     /// <returns>Sequence of all values.</returns>
     public IEnumerable<TValue> GetValuesForAllKeys()
     {
-        return Traverse(_rootNode, n => true, n => n.Value);
+        return Traverse(_rootEntityView, n => true, n => n.Value);
     }
 
     /// <summary>
@@ -267,7 +267,7 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     /// </summary>
     public TKey MinimumKey
     {
-        get { return GetExtreme(_rootNode, n => n.Left, n => n.Key); }
+        get { return GetExtreme(_rootEntityView, n => n.Left, n => n.Key); }
     }
 
     /// <summary>
@@ -275,346 +275,346 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     /// </summary>
     public TKey MaximumKey
     {
-        get { return GetExtreme(_rootNode, n => n.Right, n => n.Key); }
+        get { return GetExtreme(_rootEntityView, n => n.Right, n => n.Key); }
     }
 
     /// <summary>
-    /// Returns true if the specified node is red.
+    /// Returns true if the specified entityView is red.
     /// </summary>
-    /// <param name="node">Specified node.</param>
-    /// <returns>True if specified node is red.</returns>
-    private static bool IsRed(Node node)
+    /// <param name="entityView">Specified entityView.</param>
+    /// <returns>True if specified entityView is red.</returns>
+    private static bool IsRed(EntityView entityView)
     {
-        if (null == node)
+        if (null == entityView)
         {
-            // "Virtual" leaf nodes are always black
+            // "Virtual" leaf entityViews are always black
             return false;
         }
-        return !node.IsBlack;
+        return !entityView.IsBlack;
     }
 
     /// <summary>
-    /// Adds the specified key/value pair below the specified root node.
+    /// Adds the specified key/value pair below the specified root entityView.
     /// </summary>
-    /// <param name="node">Specified node.</param>
+    /// <param name="entityView">Specified entityView.</param>
     /// <param name="key">Key to add.</param>
     /// <param name="value">Value to add.</param>
-    /// <returns>New root node.</returns>
-    private Node Add(Node node, TKey key, TValue value)
+    /// <returns>New root entityView.</returns>
+    private EntityView Add(EntityView entityView, TKey key, TValue value)
     {
-        if (null == node)
+        if (null == entityView)
         {
-            // Insert new node
+            // Insert new entityView
             Count++;
-            return new Node { Key = key, Value = value };
+            return new EntityView { Key = key, Value = value };
         }
 
-        if (IsRed(node.Left) && IsRed(node.Right))
+        if (IsRed(entityView.Left) && IsRed(entityView.Right))
         {
-            // Split node with two red children
-            FlipColor(node);
+            // Split entityView with two red children
+            FlipColor(entityView);
         }
 
-        // Find right place for new node
-        int comparisonResult = KeyAndValueComparison(key, value, node.Key, node.Value);
+        // Find right place for new entityView
+        int comparisonResult = KeyAndValueComparison(key, value, entityView.Key, entityView.Value);
         if (comparisonResult < 0)
         {
-            node.Left = Add(node.Left, key, value);
+            entityView.Left = Add(entityView.Left, key, value);
         }
         else if (0 < comparisonResult)
         {
-            node.Right = Add(node.Right, key, value);
+            entityView.Right = Add(entityView.Right, key, value);
         }
         else
         {
             if (IsMultiDictionary)
             {
-                // Store the presence of a "duplicate" node
-                node.Siblings++;
+                // Store the presence of a "duplicate" entityView
+                entityView.Siblings++;
                 Count++;
             }
             else
             {
-                // Replace the value of the existing node
-                node.Value = value;
+                // Replace the value of the existing entityView
+                entityView.Value = value;
             }
         }
 
-        if (IsRed(node.Right))
+        if (IsRed(entityView.Right))
         {
-            // Rotate to prevent red node on right
-            node = RotateLeft(node);
+            // Rotate to prevent red entityView on right
+            entityView = RotateLeft(entityView);
         }
 
-        if (IsRed(node.Left) && IsRed(node.Left.Left))
+        if (IsRed(entityView.Left) && IsRed(entityView.Left.Left))
         {
-            // Rotate to prevent consecutive red nodes
-            node = RotateRight(node);
+            // Rotate to prevent consecutive red entityViews
+            entityView = RotateRight(entityView);
         }
 
-        return node;
+        return entityView;
     }
 
     /// <summary>
-    /// Removes the specified key/value pair from below the specified node.
+    /// Removes the specified key/value pair from below the specified entityView.
     /// </summary>
-    /// <param name="node">Specified node.</param>
+    /// <param name="entityView">Specified entityView.</param>
     /// <param name="key">Key to remove.</param>
     /// <param name="value">Value to remove.</param>
     /// <returns>True if key/value present and removed.</returns>
-    private Node Remove(Node node, TKey key, TValue value)
+    private EntityView Remove(EntityView entityView, TKey key, TValue value)
     {
-        int comparisonResult = KeyAndValueComparison(key, value, node.Key, node.Value);
+        int comparisonResult = KeyAndValueComparison(key, value, entityView.Key, entityView.Value);
         if (comparisonResult < 0)
         {
             // * Continue search if left is present
-            if (null != node.Left)
+            if (null != entityView.Left)
             {
-                if (!IsRed(node.Left) && !IsRed(node.Left.Left))
+                if (!IsRed(entityView.Left) && !IsRed(entityView.Left.Left))
                 {
-                    // Move a red node over
-                    node = MoveRedLeft(node);
+                    // Move a red entityView over
+                    entityView = MoveRedLeft(entityView);
                 }
 
                 // Remove from left
-                node.Left = Remove(node.Left, key, value);
+                entityView.Left = Remove(entityView.Left, key, value);
             }
         }
         else
         {
-            if (IsRed(node.Left))
+            if (IsRed(entityView.Left))
             {
-                // Flip a 3 node or unbalance a 4 node
-                node = RotateRight(node);
+                // Flip a 3 entityView or unbalance a 4 entityView
+                entityView = RotateRight(entityView);
             }
-            if ((0 == KeyAndValueComparison(key, value, node.Key, node.Value)) && (null == node.Right))
+            if ((0 == KeyAndValueComparison(key, value, entityView.Key, entityView.Value)) && (null == entityView.Right))
             {
-                // Remove leaf node
-                Debug.Assert(null == node.Left, "About to remove an extra node.");
+                // Remove leaf entityView
+                Debug.Assert(null == entityView.Left, "About to remove an extra entityView.");
                 Count--;
-                if (0 < node.Siblings)
+                if (0 < entityView.Siblings)
                 {
-                    // Record the removal of the "duplicate" node
+                    // Record the removal of the "duplicate" entityView
                     Debug.Assert(IsMultiDictionary, "Should not have siblings if tree is not a multi-dictionary.");
-                    node.Siblings--;
-                    return node;
+                    entityView.Siblings--;
+                    return entityView;
                 }
                 else
                 {
-                    // Leaf node is gone
+                    // Leaf entityView is gone
                     return null;
                 }
             }
             // * Continue search if right is present
-            if (null != node.Right)
+            if (null != entityView.Right)
             {
-                if (!IsRed(node.Right) && !IsRed(node.Right.Left))
+                if (!IsRed(entityView.Right) && !IsRed(entityView.Right.Left))
                 {
-                    // Move a red node over
-                    node = MoveRedRight(node);
+                    // Move a red entityView over
+                    entityView = MoveRedRight(entityView);
                 }
-                if (0 == KeyAndValueComparison(key, value, node.Key, node.Value))
+                if (0 == KeyAndValueComparison(key, value, entityView.Key, entityView.Value))
                 {
-                    // Remove leaf node
+                    // Remove leaf entityView
                     Count--;
-                    if (0 < node.Siblings)
+                    if (0 < entityView.Siblings)
                     {
-                        // Record the removal of the "duplicate" node
+                        // Record the removal of the "duplicate" entityView
                         Debug.Assert(IsMultiDictionary, "Should not have siblings if tree is not a multi-dictionary.");
-                        node.Siblings--;
+                        entityView.Siblings--;
                     }
                     else
                     {
-                        // Find the smallest node on the right, swap, and remove it
-                        Node m = GetExtreme(node.Right, n => n.Left, n => n);
-                        node.Key = m.Key;
-                        node.Value = m.Value;
-                        node.Siblings = m.Siblings;
-                        node.Right = DeleteMinimum(node.Right);
+                        // Find the smallest entityView on the right, swap, and remove it
+                        EntityView m = GetExtreme(entityView.Right, n => n.Left, n => n);
+                        entityView.Key = m.Key;
+                        entityView.Value = m.Value;
+                        entityView.Siblings = m.Siblings;
+                        entityView.Right = DeleteMinimum(entityView.Right);
                     }
                 }
                 else
                 {
                     // Remove from right
-                    node.Right = Remove(node.Right, key, value);
+                    entityView.Right = Remove(entityView.Right, key, value);
                 }
             }
         }
 
         // Maintain invariants
-        return FixUp(node);
+        return FixUp(entityView);
     }
 
     /// <summary>
-    /// Flip the colors of the specified node and its direct children.
+    /// Flip the colors of the specified entityView and its direct children.
     /// </summary>
-    /// <param name="node">Specified node.</param>
-    private static void FlipColor(Node node)
+    /// <param name="entityView">Specified entityView.</param>
+    private static void FlipColor(EntityView entityView)
     {
-        node.IsBlack = !node.IsBlack;
-        node.Left.IsBlack = !node.Left.IsBlack;
-        node.Right.IsBlack = !node.Right.IsBlack;
+        entityView.IsBlack = !entityView.IsBlack;
+        entityView.Left.IsBlack = !entityView.Left.IsBlack;
+        entityView.Right.IsBlack = !entityView.Right.IsBlack;
     }
 
     /// <summary>
-    /// Rotate the specified node "left".
+    /// Rotate the specified entityView "left".
     /// </summary>
-    /// <param name="node">Specified node.</param>
-    /// <returns>New root node.</returns>
-    private static Node RotateLeft(Node node)
+    /// <param name="entityView">Specified entityView.</param>
+    /// <returns>New root entityView.</returns>
+    private static EntityView RotateLeft(EntityView entityView)
     {
-        Node x = node.Right;
-        node.Right = x.Left;
-        x.Left = node;
-        x.IsBlack = node.IsBlack;
-        node.IsBlack = false;
+        EntityView x = entityView.Right;
+        entityView.Right = x.Left;
+        x.Left = entityView;
+        x.IsBlack = entityView.IsBlack;
+        entityView.IsBlack = false;
         return x;
     }
 
     /// <summary>
-    /// Rotate the specified node "right".
+    /// Rotate the specified entityView "right".
     /// </summary>
-    /// <param name="node">Specified node.</param>
-    /// <returns>New root node.</returns>
-    private static Node RotateRight(Node node)
+    /// <param name="entityView">Specified entityView.</param>
+    /// <returns>New root entityView.</returns>
+    private static EntityView RotateRight(EntityView entityView)
     {
-        Node x = node.Left;
-        node.Left = x.Right;
-        x.Right = node;
-        x.IsBlack = node.IsBlack;
-        node.IsBlack = false;
+        EntityView x = entityView.Left;
+        entityView.Left = x.Right;
+        x.Right = entityView;
+        x.IsBlack = entityView.IsBlack;
+        entityView.IsBlack = false;
         return x;
     }
 
     /// <summary>
-    /// Moves a red node from the right child to the left child.
+    /// Moves a red entityView from the right child to the left child.
     /// </summary>
-    /// <param name="node">Parent node.</param>
-    /// <returns>New root node.</returns>
-    private static Node MoveRedLeft(Node node)
+    /// <param name="entityView">Parent entityView.</param>
+    /// <returns>New root entityView.</returns>
+    private static EntityView MoveRedLeft(EntityView entityView)
     {
-        FlipColor(node);
-        if (IsRed(node.Right.Left))
+        FlipColor(entityView);
+        if (IsRed(entityView.Right.Left))
         {
-            node.Right = RotateRight(node.Right);
-            node = RotateLeft(node);
-            FlipColor(node);
+            entityView.Right = RotateRight(entityView.Right);
+            entityView = RotateLeft(entityView);
+            FlipColor(entityView);
 
-            // * Avoid creating right-leaning nodes
-            if (IsRed(node.Right.Right))
+            // * Avoid creating right-leaning entityViews
+            if (IsRed(entityView.Right.Right))
             {
-                node.Right = RotateLeft(node.Right);
+                entityView.Right = RotateLeft(entityView.Right);
             }
         }
-        return node;
+        return entityView;
     }
 
     /// <summary>
-    /// Moves a red node from the left child to the right child.
+    /// Moves a red entityView from the left child to the right child.
     /// </summary>
-    /// <param name="node">Parent node.</param>
-    /// <returns>New root node.</returns>
-    private static Node MoveRedRight(Node node)
+    /// <param name="entityView">Parent entityView.</param>
+    /// <returns>New root entityView.</returns>
+    private static EntityView MoveRedRight(EntityView entityView)
     {
-        FlipColor(node);
-        if (IsRed(node.Left.Left))
+        FlipColor(entityView);
+        if (IsRed(entityView.Left.Left))
         {
-            node = RotateRight(node);
-            FlipColor(node);
+            entityView = RotateRight(entityView);
+            FlipColor(entityView);
         }
-        return node;
+        return entityView;
     }
 
     /// <summary>
-    /// Deletes the minimum node under the specified node.
+    /// Deletes the minimum entityView under the specified entityView.
     /// </summary>
-    /// <param name="node">Specified node.</param>
-    /// <returns>New root node.</returns>
-    private Node DeleteMinimum(Node node)
+    /// <param name="entityView">Specified entityView.</param>
+    /// <returns>New root entityView.</returns>
+    private EntityView DeleteMinimum(EntityView entityView)
     {
-        if (null == node.Left)
+        if (null == entityView.Left)
         {
             // Nothing to do
             return null;
         }
 
-        if (!IsRed(node.Left) && !IsRed(node.Left.Left))
+        if (!IsRed(entityView.Left) && !IsRed(entityView.Left.Left))
         {
-            // Move red node left
-            node = MoveRedLeft(node);
+            // Move red entityView left
+            entityView = MoveRedLeft(entityView);
         }
 
         // Recursively delete
-        node.Left = DeleteMinimum(node.Left);
+        entityView.Left = DeleteMinimum(entityView.Left);
 
         // Maintain invariants
-        return FixUp(node);
+        return FixUp(entityView);
     }
 
     /// <summary>
-    /// Maintains invariants by adjusting the specified nodes children.
+    /// Maintains invariants by adjusting the specified entityViews children.
     /// </summary>
-    /// <param name="node">Specified node.</param>
-    /// <returns>New root node.</returns>
-    private static Node FixUp(Node node)
+    /// <param name="entityView">Specified entityView.</param>
+    /// <returns>New root entityView.</returns>
+    private static EntityView FixUp(EntityView entityView)
     {
-        if (IsRed(node.Right))
+        if (IsRed(entityView.Right))
         {
-            // Avoid right-leaning node
-            node = RotateLeft(node);
+            // Avoid right-leaning entityView
+            entityView = RotateLeft(entityView);
         }
 
-        if (IsRed(node.Left) && IsRed(node.Left.Left))
+        if (IsRed(entityView.Left) && IsRed(entityView.Left.Left))
         {
-            // Balance 4-node
-            node = RotateRight(node);
+            // Balance 4-entityView
+            entityView = RotateRight(entityView);
         }
 
-        if (IsRed(node.Left) && IsRed(node.Right))
+        if (IsRed(entityView.Left) && IsRed(entityView.Right))
         {
             // Push red up
-            FlipColor(node);
+            FlipColor(entityView);
         }
 
-        // * Avoid leaving behind right-leaning nodes
-        if ((null != node.Left) && IsRed(node.Left.Right) && !IsRed(node.Left.Left))
+        // * Avoid leaving behind right-leaning entityViews
+        if ((null != entityView.Left) && IsRed(entityView.Left.Right) && !IsRed(entityView.Left.Left))
         {
-            node.Left = RotateLeft(node.Left);
-            if (IsRed(node.Left))
+            entityView.Left = RotateLeft(entityView.Left);
+            if (IsRed(entityView.Left))
             {
-                // Balance 4-node
-                node = RotateRight(node);
+                // Balance 4-entityView
+                entityView = RotateRight(entityView);
             }
         }
 
-        return node;
+        return entityView;
     }
 
     /// <summary>
-    /// Gets the (first) node corresponding to the specified key.
+    /// Gets the (first) entityView corresponding to the specified key.
     /// </summary>
     /// <param name="key">Key to search for.</param>
-    /// <returns>Corresponding node or null if none found.</returns>
-    private Node GetNodeForKey(TKey key)
+    /// <returns>Corresponding entityView or null if none found.</returns>
+    private EntityView GetEntityViewForKey(TKey key)
     {
         // Initialize
-        Node node = _rootNode;
-        while (null != node)
+        EntityView entityView = _rootEntityView;
+        while (null != entityView)
         {
             // Compare keys and go left/right
-            int comparisonResult = _keyComparison(key, node.Key);
+            int comparisonResult = _keyComparison(key, entityView.Key);
             if (comparisonResult < 0)
             {
-                node = node.Left;
+                entityView = entityView.Left;
             }
             else if (0 < comparisonResult)
             {
-                node = node.Right;
+                entityView = entityView.Right;
             }
             else
             {
-                // Match; return node
-                return node;
+                // Match; return entityView
+                return entityView;
             }
         }
 
@@ -626,15 +626,15 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     /// Gets an extreme (ex: minimum/maximum) value.
     /// </summary>
     /// <typeparam name="T">Type of value.</typeparam>
-    /// <param name="node">Node to start from.</param>
+    /// <param name="entityView">EntityView to start from.</param>
     /// <param name="successor">Successor function.</param>
     /// <param name="selector">Selector function.</param>
     /// <returns>Extreme value.</returns>
-    private static T GetExtreme<T>(Node node, Func<Node, Node> successor, Func<Node, T> selector)
+    private static T GetExtreme<T>(EntityView entityView, Func<EntityView, EntityView> successor, Func<EntityView, T> selector)
     {
         // Initialize
         T extreme = default(T);
-        Node current = node;
+        EntityView current = entityView;
         while (null != current)
         {
             // Go to extreme
@@ -645,18 +645,18 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     }
 
     /// <summary>
-    /// Traverses a subset of the sequence of nodes in order and selects the specified nodes.
+    /// Traverses a subset of the sequence of entityViews in order and selects the specified entityViews.
     /// </summary>
     /// <typeparam name="T">Type of elements.</typeparam>
-    /// <param name="node">Starting node.</param>
+    /// <param name="entityView">Starting entityView.</param>
     /// <param name="condition">Condition method.</param>
     /// <param name="selector">Selector method.</param>
-    /// <returns>Sequence of selected nodes.</returns>
-    private IEnumerable<T> Traverse<T>(Node node, Func<Node, bool> condition, Func<Node, T> selector)
+    /// <returns>Sequence of selected entityViews.</returns>
+    private IEnumerable<T> Traverse<T>(EntityView entityView, Func<EntityView, bool> condition, Func<EntityView, T> selector)
     {
         // Create a stack to avoid recursion
-        Stack<Node> stack = new Stack<Node>();
-        Node current = node;
+        Stack<EntityView> stack = new Stack<EntityView>();
+        EntityView current = entityView;
         while (null != current)
         {
             if (null != current.Left)
@@ -671,7 +671,7 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
                 {
                     for (int i = 0; i <= current.Siblings; i++)
                     {
-                        // Select current node if relevant
+                        // Select current entityView if relevant
                         if (condition(current))
                         {
                             yield return selector(current);
@@ -714,29 +714,29 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
     private void AssertInvariants()
     {
         // Root is black
-        Debug.Assert((null == _rootNode) || _rootNode.IsBlack, "Root is not black");
-        // Every path contains the same number of black nodes
-        Dictionary<Node, Node> parents = new Dictionary<LeftLeaningRedBlackTree<TKey, TValue>.Node, LeftLeaningRedBlackTree<TKey, TValue>.Node>();
-        foreach (Node node in Traverse(_rootNode, n => true, n => n))
+        Debug.Assert((null == _rootEntityView) || _rootEntityView.IsBlack, "Root is not black");
+        // Every path contains the same number of black entityViews
+        Dictionary<EntityView, EntityView> parents = new Dictionary<LeftLeaningRedBlackTree<TKey, TValue>.EntityView, LeftLeaningRedBlackTree<TKey, TValue>.EntityView>();
+        foreach (EntityView entityView in Traverse(_rootEntityView, n => true, n => n))
         {
-            if (null != node.Left)
+            if (null != entityView.Left)
             {
-                parents[node.Left] = node;
+                parents[entityView.Left] = entityView;
             }
-            if (null != node.Right)
+            if (null != entityView.Right)
             {
-                parents[node.Right] = node;
+                parents[entityView.Right] = entityView;
             }
         }
-        if (null != _rootNode)
+        if (null != _rootEntityView)
         {
-            parents[_rootNode] = null;
+            parents[_rootEntityView] = null;
         }
         int treeCount = -1;
-        foreach (Node node in Traverse(_rootNode, n => (null == n.Left) || (null == n.Right), n => n))
+        foreach (EntityView entityView in Traverse(_rootEntityView, n => (null == n.Left) || (null == n.Right), n => n))
         {
             int pathCount = 0;
-            Node current = node;
+            EntityView current = entityView;
             while (null != current)
             {
                 if (current.IsBlack)
@@ -745,28 +745,28 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
                 }
                 current = parents[current];
             }
-            Debug.Assert((-1 == treeCount) || (pathCount == treeCount), "Not all paths have the same number of black nodes.");
+            Debug.Assert((-1 == treeCount) || (pathCount == treeCount), "Not all paths have the same number of black entityViews.");
             treeCount = pathCount;
         }
-        // Verify node properties...
-        foreach (Node node in Traverse(_rootNode, n => true, n => n))
+        // Verify entityView properties...
+        foreach (EntityView entityView in Traverse(_rootEntityView, n => true, n => n))
         {
-            // Left node is less
-            if (null != node.Left)
+            // Left entityView is less
+            if (null != entityView.Left)
             {
-                Debug.Assert(0 > KeyAndValueComparison(node.Left.Key, node.Left.Value, node.Key, node.Value), "Left node is greater than its parent.");
+                Debug.Assert(0 > KeyAndValueComparison(entityView.Left.Key, entityView.Left.Value, entityView.Key, entityView.Value), "Left entityView is greater than its parent.");
             }
-            // Right node is greater
-            if (null != node.Right)
+            // Right entityView is greater
+            if (null != entityView.Right)
             {
-                Debug.Assert(0 < KeyAndValueComparison(node.Right.Key, node.Right.Value, node.Key, node.Value), "Right node is less than its parent.");
+                Debug.Assert(0 < KeyAndValueComparison(entityView.Right.Key, entityView.Right.Value, entityView.Key, entityView.Value), "Right entityView is less than its parent.");
             }
-            // Both children of a red node are black
-            Debug.Assert(!IsRed(node) || (!IsRed(node.Left) && !IsRed(node.Right)), "Red node has a red child.");
+            // Both children of a red entityView are black
+            Debug.Assert(!IsRed(entityView) || (!IsRed(entityView.Left) && !IsRed(entityView.Right)), "Red entityView has a red child.");
             // Always left-leaning
-            Debug.Assert(!IsRed(node.Right) || IsRed(node.Left), "Node is not left-leaning.");
+            Debug.Assert(!IsRed(entityView.Right) || IsRed(entityView.Left), "EntityView is not left-leaning.");
             // No consecutive reds (subset of previous rule)
-            //Debug.Assert(!(IsRed(node) && IsRed(node.Left)));
+            //Debug.Assert(!(IsRed(entityView) && IsRed(entityView.Left)));
         }
     }
 
@@ -780,7 +780,7 @@ public class LeftLeaningRedBlackTree<TKey, TValue>
             return
                 "<html>" +
                     "<body>" +
-                        (null != _rootNode ? _rootNode.HtmlFragment : "[null]") +
+                        (null != _rootEntityView ? _rootEntityView.HtmlFragment : "[null]") +
                     "</body>" +
                 "</html>";
         }
