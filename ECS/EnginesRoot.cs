@@ -49,7 +49,7 @@ namespace Svelto.ECS
             _implementedInterfaceTypes = new Dictionary<Type, Type[]>();
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-            GameObject debugEngineObject = new GameObject("Engine Debugger");
+            UnityEngine.GameObject debugEngineObject = new UnityEngine.GameObject("Engine Debugger");
             debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
 #endif
         }
