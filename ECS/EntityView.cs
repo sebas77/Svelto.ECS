@@ -20,19 +20,17 @@ namespace Svelto.ECS
     {
         public int ID { get { return _ID; } }
 
-        abstract internal KeyValuePair<Type, Action<EntityView, object>>[]
-            EntityViewBlazingFastReflection(out int count);
-
-        protected int _ID;
+        internal FasterList<KeyValuePair<Type, Action<EntityView, object>>> EntityViewBlazingFastReflection;
+        internal int _ID;
     }
 
-    public class EntityView<T>: EntityView where T: EntityView
+    internal static class EntityView<T> where T: EntityView, new()
     {
-        internal static TEntityViewType BuildEntityView<TEntityViewType>(int ID) where TEntityViewType: EntityView<T>, new() 
+        internal static T BuildEntityView(int ID) 
         {
-            if (FieldCache.list.Count == 0)
+            if (FieldCache<T>.list.Count == 0)
             {
-                var type = typeof(TEntityViewType);
+                var type = typeof(T);
 
                 var fields = type.GetFields(BindingFlags.Public |
                                             BindingFlags.Instance);
@@ -43,26 +41,15 @@ namespace Svelto.ECS
 
                     Action<EntityView, object> setter = FastInvoke<EntityView>.MakeSetter(field);
 
-                    FieldCache.Add(new KeyValuePair<Type, Action<EntityView, object>>(field.FieldType, setter));
+                    FieldCache<T>.list.Add(new KeyValuePair<Type, Action<EntityView, object>>(field.FieldType, setter));
                 }
             }
 
-            return new TEntityViewType { _ID = ID };
+            return new T { _ID = ID, EntityViewBlazingFastReflection = FieldCache<T>.list };
         }
 
-        override internal KeyValuePair<Type, Action<EntityView, object>>[] 
-            EntityViewBlazingFastReflection(out int count)
+        static class FieldCache<W> where W:T
         {
-            return FasterList<KeyValuePair<Type, Action<EntityView, object>>>.NoVirt.ToArrayFast(FieldCache.list, out count);
-        }
-
-        static class FieldCache
-        {
-            internal static void Add(KeyValuePair<Type, Action<EntityView, object>> setter)
-            {
-                list.Add(setter);
-            }
-            
             internal static readonly FasterList<KeyValuePair<Type, Action<EntityView, object>>> list = new FasterList<KeyValuePair<Type, Action<EntityView, object>>>();
         }
     }

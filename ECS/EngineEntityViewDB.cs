@@ -18,7 +18,7 @@ namespace Svelto.ECS
             _groupEntityViewsDB = groupEntityViewsDB;
         }
 
-        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:EntityView<T>, new()
+        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:EntityView, new()
         {
             var type = typeof(T);
 
@@ -30,7 +30,7 @@ namespace Svelto.ECS
             return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
         }
 
-        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:EntityView<T>, new()
+        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:EntityView, new()
         {
             Dictionary<Type, ITypeSafeList> entityViews;
 
@@ -128,17 +128,17 @@ namespace Svelto.ECS
             throw new Exception("EntityView Not Found");
         }
 
-        public T QueryMetaEntityView<T>(int metaEntityID) where T:EntityView<T>, new()
+        public T QueryMetaEntityView<T>(int metaEntityID) where T:EntityView, new()
         {
             return QueryEntityView<T>(metaEntityID);
         }
 
-        public bool TryQueryMetaEntityView<T>(int metaEntityID, out T entityView) where T:EntityView<T>, new()
+        public bool TryQueryMetaEntityView<T>(int metaEntityID, out T entityView) where T:EntityView, new()
         {
             return TryQueryEntityView(metaEntityID, out entityView);
         }
 
-        public FasterReadOnlyList<T> QueryMetaEntityViews<T>() where T:EntityView<T>, new()
+        public FasterReadOnlyList<T> QueryMetaEntityViews<T>() where T:EntityView, new()
         {
             var type = typeof(T);
 

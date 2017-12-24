@@ -13,7 +13,7 @@ namespace Svelto.ECS.Schedulers
     //the entityViews immediatly just because convenient for your game
     //logic. This is not how it works.
     
-    public class UnitySumbmissionEntityViewScheduler : EntityViewSubmissionScheduler
+    public class UnitySumbmissionEntityViewScheduler : EntitySubmissionScheduler
     {
         public UnitySumbmissionEntityViewScheduler()
         {

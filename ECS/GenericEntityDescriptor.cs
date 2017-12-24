@@ -2,7 +2,7 @@
 
 namespace Svelto.ECS
 {
-    public class GenericEntityDescriptor<T>:IEntityDescriptor where T : EntityView<T>, new()
+    public class GenericEntityDescriptor<T>:IEntityDescriptor where T : EntityView, new()
     {
         static GenericEntityDescriptor()
         {
@@ -18,8 +18,8 @@ namespace Svelto.ECS
         
     }
 
-    public class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : EntityView<T>, new() 
-                                                                       where U : EntityView<U>, new()
+    public class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : EntityView, new() 
+                                                                       where U : EntityView, new()
     {
         static GenericEntityDescriptor()
         {
@@ -34,9 +34,9 @@ namespace Svelto.ECS
         public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : EntityView<T>, new()
-                                                                          where U : EntityView<U>, new()
-                                                                          where V : EntityView<V>, new()
+    public class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : EntityView, new()
+                                                                          where U : EntityView, new()
+                                                                          where V : EntityView, new()
     {
         static GenericEntityDescriptor()
         {
@@ -51,10 +51,10 @@ namespace Svelto.ECS
         public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : EntityView<T>, new()
-                                                                             where U : EntityView<U>, new()
-                                                                             where V : EntityView<V>, new()
-                                                                             where W : EntityView<W>, new()
+    public class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : EntityView, new()
+                                                                             where U : EntityView, new()
+                                                                             where V : EntityView, new()
+                                                                             where W : EntityView, new()
     {
         static GenericEntityDescriptor()
         {
@@ -69,11 +69,11 @@ namespace Svelto.ECS
         public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : EntityView<T>, new()
-                                                                                where U : EntityView<U>, new()
-                                                                                where V : EntityView<V>, new()
-                                                                                where W : EntityView<W>, new()
-                                                                                where X : EntityView<X>, new()
+    public class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : EntityView, new()
+                                                                                where U : EntityView, new()
+                                                                                where V : EntityView, new()
+                                                                                where W : EntityView, new()
+                                                                                where X : EntityView, new()
     {
         static GenericEntityDescriptor()
         {
@@ -88,12 +88,12 @@ namespace Svelto.ECS
         public static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : EntityView<T>, new()
-                                                                                   where U : EntityView<U>, new()
-                                                                                   where V : EntityView<V>, new()
-                                                                                   where W : EntityView<W>, new()
-                                                                                   where X : EntityView<X>, new()
-                                                                                   where Y : EntityView<Y>, new()
+    public class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : EntityView, new()
+                                                                                   where U : EntityView, new()
+                                                                                   where V : EntityView, new()
+                                                                                   where W : EntityView, new()
+                                                                                   where X : EntityView, new()
+                                                                                   where Y : EntityView, new()
     {
         static GenericEntityDescriptor()
         {

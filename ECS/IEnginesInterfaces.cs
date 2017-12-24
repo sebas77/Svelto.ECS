@@ -15,7 +15,7 @@ namespace Svelto.ECS
     
     public interface IEntityFunctions
     {
-        void RemoveEntity(int entityID, IRemoveEntityComponent template);
+        void RemoveEntity(int entityID, IRemoveEntityComponent removeInfo);
 
         void RemoveEntity<T>(int entityID) where T:IEntityDescriptor, new();
         

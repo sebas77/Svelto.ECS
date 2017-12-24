@@ -2,17 +2,20 @@
 {
     sealed class RemoveEntityImplementor : IRemoveEntityComponent
     {
-        public RemoveEntityImplementor(IEntityDescriptor descriptor, int groupID) : this(descriptor)
+        public RemoveEntityImplementor(IEntityViewBuilder[] entityViews, int groupID):this(entityViews)
         {
-            removeEntityInfo = new RemoveEntityInfo(descriptor, groupID);
+            this.groupID = groupID;
+            isInAGroup = true;
         }
 
-        internal RemoveEntityImplementor(IEntityDescriptor descriptor)
+        internal RemoveEntityImplementor(IEntityViewBuilder[] entityViews)
         {
-            removeEntityInfo = new RemoveEntityInfo(descriptor);
+            removeEntityInfo = new RemoveEntityInfo(entityViews);
         }
 
-        internal RemoveEntityInfo removeEntityInfo;
+        readonly internal RemoveEntityInfo removeEntityInfo;
+        readonly internal int groupID;
+        readonly internal bool isInAGroup;
     }
 }
 
@@ -23,20 +26,11 @@ namespace Svelto.ECS
 
     public struct RemoveEntityInfo
     {
-        readonly public IEntityDescriptor descriptor;
-        readonly public int groupID;
-        readonly public bool isInAGroup;
-
-        public RemoveEntityInfo(IEntityDescriptor descriptor) : this()
+        readonly internal IEntityViewBuilder[] entityViewsToBuild;
+        
+        public RemoveEntityInfo(IEntityViewBuilder[] entityViews) : this()
         {
-            this.descriptor = descriptor;
-        }
-
-        public RemoveEntityInfo(IEntityDescriptor descriptor, int groupID)
-        {
-            this.descriptor = descriptor;
-            this.groupID = groupID;
-            isInAGroup = true;
+            this.entityViewsToBuild = entityViews;
         }
     }
 }

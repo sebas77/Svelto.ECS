@@ -1,3 +1,5 @@
+using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 using System;
 using System.Collections.Generic;
 
@@ -8,20 +10,22 @@ namespace Svelto.ECS
         IEntityViewBuilder[] entityViewsToBuild { get; }
     }
     
-    static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
+    internal static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
         public static readonly EntityDescriptorInfo Default = new EntityDescriptorInfo(new TType());
     }
 
     public class EntityDescriptorInfo
     {
-        public readonly IEntityDescriptor descriptor;
-        public readonly string name;
+        readonly internal IEntityViewBuilder[] entityViewsToBuild;
+        readonly internal RemoveEntityImplementor removeEntityImplementor;
+        internal readonly string name;
 
-        public EntityDescriptorInfo(IEntityDescriptor entityDescriptor)
+        internal EntityDescriptorInfo(IEntityDescriptor descriptor)
         {
-            descriptor = entityDescriptor;
             name = descriptor.ToString();
+            entityViewsToBuild = descriptor.entityViewsToBuild;
+            removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuild);
         }
     }
 }
@@ -31,11 +35,11 @@ namespace Svelto.ECS.Internal
     static class EntityFactory
     {
         internal static void BuildGroupedEntityViews(int entityID, int groupID,
-            Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsByType,
+                                                     Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsByType,
                                                      EntityDescriptorInfo entityViewsToBuildDescriptor,
                                                      object[] implementors)
         {
-            var entityViewsToBuild = entityViewsToBuildDescriptor.descriptor.entityViewsToBuild;
+            var entityViewsToBuild = entityViewsToBuildDescriptor.entityViewsToBuild;
             int count = entityViewsToBuild.Length;
 
             RemoveEntityImplementor removeEntityImplementor = null;
@@ -53,6 +57,8 @@ namespace Svelto.ECS.Internal
                     groupEntityViewsByType.Add(groupID, groupedEntityViewsTyped);
                 }
 
+                //only class EntityView will be returned
+                //struct EntityView cannot be filled so it will be null.
                 var entityViewObjectToFill =
                     BuildEntityView(entityID, groupedEntityViewsTyped, entityViewType, entityViewBuilder);
 
@@ -62,7 +68,7 @@ namespace Svelto.ECS.Internal
                 if (entityViewObjectToFill != null)
                 {
                     if (removeEntityImplementor == null)
-                        removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuildDescriptor.descriptor, groupID);
+                        removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuildDescriptor.entityViewsToBuild, groupID);
 
                     FillEntityView(entityViewObjectToFill as EntityView, implementors, removeEntityImplementor, 
                                    entityViewsToBuildDescriptor.name);
@@ -70,20 +76,21 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        internal static void BuildEntityViews(int entityID, Dictionary<Type, ITypeSafeList> entityViewsByType,
+        internal static void BuildEntityViews(int entityID, 
+                                              Dictionary<Type, ITypeSafeList> entityViewsByType,
                                               EntityDescriptorInfo entityViewsToBuildDescriptor,
                                               object[] implementors)
         {
-            var entityViewsToBuild = entityViewsToBuildDescriptor.descriptor.entityViewsToBuild;
+            var entityViewsToBuild = entityViewsToBuildDescriptor.entityViewsToBuild;
             int count = entityViewsToBuild.Length;
             
-            RemoveEntityImplementor removeEntityImplementor = null;
-
             for (int index = 0; index < count; index++)
             {
                 var entityViewBuilder = entityViewsToBuild[index];
                 var entityViewType = entityViewBuilder.GetEntityViewType();
 
+                //only class EntityView will be returned
+                //struct EntityView cannot be filled so it will be null.
                 var entityViewObjectToFill =
                     BuildEntityView(entityID, entityViewsByType, entityViewType, entityViewBuilder);
 
@@ -92,29 +99,39 @@ namespace Svelto.ECS.Internal
                 //it's a EntityView
                 if (entityViewObjectToFill != null)
                 {
-                    if (removeEntityImplementor == null)
-                        removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuildDescriptor.descriptor);
-                    
-                    FillEntityView(entityViewObjectToFill as EntityView, implementors, removeEntityImplementor,
+                    FillEntityView(entityViewObjectToFill as EntityView, implementors, entityViewsToBuildDescriptor.removeEntityImplementor,
                                    entityViewsToBuildDescriptor.name);
                 }
             }
         }
 
         static IEntityView BuildEntityView(int entityID, Dictionary<Type, ITypeSafeList> entityViewsByType,
-                                                 Type entityViewType, IEntityViewBuilder entityViewBuilderId)
+                                                 Type entityViewType, IEntityViewBuilder entityViewBuilder)
         {
             ITypeSafeList entityViewsList;
 
             var entityViewsPoolWillBeCreated =
                 entityViewsByType.TryGetValue(entityViewType, out entityViewsList) == false;
-            var entityViewObjectToFill = entityViewBuilderId.BuildEntityViewAndAddToList(ref entityViewsList, entityID);
+
+            IEntityView entityViewObjectToFill;
+
+            //passing the undefined entityViewsByType inside the entityViewBuilder will allow
+            //it to be created with the correct type and casted back to the undefined list.
+            //that's how the list will be eventually of the target type.
+            entityViewBuilder.BuildEntityViewAndAddToList(ref entityViewsList, entityID, out entityViewObjectToFill);
 
             if (entityViewsPoolWillBeCreated)
                 entityViewsByType.Add(entityViewType, entityViewsList);
 
             return entityViewObjectToFill as IEntityView;
         }
+
+        //this is used to avoid newing a dictionary every time, but it's used locally only and it's clearead for each use
+#if DEBUG && !PROFILER
+        static readonly Dictionary<Type, Tuple<object, int>> implementorsByType = new Dictionary<Type, Tuple<object, int>>();
+#else
+        static readonly Dictionary<Type, object> implementorsByType = new Dictionary<Type, object>();
+#endif
 
         static void FillEntityView(EntityView entityView, object[] implementors, RemoveEntityImplementor removeEntity,
                                    string entityDescriptorName)
@@ -136,12 +153,16 @@ namespace Svelto.ECS.Internal
                         var componentType = interfaces[iindex];
 #if DEBUG && !PROFILER
                         Tuple<object, int> implementorHolder;
+
                         if (implementorsByType.TryGetValue(componentType, out implementorHolder) == true)
                             implementorHolder.item2++;
                         else
+                            implementorsByType[componentType] = new Tuple<object, int>(implementor, 1);
+#else
+                        implementorsByType[componentType] = implementor;
 #endif
 
-                            implementorsByType[componentType] = new Tuple<object, int>(implementor, 0);
+
                     }
                 }
 #if DEBUG && !PROFILER
@@ -153,8 +174,8 @@ namespace Svelto.ECS.Internal
             int count;
 
             //Very efficent way to collect the fields of every EntityViewType
-            KeyValuePair<Type, Action<EntityView, object>>[] setters =
-                entityView.EntityViewBlazingFastReflection(out count);
+            KeyValuePair<Type, Action<EntityView, object>>[] setters = 
+                FasterList<KeyValuePair<Type, Action<EntityView, object>>>.NoVirt.ToArrayFast(entityView.EntityViewBlazingFastReflection, out count);
 
             var removeEntityComponentType = typeof(IRemoveEntityComponent);
 
@@ -211,13 +232,7 @@ namespace Svelto.ECS.Internal
                 item2 = v;
             }
         }
-#endif
-        //this is used to avoid newing a dictionary every time, but it's used locally only
-#if DEBUG && !PROFILER
-        static readonly Dictionary<Type, Tuple<object, int>> implementorsByType = new Dictionary<Type, Tuple<object, int>>();
-#else
-        static readonly Dictionary<Type, object> implementorsByType = new Dictionary<Type, object>();
-#endif
+#endif        
         static Dictionary<Type, Type[]> _cachedTypes = new Dictionary<Type, Type[]>();
 
         const string DUPLICATE_IMPLEMENTOR_ERROR =

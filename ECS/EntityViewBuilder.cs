@@ -5,26 +5,26 @@ namespace Svelto.ECS
 {
     public interface IEntityViewBuilder
     {
-        IEntityView BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID);
+        void BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID, out IEntityView entityView);
         ITypeSafeList Preallocate(ref ITypeSafeList list, int size);
 
         Type GetEntityViewType();
     }
 
-    public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : EntityView<EntityViewType>, new()
+    public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : EntityView, new()
     {
-        public IEntityView BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID)
+        public void BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID, out IEntityView entityView)
         {
             if (list == null)
                 list = new TypeSafeFasterListForECSForClasses<EntityViewType>();
 
             var castedList = list as TypeSafeFasterListForECSForClasses<EntityViewType>;
 
-            var entityView = EntityView<EntityViewType>.BuildEntityView<EntityViewType>(entityID);
+            var lentityView = EntityView<EntityViewType>.BuildEntityView(entityID);
 
-            castedList.Add(entityView);
+            castedList.Add(lentityView);
 
-            return entityView;
+            entityView = lentityView;
         }
 
         public ITypeSafeList Preallocate(ref ITypeSafeList list, int size)
@@ -47,19 +47,19 @@ namespace Svelto.ECS
 
     public class EntityStructBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : struct, IEntityStruct
     {
-        public IEntityView BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID)
+        public void BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID, out IEntityView entityView)
         {
-            var entityView = default(EntityViewType);
-            entityView.ID = entityID;
+            var lentityView = default(EntityViewType);
+            lentityView.ID = entityID;
             
             if (list == null)
                 list = new TypeSafeFasterListForECSForStructs<EntityViewType>();
 
             var castedList = list as TypeSafeFasterListForECSForStructs<EntityViewType>;
 
-            castedList.Add(entityView);
+            castedList.Add(lentityView);
 
-            return null;
+            entityView = null;
         }
 
         public ITypeSafeList Preallocate(ref ITypeSafeList list, int size)

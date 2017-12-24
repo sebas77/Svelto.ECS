@@ -2,7 +2,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Internal
 {
-    public abstract class MultiEntityViewsEngine<T>:IHandleEntityViewEngine where T:EntityView<T>, new()
+    public abstract class MultiEntityViewsEngine<T>:IHandleEntityViewEngine where T:EntityView, new()
     {
         protected abstract void Add(T entityView);
         protected abstract void Remove(T entityView);
@@ -22,8 +22,8 @@ namespace Svelto.ECS.Internal
 namespace Svelto.ECS
 {
     public abstract class MultiEntityViewsEngine<T, U> : MultiEntityViewsEngine<T>
-        where T:EntityView<T>, new()
-        where U:EntityView<U>, new()
+        where T:EntityView, new()
+        where U:EntityView, new()
     {
         protected abstract void Add(U entityView);
         protected abstract void Remove(U entityView);
@@ -55,9 +55,9 @@ namespace Svelto.ECS
     }
 
     public abstract class MultiEntityViewsEngine<T, U, V> : MultiEntityViewsEngine<T, U>
-        where T : EntityView<T>, new()
-        where U : EntityView<U>, new()
-        where V : EntityView<V>, new()
+        where T : EntityView, new()
+        where U : EntityView, new()
+        where V : EntityView, new()
     {
         protected abstract void Add(V entityView);
         protected abstract void Remove(V entityView);
