@@ -56,9 +56,6 @@ namespace Svelto.ECS
             _implementedInterfaceTypes = new Dictionary<Type, Type[]>();
 #endif
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-            _addEntityViewToEngine = AddEntityViewToEngine;
-            _removeEntityViewFromEngine = RemoveEntityViewFromEngine;
-
             UnityEngine.GameObject debugEngineObject = new UnityEngine.GameObject("Engine Debugger");
             debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
 #endif
@@ -206,11 +203,7 @@ namespace Svelto.ECS
 
         readonly Dictionary<Type, Type[]>  _implementedInterfaceTypes;
 #endif    
- 
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR       
-        static Action<IHandleEntityViewEngine, IEntityView> _addEntityViewToEngine;
-        static Action<IHandleEntityViewEngine, IEntityView> _removeEntityViewFromEngine;
-#endif
+
         readonly EngineEntityViewDB _engineEntityViewDB;
 
         class DoubleBufferedEntityViews<T> where T : class, IDictionary, new()

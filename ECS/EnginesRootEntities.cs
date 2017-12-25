@@ -222,25 +222,13 @@ namespace Svelto.ECS
                 for (int j = 0; j < count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                    EngineProfiler.MonitorRemoveDuration(_removeEntityViewFromEngine, fastList[j], entityView);
+                    EngineProfiler.MonitorRemoveDuration(fastList[j], entityView);
 #else
                     fastList[j].Remove(entityView);
 #endif
                 }
             }
         }
-
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-        static void AddEntityViewToEngine(IHandleEntityViewEngine engine, IEntityView entityView)
-        {
-            engine.Add(entityView);
-        }
-
-        static void RemoveEntityViewFromEngine(IHandleEntityViewEngine engine, IEntityView entityView)
-        {
-            engine.Remove(entityView);
-        }
-#endif
 
         class GenericEntityFactory : IEntityFactory
         {

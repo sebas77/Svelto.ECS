@@ -148,7 +148,7 @@ namespace Svelto.ECS
                     for (int j = 0; j < count; j++)
                     {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                        EngineProfiler.MonitorAddDuration(_addEntityViewToEngine, fastList[j], entityView);
+                        EngineProfiler.MonitorAddDuration(fastList[j], entityView);
 #else
                         fastList[j].Add(entityView);
 #endif
