@@ -376,7 +376,7 @@ namespace Svelto.ECS
                 for (int j = 0; j < enginesForNode.Count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                    EngineProfiler.MonitorAddDuration(AddNodeToEngine, enginesForNode[j] as INodeEngine, node);
+                    EngineProfiler.MonitorAddDuration(enginesForNode[j] as INodeEngine, node);
 #else
                     (enginesForNode[j] as INodeEngine).Add(node);
 #endif
@@ -415,7 +415,7 @@ namespace Svelto.ECS
                 for (int j = 0; j < enginesForNode.Count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                    EngineProfiler.MonitorRemoveDuration(RemoveNodeFromEngine, (enginesForNode[j] as INodeEngine), node);
+                    EngineProfiler.MonitorRemoveDuration((enginesForNode[j] as INodeEngine), node);
 #else
                     (enginesForNode[j] as INodeEngine).Remove(node);
 #endif
@@ -448,17 +448,6 @@ namespace Svelto.ECS
                 }
             }
         }
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-        void AddNodeToEngine(IEngine engine, INode node)
-        {
-            (engine as INodeEngine).Add(node);
-        }
-
-        void RemoveNodeFromEngine(IEngine engine, INode node)
-        {
-            (engine as INodeEngine).Remove(node);
-        }
-#endif
 
         void InternalDisable(FasterList<INode> nodes)
         {
