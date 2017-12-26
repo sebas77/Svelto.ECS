@@ -39,41 +39,17 @@ namespace Svelto.ECS.Internal
                                                      EntityDescriptorInfo entityViewsToBuildDescriptor,
                                                      object[] implementors)
         {
-            var entityViewsToBuild = entityViewsToBuildDescriptor.entityViewsToBuild;
-            int count = entityViewsToBuild.Length;
+            Dictionary<Type, ITypeSafeList> groupedEntityViewsTyped;
 
-            RemoveEntityImplementor removeEntityImplementor = null;
-
-            for (int index = 0; index < count; index++)
+            if (groupEntityViewsByType.TryGetValue(groupID, out groupedEntityViewsTyped) == false)
             {
-                var entityViewBuilder = entityViewsToBuild[index];
-                var entityViewType = entityViewBuilder.GetEntityViewType();
-
-                Dictionary<Type, ITypeSafeList> groupedEntityViewsTyped;
-
-                if (groupEntityViewsByType.TryGetValue(groupID, out groupedEntityViewsTyped) == false)
-                {
-                    groupedEntityViewsTyped = new Dictionary<Type, ITypeSafeList>();
-                    groupEntityViewsByType.Add(groupID, groupedEntityViewsTyped);
-                }
-
-                //only class EntityView will be returned
-                //struct EntityView cannot be filled so it will be null.
-                var entityViewObjectToFill =
-                    BuildEntityView(entityID, groupedEntityViewsTyped, entityViewType, entityViewBuilder);
-
-                //the semantic of this code must still be improved
-                //but only classes can be filled, so I am aware
-                //it's a EntityViewWithID
-                if (entityViewObjectToFill != null)
-                {
-                    if (removeEntityImplementor == null)
-                        removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuildDescriptor.entityViewsToBuild, groupID);
-
-                    FillEntityView(entityViewObjectToFill as EntityView, implementors, removeEntityImplementor, 
-                                   entityViewsToBuildDescriptor.name);
-                }
+                groupedEntityViewsTyped = new Dictionary<Type, ITypeSafeList>();
+                groupEntityViewsByType.Add(groupID, groupedEntityViewsTyped);
             }
+
+            var removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuildDescriptor.entityViewsToBuild, groupID);
+
+            InternalBuildEntityViews(entityID, groupedEntityViewsTyped, entityViewsToBuildDescriptor, implementors, removeEntityImplementor);
         }
 
         internal static void BuildEntityViews(int entityID, 
@@ -81,9 +57,19 @@ namespace Svelto.ECS.Internal
                                               EntityDescriptorInfo entityViewsToBuildDescriptor,
                                               object[] implementors)
         {
+            var removeEntityImplementor = entityViewsToBuildDescriptor.removeEntityImplementor;
+
+            InternalBuildEntityViews(entityID, entityViewsByType, entityViewsToBuildDescriptor, implementors, removeEntityImplementor);
+        }
+
+        private static void InternalBuildEntityViews(int entityID, 
+            Dictionary<Type, ITypeSafeList> entityViewsByType, 
+            EntityDescriptorInfo entityViewsToBuildDescriptor, 
+            object[] implementors, RemoveEntityImplementor removeEntityImplementor)
+        {
             var entityViewsToBuild = entityViewsToBuildDescriptor.entityViewsToBuild;
             int count = entityViewsToBuild.Length;
-            
+
             for (int index = 0; index < count; index++)
             {
                 var entityViewBuilder = entityViewsToBuild[index];
@@ -99,7 +85,7 @@ namespace Svelto.ECS.Internal
                 //it's a EntityView
                 if (entityViewObjectToFill != null)
                 {
-                    FillEntityView(entityViewObjectToFill as EntityView, implementors, entityViewsToBuildDescriptor.removeEntityImplementor,
+                    FillEntityView(entityViewObjectToFill as EntityView, implementors, removeEntityImplementor,
                                    entityViewsToBuildDescriptor.name);
                 }
             }

@@ -48,7 +48,7 @@ namespace Svelto.ECS
             var fromCastedList = fromSafeList as TypeSafeFasterListForECSForClasses<EntityViewType>;
             var toCastedList = toSafeList as TypeSafeFasterListForECSForClasses<EntityViewType>;
 
-            toCastedList.Add(fromCastedList[entityID]);
+            toCastedList.Add(fromCastedList[fromCastedList.GetIndexFromID(entityID)]);
         }
 
         readonly Type _entityViewType = typeof(EntityViewType);
@@ -91,7 +91,7 @@ namespace Svelto.ECS
             var fromCastedList = fromSafeList as TypeSafeFasterListForECSForStructs<EntityViewType>;
             var toCastedList = toSafeList as TypeSafeFasterListForECSForStructs<EntityViewType>;
 
-            toCastedList.Add(fromCastedList[entityID]);
+            toCastedList.Add(fromCastedList[fromCastedList.GetIndexFromID(entityID)]);
         }
 
         readonly Type _entityViewType = typeof(EntityViewType);

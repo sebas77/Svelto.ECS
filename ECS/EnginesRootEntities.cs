@@ -171,22 +171,22 @@ namespace Svelto.ECS
             var entityViewBuilders = EntityDescriptorTemplate<T>.Default.entityViewsToBuild;
             int entityViewBuildersCount = entityViewBuilders.Length;
 
+            Dictionary<Type, ITypeSafeList> dictionary = _groupEntityViewsDB[fromGroupID];
+
+            Dictionary<Type, ITypeSafeList> groupedEntityViewsTyped;
+            if (_groupEntityViewsDB.TryGetValue(toGroupID, out groupedEntityViewsTyped) == false)
+            {
+                groupedEntityViewsTyped = new Dictionary<Type, ITypeSafeList>();
+
+                _groupEntityViewsDB.Add(toGroupID, groupedEntityViewsTyped);
+            }
+
             for (int i = 0; i < entityViewBuildersCount; i++)
             {
                 IEntityViewBuilder entityViewBuilder = entityViewBuilders[i];
                 Type entityViewType = entityViewBuilder.GetEntityViewType();
-                Dictionary<Type, ITypeSafeList> dictionary = _groupEntityViewsDB[fromGroupID];
 
                 ITypeSafeList fromSafeList = dictionary[entityViewType];
-
-                Dictionary<Type, ITypeSafeList> groupedEntityViewsTyped;
-                if (_groupEntityViewsDB.TryGetValue(toGroupID, out groupedEntityViewsTyped) == false)
-                {
-                    groupedEntityViewsTyped = new Dictionary<Type, ITypeSafeList>();
-
-                    _groupEntityViewsDB.Add(toGroupID, groupedEntityViewsTyped);
-                }
-
                 ITypeSafeList toSafeList;
 
                 if (groupedEntityViewsTyped.TryGetValue(entityViewType, out toSafeList) == false)
@@ -198,9 +198,9 @@ namespace Svelto.ECS
 
                 if (fromSafeList.UnorderedRemove(entityID) == false)
                     dictionary.Remove(entityViewType);
-
-                if (dictionary.Count == 0) _groupEntityViewsDB.Remove(fromGroupID);
             }
+
+            if (dictionary.Count == 0) _groupEntityViewsDB.Remove(fromGroupID);
         }
 
         void InternalRemove(IEntityViewBuilder[] entityViewBuilders, int entityID,
@@ -241,16 +241,17 @@ namespace Svelto.ECS
         {
             int entityViewBuildersCount = entityViewBuilders.Length;
 
+            Dictionary<Type, ITypeSafeList> dictionary = _groupEntityViewsDB[groupID];
+
             for (int i = 0; i < entityViewBuildersCount; i++)
             {
                 Type entityViewType = entityViewBuilders[i].GetEntityViewType();
-                Dictionary<Type, ITypeSafeList> dictionary = _groupEntityViewsDB[groupID];
 
                 if (dictionary[entityViewType].UnorderedRemove(entityID) == false)
                     dictionary.Remove(entityViewType);
-
-                if (dictionary.Count == 0) _groupEntityViewsDB.Remove(groupID);
             }
+
+            if (dictionary.Count == 0) _groupEntityViewsDB.Remove(groupID);
         }
 
         static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines,

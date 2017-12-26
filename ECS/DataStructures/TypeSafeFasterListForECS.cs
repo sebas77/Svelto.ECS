@@ -16,6 +16,7 @@ namespace Svelto.ECS.Internal
         ITypeSafeDictionary CreateIndexedDictionary();
         IEntityView[] ToArrayFast(out int count);
         void ReserveCapacity(int capacity);
+        int GetIndexFromID(int entityID);
     }
 
     class TypeSafeFasterListForECS<T>: FasterList<T> where T:IEntityView
@@ -67,6 +68,11 @@ namespace Svelto.ECS.Internal
         {
             if (this.ToArrayFast().Length < capacity)
                 Resize(capacity);
+        }
+
+        public int GetIndexFromID(int entityID)
+        {
+            return _mappedIndices[entityID];
         }
 
         readonly Dictionary<int, int> _mappedIndices;
