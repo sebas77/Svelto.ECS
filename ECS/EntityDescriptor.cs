@@ -105,7 +105,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        static IEntityView BuildEntityView(int entityID, Dictionary<Type, ITypeSafeList> entityViewsByType,
+        internal static IEntityView BuildEntityView(int entityID, Dictionary<Type, ITypeSafeList> entityViewsByType,
                                                  Type entityViewType, IEntityViewBuilder entityViewBuilder)
         {
             ITypeSafeList entityViewsList;

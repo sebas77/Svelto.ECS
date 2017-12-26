@@ -9,6 +9,7 @@ namespace Svelto.ECS
         ITypeSafeList Preallocate(ref ITypeSafeList list, int size);
 
         Type GetEntityViewType();
+        void MoveEntityView(int entityID, ITypeSafeList fromSafeList, ITypeSafeList toSafeList);
     }
 
     public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : EntityView, new()
@@ -40,6 +41,14 @@ namespace Svelto.ECS
         public Type GetEntityViewType()
         {
             return _entityViewType;
+        }
+
+        public void MoveEntityView(int entityID, ITypeSafeList fromSafeList, ITypeSafeList toSafeList)
+        {
+            var fromCastedList = fromSafeList as TypeSafeFasterListForECSForClasses<EntityViewType>;
+            var toCastedList = toSafeList as TypeSafeFasterListForECSForClasses<EntityViewType>;
+
+            toCastedList.Add(fromCastedList[entityID]);
         }
 
         readonly Type _entityViewType = typeof(EntityViewType);
@@ -75,6 +84,14 @@ namespace Svelto.ECS
         public Type GetEntityViewType()
         {
             return _entityViewType;
+        }
+
+        public void MoveEntityView(int entityID, ITypeSafeList fromSafeList, ITypeSafeList toSafeList)
+        {
+            var fromCastedList = fromSafeList as TypeSafeFasterListForECSForStructs<EntityViewType>;
+            var toCastedList = toSafeList as TypeSafeFasterListForECSForStructs<EntityViewType>;
+
+            toCastedList.Add(fromCastedList[entityID]);
         }
 
         readonly Type _entityViewType = typeof(EntityViewType);

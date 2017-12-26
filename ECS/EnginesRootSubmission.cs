@@ -89,9 +89,9 @@ namespace Svelto.ECS
         {
             foreach (var group in groupedEntityViewsToAdd)
             {
-                AddEntityViewsToTheDBAndSuitableEngines(group.Value, entityViewsDB);
-
                 AddEntityViewsToGroupDB(groupEntityViewsDB, @group);
+
+                AddEntityViewsToTheDBAndSuitableEngines(group.Value, entityViewsDB);
             }
         }
 

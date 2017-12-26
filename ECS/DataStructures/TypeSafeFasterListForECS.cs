@@ -48,10 +48,19 @@ namespace Svelto.ECS.Internal
         {
             var index = this.Count;
             
-            AddRange(entityViewListValue as FasterList<T>);
+            base.AddRange(entityViewListValue as FasterList<T>);
             
             for (int i = index; i < Count; ++i)
                 _mappedIndices[this[i].ID] = i;
+        }
+
+        new public void Add(T entityView)
+        {
+            var index = this.Count;
+
+            base.Add(entityView);
+
+            _mappedIndices[entityView.ID] = index;
         }
 
         public void ReserveCapacity(int capacity)
