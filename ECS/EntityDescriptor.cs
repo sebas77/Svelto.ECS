@@ -132,7 +132,7 @@ namespace Svelto.ECS.Internal
 
                     Type[] interfaces;
                     if (_cachedTypes.TryGetValue(type, out interfaces) == false)
-                        interfaces = _cachedTypes[type] = type.GetInterfaces(); 
+                        interfaces = _cachedTypes[type] = type.GetInterfacesEx(); 
 
                     for (int iindex = 0; iindex < interfaces.Length; iindex++)
                     {
@@ -161,7 +161,7 @@ namespace Svelto.ECS.Internal
 
             //Very efficent way to collect the fields of every EntityViewType
             KeyValuePair<Type, Action<EntityView, object>>[] setters = 
-                FasterList<KeyValuePair<Type, Action<EntityView, object>>>.NoVirt.ToArrayFast(entityView.EntityViewBlazingFastReflection, out count);
+                FasterList<KeyValuePair<Type, Action<EntityView, object>>>.NoVirt.ToArrayFast(entityView.entityViewBlazingFastReflection, out count);
 
             var removeEntityComponentType = typeof(IRemoveEntityComponent);
 

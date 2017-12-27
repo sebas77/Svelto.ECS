@@ -16,11 +16,11 @@ namespace Svelto.ECS
         new int ID { set; }
     }
 
-    public abstract class EntityView : IEntityView
+    public class EntityView : IEntityView
     {
         public int ID { get { return _ID; } }
 
-        internal FasterList<KeyValuePair<Type, Action<EntityView, object>>> EntityViewBlazingFastReflection;
+        internal FasterList<KeyValuePair<Type, Action<EntityView, object>>> entityViewBlazingFastReflection;
         internal int _ID;
     }
 
@@ -39,13 +39,13 @@ namespace Svelto.ECS
                 {
                     var field = fields[i];
 
-                    Action<EntityView, object> setter = FastInvoke<EntityView>.MakeSetter(field);
-
+                    Action<EntityView, object> setter = FastInvoke<T>.MakeSetter<EntityView>(field);
+                    
                     FieldCache<T>.list.Add(new KeyValuePair<Type, Action<EntityView, object>>(field.FieldType, setter));
                 }
             }
 
-            return new T { _ID = ID, EntityViewBlazingFastReflection = FieldCache<T>.list };
+            return new T { _ID = ID, entityViewBlazingFastReflection = FieldCache<T>.list };
         }
 
         static class FieldCache<W> where W:T

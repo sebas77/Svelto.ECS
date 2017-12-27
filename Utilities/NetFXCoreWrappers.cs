@@ -4,11 +4,18 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
 
-namespace Svelto.Utilities
-{
     public static class NetFXCoreWrappers
     {
-        public static MethodInfo GetMethodInfoEx(this Delegate delegateEx)
+    public static Type GetDeclaringType(this MethodInfo methodInfo)
+    {
+#if NETFX_CORE
+        return methodInfo.DeclaringType;
+#else
+        return methodInfo.ReflectedType;
+#endif
+    }
+
+    public static MethodInfo GetMethodInfoEx(this Delegate delegateEx)
         {
 #if NETFX_CORE
             var method = delegateEx.GetMethodInfo();
@@ -16,6 +23,33 @@ namespace Svelto.Utilities
             var method = delegateEx.Method;
 #endif
             return method;
+        }
+
+        public static Type[] GetInterfacesEx(this Type type)
+        {
+#if NETFX_CORE
+            return type.GetInterfaces();
+#else
+        return type.GetInterfaces();
+#endif
+        }
+
+        public static bool IsInterfaceEx(this Type type)
+        {
+#if NETFX_CORE
+            return type.GetTypeInfo().IsInterface;
+#else
+        return type.IsInterface;
+#endif
+        }
+
+        public static bool IsValueTypeEx(this Type type)
+        {
+#if NETFX_CORE
+            return type.GetTypeInfo().IsValueType;
+#else
+        return type.IsValueType;
+#endif
         }
 
         public static Type GetDeclaringType(this MemberInfo memberInfo)
@@ -30,7 +64,7 @@ namespace Svelto.Utilities
         public static Type GetBaseType(this Type type)
         {
 #if NETFX_CORE
-            return type.BaseType();
+            return type.GetTypeInfo().BaseType;
 #else
             return type.BaseType;
 #endif
@@ -63,7 +97,19 @@ namespace Svelto.Utilities
 #endif
         }
 
-        public static MemberInfo[] FindWritablePropertiesWithCustomAttribute(this Type contract, 
+    public static Type[] GetGenericArgumentsEx(this Type type)
+    {
+#if !NETFX_CORE
+        return type.GetGenericArguments();
+#else
+        var typeinfo = type.GetTypeInfo();
+        return typeinfo.IsGenericTypeDefinition 
+    ? typeinfo.GenericTypeParameters 
+    : typeinfo.GenericTypeArguments;
+#endif
+    }
+
+    public static MemberInfo[] FindWritablePropertiesWithCustomAttribute(this Type contract, 
             Type customAttributeType)
         {
             FasterList<MemberInfo> propertyList = new FasterList<MemberInfo>(8);
@@ -121,4 +167,4 @@ namespace Svelto.Utilities
 
         static readonly Type _compilerType = typeof(CompilerGeneratedAttribute);
     }
-}
+

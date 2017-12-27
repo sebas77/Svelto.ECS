@@ -143,7 +143,7 @@ namespace Svelto.ECS
 
             if (baseType.IsGenericTypeEx())
             {
-                var genericArguments = baseType.GetGenericArguments();
+                var genericArguments = baseType.GetGenericArgumentsEx();
                 AddEngine(engine as IHandleEntityViewEngine, genericArguments, _entityViewEngines);
 #if EXPERIMENTAL
                 var activableEngine = engine as IHandleActivableEntityEngine;
