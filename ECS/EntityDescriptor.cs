@@ -1,5 +1,6 @@
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
+using Svelto.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -160,8 +161,8 @@ namespace Svelto.ECS.Internal
             int count;
 
             //Very efficent way to collect the fields of every EntityViewType
-            KeyValuePair<Type, Action<EntityView, object>>[] setters = 
-                FasterList<KeyValuePair<Type, Action<EntityView, object>>>.NoVirt.ToArrayFast(entityView.entityViewBlazingFastReflection, out count);
+            KeyValuePair<Type, CastedAction<EntityView>>[] setters = 
+                FasterList<KeyValuePair<Type, CastedAction<EntityView>>>.NoVirt.ToArrayFast(entityView.entityViewBlazingFastReflection, out count);
 
             var removeEntityComponentType = typeof(IRemoveEntityComponent);
 
@@ -193,14 +194,14 @@ namespace Svelto.ECS.Internal
                                                      entityView.GetType().Name + " - EntityDescriptor " + entityDescriptorName);
 #endif
 #if DEBUG && !PROFILER
-                    keyValuePair.Value(entityView, component.item1);
+                    keyValuePair.Value.Call(entityView, component.item1);
 #else
-                    keyValuePair.Value(entityView, component);
+                    keyValuePair.Value.Call(entityView, component);
 #endif
                 }
                 else
                 {
-                    keyValuePair.Value(entityView, removeEntity);
+                    keyValuePair.Value.Call(entityView, removeEntity);
                 }
             }
 

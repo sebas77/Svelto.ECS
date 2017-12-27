@@ -20,7 +20,7 @@ namespace Svelto.ECS
     {
         public int ID { get { return _ID; } }
 
-        internal FasterList<KeyValuePair<Type, Action<EntityView, object>>> entityViewBlazingFastReflection;
+        internal FasterList<KeyValuePair<Type, CastedAction<EntityView>>> entityViewBlazingFastReflection;
         internal int _ID;
     }
 
@@ -39,9 +39,9 @@ namespace Svelto.ECS
                 {
                     var field = fields[i];
 
-                    Action<EntityView, object> setter = FastInvoke<T>.MakeSetter<EntityView>(field);
+                    CastedAction<EntityView> setter = FastInvoke<T>.MakeSetter<EntityView>(field);
                     
-                    FieldCache<T>.list.Add(new KeyValuePair<Type, Action<EntityView, object>>(field.FieldType, setter));
+                    FieldCache<T>.list.Add(new KeyValuePair<Type, CastedAction<EntityView>>(field.FieldType, setter));
                 }
             }
 
@@ -50,7 +50,7 @@ namespace Svelto.ECS
 
         static class FieldCache<W> where W:T
         {
-            internal static readonly FasterList<KeyValuePair<Type, Action<EntityView, object>>> list = new FasterList<KeyValuePair<Type, Action<EntityView, object>>>();
+            internal static readonly FasterList<KeyValuePair<Type, CastedAction<EntityView>>> list = new FasterList<KeyValuePair<Type, CastedAction<EntityView>>>();
         }
     }
 }

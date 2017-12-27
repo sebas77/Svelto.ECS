@@ -10,7 +10,7 @@ namespace Svelto.Utilities
     public static class FastInvoke<T> where T : class
     {
 #if ENABLE_IL2CPP
-        public static Action<CastedType, object> MakeSetter<CastedType>(FieldInfo field) 
+        public static Action<CastedType, object> MakeSetter<CastedType>(FieldInfo field) where CastedType:class
         {
             if (field.FieldType.IsInterface == true && field.FieldType.IsValueType == false)
             {
@@ -20,7 +20,7 @@ namespace Svelto.Utilities
             throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported EntityView field (must be an interface and a class)");
         }
 #elif !NETFX_CORE
-        public static Action<CastedType, object> MakeSetter<CastedType>(FieldInfo field) 
+        public static CastedAction<CastedType> MakeSetter<CastedType>(FieldInfo field) where CastedType:class
         {
             if (field.FieldType.IsInterfaceEx() == true && field.FieldType.IsValueTypeEx() == false)
             {
@@ -33,29 +33,54 @@ namespace Svelto.Utilities
                 cg.Emit(OpCodes.Stfld, field);
                 cg.Emit(OpCodes.Ret);
 
-                return new Action<CastedType, object>((target, value) => m.CreateDelegate(typeof(Action<T, object>)).DynamicInvoke(target, value));
+                var del = m.CreateDelegate(typeof(Action<T, object>));
+
+                return new CastedAction<CastedType, T>(del);
             }
 
             throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported EntityView field (must be an interface and a class)");
         }
 #else
-        public static Action<CastedType, object> MakeSetter<CastedType>(FieldInfo field) 
+        public static CastedAction<CastedType> MakeSetter<CastedType>(FieldInfo field) where CastedType:class
         {
             if (field.FieldType.IsInterfaceEx() == true && field.FieldType.IsValueTypeEx() == false)
             {
                 ParameterExpression targetExp = Expression.Parameter(typeof(T), "target");
-                ParameterExpression valueExp = Expression.Parameter(field.FieldType, "value");
+                ParameterExpression valueExp = Expression.Parameter(typeof(object), "value");
 
                 MemberExpression fieldExp = Expression.Field(targetExp, field);
-                BinaryExpression assignExp = Expression.Assign(fieldExp, valueExp);
+                UnaryExpression convertedExp = Expression.TypeAs(valueExp, field.FieldType);
+                BinaryExpression assignExp = Expression.Assign(fieldExp, convertedExp);
 
-                var setter = Expression.Lambda(assignExp, targetExp, valueExp).Compile();
+                Type type = typeof(Action<,>).MakeGenericType(new Type[] { typeof(T), typeof(object) });
 
-                return new Action<CastedType, object>((target, value) => setter.DynamicInvoke(target, value));
+                var setter = Expression.Lambda(type, assignExp, targetExp, valueExp).Compile();
+
+                return new CastedAction<CastedType, T>(setter); 
             }
 
             throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported EntityView field (must be an interface and a class)");
         }
 #endif
+    }
+
+    public abstract class CastedAction<W> 
+    {
+        abstract public void Call(W target, object value);
+    }
+
+    public class CastedAction<W, T> : CastedAction<W> where W : class where T:class
+    {
+        Action<T, object> setter;
+
+        public CastedAction(Delegate setter)
+        {
+            this.setter = (Action<T, object>)setter;
+        }
+
+        override public void Call(W target, object value)
+        {
+            setter(target as T, value);
+        }
     }
 }
