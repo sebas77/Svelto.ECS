@@ -3,13 +3,17 @@ Svelto Entity Component System for Unity
 
 Real Entity-Component-System for c# and Unity (it can be adapted for other c# platforms too). Enables to write encapsulated, uncoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain.
 
-you can find a working example to learn how to use the framework here:
+you can find working examples to learn how to use the framework here:
 
-https://github.com/sebas77/Svelto-ECS-Example
+https://github.com/sebas77/Svelto-ECS-Example (unity)
+
+https://github.com/sebas77/Svelto.ECS.Vanilla.Example (.net core and standard)
 
 I advise to clone the example repositories separately from the framework one, both under the same Unity project Assets folder.
 
 relative article:
+
+http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/
 
 http://www.sebaslab.com/ecs-1-0/
 
