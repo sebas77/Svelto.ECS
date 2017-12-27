@@ -10,14 +10,14 @@ namespace Svelto.Utilities
     public static class FastInvoke<T> where T : class
     {
 #if ENABLE_IL2CPP
-        public static Action<CastedType, object> MakeSetter<CastedType>(FieldInfo field) where CastedType:class
+        public static CastedAction<CastedType> MakeSetter<CastedType>(FieldInfo field) where CastedType:class
         {
-            if (field.FieldType.IsInterface == true && field.FieldType.IsValueType == false)
+            if (field.FieldType.IsInterfaceEx() == true && field.FieldType.IsValueTypeEx() == false)
             {
-                return new Action<CastedType, object>((target, value) => field.SetValue(target, value));
+                return new CastedAction<CastedType, T>(field.SetValue);
             }
 
-            throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported EntityView field (must be an interface and a class)");
+            throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported field (must be an interface and a class)");
         }
 #elif !NETFX_CORE
         public static CastedAction<CastedType> MakeSetter<CastedType>(FieldInfo field) where CastedType:class
@@ -38,7 +38,7 @@ namespace Svelto.Utilities
                 return new CastedAction<CastedType, T>(del);
             }
 
-            throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported EntityView field (must be an interface and a class)");
+            throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported field (must be an interface and a class)");
         }
 #else
         public static CastedAction<CastedType> MakeSetter<CastedType>(FieldInfo field) where CastedType:class
@@ -59,7 +59,7 @@ namespace Svelto.Utilities
                 return new CastedAction<CastedType, T>(setter); 
             }
 
-            throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported EntityView field (must be an interface and a class)");
+            throw new ArgumentException("<color=orange>Svelto.ECS</color> unsupported field (must be an interface and a class)");
         }
 #endif
     }
@@ -76,6 +76,11 @@ namespace Svelto.Utilities
         public CastedAction(Delegate setter)
         {
             this.setter = (Action<T, object>)setter;
+        }
+
+        public CastedAction(Action<T, object> setter)
+        {
+            this.setter = setter;
         }
 
         override public void Call(W target, object value)
