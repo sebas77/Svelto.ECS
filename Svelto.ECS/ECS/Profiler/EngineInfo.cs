@@ -40,27 +40,16 @@ namespace Svelto.ECS.Profiler
         double _maxRemoveDuration;
         int _entityViewsRemovedCount;
 
-        public IEngine engine { get { return _engine; } }
         public string engineName { get { return _engineName; } }
-        public Type engineType { get { return _engineType; } }
-
-        public double lastUpdateDuration { get { return _lastUpdateDuration[(int) UpdateType.Update]; } }
-        public double lastFixedUpdateDuration { get { return _lastUpdateDuration[(int)UpdateType.LateUpdate]; } }
-        public double lastLateUpdateDuration { get { return _lastUpdateDuration[(int)UpdateType.FixedUpdate]; } }
-
+        
         public double minAddDuration { get { return _minAddDuration; } }
         public double minRemoveDuration { get { return _minRemoveDuration; } }
-        public double minUpdateDuration { get { return _minUpdateDuration[(int)UpdateType.Update]; } }
 
         public double maxAddDuration { get { return _maxAddDuration; } }
         public double maxRemoveDuration { get { return _maxRemoveDuration; } }
-        public double maxUpdateDuration { get { return _maxUpdateDuration[(int)UpdateType.Update]; } }
 
         public double averageAddDuration { get { return _entityViewsAddedCount == 0 ? 0 : _accumulatedAddDuration / _entityViewsAddedCount; } }
         public double averageRemoveDuration { get { return _entityViewsRemovedCount == 0 ? 0 : _accumulatedRemoveDuration / _entityViewsRemovedCount; } }
-        public double averageUpdateDuration { get { return _updateFrameTimes[(int)UpdateType.Update].Count == 0 ? 0 : _accumulatedUpdateDuration[(int)UpdateType.Update] / _updateFrameTimes[(int)UpdateType.Update].Count; } }
-        public double averageLateUpdateDuration { get { return _updateFrameTimes[(int)UpdateType.LateUpdate].Count == 0 ? 0 : _accumulatedUpdateDuration[(int)UpdateType.LateUpdate] / _updateFrameTimes[(int)UpdateType.LateUpdate].Count; } }
-        public double averageFixedUpdateDuration { get { return _updateFrameTimes[(int)UpdateType.FixedUpdate].Count == 0 ? 0 : _accumulatedUpdateDuration[(int)UpdateType.FixedUpdate] / _updateFrameTimes[(int)UpdateType.FixedUpdate].Count; } }
 
         public EngineInfo(IEngine engine)
         {
@@ -77,42 +66,6 @@ namespace Svelto.ECS.Profiler
                 _updateFrameTimes[i] = new Queue<double>();
             }
             ResetDurations();
-        }
-
-        public void AddUpdateDuration(double updateDuration)
-        {
-            AddUpdateDurationForType(updateDuration, (int)UpdateType.Update);
-        }
-
-        public void AddLateUpdateDuration(double updateDuration)
-        {
-            AddUpdateDurationForType(updateDuration, (int)UpdateType.LateUpdate);
-        }
-
-        public void AddFixedUpdateDuration(double updateDuration)
-        {
-            AddUpdateDurationForType(updateDuration, (int)UpdateType.FixedUpdate);
-        }
-
-        void AddUpdateDurationForType(double updateDuration, int updateType)
-        {
-            if (updateDuration < _minUpdateDuration[updateType] || _minUpdateDuration[updateType] == 0)
-            {
-                _minUpdateDuration[updateType] = updateDuration;
-            }
-            if (updateDuration > _maxUpdateDuration[updateType])
-            {
-                _maxUpdateDuration[updateType] = updateDuration;
-            }
-
-            if (_updateFrameTimes[updateType].Count == NUM_FRAMES_TO_AVERAGE)
-            {
-                _accumulatedUpdateDuration[updateType] -= _updateFrameTimes[updateType].Dequeue();
-            }
-
-            _accumulatedUpdateDuration[updateType] += updateDuration;
-            _updateFrameTimes[updateType].Enqueue(updateDuration);
-            _lastUpdateDuration[updateType] = updateDuration;
         }
 
         public void AddAddDuration(double duration)

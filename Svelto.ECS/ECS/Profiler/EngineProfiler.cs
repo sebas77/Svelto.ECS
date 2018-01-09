@@ -19,9 +19,9 @@ namespace Svelto.ECS.Profiler
             {
                 _stopwatch.Start();
                 engine.Add(entityView);
-                _stopwatch.Reset();
-
+                _stopwatch.Stop();
                 info.AddAddDuration(_stopwatch.Elapsed.TotalMilliseconds);
+                _stopwatch.Reset();
             }
         }
 
@@ -32,9 +32,10 @@ namespace Svelto.ECS.Profiler
             {
                 _stopwatch.Start();
                 engine.Remove(entityView);
-                _stopwatch.Reset();
+                _stopwatch.Stop();
 
                 info.AddRemoveDuration(_stopwatch.Elapsed.TotalMilliseconds);
+                _stopwatch.Reset();
             }
         }
 
