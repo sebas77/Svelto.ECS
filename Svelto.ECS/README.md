@@ -33,6 +33,12 @@ http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency
 
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
 
+new article on optimizations:
+
+http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
+
+Note: if you ever build something with Svelto.ECS that you can share with the community, please do and let me know. Other coders need more examples.
+
 Copyright (c) Sebastiano Mandalà
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:

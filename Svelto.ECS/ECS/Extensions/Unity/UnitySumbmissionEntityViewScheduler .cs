@@ -3,7 +3,7 @@ using System.Collections;
 using Svelto.WeakEvents;
 using UnityEngine;
 
-namespace Svelto.ECS.Schedulers
+namespace Svelto.ECS.Schedulers.Unity
 {
     //The EntityViewSubmissionScheduler has been introduced to make
     //the entityView submission logic platform indipendent.

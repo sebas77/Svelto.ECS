@@ -11,35 +11,72 @@ namespace Svelto.ECS
         IEntityViewBuilder[] entityViewsToBuild { get; }
     }
     
-    internal static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
+    public class EntityDescriptor:IEntityDescriptor
     {
-        public static readonly EntityDescriptorInfo Default = new EntityDescriptorInfo(new TType());
+        protected EntityDescriptor(IEntityViewBuilder[] entityViewsToBuild)
+        {
+            this.entityViewsToBuild = entityViewsToBuild;
+        }
+
+        public IEntityViewBuilder[] entityViewsToBuild { get; private set; }
     }
 
-    public class EntityDescriptorInfo
+    public interface IEntityDescriptorInfo
+    {}
+    
+    public static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
-        readonly internal IEntityViewBuilder[] entityViewsToBuild;
-        readonly internal RemoveEntityImplementor removeEntityImplementor;
-        internal readonly string name;
+        public static readonly IEntityDescriptorInfo Default = new EntityDescriptorInfo(new TType());
+    }
 
-        internal EntityDescriptorInfo(IEntityDescriptor descriptor)
+    public class DynamicEntityDescriptorInfo<TType> : EntityDescriptorInfo where TType : IEntityDescriptor, new()
+    {
+        public DynamicEntityDescriptorInfo(FasterList<IEntityViewBuilder> extraEntityViews)
         {
-            name = descriptor.ToString();
-            entityViewsToBuild = descriptor.entityViewsToBuild;
+            DesignByContract.Check.Require(extraEntityViews.Count > 0, "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
+            
+            var descriptor = new TType();
+            int length = descriptor.entityViewsToBuild.Length;
+            
+            entityViewsToBuild = new IEntityViewBuilder[length + extraEntityViews.Count];
+            
+            Array.Copy(descriptor.entityViewsToBuild, 0, entityViewsToBuild, 0, length);
+            Array.Copy(extraEntityViews.ToArrayFast(), 0, entityViewsToBuild, length, extraEntityViews.Count);
+            
             removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuild);
+            name = descriptor.ToString();
         }
     }
 }
 
 namespace Svelto.ECS.Internal
 {
+    public class EntityDescriptorInfo:IEntityDescriptorInfo
+    {
+        internal IEntityViewBuilder[] entityViewsToBuild;
+        internal RemoveEntityImplementor removeEntityImplementor;
+        internal string name;
+
+        internal EntityDescriptorInfo(IEntityDescriptor descriptor)
+        {
+            name = descriptor.ToString();
+            entityViewsToBuild = descriptor.entityViewsToBuild;
+            
+            removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuild);
+        }
+
+        protected EntityDescriptorInfo()
+        {}
+    }
+    
     static class EntityFactory
     {
         internal static void BuildGroupedEntityViews(int entityID, int groupID,
                                                      Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsByType,
-                                                     EntityDescriptorInfo entityViewsToBuildDescriptor,
+                                                     IEntityDescriptorInfo eentityViewsToBuildDescriptor,
                                                      object[] implementors)
         {
+            var entityViewsToBuildDescriptor = eentityViewsToBuildDescriptor as EntityDescriptorInfo; 
             Dictionary<Type, ITypeSafeList> groupedEntityViewsTyped;
 
             if (groupEntityViewsByType.TryGetValue(groupID, out groupedEntityViewsTyped) == false)
@@ -48,6 +85,7 @@ namespace Svelto.ECS.Internal
                 groupEntityViewsByType.Add(groupID, groupedEntityViewsTyped);
             }
 
+            //I would like to find a better solution for this
             var removeEntityImplementor = new RemoveEntityImplementor(entityViewsToBuildDescriptor.entityViewsToBuild, groupID);
 
             InternalBuildEntityViews(entityID, groupedEntityViewsTyped, entityViewsToBuildDescriptor, implementors, removeEntityImplementor);
@@ -55,19 +93,21 @@ namespace Svelto.ECS.Internal
 
         internal static void BuildEntityViews(int entityID, 
                                               Dictionary<Type, ITypeSafeList> entityViewsByType,
-                                              EntityDescriptorInfo entityViewsToBuildDescriptor,
+                                              IEntityDescriptorInfo eentityViewsToBuildDescriptor,
                                               object[] implementors)
         {
+            var entityViewsToBuildDescriptor = eentityViewsToBuildDescriptor as EntityDescriptorInfo;
             var removeEntityImplementor = entityViewsToBuildDescriptor.removeEntityImplementor;
 
             InternalBuildEntityViews(entityID, entityViewsByType, entityViewsToBuildDescriptor, implementors, removeEntityImplementor);
         }
 
-        private static void InternalBuildEntityViews(int entityID, 
+        static void InternalBuildEntityViews(int entityID, 
             Dictionary<Type, ITypeSafeList> entityViewsByType, 
-            EntityDescriptorInfo entityViewsToBuildDescriptor, 
+            IEntityDescriptorInfo eentityViewsToBuildDescriptor, 
             object[] implementors, RemoveEntityImplementor removeEntityImplementor)
         {
+            var entityViewsToBuildDescriptor = eentityViewsToBuildDescriptor as EntityDescriptorInfo;
             var entityViewsToBuild = entityViewsToBuildDescriptor.entityViewsToBuild;
             int count = entityViewsToBuild.Length;
 
@@ -92,7 +132,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        internal static IEntityView BuildEntityView(int entityID, Dictionary<Type, ITypeSafeList> entityViewsByType,
+        static IEntityView BuildEntityView(int entityID, Dictionary<Type, ITypeSafeList> entityViewsByType,
                                                  Type entityViewType, IEntityViewBuilder entityViewBuilder)
         {
             ITypeSafeList entityViewsList;
@@ -148,8 +188,6 @@ namespace Svelto.ECS.Internal
 #else
                         implementorsByType[componentType] = implementor;
 #endif
-
-
                     }
                 }
 #if DEBUG && !PROFILER
@@ -223,12 +261,12 @@ namespace Svelto.ECS.Internal
         static Dictionary<Type, Type[]> _cachedTypes = new Dictionary<Type, Type[]>();
 
         const string DUPLICATE_IMPLEMENTOR_ERROR =
-            "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is considered an error and MUST be fixed.";
+            "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is considered an error and MUST be fixed. ";
 
         const string NULL_IMPLEMENTOR_ERROR =
-            "<color=orange>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid performance loss";
+            "<color=orange>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid performance loss ";
 
-        const string NOT_FOUND_EXCEPTION = "<color=orange>Svelto.ECS</color> Implementor not found for an EntityView.";
+        const string NOT_FOUND_EXCEPTION = "<color=orange>Svelto.ECS</color> Implementor not found for an EntityView. ";
     }
 }
 

@@ -11,16 +11,10 @@ namespace Svelto.ECS
 {
     public interface IEngine
     {}
-#if EXPERIMENTAL
-    public interface IHandleActivableEntityEngine : IEngine
-    {
-        void Enable(EntityView entityView);
-        void Disable(EntityView entityView);
-    }
-#endif
+    
     public interface IQueryingEntityViewEngine : IEngine
     {
-        IEngineEntityViewDB entityViewsDB { set; }
+        IEntityViewsDB entityViewsDB { set; }
 
         void Ready();
     }
