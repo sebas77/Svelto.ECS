@@ -54,19 +54,19 @@ namespace Svelto.ECS
         readonly Type _entityViewType = typeof(EntityViewType);
     }
 
-    public class EntityStructBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : struct, IEntityStruct
+    public class EntityViewStructBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : struct, IEntityStruct
     {
         public void BuildEntityViewAndAddToList(ref ITypeSafeList list, int entityID, out IEntityView entityView)
         {
-            var lentityView = default(EntityViewType);
-            lentityView.ID = entityID;
+            var structEntityView = default(EntityViewType);
+            structEntityView.ID = entityID;
             
             if (list == null)
                 list = new TypeSafeFasterListForECSForStructs<EntityViewType>();
 
             var castedList = list as TypeSafeFasterListForECSForStructs<EntityViewType>;
 
-            castedList.Add(lentityView);
+            castedList.Add(structEntityView);
 
             entityView = null;
         }
