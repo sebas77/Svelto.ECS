@@ -14,17 +14,25 @@ I advise to clone the example repositories separately from the framework one, bo
 relative articles:
 
 http://www.sebaslab.com/ecs-1-0/
+
 http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
+
 http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/
 
 If you want to know more about the theory and rationale behind this framework:
 
 http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
+
 http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
+
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
+
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-ii-inversion-of-control/
+
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/
+
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
+
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
 
 new article on optimizations:
