@@ -1,7 +1,5 @@
-Svelto Entity Component System for Unity
+Svelto Entity Component System 2.0
 =====================================
-
-**Note: The alpha stage of Svelto 2.0 is almost completed, so if you are here to experiment with it, please use the current alpha branch**
 
 Real Entity-Component-System for c# and Unity (it can be adapted for other c# platforms too). Enables to write encapsulated, uncoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain.
 
