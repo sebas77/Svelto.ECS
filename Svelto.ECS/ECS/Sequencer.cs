@@ -1,14 +1,25 @@
 using System;
-using Steps = System.Collections.Generic.Dictionary<Svelto.ECS.IEngine, System.Collections.Generic.Dictionary<System.Enum, Svelto.ECS.IStep[]>>;
+using System.Collections.Generic;
 
 namespace Svelto.ECS
 {
+    public class Steps : Dictionary<IEngine, Dictionary<int, IStep[]>>
+    {}
+
+    public class To : Dictionary<int, IStep[]>
+    {
+        public void Add(IStep engine)
+        {
+            Add(Condition.always, new [] {engine});
+        }
+    }
+    
     public interface IStep
     { }
 
     public interface IStep<T>:IStep
     {
-        void Step(ref T token, Enum condition);
+        void Step(ref T token, int condition);
     }
 
     public class Sequencer
@@ -23,7 +34,7 @@ namespace Svelto.ECS
             Next(engine, ref param, Condition.always);
         }
 
-        public void Next<T>(IEngine engine, ref T param, Enum condition)
+        public void Next<T>(IEngine engine, ref T param, int condition)
         {
             var tos = _steps[engine];
             var steps = tos[condition];
@@ -37,8 +48,8 @@ namespace Svelto.ECS
     }
 
     //you can inherit from Condition and add yours
-    public enum Condition
+    public class Condition
     {
-        always
+        public const int always = 0;
     }
 }   

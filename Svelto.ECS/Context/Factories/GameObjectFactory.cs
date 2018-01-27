@@ -39,17 +39,17 @@ namespace Svelto.Context
             return go;
         }
 
-        /// <summary>
-        /// Register a prefab to be built later using a string ID.
-        /// </summary>
-        /// <param name="prefab">original prefab</param>
-        virtual public GameObject Build(GameObject prefab)
+        public virtual GameObject Build(GameObject prefab)
         {
             var copy = Object.Instantiate(prefab) as GameObject;
 
             return copy;
         }
 
+        /// <summary>
+        /// Register a prefab to be built later using a string ID.
+        /// </summary>
+        /// <param name="prefab">original prefab</param>
         public void RegisterPrefab(GameObject prefab, string prefabName, GameObject parent = null)
         {
             var objects = new GameObject[2];
