@@ -306,7 +306,7 @@ namespace Svelto.ECS
                 _weakEngine = weakReference;
             }
 
-            public void BuildEntity<T>(int entityID, object[] implementors = null) where T : IEntityDescriptor, new()
+            public void BuildEntity<T>(int entityID, object[] implementors) where T : IEntityDescriptor, new()
             {
                 _weakEngine.Target.BuildEntity<T>(entityID, implementors);
             }
@@ -316,17 +316,17 @@ namespace Svelto.ECS
                 _weakEngine.Target.BuildEntity(entityID, entityDescriptor, implementors);
             }
 
-            public void BuildMetaEntity<T>(int metaEntityID, object[] implementors = null) where T : IEntityDescriptor, new()
+            public void BuildMetaEntity<T>(int metaEntityID, object[] implementors) where T : IEntityDescriptor, new()
             {
                 _weakEngine.Target.BuildMetaEntity<T>(metaEntityID, implementors);
             }
 
-            public void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors = null) where T : IEntityDescriptor, new()
+            public void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors) where T : IEntityDescriptor, new()
             {
                 _weakEngine.Target.BuildEntityInGroup<T>(entityID, groupID, implementors);
             }
 
-            public void BuildEntityInGroup(int entityID, int groupID, IEntityDescriptorInfo entityDescriptor, object[] implementors = null)
+            public void BuildEntityInGroup(int entityID, int groupID, IEntityDescriptorInfo entityDescriptor, object[] implementors)
             {
                 _weakEngine.Target.BuildEntityInGroup(entityID, groupID, entityDescriptor, implementors);
             }

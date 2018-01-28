@@ -4,12 +4,12 @@ namespace Svelto.ECS
     {
         void Preallocate<T>(int size) where T : IEntityDescriptor, new();
 
-        void BuildEntity<T>(int entityID, object[] implementors = null) where T:IEntityDescriptor, new();
+        void BuildEntity<T>(int entityID, object[] implementors) where T:IEntityDescriptor, new();
         void BuildEntity(int entityID, IEntityDescriptorInfo entityDescriptorInfo, object[] implementors);
 
-        void BuildMetaEntity<T>(int metaEntityID, object[] implementors = null) where T:IEntityDescriptor, new();
+        void BuildMetaEntity<T>(int metaEntityID, object[] implementors) where T:IEntityDescriptor, new();
 
-        void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors = null) where T:IEntityDescriptor, new();
+        void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors) where T:IEntityDescriptor, new();
         void BuildEntityInGroup(int entityID, int groupID, IEntityDescriptorInfo entityDescriptor, object[] implementors);
     }
     
