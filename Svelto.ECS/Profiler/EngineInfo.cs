@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 //This profiler is based on the Entitas Visual Debugging tool 
 //https://github.com/sschmid/Entitas-CSharp
 
@@ -8,27 +5,11 @@ namespace Svelto.ECS.Profiler
 {
     public sealed class EngineInfo
     {
-        enum UpdateType
-        {
-            Update = 0,
-            LateUpdate = 1,
-            FixedUpdate = 2,
-        }
-
         readonly IEngine _engine;
         readonly string _engineName;
-        readonly Type _engineType;
 
         const int NUM_UPDATE_TYPES = 3;
         const int NUM_FRAMES_TO_AVERAGE = 10;
-
-        //use a queue to averave out the last 30 frames
-        Queue<double>[] _updateFrameTimes = new Queue<double>[NUM_UPDATE_TYPES];
-        readonly double[] _accumulatedUpdateDuration = new double[NUM_UPDATE_TYPES];
-        readonly double[] _lastUpdateDuration = new double[NUM_UPDATE_TYPES];
-
-        readonly double[] _minUpdateDuration = new double[NUM_UPDATE_TYPES];
-        readonly double[] _maxUpdateDuration = new double[NUM_UPDATE_TYPES];
 
         double _accumulatedAddDuration;
         double _minAddDuration;
@@ -58,13 +39,7 @@ namespace Svelto.ECS.Profiler
 
             int foundNamespace = _engineName.LastIndexOf(".");
             _engineName = _engineName.Remove(0, foundNamespace + 1);
-
-            _engineType = engine.GetType();
-
-            for (int i = 0; i < NUM_UPDATE_TYPES; i++)
-            {
-                _updateFrameTimes[i] = new Queue<double>();
-            }
+            
             ResetDurations();
         }
 
@@ -98,14 +73,6 @@ namespace Svelto.ECS.Profiler
 
         public void ResetDurations()
         {
-            for (int i = 0; i < NUM_UPDATE_TYPES; i++)
-            {
-                _accumulatedUpdateDuration[i] = 0;
-                _minUpdateDuration[i] = 0;
-                _maxUpdateDuration[i] = 0;
-                _updateFrameTimes[i].Clear();
-            }
-
             _accumulatedAddDuration = 0;
             _minAddDuration = 0;
             _maxAddDuration = 0;

@@ -22,7 +22,14 @@ namespace Svelto.ECS
         void Step(ref T token, int condition);
     }
 
-    public class Sequencer
+    public interface ISequencer
+    {
+        void Next<T>(IEngine engine, ref T param);
+
+        void Next<T>(IEngine engine, ref T param, int condition);
+    }
+
+    public class Sequencer : ISequencer
     {
         public void SetSequence(Steps steps)       
         {
@@ -36,8 +43,7 @@ namespace Svelto.ECS
 
         public void Next<T>(IEngine engine, ref T param, int condition)
         {
-            var tos = _steps[engine];
-            var steps = tos[condition];
+            var steps = _steps[engine][condition];
 
             if (steps != null)
                 for (int i = 0; i < steps.Length; i++)
@@ -47,8 +53,7 @@ namespace Svelto.ECS
         Steps     _steps;
     }
 
-    //you can inherit from Condition and add yours
-    public class Condition
+    public static class Condition
     {
         public const int always = 0;
     }
