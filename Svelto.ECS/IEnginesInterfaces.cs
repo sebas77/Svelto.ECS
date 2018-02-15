@@ -2,7 +2,7 @@ namespace Svelto.ECS
 {   
     public interface IEntityFactory
     {
-        void Preallocate<T>(int size) where T : IEntityDescriptor, new();
+        void PreallocateEntitySlots<T>(int size) where T : IEntityDescriptor, new();
 
         void BuildEntity<T>(int entityID, object[] implementors) where T:IEntityDescriptor, new();
         void BuildEntity(int entityID, IEntityDescriptorInfo entityDescriptorInfo, object[] implementors);

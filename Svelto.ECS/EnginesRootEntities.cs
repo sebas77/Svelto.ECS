@@ -331,7 +331,7 @@ namespace Svelto.ECS
                 _weakEngine.Target.BuildEntityInGroup(entityID, groupID, entityDescriptor, implementors);
             }
 
-            public void Preallocate<T>(int size) where T : IEntityDescriptor, new()
+            public void PreallocateEntitySlots<T>(int size) where T : IEntityDescriptor, new()
             {
                 _weakEngine.Target.Preallocate<T>(size);
             }
