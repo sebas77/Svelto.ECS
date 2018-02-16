@@ -9,6 +9,12 @@ namespace Svelto.ECS
             _senderID = senderID;
             _subscribers = new WeakEvent<int, T>();
         }
+        
+        public DispatchOnSet()
+        {
+            _senderID    = -1;
+            _subscribers = new WeakEvent<int, T>();
+        }
 
         public T value
         {
