@@ -31,12 +31,12 @@ namespace Svelto.ECS.Internal
 
         public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:EntityView, new()
         {
-            Dictionary<Type, ITypeSafeList> entityViews;
+            Dictionary<Type, ITypeSafeList> entitiesInGroupPerType;
 
-            if (_groupEntityViewsDB.TryGetValue(group, out entityViews) == false)
+            if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
                 return RetrieveEmptyEntityViewList<T>();
             
-            return new FasterReadOnlyList<T>(entityViews as FasterList<T>);
+            return new FasterReadOnlyList<T>((FasterList<T>) entitiesInGroupPerType[typeof(T)]);
         }
 
         public T[] QueryEntityViewsAsArray<T>(out int count) where T : IEntityView
@@ -49,9 +49,7 @@ namespace Svelto.ECS.Internal
             if (_entityViewsDB.TryGetValue(type, out entityViews) == false)
                 return RetrieveEmptyEntityViewArray<T>();
             
-            var castedEntityViews = (FasterList<T>)entityViews;
-
-            return FasterList < T > .NoVirt.ToArrayFast(castedEntityViews, out count);
+            return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews, out count);
         }
         
         public T[] QueryGroupedEntityViewsAsArray<T>(int @group, out int count) where T : IEntityView
@@ -64,11 +62,7 @@ namespace Svelto.ECS.Internal
             if (_groupEntityViewsDB.TryGetValue(group, out entityViews) == false)
                 return RetrieveEmptyEntityViewArray<T>();
                        
-            var castedEntityViews = (FasterList<T>)entityViews[type];
-
-            count = castedEntityViews.Count;
-
-            return FasterList<T>.NoVirt.ToArrayFast(castedEntityViews, out count);
+            return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews[type], out count);
         }
 
         public ReadOnlyDictionary<int, T> QueryIndexableEntityViews<T>() where T:IEntityView

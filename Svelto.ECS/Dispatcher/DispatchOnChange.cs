@@ -2,14 +2,12 @@ using System.Collections.Generic;
 
 namespace Svelto.ECS
 {
-    public class DispatchOnChange<T> : DispatchOnSet<T>
+    public class DispatchOnChange<T> : DispatchOnSet<T> where T:struct
     {
         public DispatchOnChange(int senderID) : base(senderID)
         { }
 
-        public DispatchOnChange() 
-        {
-        }
+        public DispatchOnChange() {}
 
         public new T value
         {
