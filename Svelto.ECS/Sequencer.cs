@@ -10,18 +10,22 @@ namespace Svelto.ECS
     {
         public void Add(IStep engine)
         {
-            Add(Condition.always, new [] {engine});
+            Add(Condition.Always, new [] {engine});
+        }
+        public void Add(IStep[] engines)
+        {
+            Add(Condition.Always, engines);
         }
     }
     
     public interface IStep
-    { }
+    {}
 
     public interface IStep<T>:IStep
     {
         void Step(ref T token, int condition);
     }
-
+    
     public interface ISequencer
     {
         void Next<T>(IEngine engine, ref T param);
@@ -38,23 +42,24 @@ namespace Svelto.ECS
 
         public void Next<T>(IEngine engine, ref T param)
         {
-            Next(engine, ref param, Condition.always);
+            Next<T>(engine, ref param, Condition.Always);
         }
 
         public void Next<T>(IEngine engine, ref T param, int condition)
         {
-            var steps = _steps[engine][condition];
+            int branch = condition;
+            var steps = _steps[engine][branch];
 
             if (steps != null)
                 for (int i = 0; i < steps.Length; i++)
                     ((IStep<T>)steps[i]).Step(ref param, condition);
         }
 
-        Steps     _steps;
+        Steps _steps;
     }
 
     public static class Condition
     {
-        public const int always = 0;
+        public const int Always = 0;
     }
 }   
