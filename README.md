@@ -17,6 +17,8 @@ http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-fri
 
 http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/
 
+http://www.sebaslab.com/learning-svelto-ecs-by-example-the-survival-example/
+
 If you want to know more about the theory and rationale behind this framework:
 
 http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
@@ -32,6 +34,18 @@ http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-co
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
 
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
+
+The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!
+
+https://github.com/sebas77/Svelto.Tasks
+
+Unity official thread:
+
+https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
+
+Dario Oliveri articles:
+
+https://eagergames.wordpress.com/category/ecs/
 
 **_Note: Dear Svelto Users : Although I am committed to help you and write articles as much as I can, I will never be able to keep all the documentation up to date. If you are a happy svelto user and you want to contribute, please feel free to update the github wiki! 🙏👊_**
 
