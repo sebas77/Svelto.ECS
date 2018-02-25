@@ -1,16 +1,16 @@
-Svelto Entity Component System 2.0
+# Svelto Entity Component System 2.0
 =====================================
 
 Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic, it comes with several unity extensions. 
 you can find a working example to learn how to use the framework here:
 
-# Examples
+## Examples
 
 * **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
 * **Entities as struct, cache friendly date oriented code:** https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
 
-# Articles
+## Articles
 
 **Dario Oliveri's Svelto.ECS articles:**
 
@@ -45,7 +45,7 @@ you can find a working example to learn how to use the framework here:
 
 **Note: don't beat yourself if you find Svelto.ECS hard to use at first. The framework is very light in features, but it forces the use of a new coding paradigm and shifting code paradigm is hard! I will try to clarify all the concepts writing more and more articles**
 
-# Svelto Framework is used to develop the following products:
+## Svelto Framework is used to develop the following products:
 
 ![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
