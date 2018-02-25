@@ -1,25 +1,22 @@
 Svelto Entity Component System 2.0
 =====================================
 
-Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic (
-https://github.com/sebas77/Svelto.ECS.Vanilla.Example/) it comes with several unity extensions. 
+Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic, it comes with several unity extensions. 
 you can find a working example to learn how to use the framework here:
 
-https://github.com/sebas77/Svelto-ECS-Example
+**Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
+**Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
 
-I advise to clone the example repositories separately from the framework one, both under the same Unity project Assets folder.
-
-relative articles:
+**Framework Articles:**
 
 http://www.sebaslab.com/ecs-1-0/
+http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
 
-http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
+**Entities as struct, cache friendly date oriented code:**
 
-http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/
+https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
 
-http://www.sebaslab.com/learning-svelto-ecs-by-example-the-survival-example/
-
-If you want to know more about the theory and rationale behind this framework:
+**Theory related articles:**
 
 http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
 
@@ -35,15 +32,15 @@ http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency
 
 http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
 
-The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!
+**The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
 https://github.com/sebas77/Svelto.Tasks
 
-Unity official thread:
+**Unity official thread:**
 
 https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
 
-Dario Oliveri articles:
+**Dario Oliveri's Svelto.ECS articles:**
 
 https://eagergames.wordpress.com/category/ecs/
 
