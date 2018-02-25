@@ -14,7 +14,7 @@ you can find a working example to learn how to use the framework here:
 
 **Dario Oliveri's Svelto.ECS articles:**
 
-https://eagergames.wordpress.com/category/ecs/
+* https://eagergames.wordpress.com/category/ecs/
 
 **Framework Articles:**
 
@@ -33,11 +33,11 @@ https://eagergames.wordpress.com/category/ecs/
 
 **The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
-https://github.com/sebas77/Svelto.Tasks
+* https://github.com/sebas77/Svelto.Tasks
 
-**Unity official thread:**
+**Unity official forum thread:**
 
-https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
+* https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
 
 ## How to Install
 
@@ -45,7 +45,7 @@ https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-compon
 
 **Note: don't beat yourself if you find Svelto.ECS hard to use at first. The framework is very light in features, but it forces the use of a new coding paradigm and shifting code paradigm is hard! I will try to clarify all the concepts writing more and more articles**
 
-# Svelto Framework is being used to develop the following products:
+# Svelto Framework is used to develop the following products:
 
 ![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
