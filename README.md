@@ -6,9 +6,9 @@ you can find a working example to learn how to use the framework here:
 
 # Examples
 
-**Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
-**Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
-**Entities as struct, cache friendly date oriented code:** https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
+* **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
+* **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
+* **Entities as struct, cache friendly date oriented code:** https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
 
 # Articles
 
@@ -18,24 +18,18 @@ https://eagergames.wordpress.com/category/ecs/
 
 **Framework Articles:**
 
-http://www.sebaslab.com/ecs-1-0/
-http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
+* http://www.sebaslab.com/ecs-1-0/
+* http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
 
 **Theory related articles:**
 
-http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
-
-http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
-
-http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
-
-http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-ii-inversion-of-control/
-
-http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/
-
-http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
-
-http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
+* http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
+* http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
+* http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
+* http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-ii-inversion-of-control/
+* http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/
+* http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
+* http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
 
 **The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
