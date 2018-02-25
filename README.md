@@ -4,17 +4,22 @@ Svelto Entity Component System 2.0
 Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic, it comes with several unity extensions. 
 you can find a working example to learn how to use the framework here:
 
+# Examples
+
 **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
+**Entities as struct, cache friendly date oriented code:** https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
+
+# Articles
+
+**Dario Oliveri's Svelto.ECS articles:**
+
+https://eagergames.wordpress.com/category/ecs/
 
 **Framework Articles:**
 
 http://www.sebaslab.com/ecs-1-0/
 http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
-
-**Entities as struct, cache friendly date oriented code:**
-
-https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
 
 **Theory related articles:**
 
@@ -40,15 +45,13 @@ https://github.com/sebas77/Svelto.Tasks
 
 https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
 
-**Dario Oliveri's Svelto.ECS articles:**
-
-https://eagergames.wordpress.com/category/ecs/
+## How to Install
 
 **Note: The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relavite repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki**
 
 **Note: don't beat yourself if you find Svelto.ECS hard to use at first. The framework is very light in features, but it forces the use of a new coding paradigm and shifting code paradigm is hard! I will try to clarify all the concepts writing more and more articles**
 
-Svelto Framework is being used to develop the following products:
+# Svelto Framework is being used to develop the following products:
 
 ![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
