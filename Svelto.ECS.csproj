@@ -1,9 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Svelto.ECS.Tests</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.Reflection" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
@@ -13,11 +12,15 @@
     <PackageReference Include="System.Reflection.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="System.Reflection.Emit.Lightweight">
       <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.netcore.app\2.0.0\ref\netcoreapp2.0\System.Reflection.Emit.Lightweight.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj">
+      <Project>{6341571A-7DFB-43F5-BAAA-27357750D9E9}</Project>
+      <Name>Svelto.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

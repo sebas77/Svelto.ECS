@@ -22,8 +22,7 @@ namespace Svelto.ECS
 
         void RemoveEntityFromGroup<T>(int entityID, int groupID) where T:IEntityDescriptor, new();
         
-        void RemoveGroupedEntities(int groupID);
-
+        void DeleteEntityGroup(int groupID);
         void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new();
     }
 }

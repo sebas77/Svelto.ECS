@@ -11,11 +11,4 @@ namespace Svelto.ECS
 {
     public interface IEngine
     {}
-    
-    public interface IQueryingEntityViewEngine : IEngine
-    {
-        IEntityViewsDB entityViewsDB { set; }
-
-        void Ready();
-    }
 }

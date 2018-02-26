@@ -159,7 +159,7 @@ namespace Svelto.ECS
             InternalRemoveFromDBAndEngines(((EntityDescriptorInfo) EntityDescriptorTemplate<T>.Default).entityViewsToBuild, entityID, _groupEntityViewsDB[groupID]);
         }
         
-        void RemoveEntitiesGroup(int groupID)
+        void DeleteEntityGroup(int groupID)
         {
             foreach (var group in _groupEntityViewsDB[groupID])
             {
@@ -364,9 +364,9 @@ namespace Svelto.ECS
                 _weakReference.Target.RemoveEntity<T>(entityID);
             }
 
-            public void RemoveGroupedEntities(int groupID)
+            public void DeleteEntityGroup(int groupID)
             {
-                _weakReference.Target.RemoveEntitiesGroup(groupID);
+                _weakReference.Target.DeleteEntityGroup(groupID);
             }
 
             public void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
