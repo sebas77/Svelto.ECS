@@ -8,7 +8,7 @@ you can find a working example to learn how to use the framework here:
 
 * **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
-* **Entities as struct, cache friendly date oriented code:** https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
+* **Entities as struct, cache friendly data oriented code:** https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
 
 ## Articles
 
