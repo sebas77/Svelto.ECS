@@ -49,7 +49,7 @@ The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submo
 
 just open an issue here, I come here pretty often :). Also feel free to contact me on twitter or leave comments on the blog!
 
-## The Github wiki page
+## [The Github wiki page](https://github.com/sebas77/Svelto.ECS/wiki)
 
 It needs love and as far as I understood, anyone can edit it. Feel free to do so if you have a good understanding of Svelto!
 
