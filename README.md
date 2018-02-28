@@ -53,11 +53,13 @@ just open an issue here, I come here pretty often :). Also feel free to contact 
 
 It needs love and as far as I understood, anyone can edit it. Feel free to do so if you have a good understanding of Svelto!
 
-## Svelto Framework is used to develop the following products:
+## Svelto Framework is used to develop the following products(*):
 
 ![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
 ![Robocraft Royale](https://static.altchar.com/live/media/images/950x633_ct/7707_Robocraft_Royale_2bc6bb8ceab8ce0a1568fb37bd826b3f.jpg)!
 ![Cardlife](https://i.ytimg.com/vi/q2jaUZjnNyg/maxresdefault.jpg)
+
+*if you want your products made with Svelto here, just send me an email or whatever, I'll be super happy to add them.
 
 **_Note: Dear Svelto Users : Although I am committed to help you and write articles as much as I can, I will never be able to keep all the documentation up to date. If you are a happy svelto user and you want to contribute, please feel free to update the github wiki! 🙏👊_**
