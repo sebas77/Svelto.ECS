@@ -17,10 +17,4 @@
       <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.netcore.app\2.0.0\ref\netcoreapp2.0\System.Reflection.Emit.Lightweight.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj">
-      <Project>{6341571A-7DFB-43F5-BAAA-27357750D9E9}</Project>
-      <Name>Svelto.Common</Name>
-    </ProjectReference>
-  </ItemGroup>
 </Project>
