@@ -1,7 +1,7 @@
 # Svelto Entity Component System 2.0
 =====================================
 
-Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic, it comes with several unity extensions. 
+Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic, it comes with several unity extensions. 
 you can find a working example to learn how to use the framework here:
 
 ## Examples
@@ -41,7 +41,7 @@ you can find a working example to learn how to use the framework here:
 
 ## How to clone
 
-The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relavite repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki**
+The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relavite repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
 
 **Note: don't beat yourself up if you find Svelto.ECS hard to use at first. The framework is very light in features, but it forces the use of a new coding paradigm and shifting code paradigm is hard! I will try to clarify all the concepts writing more and more articles**
 
@@ -49,24 +49,17 @@ The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submo
 
 just open an issue here, I come here pretty often :). Also feel free to contact me on twitter or leave comments on the blog!
 
-## The Github wiki page
+## [The Github wiki page](https://github.com/sebas77/Svelto.ECS/wiki)
 
 It needs love and as far as I understood, anyone can edit it. Feel free to do so if you have a good understanding of Svelto!
 
-## Svelto Framework is used to develop the following products:
+## Svelto Framework is used to develop the following products(*):
 
 ![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
 ![Robocraft Royale](https://static.altchar.com/live/media/images/950x633_ct/7707_Robocraft_Royale_2bc6bb8ceab8ce0a1568fb37bd826b3f.jpg)!
 ![Cardlife](https://i.ytimg.com/vi/q2jaUZjnNyg/maxresdefault.jpg)
 
+*if you want your products made with Svelto here, just send me an email or whatever, I'll be super happy to add them.
+
 **_Note: Dear Svelto Users : Although I am committed to help you and write articles as much as I can, I will never be able to keep all the documentation up to date. If you are a happy svelto user and you want to contribute, please feel free to update the github wiki! 🙏👊_**
-
-
-Copyright (c) Sebastiano Mandalà
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
