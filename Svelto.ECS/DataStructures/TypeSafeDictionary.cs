@@ -1,4 +1,5 @@
-﻿using Svelto.DataStructures;
+﻿using System;
+using Svelto.DataStructures;
 using System.Collections.Generic;
 
 namespace Svelto.ECS.Internal
@@ -28,15 +29,22 @@ namespace Svelto.ECS.Internal
             int count;
             var buffer = FasterList<TValue>.NoVirt.ToArrayFast((FasterList<TValue>) entityViews, out count);
 
-            for (int i = 0; i < count; i++)
+            try
             {
-                var entityView = buffer[i];
+                for (int i = 0; i < count; i++)
+                {
+                    var entityView = buffer[i];
 
-                Add(entityView.ID, entityView);
+                    Add(entityView.ID, entityView);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new TypeSafeDictionaryException(e);
             }
         }
 
-        new public bool Remove(int entityId)
+        public new bool Remove(int entityId)
         {
             base.Remove(entityId);
 

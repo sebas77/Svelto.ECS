@@ -30,13 +30,13 @@ namespace Svelto.ECS
                 _groupedEntityViewsToAdd.Swap();
 
                 if (_entityViewsToAdd.other.Count > 0)
-                    AddEntityViewsToTheDBAndSuitableEngines(_entityViewsToAdd.other, _entityViewsDB);
+                    AddEntityViewsToTheDBAndSuitableEngines(_entityViewsToAdd.other, _entityViewsDB, _entityViewsDBDic);
 
                 if (_metaEntityViewsToAdd.other.Count > 0)
-                    AddEntityViewsToTheDBAndSuitableEngines(_metaEntityViewsToAdd.other, _metaEntityViewsDB);
+                    AddEntityViewsToTheDBAndSuitableEngines(_metaEntityViewsToAdd.other, _metaEntityViewsDB, _metaEntityViewsDBDic);
 
                 if (_groupedEntityViewsToAdd.other.Count > 0)
-                    AddGroupEntityViewsToTheDBAndSuitableEngines(_groupedEntityViewsToAdd.other, _groupEntityViewsDB, _entityViewsDB);
+                    AddGroupEntityViewsToTheDBAndSuitableEngines(_groupedEntityViewsToAdd.other, _groupEntityViewsDB, _entityViewsDB, _entityViewsDBDic);
 
                 //other can be cleared now
                 _entityViewsToAdd.other.Clear();
@@ -57,7 +57,7 @@ namespace Svelto.ECS
         }
 
         void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<Type, ITypeSafeList> entityViewsToAdd,
-            Dictionary<Type, ITypeSafeList> entityViewsDB)
+            Dictionary<Type, ITypeSafeList> entityViewsDB, Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic)
         {
             foreach (var entityViewList in entityViewsToAdd)
             {
@@ -65,7 +65,7 @@ namespace Svelto.ECS
 
                 if (entityViewList.Value.isQueryiableEntityView)
                 {
-                    AddEntityViewToEntityViewsDictionary(_entityViewsDBDic, entityViewList.Value, entityViewList.Key);
+                    AddEntityViewToEntityViewsDictionary(entityViewsDBDic, entityViewList.Value, entityViewList.Key);
                 }
             }
 
@@ -83,13 +83,14 @@ namespace Svelto.ECS
 
         void AddGroupEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupedEntityViewsToAdd,
                                                       Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsDB,
-                                                      Dictionary<Type, ITypeSafeList> entityViewsDB)
+                                                      Dictionary<Type, ITypeSafeList> entityViewsDB 
+                                                        , Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic)
         {
             foreach (var group in groupedEntityViewsToAdd)
             {
                 AddEntityViewsToGroupDB(groupEntityViewsDB, @group);
 
-                AddEntityViewsToTheDBAndSuitableEngines(group.Value, entityViewsDB);
+                AddEntityViewsToTheDBAndSuitableEngines(group.Value, entityViewsDB, entityViewsDBDic);
             }
         }
 
@@ -157,6 +158,7 @@ namespace Svelto.ECS
         
         readonly DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>> _entityViewsToAdd;
         readonly DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>> _metaEntityViewsToAdd;
+        
         readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>> _groupedEntityViewsToAdd;
       
         readonly EntitySubmissionScheduler _scheduler;

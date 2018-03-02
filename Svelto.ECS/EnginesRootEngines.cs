@@ -42,12 +42,13 @@ namespace Svelto.ECS
             _metaEntityViewsDB = new Dictionary<Type, ITypeSafeList>();
             _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeList>>();
             _entityViewsDBDic = new Dictionary<Type, ITypeSafeDictionary>();
+            _metaEntityViewsDBDic = new Dictionary<Type, ITypeSafeDictionary>();
             
             _entityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>>();           
             _metaEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>>();
             _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>>();
 
-            _DB = new EntityViewsDB(_entityViewsDB, _entityViewsDBDic, _metaEntityViewsDB, _groupEntityViewsDB);
+            _DB = new EntityViewsDB(_entityViewsDB, _metaEntityViewsDB, _entityViewsDBDic, _metaEntityViewsDBDic, _groupEntityViewsDB);
 
             _scheduler = entityViewScheduler;
             _scheduler.Schedule(new WeakAction(SubmitEntityViews));

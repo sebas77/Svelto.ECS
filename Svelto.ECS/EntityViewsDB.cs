@@ -6,18 +6,22 @@ namespace Svelto.ECS.Internal
 {
     class EntityViewsDB : IEntityViewsDB
     {
-        internal EntityViewsDB(  Dictionary<Type, ITypeSafeList> entityViewsDB, 
+        internal EntityViewsDB(  Dictionary<Type, ITypeSafeList> entityViewsDB,
+                                 Dictionary<Type, ITypeSafeList> metaEntityViewsDB,
                                 Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
-                                Dictionary<Type, ITypeSafeList> metaEntityViewsDB,
+                                 Dictionary<Type, ITypeSafeDictionary> metaEntityViewsDBdic,
                                 Dictionary<int, Dictionary<Type, ITypeSafeList>>  groupEntityViewsDB)
         {
             _entityViewsDB = entityViewsDB;
-            _entityViewsDBdic = entityViewsDBdic;
             _metaEntityViewsDB = metaEntityViewsDB;
+            
+            _entityViewsDBdic = entityViewsDBdic;
+            _metaEntityViewsDBdic = metaEntityViewsDBdic;
+            
             _groupEntityViewsDB = groupEntityViewsDB;
         }
 
-        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:EntityView, new()
+        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:EntityView
         {
             var type = typeof(T);
 
@@ -29,7 +33,7 @@ namespace Svelto.ECS.Internal
             return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
         }
 
-        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:EntityView, new()
+        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:EntityView
         {
             Dictionary<Type, ITypeSafeList> entitiesInGroupPerType;
 
@@ -65,7 +69,7 @@ namespace Svelto.ECS.Internal
             return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews[type], out count);
         }
 
-        public ReadOnlyDictionary<int, T> QueryIndexableEntityViews<T>() where T:IEntityView
+        public ReadOnlyDictionary<int, T> QueryIndexableEntityViews<T>() where T:EntityView
         {
             var type = typeof(T);
 
@@ -76,60 +80,40 @@ namespace Svelto.ECS.Internal
 
             return new ReadOnlyDictionary<int, T>(entityViews as Dictionary<int, T>);
         }
-
-        public bool TryQueryEntityView<T>(int ID, out T entityView) where T : IEntityView
+        
+        public ReadOnlyDictionary<int, T> QueryIndexableMetaEntityViews<T>() where T:EntityView
         {
             var type = typeof(T);
-
-            T internalEntityView;
 
             ITypeSafeDictionary entityViews;
-            TypeSafeDictionary<T> casted;
 
-            _entityViewsDBdic.TryGetValue(type, out entityViews);
-            casted = entityViews as TypeSafeDictionary<T>;
+            if (_metaEntityViewsDBdic.TryGetValue(type, out entityViews) == false)
+                return TypeSafeDictionary<T>.Default;
 
-            if (casted != null &&
-                casted.TryGetValue(ID, out internalEntityView))
-            {
-                entityView = internalEntityView;
-
-                return true;
-            }
-
-            entityView = default(T);
-
-            return false;
+            return new ReadOnlyDictionary<int, T>(entityViews as Dictionary<int, T>);
         }
-
-        public T QueryEntityView<T>(int ID) where T : IEntityView
+        
+        public T QueryEntityView<T>(int entityID) where T:EntityView
         {
-            var type = typeof(T);
-
-            T internalEntityView; ITypeSafeDictionary entityViews;
-            TypeSafeDictionary<T> casted;
-
-            _entityViewsDBdic.TryGetValue(type, out entityViews);
-            casted = entityViews as TypeSafeDictionary<T>;
-
-            if (casted != null &&
-                casted.TryGetValue(ID, out internalEntityView))
-                return (T)internalEntityView;
-
-            throw new Exception("EntityView Not Found");
+            return QueryEntityView<T>(entityID, _entityViewsDBdic);
         }
 
-        public T QueryMetaEntityView<T>(int metaEntityID) where T:EntityView, new()
+        public bool TryQueryEntityView<T>(int entityID, out T entityView) where T:EntityView
         {
-            return QueryEntityView<T>(metaEntityID);
+            return TryQueryEntityView(entityID, _entityViewsDBdic, out entityView);
         }
 
-        public bool TryQueryMetaEntityView<T>(int metaEntityID, out T entityView) where T:EntityView, new()
+        public T QueryMetaEntityView<T>(int metaEntityID) where T:EntityView
         {
-            return TryQueryEntityView(metaEntityID, out entityView);
+            return QueryEntityView<T>(metaEntityID, _metaEntityViewsDBdic);
         }
 
-        public FasterReadOnlyList<T> QueryMetaEntityViews<T>() where T:EntityView, new()
+        public bool TryQueryMetaEntityView<T>(int metaEntityID, out T entityView) where T:EntityView
+        {
+            return TryQueryEntityView(metaEntityID, _metaEntityViewsDBdic, out entityView);
+        }
+
+        public FasterReadOnlyList<T> QueryMetaEntityViews<T>() where T:EntityView
         {
             var type = typeof(T);
 
@@ -150,10 +134,55 @@ namespace Svelto.ECS.Internal
         {
             return FasterList<T>.DefaultList.ToArrayFast();
         }
+        
+        static bool TryQueryEntityView<T>(int ID, Dictionary<Type, ITypeSafeDictionary> entityDic, out T entityView) where T : EntityView
+        {
+            var type = typeof(T);
 
-        readonly Dictionary<Type, ITypeSafeList>                  _entityViewsDB;
-        readonly Dictionary<Type, ITypeSafeDictionary>            _entityViewsDBdic;
-        readonly Dictionary<Type, ITypeSafeList>                  _metaEntityViewsDB;
+            T internalEntityView;
+
+            ITypeSafeDictionary   entityViews;
+            TypeSafeDictionary<T> casted;
+
+            entityDic.TryGetValue(type, out entityViews);
+            casted = entityViews as TypeSafeDictionary<T>;
+
+            if (casted != null &&
+                casted.TryGetValue(ID, out internalEntityView))
+            {
+                entityView = internalEntityView;
+
+                return true;
+            }
+
+            entityView = default(T);
+
+            return false;
+        }
+
+        static T QueryEntityView<T>(int ID, Dictionary<Type, ITypeSafeDictionary> entityDic) where T : EntityView
+        {
+            var type = typeof(T);
+
+            T                     internalEntityView; ITypeSafeDictionary entityViews;
+            TypeSafeDictionary<T> casted;
+
+            entityDic.TryGetValue(type, out entityViews);
+            casted = entityViews as TypeSafeDictionary<T>;
+
+            if (casted != null &&
+                casted.TryGetValue(ID, out internalEntityView))
+                return (T)internalEntityView;
+
+            throw new Exception("EntityView Not Found");
+        }
+
+        readonly Dictionary<Type, ITypeSafeList>         _entityViewsDB;
+        readonly Dictionary<Type, ITypeSafeList>         _metaEntityViewsDB;
+        
+        readonly Dictionary<Type, ITypeSafeDictionary>   _entityViewsDBdic;
+        readonly Dictionary<Type, ITypeSafeDictionary>   _metaEntityViewsDBdic;
+        
         readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
     }
 }

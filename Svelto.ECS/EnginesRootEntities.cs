@@ -134,32 +134,29 @@ namespace Svelto.ECS
             }
         }
 
-        void RemoveEntity(int entityID, IRemoveEntityComponent removeInfo)
+        void RemoveEntity(ref EntityInfoView entityInfoView, Dictionary<Type, ITypeSafeList> viewsDB, Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic)
         {
-            var removeEntityImplementor = removeInfo as RemoveEntityImplementor;
-
-            if (removeEntityImplementor.isInAGroup)
-                InternalRemove(removeEntityImplementor.removeEntityInfo.entityViewsToBuild, entityID, removeEntityImplementor.groupID, _entityViewsDB);
+            if (entityInfoView.isInAGroup)
+                InternalRemoveFromGroupAndDBAndEngines(entityInfoView.entityViews, entityInfoView.ID, entityInfoView.groupID, viewsDB, entityViewsDBDic);
             else
-                InternalRemoveFromDBAndEngines(removeEntityImplementor.removeEntityInfo.entityViewsToBuild, entityID, _entityViewsDB);
-        }
-
-        void RemoveEntity<T>(int entityID) where T : IEntityDescriptor, new()
-        {
-            InternalRemoveFromDBAndEngines( ((EntityDescriptorInfo) EntityDescriptorTemplate<T>.Default).entityViewsToBuild, entityID, _entityViewsDB);
-        }
-
-        void RemoveMetaEntity<T>(int metaEntityID) where T : IEntityDescriptor, new()
-        {
-            InternalRemoveFromDBAndEngines(((EntityDescriptorInfo) EntityDescriptorTemplate<T>.Default).entityViewsToBuild, metaEntityID, _metaEntityViewsDB);
-        }
-
-        void RemoveEntityFromGroup<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
-        {
-            InternalRemoveFromDBAndEngines(((EntityDescriptorInfo) EntityDescriptorTemplate<T>.Default).entityViewsToBuild, entityID, _groupEntityViewsDB[groupID]);
+                InternalRemoveFromDBAndEngines(entityInfoView.entityViews, entityInfoView.ID, viewsDB, entityViewsDBDic);
         }
         
-        void DeleteEntityGroup(int groupID)
+        void RemoveEntity(int entityID)
+        {
+            var entityInfoView = _DB.QueryEntityView<EntityInfoView>(entityID);
+            
+            RemoveEntity(ref entityInfoView, _entityViewsDB, _entityViewsDBDic);
+        }
+
+        void RemoveMetaEntity(int metaEntityID)
+        {
+            var entityInfoView = _DB.QueryMetaEntityView<EntityInfoView>(metaEntityID);
+            
+            RemoveEntity(ref entityInfoView, _metaEntityViewsDB, _metaEntityViewsDBDic);
+        }
+        
+        void RemoveGroupAndEntitiesFromDB(int groupID)
         {
             foreach (var group in _groupEntityViewsDB[groupID])
             {
@@ -172,7 +169,7 @@ namespace Svelto.ECS
                 {
                     var entityID = entities[i].ID;
 
-                    InternalRemoveEntityViewFromDBAndEngines(_entityViewsDB, entityViewType, entityID);
+                    InternalRemoveEntityViewFromDBAndEngines(_entityViewsDB, _entityViewsDBDic, entityViewType, entityID);
                 }
             }
             
@@ -180,6 +177,7 @@ namespace Svelto.ECS
         }
         
         void InternalRemoveEntityViewFromDBAndEngines(Dictionary<Type, ITypeSafeList> entityViewsDB, 
+                                                      Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic,
                                                       Type entityViewType, int entityID)
         {
             var entityViews = entityViewsDB[entityViewType];
@@ -188,22 +186,22 @@ namespace Svelto.ECS
 
             if (entityViews.isQueryiableEntityView)
             {
-                var typeSafeDictionary = _entityViewsDBDic[entityViewType];
+                var typeSafeDictionary = entityViewsDBDic[entityViewType];
                 var entityView = typeSafeDictionary.GetIndexedEntityView(entityID);
 
                 if (typeSafeDictionary.Remove(entityID) == false)
-                    _entityViewsDBDic.Remove(entityViewType);
+                    entityViewsDBDic.Remove(entityViewType);
 
                 for (var current = entityViewType; current != _entityViewType; current = current.BaseType)
                     RemoveEntityViewFromEngines(_entityViewEngines, entityView, current);
             }
         }
 
-        void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
+        void SwapEntityGroup(int entityID, int fromGroupID, int toGroupID)
         {
             DesignByContract.Check.Require(fromGroupID != toGroupID, "can't move an entity to the same group where it already belongs to");
 
-            var entityViewBuilders = ((EntityDescriptorInfo) EntityDescriptorTemplate<T>.Default).entityViewsToBuild;
+            var entityViewBuilders = _DB.QueryEntityView<EntityInfoView>(entityID).entityViews;
             int entityViewBuildersCount = entityViewBuilders.Length;
 
             var dictionary = _groupEntityViewsDB[fromGroupID];
@@ -239,7 +237,7 @@ namespace Svelto.ECS
         }
 
         void InternalRemoveFromDBAndEngines(IEntityViewBuilder[] entityViewBuilders, int entityID,
-                    Dictionary<Type, ITypeSafeList> entityViewsDB)
+                    Dictionary<Type, ITypeSafeList> entityViewsDB, Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic)
         {
             int entityViewBuildersCount = entityViewBuilders.Length;
 
@@ -247,16 +245,16 @@ namespace Svelto.ECS
             {
                 Type entityViewType = entityViewBuilders[i].GetEntityViewType();
 
-                InternalRemoveEntityViewFromDBAndEngines(entityViewsDB, entityViewType, entityID);
+                InternalRemoveEntityViewFromDBAndEngines(entityViewsDB, entityViewsDBDic, entityViewType, entityID);
             }
         }
 
-        void InternalRemove(IEntityViewBuilder[] entityViewBuilders, int entityID, int groupID,
-                            Dictionary<Type, ITypeSafeList> entityViewsDB)
+        void InternalRemoveFromGroupAndDBAndEngines(IEntityViewBuilder[] entityViewBuilders, int entityID, int groupID,
+                            Dictionary<Type, ITypeSafeList> entityViewsDB, Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic)
         {
             InternalRemoveFromGroupDB(entityViewBuilders, entityID, groupID);
 
-            InternalRemoveFromDBAndEngines(entityViewBuilders, entityID, entityViewsDB);
+            InternalRemoveFromDBAndEngines(entityViewBuilders, entityID, entityViewsDB, entityViewsDBDic);
         }
 
         void InternalRemoveFromGroupDB(IEntityViewBuilder[] entityViewBuilders, int entityID, int groupID)
@@ -269,11 +267,8 @@ namespace Svelto.ECS
             {
                 Type entityViewType = entityViewBuilders[i].GetEntityViewType();
 
-                if (dictionary[entityViewType].UnorderedRemove(entityID) == false)
-                    dictionary.Remove(entityViewType);
+                dictionary[entityViewType].UnorderedRemove(entityID);
             }
-
-            if (dictionary.Count == 0) _groupEntityViewsDB.Remove(groupID);
         }
 
         static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines,
@@ -344,34 +339,24 @@ namespace Svelto.ECS
                 _weakReference = weakReference;
             }
 
-            public void RemoveEntity(int entityID, IRemoveEntityComponent removeInfo)
+            public void RemoveEntity(int entityID)
             {
-                _weakReference.Target.RemoveEntity(entityID, removeInfo);
+                _weakReference.Target.RemoveEntity(entityID);
             }
 
-            public void RemoveEntity<T>(int entityID) where T : IEntityDescriptor, new()
+            public void RemoveMetaEntity(int metaEntityID)
             {
-                _weakReference.Target.RemoveEntity<T>(entityID);
+                _weakReference.Target.RemoveEntity(metaEntityID);
             }
 
-            public void RemoveMetaEntity<T>(int metaEntityID) where T : IEntityDescriptor, new()
+            public void RemoveGroupAndEntities(int groupID)
             {
-                _weakReference.Target.RemoveEntity<T>(metaEntityID);
+                _weakReference.Target.RemoveGroupAndEntitiesFromDB(groupID);
             }
 
-            public void RemoveEntityFromGroup<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup(int entityID, int fromGroupID, int toGroupID)
             {
-                _weakReference.Target.RemoveEntity<T>(entityID);
-            }
-
-            public void DeleteEntityGroup(int groupID)
-            {
-                _weakReference.Target.DeleteEntityGroup(groupID);
-            }
-
-            public void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
-            {
-                _weakReference.Target.SwapEntityGroup<T>(entityID, fromGroupID, toGroupID);
+                _weakReference.Target.SwapEntityGroup(entityID, fromGroupID, toGroupID);
             }
 
             readonly DataStructures.WeakReference<EnginesRoot> _weakReference;
@@ -406,6 +391,6 @@ namespace Svelto.ECS
         readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
         
         readonly Dictionary<Type, ITypeSafeDictionary> _entityViewsDBDic;
-
+        readonly Dictionary<Type, ITypeSafeDictionary> _metaEntityViewsDBDic;
     }
 }

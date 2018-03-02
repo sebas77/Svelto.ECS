@@ -15,14 +15,12 @@ namespace Svelto.ECS
     
     public interface IEntityFunctions
     {
-        void RemoveEntity(int entityID, IRemoveEntityComponent removeInfo);
-        void RemoveEntity<T>(int entityID) where T:IEntityDescriptor, new();
+        void RemoveEntity(int entityID);
 
-        void RemoveMetaEntity<T>(int metaEntityID) where T:IEntityDescriptor, new();
+        void RemoveMetaEntity(int metaEntityID);
 
-        void RemoveEntityFromGroup<T>(int entityID, int groupID) where T:IEntityDescriptor, new();
+        void RemoveGroupAndEntities(int groupID);
         
-        void DeleteEntityGroup(int groupID);
-        void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new();
+        void SwapEntityGroup(int entityID, int fromGroupID, int toGroupID);
     }
 }
