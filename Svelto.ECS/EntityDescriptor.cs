@@ -17,7 +17,7 @@ namespace Svelto.ECS
             this.entityViewsToBuild = entityViewsToBuild;
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild { get; }
+        public IEntityViewBuilder[] entityViewsToBuild { get; private set;  }
     }
 
     public interface IEntityDescriptorInfo
