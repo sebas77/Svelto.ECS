@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace Svelto.ECS
+﻿namespace Svelto.ECS
 {
     public class GenericEntityDescriptor<T>:IEntityDescriptor where T : EntityView, new()
     {
