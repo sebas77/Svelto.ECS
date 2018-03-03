@@ -47,7 +47,7 @@ The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submo
 
 ## In case of bugs
 
-just open an issue here, I come here pretty often :). Also feel free to contact me on twitter or leave comments on the blog!
+Best option is to fork and clone https://github.com/sebas77/Svelto.ECS.Tests, add a new test to reproduce the problem and request a pull. Then open a github, I come here pretty often :). Also feel free to contact me on twitter or leave comments on the blog!
 
 ## [The Github wiki page](https://github.com/sebas77/Svelto.ECS/wiki)
 
