@@ -12,6 +12,8 @@ namespace Svelto.ECS.Profiler
     {
         static readonly Stopwatch _stopwatch = new Stopwatch();
 
+        public static readonly Dictionary<Type, EngineInfo> engineInfos = new Dictionary<Type, EngineInfo>();
+
         public static void MonitorAddDuration(IHandleEntityViewEngine engine, IEntityView entityView)
         {
             EngineInfo info;
@@ -42,19 +44,12 @@ namespace Svelto.ECS.Profiler
         public static void AddEngine(IEngine engine)
         {
             if (engineInfos.ContainsKey(engine.GetType()) == false)
-            {
                 engineInfos.Add(engine.GetType(), new EngineInfo(engine));
-            }
         }
 
         public static void ResetDurations()
         {
-            foreach (var engine in engineInfos)
-            {
-                engine.Value.ResetDurations();
-            }
+            foreach (var engine in engineInfos) engine.Value.ResetDurations();
         }
-
-        public static readonly Dictionary<Type, EngineInfo> engineInfos = new Dictionary<Type, EngineInfo>();
     }
 }

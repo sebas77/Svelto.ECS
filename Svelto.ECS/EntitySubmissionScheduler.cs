@@ -4,6 +4,6 @@ namespace Svelto.ECS.Schedulers
 {
     public abstract class EntitySubmissionScheduler
     {
-        abstract public void Schedule(WeakAction submitEntityViews);
+        public abstract void Schedule(WeakAction submitEntityViews);
     }
 }

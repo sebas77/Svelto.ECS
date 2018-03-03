@@ -1,29 +1,28 @@
 ﻿using System;
-using Svelto.DataStructures;
 using System.Collections.Generic;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS.Internal
 {
     /// <summary>
-    /// This is just a place holder at the moment
-    /// I always wanted to create my own Dictionary
-    /// data structure as excercise, but never had the
-    /// time to. At the moment I need the custom interface
-    /// wrapped though.
+    ///     This is just a place holder at the moment
+    ///     I always wanted to create my own Dictionary
+    ///     data structure as excercise, but never had the
+    ///     time to. At the moment I need the custom interface
+    ///     wrapped though.
     /// </summary>
-
     public interface ITypeSafeDictionary
     {
-        void FillWithIndexedEntityViews(ITypeSafeList entityViews);
-        bool Remove(int entityId);
-        IEntityView GetIndexedEntityView(int entityID);
+        void        FillWithIndexedEntityViews(ITypeSafeList entityViews);
+        bool        Remove(int                               entityId);
+        IEntityView GetIndexedEntityView(int                 entityID);
     }
 
-    class TypeSafeDictionary<TValue> : Dictionary<int, TValue>, ITypeSafeDictionary where TValue:IEntityView
+    class TypeSafeDictionary<TValue> : Dictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityView
     {
-        internal static readonly ReadOnlyDictionary<int, TValue> Default = 
+        internal static readonly ReadOnlyDictionary<int, TValue> Default =
             new ReadOnlyDictionary<int, TValue>(new Dictionary<int, TValue>());
-        
+
         public void FillWithIndexedEntityViews(ITypeSafeList entityViews)
         {
             int count;
@@ -31,7 +30,7 @@ namespace Svelto.ECS.Internal
 
             try
             {
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
                     var entityView = buffer[i];
 
@@ -48,7 +47,7 @@ namespace Svelto.ECS.Internal
         {
             base.Remove(entityId);
 
-            return this.Count > 0;
+            return Count > 0;
         }
 
         public IEntityView GetIndexedEntityView(int entityID)

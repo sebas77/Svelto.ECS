@@ -3,8 +3,7 @@
     class EntityInfoView : EntityView
     {
         internal IEntityViewBuilder[] entityViews;
-        internal int  groupID;
-        internal bool isInAGroup;
+        internal int                  groupID;
+        internal bool                 isInAGroup;
     }
 }
-

@@ -79,7 +79,8 @@ namespace Svelto.ECS.Experimental
         {
             T convert = (T)entityView;
 
-            var fasterList = (SharedGroupedStructEntityViewsLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
+            var fasterList =
+ (SharedGroupedStructEntityViewsLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
             indices[entityView.ID] = fasterList.Count;
 
             fasterList.Add(convert);
@@ -87,7 +88,8 @@ namespace Svelto.ECS.Experimental
 
         public void Remove(int groupID, T entityView)
         {
-            var fasterList = (SharedGroupedStructEntityViewsLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
+            var fasterList =
+ (SharedGroupedStructEntityViewsLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
             var index = indices[entityView.ID];
             indices.Remove(entityView.ID);
 
@@ -97,7 +99,8 @@ namespace Svelto.ECS.Experimental
 
         public T[] GetList(int groupID, out int numberOfItems)
         {
-            var fasterList = (SharedGroupedStructEntityViewsLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
+            var fasterList =
+ (SharedGroupedStructEntityViewsLists.NoVirt.GetList<T>(_container, groupID) as FasterList<T>);
             
             return FasterList<T>.NoVirt.ToArrayFast(fasterList, out numberOfItems);
         }

@@ -1,61 +1,65 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using DesignByContract;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS.Internal
 {
-    public interface ITypeSafeList: IEnumerable
+    public interface ITypeSafeList : IEnumerable
     {
+        bool isQueryiableEntityView { get; }
         void AddRange(ITypeSafeList entityViewListValue);
 
-        ITypeSafeList Create();
-        bool isQueryiableEntityView { get; }
-        bool UnorderedRemove(int entityID);
+        ITypeSafeList       Create();
+        bool                MappedRemove(int entityID);
         ITypeSafeDictionary CreateIndexedDictionary();
-        IEntityView[] ToArrayFast(out int count);
-        void ReserveCapacity(int capacity);
+        IEntityView[]       ToArrayFast(out int count);
+        void                ReserveCapacity(int capacity);
     }
 
-    class TypeSafeFasterListForECS<T>: FasterList<T> where T:IEntityView
+    class TypeSafeFasterListForECS<T> : FasterList<T> where T : IEntityView
     {
+        readonly Dictionary<int, int> _mappedIndices;
+
         protected TypeSafeFasterListForECS()
         {
             _mappedIndices = new Dictionary<int, int>();
         }
 
-        protected TypeSafeFasterListForECS(int size):base(size)
+        protected TypeSafeFasterListForECS(int size) : base(size)
         {
             _mappedIndices = new Dictionary<int, int>();
         }
-        
-        public bool UnorderedRemove(int entityID)
+
+        public bool MappedRemove(int entityID)
         {
             var index = _mappedIndices[entityID];
 
-            DesignByContract.Check.Assert(entityID == this[index].ID, "Something went wrong with the Svelto.ECS code, please contact the author");
+            Check.Assert(entityID == this[index].ID,
+                         "Something went wrong with the Svelto.ECS code, please contact the author");
 
             _mappedIndices.Remove(entityID);
 
             if (UnorderedRemoveAt(index))
                 _mappedIndices[this[index].ID] = index;
 
-            return this.Count > 0;
+            return Count > 0;
         }
-        
+
         public void AddRange(ITypeSafeList entityViewListValue)
         {
-            var index = this.Count;
-            
+            var index = Count;
+
             base.AddRange(entityViewListValue as FasterList<T>);
-            
-            for (int i = index; i < Count; ++i)
+
+            for (var i = index; i < Count; ++i)
                 _mappedIndices[this[i].ID] = i;
         }
 
-        new public void Add(T entityView)
+        public new void Add(T entityView)
         {
-            var index = this.Count;
+            var index = Count;
 
             base.Add(entityView);
 
@@ -64,7 +68,7 @@ namespace Svelto.ECS.Internal
 
         public void ReserveCapacity(int capacity)
         {
-            if (this.ToArrayFast().Length < capacity)
+            if (ToArrayFast().Length < capacity)
                 Resize(capacity);
         }
 
@@ -72,17 +76,18 @@ namespace Svelto.ECS.Internal
         {
             return _mappedIndices[entityID];
         }
-
-        readonly Dictionary<int, int> _mappedIndices;
     }
 
-    class TypeSafeFasterListForECSForStructs<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:struct, IEntityStruct
+    class TypeSafeFasterListForECSForStructs<T> : TypeSafeFasterListForECS<T>, ITypeSafeList
+        where T : struct, IEntityStruct
     {
-        public TypeSafeFasterListForECSForStructs(int size):base(size)
-        {}
+        public TypeSafeFasterListForECSForStructs(int size) : base(size)
+        {
+        }
 
         public TypeSafeFasterListForECSForStructs()
-        {}
+        {
+        }
 
         public ITypeSafeList Create()
         {
@@ -109,14 +114,16 @@ namespace Svelto.ECS.Internal
             return new TypeSafeFasterListForECSForStructs<T>(size);
         }
     }
-    
-    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:EntityView, new()
+
+    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T : EntityView, new()
     {
-        public TypeSafeFasterListForECSForClasses(int size):base(size)
-        {}
+        public TypeSafeFasterListForECSForClasses(int size) : base(size)
+        {
+        }
 
         public TypeSafeFasterListForECSForClasses()
-        {}
+        {
+        }
 
         public ITypeSafeList Create()
         {
@@ -135,9 +142,9 @@ namespace Svelto.ECS.Internal
 
         public IEntityView[] ToArrayFast(out int count)
         {
-            count = this.Count;
-            
-            return this.ToArrayFast();
+            count = Count;
+
+            return ToArrayFast();
         }
 
         public ITypeSafeList Create(int size)
