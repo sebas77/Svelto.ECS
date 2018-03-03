@@ -65,12 +65,16 @@ namespace Svelto.ECS.Internal
             var type = typeof(T);
             count = 0;
             
-            Dictionary<Type, ITypeSafeList> entityViews;
+            Dictionary<Type, ITypeSafeList> entitiesInGroupPerType;
             
-            if (_groupEntityViewsDB.TryGetValue(group, out entityViews) == false)
+            if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
+                return RetrieveEmptyEntityViewArray<T>();
+            
+            ITypeSafeList outList;
+            if (entitiesInGroupPerType.TryGetValue(typeof(T), out outList) == false)
                 return RetrieveEmptyEntityViewArray<T>();
                        
-            return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews[type], out count);
+            return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entitiesInGroupPerType[type], out count);
         }
 
         public ReadOnlyDictionary<int, T> QueryIndexableEntityViews<T>() where T:EntityView
