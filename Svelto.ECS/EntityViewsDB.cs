@@ -39,8 +39,12 @@ namespace Svelto.ECS.Internal
 
             if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
                 return RetrieveEmptyEntityViewList<T>();
+
+            ITypeSafeList outList;
+            if (entitiesInGroupPerType.TryGetValue(typeof(T), out outList) == false)
+                return RetrieveEmptyEntityViewList<T>();
             
-            return new FasterReadOnlyList<T>((FasterList<T>) entitiesInGroupPerType[typeof(T)]);
+            return new FasterReadOnlyList<T>((FasterList<T>) outList);
         }
 
         public T[] QueryEntityViewsAsArray<T>(out int count) where T : IEntityView
