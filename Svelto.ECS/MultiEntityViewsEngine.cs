@@ -2,7 +2,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Internal
 {
-    public abstract class MultiEntityViewsEngine<T> : IHandleEntityViewEngine where T : EntityView, new()
+    public abstract class MultiEntityViewsEngine<T> : IHandleEntityViewEngine where T : class, IEntityView
     {
         public virtual void Add(IEntityView entityView)
         {
@@ -22,14 +22,14 @@ namespace Svelto.ECS.Internal
 namespace Svelto.ECS
 {
     public abstract class MultiEntityViewsEngine<T, U> : MultiEntityViewsEngine<T>
-        where U : EntityView, new() where T : EntityView, new()
+        where U : class, IEntityView where T : class, IEntityView
     {
         protected abstract void Add(U    entityView);
         protected abstract void Remove(U entityView);
 
         public override void Add(IEntityView entityView)
         {
-            var castedEntityView = entityView as U;
+            var castedEntityView = (U) entityView;
             if (castedEntityView != null)
                 Add(castedEntityView);
             else
@@ -46,14 +46,14 @@ namespace Svelto.ECS
     }
 
     public abstract class MultiEntityViewsEngine<T, U, V> : MultiEntityViewsEngine<T, U>
-        where V : EntityView, new() where U : EntityView, new() where T : EntityView, new()
+        where V :  class, IEntityView where U :  class, IEntityView where T :  class, IEntityView
     {
         protected abstract void Add(V    entityView);
         protected abstract void Remove(V entityView);
 
         public override void Add(IEntityView entityView)
         {
-            var castedEntityView = entityView as V;
+            var castedEntityView = (V) entityView;
             if (castedEntityView != null)
                 Add(castedEntityView);
             else
@@ -62,7 +62,7 @@ namespace Svelto.ECS
 
         public override void Remove(IEntityView entityView)
         {
-            var castedEntityView = entityView as V;
+            var castedEntityView = (V) entityView;
             if (castedEntityView != null)
                 Remove(castedEntityView);
             else
@@ -76,14 +76,14 @@ namespace Svelto.ECS
     ///     already too many responsabilities.
     /// </summary>
     public abstract class MultiEntityViewsEngine<T, U, V, W> : MultiEntityViewsEngine<T, U, V>
-        where W : EntityView, new() where V : EntityView, new() where U : EntityView, new() where T : EntityView, new()
+        where W :  class, IEntityView where V :  class, IEntityView where U :  class, IEntityView where T : class, IEntityView
     {
         protected abstract void Add(W    entityView);
         protected abstract void Remove(W entityView);
 
         public override void Add(IEntityView entityView)
         {
-            var castedEntityView = entityView as W;
+            var castedEntityView = (W) entityView;
             if (castedEntityView != null)
                 Add(castedEntityView);
             else
@@ -92,7 +92,7 @@ namespace Svelto.ECS
 
         public override void Remove(IEntityView entityView)
         {
-            var castedEntityView = entityView as W;
+            var castedEntityView = (W) entityView;
             if (castedEntityView != null)
                 Remove(castedEntityView);
             else
