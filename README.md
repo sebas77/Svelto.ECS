@@ -14,7 +14,7 @@ you can find a working example to learn how to use the framework here:
 
 **Dario Oliveri's Svelto.ECS articles:**
 
-* https://eagergames.wordpress.com/category/ecs/
+* https://eagergames.wordpress.com/category/ecs/ 
 
 **Framework Articles:**
 
