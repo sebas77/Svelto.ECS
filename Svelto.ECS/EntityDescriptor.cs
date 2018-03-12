@@ -1,5 +1,5 @@
 using System;
-using DesignByContract;
+using DBC;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 

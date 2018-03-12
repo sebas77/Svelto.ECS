@@ -29,9 +29,8 @@ namespace Svelto.ECS
 
         public override void Add(IEntityView entityView)
         {
-            var castedEntityView = (U) entityView;
-            if (castedEntityView != null)
-                Add(castedEntityView);
+            if (entityView is U)
+                Add((U) entityView);
             else
                 base.Add(entityView);
         }
@@ -53,18 +52,16 @@ namespace Svelto.ECS
 
         public override void Add(IEntityView entityView)
         {
-            var castedEntityView = (V) entityView;
-            if (castedEntityView != null)
-                Add(castedEntityView);
+            if (entityView is V)
+                Add((V) entityView);
             else
                 base.Add(entityView);
         }
 
         public override void Remove(IEntityView entityView)
         {
-            var castedEntityView = (V) entityView;
-            if (castedEntityView != null)
-                Remove(castedEntityView);
+            if (entityView is V)
+                Remove((V) entityView);
             else
                 base.Remove(entityView);
         }
@@ -83,18 +80,16 @@ namespace Svelto.ECS
 
         public override void Add(IEntityView entityView)
         {
-            var castedEntityView = (W) entityView;
-            if (castedEntityView != null)
-                Add(castedEntityView);
+            if (entityView is W)
+                Add((W) entityView);
             else
                 base.Add(entityView);
         }
 
         public override void Remove(IEntityView entityView)
         {
-            var castedEntityView = (W) entityView;
-            if (castedEntityView != null)
-                Remove(castedEntityView);
+            if (entityView is W)
+                Remove((W) entityView);
             else
                 base.Remove(entityView);
         }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using DesignByContract;
+using DBC;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 

@@ -42,7 +42,7 @@ namespace Svelto.ECS
 
         public void Next<T>(IEngine engine, ref T param)
         {
-            Next<T>(engine, ref param, Condition.Always);
+            Next(engine, ref param, Condition.Always);
         }
 
         public void Next<T>(IEngine engine, ref T param, int condition)
