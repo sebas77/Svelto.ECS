@@ -7,17 +7,11 @@ namespace Svelto.ECS.Internal
     class EntityViewsDB : IEntityViewsDB
     {
         internal EntityViewsDB(  Dictionary<Type, ITypeSafeList> entityViewsDB,
-                                 Dictionary<Type, ITypeSafeList> metaEntityViewsDB,
-                                Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
-                                 Dictionary<Type, ITypeSafeDictionary> metaEntityViewsDBdic,
+                                Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> entityViewsDBdic,
                                 Dictionary<int, Dictionary<Type, ITypeSafeList>>  groupEntityViewsDB)
         {
             _entityViewsDB = entityViewsDB;
-            _metaEntityViewsDB = metaEntityViewsDB;
-            
-            _entityViewsDBdic = entityViewsDBdic;
-            _metaEntityViewsDBdic = metaEntityViewsDBdic;
-            
+            _groupedEntityViewsDBDic = entityViewsDBdic;
             _groupEntityViewsDB = groupEntityViewsDB;
         }
 
@@ -77,60 +71,28 @@ namespace Svelto.ECS.Internal
             return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entitiesInGroupPerType[type], out count);
         }
 
-        public ReadOnlyDictionary<int, T> QueryIndexableEntityViews<T>() where T:EntityView
-        {
-            var type = typeof(T);
-
-            ITypeSafeDictionary entityViews;
-
-            if (_entityViewsDBdic.TryGetValue(type, out entityViews) == false)
-                return TypeSafeDictionary<T>.Default;
-
-            return new ReadOnlyDictionary<int, T>(entityViews as Dictionary<int, T>);
-        }
-        
-        public ReadOnlyDictionary<int, T> QueryIndexableMetaEntityViews<T>() where T:EntityView
-        {
-            var type = typeof(T);
-
-            ITypeSafeDictionary entityViews;
-
-            if (_metaEntityViewsDBdic.TryGetValue(type, out entityViews) == false)
-                return TypeSafeDictionary<T>.Default;
-
-            return new ReadOnlyDictionary<int, T>(entityViews as Dictionary<int, T>);
-        }
-        
         public T QueryEntityView<T>(int entityID) where T:EntityView
         {
-            return QueryEntityView<T>(entityID, _entityViewsDBdic);
+            return QueryEntityViewInGroup<T>(entityID, ExclusiveGroups.StandardEntity);
         }
 
         public bool TryQueryEntityView<T>(int entityID, out T entityView) where T:EntityView
         {
-            return TryQueryEntityView(entityID, _entityViewsDBdic, out entityView);
+            return TryQueryEntityViewInGroup(entityID, ExclusiveGroups.StandardEntity, out entityView);
+        }
+        
+        public T QueryEntityViewInGroup<T>(int entityID, int groupID) where T:EntityView
+        {
+            T entityView;
+            
+            TryQueryEntityView(entityID, groupID, _groupedEntityViewsDBDic, out entityView);
+
+            return entityView;
         }
 
-        public T QueryMetaEntityView<T>(int metaEntityID) where T:EntityView
+        public bool TryQueryEntityViewInGroup<T>(int entityID, int groupID, out T entityView) where T:EntityView
         {
-            return QueryEntityView<T>(metaEntityID, _metaEntityViewsDBdic);
-        }
-
-        public bool TryQueryMetaEntityView<T>(int metaEntityID, out T entityView) where T:EntityView
-        {
-            return TryQueryEntityView(metaEntityID, _metaEntityViewsDBdic, out entityView);
-        }
-
-        public FasterReadOnlyList<T> QueryMetaEntityViews<T>() where T:EntityView
-        {
-            var type = typeof(T);
-
-            ITypeSafeList entityViews;
-
-            if (_metaEntityViewsDB.TryGetValue(type, out entityViews) == false)
-                return RetrieveEmptyEntityViewList<T>();
-
-            return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
+            return TryQueryEntityView(entityID, groupID, _groupedEntityViewsDBDic, out entityView);
         }
 
         static FasterReadOnlyList<T> RetrieveEmptyEntityViewList<T>()
@@ -143,7 +105,7 @@ namespace Svelto.ECS.Internal
             return FasterList<T>.DefaultList.ToArrayFast();
         }
         
-        static bool TryQueryEntityView<T>(int ID, Dictionary<Type, ITypeSafeDictionary> entityDic, out T entityView) where T : EntityView
+        static bool TryQueryEntityView<T>(int ID, int groupID, Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> entityDic, out T entityView) where T : EntityView
         {
             var type = typeof(T);
 
@@ -152,7 +114,11 @@ namespace Svelto.ECS.Internal
             ITypeSafeDictionary   entityViews;
             TypeSafeDictionary<T> casted;
 
-            entityDic.TryGetValue(type, out entityViews);
+            Dictionary<Type, ITypeSafeDictionary> @group;
+            if (entityDic.TryGetValue(groupID, out group) == false)
+                throw new Exception("Group not found");
+
+            group.TryGetValue(type, out entityViews);
             casted = entityViews as TypeSafeDictionary<T>;
 
             if (casted != null &&
@@ -163,34 +129,14 @@ namespace Svelto.ECS.Internal
                 return true;
             }
 
-            entityView = default(T);
+            entityView = null;
 
             return false;
         }
 
-        static T QueryEntityView<T>(int ID, Dictionary<Type, ITypeSafeDictionary> entityDic) where T : EntityView
-        {
-            var type = typeof(T);
+        readonly Dictionary<int, Dictionary<Type, ITypeSafeList>>       _groupEntityViewsDB;
+        readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupedEntityViewsDBDic;
 
-            T                     internalEntityView; ITypeSafeDictionary entityViews;
-            TypeSafeDictionary<T> casted;
-
-            entityDic.TryGetValue(type, out entityViews);
-            casted = entityViews as TypeSafeDictionary<T>;
-
-            if (casted != null &&
-                casted.TryGetValue(ID, out internalEntityView))
-                return (T)internalEntityView;
-
-            throw new Exception("EntityView Not Found");
-        }
-
-        readonly Dictionary<Type, ITypeSafeList>         _entityViewsDB;
-        readonly Dictionary<Type, ITypeSafeList>         _metaEntityViewsDB;
-        
-        readonly Dictionary<Type, ITypeSafeDictionary>   _entityViewsDBdic;
-        readonly Dictionary<Type, ITypeSafeDictionary>   _metaEntityViewsDBdic;
-        
-        readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
+        readonly Dictionary<Type, ITypeSafeList> _entityViewsDB;
     }
 }

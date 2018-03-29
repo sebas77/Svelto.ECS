@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
@@ -39,16 +38,12 @@ namespace Svelto.ECS
             _otherEngines = new FasterList<IEngine>();
 
             _entityViewsDB = new Dictionary<Type, ITypeSafeList>();
-            _metaEntityViewsDB = new Dictionary<Type, ITypeSafeList>();
             _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeList>>();
-            _entityViewsDBDic = new Dictionary<Type, ITypeSafeDictionary>();
-            _metaEntityViewsDBDic = new Dictionary<Type, ITypeSafeDictionary>();
+            _groupedEntityViewsDBDic = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
             
-            _entityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>>();           
-            _metaEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>>();
             _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>>();
 
-            _DB = new EntityViewsDB(_entityViewsDB, _metaEntityViewsDB, _entityViewsDBDic, _metaEntityViewsDBDic, _groupEntityViewsDB);
+            _DB = new EntityViewsDB(_entityViewsDB, _groupedEntityViewsDBDic, _groupEntityViewsDB);
 
             _scheduler = entityViewScheduler;
             _scheduler.Schedule(new WeakAction(SubmitEntityViews));
@@ -125,27 +120,5 @@ namespace Svelto.ECS
         
         static readonly Type _entityViewType= typeof(EntityView);
         static readonly Type _object = typeof(object);
-
-        class DoubleBufferedEntityViews<T> where T : class, IDictionary, new()
-        {
-            readonly T _entityViewsToAddBufferA = new T();
-            readonly T _entityViewsToAddBufferB = new T();
-
-            internal DoubleBufferedEntityViews()
-            {
-                this.other = _entityViewsToAddBufferA;
-                this.current = _entityViewsToAddBufferB;
-            }
-
-            internal T other;
-            internal T current;
-
-            internal void Swap()
-            {
-                var toSwap = other;
-                other = current;
-                current = toSwap;
-            }
-        }
     }
 }

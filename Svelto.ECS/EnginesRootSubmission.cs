@@ -14,10 +14,7 @@ namespace Svelto.ECS
     {
         void SubmitEntityViews()
         {
-            bool newEntityViewsHaveBeenAddedWhileIterating =
-                _metaEntityViewsToAdd.current.Count > 0
-                || _entityViewsToAdd.current.Count > 0
-                || _groupedEntityViewsToAdd.current.Count > 0;
+            bool newEntityViewsHaveBeenAddedWhileIterating =  _groupedEntityViewsToAdd.current.Count > 0;
 
             int numberOfReenteringLoops = 0;
 
@@ -25,29 +22,16 @@ namespace Svelto.ECS
             {
                 //use other as source from now on
                 //current will be use to write new entityViews
-                _entityViewsToAdd.Swap();
-                _metaEntityViewsToAdd.Swap();
                 _groupedEntityViewsToAdd.Swap();
 
-                if (_entityViewsToAdd.other.Count > 0)
-                    AddEntityViewsToTheDBAndSuitableEngines(_entityViewsToAdd.other, _entityViewsDB, _entityViewsDBDic);
-
-                if (_metaEntityViewsToAdd.other.Count > 0)
-                    AddEntityViewsToTheDBAndSuitableEngines(_metaEntityViewsToAdd.other, _metaEntityViewsDB, _metaEntityViewsDBDic);
-
                 if (_groupedEntityViewsToAdd.other.Count > 0)
-                    AddGroupEntityViewsToTheDBAndSuitableEngines(_groupedEntityViewsToAdd.other, _groupEntityViewsDB, _entityViewsDB, _entityViewsDBDic);
+                    AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityViewsToAdd.other);
 
                 //other can be cleared now
-                _entityViewsToAdd.other.Clear();
-                _metaEntityViewsToAdd.other.Clear();
                 _groupedEntityViewsToAdd.other.Clear();
 
                 //has current new entityViews?
-                newEntityViewsHaveBeenAddedWhileIterating =
-                    _metaEntityViewsToAdd.current.Count > 0
-                    || _entityViewsToAdd.current.Count > 0
-                    || _groupedEntityViewsToAdd.current.Count > 0;
+                newEntityViewsHaveBeenAddedWhileIterating = _groupedEntityViewsToAdd.current.Count > 0;
 
                 if (numberOfReenteringLoops > 5)
                     throw new Exception("possible infinite loop found creating Entities inside IEntityViewsEngine Add method, please consider building entities outside IEntityViewsEngine Add method");
@@ -56,59 +40,55 @@ namespace Svelto.ECS
             }
         }
 
-        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<Type, ITypeSafeList> entityViewsToAdd,
-            Dictionary<Type, ITypeSafeList> entityViewsDB, Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic)
+        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupsToSubmit)
         {
-            foreach (var entityViewList in entityViewsToAdd)
+            //for each groups there is a dictionary of built lists of EntityView grouped by type
+            foreach (var groupToSubmit in groupsToSubmit)
             {
-                AddEntityViewToDB(entityViewsDB, entityViewList);
+                Dictionary<Type, ITypeSafeList> groupDB;
+                int groupID = groupToSubmit.Key;
 
-                if (entityViewList.Value.isQueryiableEntityView)
+                //if the group doesn't exist in the current DB let's create it frst
+                if (_groupEntityViewsDB.TryGetValue(groupID, out groupDB) == false)
+                    groupDB = _groupEntityViewsDB[groupID] = new Dictionary<Type, ITypeSafeList>();
+
+                foreach (var entityViewsPerType in groupToSubmit.Value)
                 {
-                    AddEntityViewToEntityViewsDictionary(entityViewsDBDic, entityViewList.Value, entityViewList.Key);
+                    //add the entity View in the group
+                    AddEntityViewToDB(groupDB, entityViewsPerType);
+                    //add the entity view in the gloal pool
+                    AddEntityViewToDB(_entityViewsDB, entityViewsPerType);
+                    //and it's not a struct, add in the indexable DB too
+                    if (entityViewsPerType.Value.isQueryiableEntityView)
+                    {
+                        Dictionary<Type, ITypeSafeDictionary> groupDic;
+
+                        if (_groupedEntityViewsDBDic.TryGetValue(groupID, out groupDic) == false)
+                            groupDic = _groupedEntityViewsDBDic[groupID] =
+                                new Dictionary<Type, ITypeSafeDictionary>();
+
+                        AddEntityViewToEntityViewsDictionary(groupDic, entityViewsPerType.Value, entityViewsPerType.Key);
+                    }
                 }
             }
 
-            foreach (var entityViewList in entityViewsToAdd)
+            //then submit everything in the engines
+            foreach (var group in groupsToSubmit)
             {
-                if (entityViewList.Value.isQueryiableEntityView)
+                foreach (var entityViewList in group.Value)
                 {
-                    var type = entityViewList.Key;
-                    for (var current = type; current != _entityViewType; current = current.BaseType)
-                        AddEntityViewToTheSuitableEngines(_entityViewEngines, entityViewList.Value,
-                                                          current);
+                    if (entityViewList.Value.isQueryiableEntityView)
+                    {
+                        var type = entityViewList.Key;
+                        for (var current = type; current != _entityViewType; current = current.BaseType)
+                            AddEntityViewToTheSuitableEngines(_entityViewEngines, entityViewList.Value, current);
+                    }
                 }
             }
         }
 
-        void AddGroupEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupedEntityViewsToAdd,
-                                                      Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsDB,
-                                                      Dictionary<Type, ITypeSafeList> entityViewsDB 
-                                                        , Dictionary<Type, ITypeSafeDictionary> entityViewsDBDic)
-        {
-            foreach (var group in groupedEntityViewsToAdd)
-            {
-                AddEntityViewsToGroupDB(groupEntityViewsDB, @group);
-
-                AddEntityViewsToTheDBAndSuitableEngines(group.Value, entityViewsDB, entityViewsDBDic);
-            }
-        }
-
-        static void AddEntityViewsToGroupDB(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsDB,
-                                      KeyValuePair<int, Dictionary<Type, ITypeSafeList>> @group)
-        {
-            Dictionary<Type, ITypeSafeList> groupedEntityViewsByType;
-
-            if (groupEntityViewsDB.TryGetValue(@group.Key, out groupedEntityViewsByType) == false)
-                groupedEntityViewsByType = groupEntityViewsDB[@group.Key] = new Dictionary<Type, ITypeSafeList>();
-
-            foreach (var entityView in @group.Value)
-            {
-                groupedEntityViewsByType.Add(entityView.Key, entityView.Value);
-            }
-        }
-
-        static void AddEntityViewToDB(Dictionary<Type, ITypeSafeList> entityViewsDB, KeyValuePair<Type, ITypeSafeList> entityViewList)
+        static void AddEntityViewToDB(Dictionary<Type, ITypeSafeList> entityViewsDB, 
+            KeyValuePair<Type, ITypeSafeList> entityViewList)
         {
             ITypeSafeList dbList;
 
@@ -119,7 +99,7 @@ namespace Svelto.ECS
         }
 
         static void AddEntityViewToEntityViewsDictionary(Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
-                                             ITypeSafeList entityViews, Type entityViewType)
+                                                        ITypeSafeList entityViews, Type entityViewType)
         {
             ITypeSafeDictionary entityViewsDic;
 
@@ -156,12 +136,7 @@ namespace Svelto.ECS
             }
         }
         
-        readonly DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>> _entityViewsToAdd;
-        readonly DoubleBufferedEntityViews<Dictionary<Type, ITypeSafeList>> _metaEntityViewsToAdd;
-        
         readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>> _groupedEntityViewsToAdd;
-      
         readonly EntitySubmissionScheduler _scheduler;
-
     }
 }

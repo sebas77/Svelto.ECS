@@ -15,7 +15,7 @@ namespace Svelto.ECS.Internal
         bool                MappedRemove(int entityID);
         ITypeSafeDictionary CreateIndexedDictionary();
         IEntityView[]       ToArrayFast(out int count);
-        void                ReserveCapacity(int capacity);
+        void                AddCapacity(int capacity);
     }
 
     class TypeSafeFasterListForECS<T> : FasterList<T> where T : IEntityView
@@ -66,10 +66,10 @@ namespace Svelto.ECS.Internal
             _mappedIndices[entityView.ID] = index;
         }
 
-        public void ReserveCapacity(int capacity)
+        public void AddCapacity(int capacity)
         {
-            if (ToArrayFast().Length < capacity)
-                Resize(capacity);
+            if (ToArrayFast().Length < Count + capacity)
+                Resize(Count + capacity);
         }
 
         public int GetIndexFromID(int entityID)
