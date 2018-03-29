@@ -39,6 +39,10 @@ you can find a working example to learn how to use the framework here:
 
 * https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
 
+**Official Chat**
+
+* https://gitter.im/Svelto-ECS/Lobby
+
 ## How to clone
 
 The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relavite repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
