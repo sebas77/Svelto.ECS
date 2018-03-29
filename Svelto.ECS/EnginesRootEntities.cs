@@ -15,7 +15,7 @@ namespace Svelto.ECS
         public void Dispose()
         {
             foreach (var entity in _entityViewsDB)
-                if (entity.Value.isQueryiableEntityView)
+                if (entity.Value.isQueryiableEntityView == true)
                     foreach (var entityView in entity.Value)
                         RemoveEntityViewFromEngines(_entityViewEngines, entityView as EntityView, entity.Key);
 
@@ -204,6 +204,11 @@ namespace Svelto.ECS
                                                       Type                                  entityViewType,
                                                       int                                   entityID)
         {
+#if DEBUG && !PROFILE
+            if (entityViewsDB.ContainsKey(entityViewType) == false)
+                throw new Exception(NO_ENTITY_FOUND_EXCEPTION + " - EntityViewType: " +
+                                    entityViewType.Name + " - ID " + entityID);
+#endif  
             var entityViews = entityViewsDB[entityViewType];
             if (entityViews.MappedRemove(entityID) == false)
                 entityViewsDB.Remove(entityViewType);
@@ -300,23 +305,23 @@ namespace Svelto.ECS
             }
         }
 
-        static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines,
-                                                IEntityView                                           entityView,
-                                                Type                                                  entityViewType)
+        static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines,
+                                                IEntityView entityView, Type entityViewType)
         {
-            FasterList<IHandleEntityViewEngine> enginesForEntityView;
+            FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView;
 
             if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
             {
                 int count;
-                var fastList = FasterList<IHandleEntityViewEngine>.NoVirt.ToArrayFast(enginesForEntityView, out count);
+                var fastList = FasterList<IHandleEntityViewEngineAbstracted>.NoVirt.ToArrayFast(enginesForEntityView, out count);
 
                 for (var j = 0; j < count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
                     EngineProfiler.MonitorRemoveDuration(fastList[j], entityView);
 #else
-                    fastList[j].Remove(entityView);
+                    var handleMixedEntityViewEngine = (fastList[j] as IHandleEntityViewEngine);
+                    handleMixedEntityViewEngine.Remove(entityView);
 #endif
                 }
             }
@@ -401,6 +406,9 @@ namespace Svelto.ECS
         readonly Dictionary<Type, ITypeSafeDictionary>            _entityViewsDBDic;
         readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
         readonly Dictionary<Type, ITypeSafeList>                  _metaEntityViewsDB;
+        const string NO_ENTITY_FOUND_EXCEPTION = 
+            "<color=orange>Svelto.ECS</color> Trying to remove an Entity never added, please be sure the " + 
+            "Entity is submitted before trying to remove it";
         readonly Dictionary<Type, ITypeSafeDictionary>            _metaEntityViewsDBDic;
 
     }

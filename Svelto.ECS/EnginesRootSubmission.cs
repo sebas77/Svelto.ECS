@@ -71,13 +71,10 @@ namespace Svelto.ECS
 
             foreach (var entityViewList in entityViewsToAdd)
             {
-                if (entityViewList.Value.isQueryiableEntityView)
-                {
                     var type = entityViewList.Key;
-                    for (var current = type; current != _entityViewType; current = current.BaseType)
+                    for (var current = type; current != _entityViewType && current != _objectType && current != _valueType; current = current.BaseType)
                         AddEntityViewToTheSuitableEngines(_entityViewEngines, entityViewList.Value,
                                                           current);
-                }
             }
         }
 
@@ -129,30 +126,15 @@ namespace Svelto.ECS
             entityViewsDic.FillWithIndexedEntityViews(entityViews);
         }
 
-        static void AddEntityViewToTheSuitableEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines, ITypeSafeList entityViewsList, Type entityViewType)
+        static void AddEntityViewToTheSuitableEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines, 
+        ITypeSafeList entityViewsList, 
+        Type entityViewType)
         {
-            FasterList<IHandleEntityViewEngine> enginesForEntityView;
+            FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView;
 
             if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
             {
-                int viewsCount;
-
-                var entityViews = entityViewsList.ToArrayFast(out viewsCount);
-
-                for (int i = 0; i < viewsCount; i++)
-                {
-                    int count;
-                    var fastList = FasterList<IHandleEntityViewEngine>.NoVirt.ToArrayFast(enginesForEntityView, out count);
-                    IEntityView entityView = entityViews[i];
-                    for (int j = 0; j < count; j++)
-                    {
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                        EngineProfiler.MonitorAddDuration(fastList[j], entityView);
-#else
-                        fastList[j].Add(entityView);
-#endif
-                    }
-                }
+                entityViewsList.Fill(enginesForEntityView);
             }
         }
         
