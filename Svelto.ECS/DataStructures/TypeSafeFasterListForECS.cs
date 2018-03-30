@@ -43,14 +43,7 @@ namespace Svelto.ECS.Internal
 
             if (UnorderedRemoveAt(index))
             {
-                try
-                {
-                    _mappedIndices.Add(this[index].ID.GID, index);
-                }
-                catch (Exception e)
-                {
-                    throw new TypeSafeFasterListForECSException(e);
-                }
+                _mappedIndices[this[index].ID.GID] = index;
             }
 
             return Count > 0;

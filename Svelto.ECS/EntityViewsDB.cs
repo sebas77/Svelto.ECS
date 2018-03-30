@@ -71,15 +71,6 @@ namespace Svelto.ECS.Internal
             return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entitiesInGroupPerType[type], out count);
         }
 
-        public T QueryEntityView<T>(int entityID) where T:EntityView
-        {
-            T entityView;
-
-            TryQueryEntityViewInGroup(new EGID(entityID, ExclusiveGroups.StandardEntity), out entityView);
-
-            return entityView;
-        }
-
         public T QueryEntityView<T>(EGID entityGID) where T : EntityView
         {
             T entityView;
@@ -89,28 +80,9 @@ namespace Svelto.ECS.Internal
             return entityView;
         }
 
-        public bool TryQueryEntityView<T>(int entityID, out T entityView) where T:EntityView
-        {
-            return TryQueryEntityViewInGroup(new EGID(entityID, ExclusiveGroups.StandardEntity), out entityView);
-        }
-
         public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : EntityView
         {
             return TryQueryEntityViewInGroup(entityegid, out entityView);
-        }
-
-        public T QueryEntityViewInGroup<T>(int entityID, int groupID) where T:EntityView
-        {
-            T entityView;
-
-            TryQueryEntityViewInGroup(entityID, groupID, out entityView);
-
-            return entityView;
-        }
-
-        public bool TryQueryEntityViewInGroup<T>(int entityID, int groupID, out T entityView) where T : EntityView
-        {
-            return TryQueryEntityViewInGroup(new EGID(entityID, groupID), out entityView);
         }
 
         bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:EntityView

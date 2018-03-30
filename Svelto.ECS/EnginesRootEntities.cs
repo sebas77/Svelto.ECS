@@ -127,7 +127,9 @@ namespace Svelto.ECS
 
         void RemoveEntity(EGID entityGID)
         {
-            _DB.TryQueryEntityView<EntityInfoView>(entityGID, out var entityInfoView);
+            EntityInfoView entityInfoView;
+            
+            _DB.TryQueryEntityView(entityGID, out entityInfoView);
 
             var entityViewBuilders = entityInfoView.entityViews;
             EGID id = entityInfoView._ID;
@@ -231,7 +233,9 @@ namespace Svelto.ECS
             Check.Require(fromGroupID != toGroupID,
                           "can't move an entity to the same group where it already belongs to");
 
-            _DB.TryQueryEntityViewInGroup(fromGroupID, entityID, out EntityInfoView entityInfoView);
+            EntityInfoView entityInfoView;
+                
+            _DB.TryQueryEntityView(new EGID(fromGroupID, entityID), out entityInfoView);
             
             var entityViewBuilders      = entityInfoView.entityViews;
             var entityViewBuildersCount = entityViewBuilders.Length;
