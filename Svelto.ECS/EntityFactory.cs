@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Xml;
 using Svelto.DataStructures;
 using Svelto.Utilities;
 using Console = Utility.Console;
@@ -11,31 +12,20 @@ namespace Svelto.ECS.Internal
         internal static void BuildGroupedEntityViews(int entityID, int groupID,
                                                      Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsByType,
                                                      EntityDescriptorInfo entityViewsToBuildDescriptor,
+                                                     Dictionary<int, IEntityViewBuilder[]> entityInfos,
                                                      object[] implementors)
         {
             var @group = FetchGroup(groupID, groupEntityViewsByType);
 
             BuildEntityViewsAndAddToGroup(new EGID(entityID, groupID), group, entityViewsToBuildDescriptor, implementors);
 
-            AddEntityInfoView(new EGID(entityID, groupID), entityViewsToBuildDescriptor, @group);
+            AddEntityInfoView(new EGID(entityID, groupID), entityViewsToBuildDescriptor, entityInfos);
         }
 
-        static void AddEntityInfoView(EGID entityID, EntityDescriptorInfo entityViewsToBuildDescriptor,
-                                      Dictionary<Type, ITypeSafeList> @group)
+        static void AddEntityInfoView(EGID entityID, EntityDescriptorInfo entityViewsToBuildDescriptor, 
+                                      Dictionary<int, IEntityViewBuilder[]> entityInfos)
         {
-            //should be a struct?
-            var removeEntityView = new EntityInfoView();
-
-            removeEntityView._ID = entityID;
-            removeEntityView.entityViews = entityViewsToBuildDescriptor.entityViewsToBuild;
-
-            ITypeSafeList list;
-
-            if (group.TryGetValue(typeof(EntityInfoView), out list) == false)
-                list = group[typeof(EntityInfoView)] =
-                           new TypeSafeFasterListForECSForClasses<EntityInfoView>();
-
-            ((TypeSafeFasterListForECSForClasses<EntityInfoView>) list).Add(removeEntityView);
+            entityInfos.Add(entityID.GID, entityViewsToBuildDescriptor.entityViewsToBuild);
         }
 
         static Dictionary<Type, ITypeSafeList> FetchGroup(int groupID, Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsByType)
@@ -202,7 +192,7 @@ namespace Svelto.ECS.Internal
         }
 #endif
         static readonly Dictionary<Type, Type[]> _cachedTypes = new Dictionary<Type, Type[]>();
-
+        
         const string DUPLICATE_IMPLEMENTOR_ERROR =
             "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is considered an error and MUST be fixed. ";
 
