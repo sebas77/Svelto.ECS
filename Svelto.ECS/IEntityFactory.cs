@@ -41,7 +41,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <param name="entityID"></param>
         /// <param name="implementors"></param>
-        void BuildEntity<T>(int entityID, object[]              implementors) where T:IEntityDescriptor, new();
+        void BuildEntity<T>(int entityID, object[] implementors) where T:IEntityDescriptor, new();
 
         /// <summary>
         ///     When the type of the entity is not known (this is a special case!) an EntityDescriptorInfo

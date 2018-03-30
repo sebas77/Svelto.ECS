@@ -1,8 +1,7 @@
-﻿namespace Svelto.ECS
+﻿namespace Svelto.ECS.Internal
 {
-    public class EntityInfoView : EntityView
+    class EntityInfoView : EntityView
     {
         internal IEntityViewBuilder[] entityViews;
-        public int                  groupID;
     }
 }

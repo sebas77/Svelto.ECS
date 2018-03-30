@@ -6,27 +6,29 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {   
+    //todo: can I remove the ID from the struct?
+    
     public interface IEntityView
     {
-        int ID { get; }
+        EGID ID { get; }
     }
     
     public interface IEntityStruct:IEntityView
     {
-        new int ID { set; }
+        new EGID ID { get; set; }
     }
 
     public class EntityView : IEntityView
     {
-        public int ID { get { return _ID; } }
+        public EGID ID { get { return _ID; } }
 
         internal FasterList<KeyValuePair<Type, CastedAction<EntityView>>> entityViewBlazingFastReflection;
-        internal int _ID;
+        internal EGID _ID;
     }
 
     static class EntityView<T> where T: EntityView, new()
     {
-        internal static T BuildEntityView(int ID) 
+        internal static T BuildEntityView(EGID ID) 
         {
             if (FieldCache<T>.list.Count == 0)
             {

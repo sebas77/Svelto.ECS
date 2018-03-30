@@ -27,6 +27,11 @@ namespace Svelto.ECS
                 _weakReference.Target.RemoveEntity(entityID, groupID);
             }
 
+            public void RemoveEntity(EGID entityEGID)
+            {
+                _weakReference.Target.RemoveEntity(entityEGID);
+            }
+
             public void RemoveGroupAndEntities(int groupID)
             {
                 _weakReference.Target.RemoveGroupAndEntitiesFromDB(groupID);

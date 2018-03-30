@@ -39,7 +39,7 @@ namespace Svelto.ECS
                 numberOfReenteringLoops++;
             }
         }
-
+        //todo: can I make the entity creation less complicated?
         void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupsToSubmit)
         {
             //for each groups there is a dictionary of built lists of EntityView grouped by type
@@ -57,18 +57,9 @@ namespace Svelto.ECS
                     //add the entity View in the group
                     AddEntityViewToDB(groupDB, entityViewsPerType);
                     //add the entity view in the gloal pool
-                    AddEntityViewToDB(_entityViewsDB, entityViewsPerType);
+                    AddEntityViewToDB(_globalEntityViewsDB, entityViewsPerType);
                     //and it's not a struct, add in the indexable DB too
-                    if (entityViewsPerType.Value.isQueryiableEntityView)
-                    {
-                        Dictionary<Type, ITypeSafeDictionary> groupDic;
-
-                        if (_groupedEntityViewsDBDic.TryGetValue(groupID, out groupDic) == false)
-                            groupDic = _groupedEntityViewsDBDic[groupID] =
-                                new Dictionary<Type, ITypeSafeDictionary>();
-
-                        AddEntityViewToEntityViewsDictionary(groupDic, entityViewsPerType.Value, entityViewsPerType.Key);
-                    }
+                    AddEntityViewToEntityViewsDictionary(_globalEntityViewsDBDic, entityViewsPerType.Value, entityViewsPerType.Key);
                 }
             }
 
@@ -87,8 +78,8 @@ namespace Svelto.ECS
             }
         }
 
-        static void AddEntityViewToDB(Dictionary<Type, ITypeSafeList> entityViewsDB, 
-            KeyValuePair<Type, ITypeSafeList> entityViewList)
+        static void AddEntityViewToDB(  Dictionary<Type, ITypeSafeList> entityViewsDB, 
+                                        KeyValuePair<Type, ITypeSafeList> entityViewList)
         {
             ITypeSafeList dbList;
 

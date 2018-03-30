@@ -2,6 +2,6 @@
 {
     static class ExclusiveGroups
     {
-        internal const int StandardEntity = unchecked((int) 0xFFFFFFFF);
+        internal const int StandardEntity = 0xFF;
     }
 }
