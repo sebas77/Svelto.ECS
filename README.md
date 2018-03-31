@@ -43,6 +43,10 @@ you can find a working example to learn how to use the framework here:
 
 * https://gitter.im/Svelto-ECS/Lobby
 
+**NED-Studio Svelto ECS inspector (WIP)**
+
+* https://github.com/NED-Studio/LGK.Inspector
+
 ## How to clone
 
 The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relavite repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
