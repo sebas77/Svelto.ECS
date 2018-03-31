@@ -136,7 +136,7 @@ namespace Svelto.ECS.Internal
 #if DEBUG && !PROFILER
                 else
                 {
-                    Console.LogError(NULL_IMPLEMENTOR_ERROR.FastConcat(entityView.ToString()));
+                    Console.LogError(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityView.ToString()));
                 }
 #endif
             }
