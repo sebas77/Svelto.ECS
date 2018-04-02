@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using Svelto.DataStructures;
 using Svelto.Utilities;
 using Console = Utility.Console;

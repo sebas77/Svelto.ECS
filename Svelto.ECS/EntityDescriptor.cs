@@ -31,15 +31,15 @@ namespace Svelto.ECS
             Check.Require(extraEntityViews.Count > 0,
                           "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
 
-            var descriptor = new TType();
-            var length     = descriptor.entityViewsToBuild.Length;
+            var defaultEntityViewsToBuild = EntityDescriptorTemplate<TType>.Default.entityViewsToBuild;
+            var length     = defaultEntityViewsToBuild.Length;
 
             entityViewsToBuild = new IEntityViewBuilder[length + extraEntityViews.Count];
 
-            Array.Copy(descriptor.entityViewsToBuild, 0, entityViewsToBuild, 0, length);
+            Array.Copy(defaultEntityViewsToBuild, 0, entityViewsToBuild, 0, length);
             Array.Copy(extraEntityViews.ToArrayFast(), 0, entityViewsToBuild, length, extraEntityViews.Count);
 
-            name = descriptor.ToString();
+            name = EntityDescriptorTemplate<TType>.Default.name;
         }
     }
 

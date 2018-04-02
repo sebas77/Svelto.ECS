@@ -55,7 +55,8 @@ namespace Svelto.ECS
                 foreach (var entityViewsPerType in groupToSubmit.Value)
                 {
                     //add the entity View in the group
-                    AddEntityViewToDB(groupDB, entityViewsPerType);
+                    if (entityViewsPerType.Value.isQueryiableEntityView == true)
+                        AddEntityViewToDB(groupDB, entityViewsPerType);
                     //add the entity view in the gloal pool
                     AddEntityViewToDB(_globalEntityViewsDB, entityViewsPerType);
                     //and it's not a struct, add in the indexable DB too
@@ -63,7 +64,8 @@ namespace Svelto.ECS
                 }
             }
 
-            //then submit everything in the engines
+            //then submit everything in the engines, so that the DB is up to date
+            //with all the entity views and struct created by the entity built
             foreach (var group in groupsToSubmit)
             {
                 foreach (var entityViewList in group.Value)
@@ -81,23 +83,29 @@ namespace Svelto.ECS
         static void AddEntityViewToDB(  Dictionary<Type, ITypeSafeList> entityViewsDB, 
                                         KeyValuePair<Type, ITypeSafeList> entityViewList)
         {
-            ITypeSafeList dbList;
+            
+            {
+                ITypeSafeList dbList;
 
-            if (entityViewsDB.TryGetValue(entityViewList.Key, out dbList) == false)
-                dbList = entityViewsDB[entityViewList.Key] = entityViewList.Value.Create();
+                if (entityViewsDB.TryGetValue(entityViewList.Key, out dbList) == false)
+                    dbList = entityViewsDB[entityViewList.Key] = entityViewList.Value.Create();
 
-            dbList.AddRange(entityViewList.Value);
+                dbList.AddRange(entityViewList.Value);
+            }
         }
 
         static void AddEntityViewToEntityViewsDictionary(Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
                                                         ITypeSafeList entityViews, Type entityViewType)
         {
-            ITypeSafeDictionary entityViewsDic;
-
-            if (entityViewsDBdic.TryGetValue(entityViewType, out entityViewsDic) == false)
-                entityViewsDic = entityViewsDBdic[entityViewType] = entityViews.CreateIndexedDictionary();
-
-            entityViewsDic.FillWithIndexedEntityViews(entityViews);
+            if (entityViews.isQueryiableEntityView == true)
+            {
+                ITypeSafeDictionary entityViewsDic;
+    
+                if (entityViewsDBdic.TryGetValue(entityViewType, out entityViewsDic) == false)
+                    entityViewsDic = entityViewsDBdic[entityViewType] = entityViews.CreateIndexedDictionary();
+    
+                entityViewsDic.FillWithIndexedEntityViews(entityViews);
+            }
         }
 
         static void AddEntityViewToTheSuitableEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines, ITypeSafeList entityViewsList, Type entityViewType)

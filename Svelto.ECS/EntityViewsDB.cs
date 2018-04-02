@@ -54,7 +54,7 @@ namespace Svelto.ECS.Internal
             return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews, out count);
         }
         
-        public T[] QueryGroupedEntityViewsAsArray<T>(int @group, out int count) where T : IEntityView
+        public T[] QueryGroupedEntityViewsAsArray<T>(int @group, out int count) where T : EntityView
         {
             var type = typeof(T);
             count = 0;

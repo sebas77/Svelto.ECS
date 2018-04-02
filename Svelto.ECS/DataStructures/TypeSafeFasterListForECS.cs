@@ -118,7 +118,7 @@ namespace Svelto.ECS.Internal
 
         public ITypeSafeDictionary CreateIndexedDictionary()
         {
-            return new TypeSafeDictionaryForStruct<T>();
+            throw new NotSupportedException();
         }
 
         public IEntityView[] ToArrayFast(out int count)

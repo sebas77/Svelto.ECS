@@ -11,6 +11,7 @@ namespace Svelto.ECS
         Type GetEntityViewType();
         void MoveEntityView(EGID entityID, ITypeSafeList fromSafeList, ITypeSafeList toSafeList);
         bool mustBeFilled { get; }
+        bool isQueryiableEntityView { get; }
     }
 
     public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : EntityView, new()
@@ -56,23 +57,35 @@ namespace Svelto.ECS
         {
             get { return true; }
         }
+        
+        public bool isQueryiableEntityView
+        {
+            get { return true; }
+        }
 
         public static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);
     }
 
     public class EntityViewStructBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : struct, IEntityStruct
     {
+        public EntityViewStructBuilder()
+        {}
+        
+        public EntityViewStructBuilder(ref EntityViewType initializer)
+        {
+            _initializer = initializer;
+        }
+        
         public void BuildEntityViewAndAddToList(ref ITypeSafeList list, EGID entityID, out IEntityView entityView)
         {
-            var structEntityView = default(EntityViewType);
-            structEntityView.ID = entityID;
+            _initializer.ID = entityID;
             
             if (list == null)
                 list = new TypeSafeFasterListForECSForStructs<EntityViewType>();
 
             var castedList = list as TypeSafeFasterListForECSForStructs<EntityViewType>;
-
-            castedList.Add(structEntityView);
+            
+            castedList.Add(_initializer);
 
             entityView = null;
         }
@@ -105,6 +118,12 @@ namespace Svelto.ECS
             get { return false; }
         }
 
+        public bool isQueryiableEntityView
+        {
+            get { return false; }
+        }
+
         public static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);
-    }    
+        EntityViewType _initializer;
+   }    
 }
