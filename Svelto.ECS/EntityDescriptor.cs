@@ -1,7 +1,6 @@
 using System;
 using DBC;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -17,16 +16,12 @@ namespace Svelto.ECS
             this.entityViewsToBuild = entityViewsToBuild;
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild { get; private set;  }
-    }
-
-    public interface IEntityDescriptorInfo
-    {
+        public IEntityViewBuilder[] entityViewsToBuild { get; }
     }
 
     public static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
-        public static readonly IEntityDescriptorInfo Default = new EntityDescriptorInfo(new TType());
+        public static readonly EntityDescriptorInfo Default = new EntityDescriptorInfo(new TType());
     }
 
     public class DynamicEntityDescriptorInfo<TType> : EntityDescriptorInfo where TType : IEntityDescriptor, new()
@@ -36,34 +31,30 @@ namespace Svelto.ECS
             Check.Require(extraEntityViews.Count > 0,
                           "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
 
-            var descriptor = new TType();
-            var length     = descriptor.entityViewsToBuild.Length;
+            var defaultEntityViewsToBuild = EntityDescriptorTemplate<TType>.Default.entityViewsToBuild;
+            var length     = defaultEntityViewsToBuild.Length;
 
             entityViewsToBuild = new IEntityViewBuilder[length + extraEntityViews.Count];
 
-            Array.Copy(descriptor.entityViewsToBuild, 0, entityViewsToBuild, 0, length);
+            Array.Copy(defaultEntityViewsToBuild, 0, entityViewsToBuild, 0, length);
             Array.Copy(extraEntityViews.ToArrayFast(), 0, entityViewsToBuild, length, extraEntityViews.Count);
 
-            name = descriptor.ToString();
+            name = EntityDescriptorTemplate<TType>.Default.name;
         }
     }
-}
 
-namespace Svelto.ECS.Internal
-{
-    public class EntityDescriptorInfo : IEntityDescriptorInfo
+    public class EntityDescriptorInfo
     {
         internal IEntityViewBuilder[] entityViewsToBuild;
-        internal string               name;
+        internal string name;
 
         internal EntityDescriptorInfo(IEntityDescriptor descriptor)
         {
-            name               = descriptor.ToString();
+            name = descriptor.ToString();
             entityViewsToBuild = descriptor.entityViewsToBuild;
         }
 
         protected EntityDescriptorInfo()
-        {
-        }
+        { }
     }
 }

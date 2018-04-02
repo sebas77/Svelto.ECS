@@ -12,10 +12,10 @@ namespace Svelto.ECS.Internal
         void AddRange(ITypeSafeList entityViewListValue);
 
         ITypeSafeList       Create();
-        bool                MappedRemove(int entityID);
+        bool                MappedRemove(EGID entityID);
         ITypeSafeDictionary CreateIndexedDictionary();
         IEntityView[]       ToArrayFast(out int count);
-        void                ReserveCapacity(int capacity);
+        void                AddCapacity(int capacity);
     }
 
     class TypeSafeFasterListForECS<T> : FasterList<T> where T : IEntityView
@@ -32,17 +32,19 @@ namespace Svelto.ECS.Internal
             _mappedIndices = new Dictionary<int, int>();
         }
 
-        public bool MappedRemove(int entityID)
+        public bool MappedRemove(EGID entityID)
         {
-            var index = _mappedIndices[entityID];
+            var index = _mappedIndices[entityID.GID];
 
-            Check.Assert(entityID == this[index].ID,
+            Check.Assert(entityID.GID == this[index].ID.GID,
                          "Something went wrong with the Svelto.ECS code, please contact the author");
 
-            _mappedIndices.Remove(entityID);
+            _mappedIndices.Remove(entityID.GID);
 
             if (UnorderedRemoveAt(index))
-                _mappedIndices[this[index].ID] = index;
+            {
+                _mappedIndices[this[index].ID.GID] = index;
+            }
 
             return Count > 0;
         }
@@ -53,8 +55,18 @@ namespace Svelto.ECS.Internal
 
             base.AddRange(entityViewListValue as FasterList<T>);
 
+
             for (var i = index; i < Count; ++i)
-                _mappedIndices[this[i].ID] = i;
+            {
+                try
+                {
+                    _mappedIndices.Add(this[i].ID.GID, i);
+                }
+                catch (Exception e)
+                {
+                    throw new TypeSafeFasterListForECSException(e);
+                }
+            }
         }
 
         public new void Add(T entityView)
@@ -63,18 +75,25 @@ namespace Svelto.ECS.Internal
 
             base.Add(entityView);
 
-            _mappedIndices[entityView.ID] = index;
+            try
+            {
+                _mappedIndices.Add(entityView.ID.GID, index);
+            }
+            catch (Exception e)
+            {
+                throw new TypeSafeFasterListForECSException(e);
+            }
         }
 
-        public void ReserveCapacity(int capacity)
+        public void AddCapacity(int capacity)
         {
-            if (ToArrayFast().Length < capacity)
-                Resize(capacity);
+            if (ToArrayFast().Length < Count + capacity)
+                Resize(Count + capacity);
         }
 
-        public int GetIndexFromID(int entityID)
+        public int GetIndexFromID(EGID entityID)
         {
-            return _mappedIndices[entityID];
+            return _mappedIndices[entityID.GID];
         }
     }
 
@@ -82,12 +101,10 @@ namespace Svelto.ECS.Internal
         where T : struct, IEntityStruct
     {
         public TypeSafeFasterListForECSForStructs(int size) : base(size)
-        {
-        }
+        {}
 
         public TypeSafeFasterListForECSForStructs()
-        {
-        }
+        {}
 
         public ITypeSafeList Create()
         {
@@ -101,7 +118,7 @@ namespace Svelto.ECS.Internal
 
         public ITypeSafeDictionary CreateIndexedDictionary()
         {
-            throw new Exception("Not Allowed");
+            throw new NotSupportedException();
         }
 
         public IEntityView[] ToArrayFast(out int count)
@@ -118,12 +135,10 @@ namespace Svelto.ECS.Internal
     class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T : EntityView, new()
     {
         public TypeSafeFasterListForECSForClasses(int size) : base(size)
-        {
-        }
+        {}
 
         public TypeSafeFasterListForECSForClasses()
-        {
-        }
+        {}
 
         public ITypeSafeList Create()
         {
@@ -137,7 +152,7 @@ namespace Svelto.ECS.Internal
 
         public ITypeSafeDictionary CreateIndexedDictionary()
         {
-            return new TypeSafeDictionary<T>();
+            return new TypeSafeDictionaryForClass<T>();
         }
 
         public IEntityView[] ToArrayFast(out int count)

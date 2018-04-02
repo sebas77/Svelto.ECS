@@ -14,11 +14,11 @@ namespace Svelto.ECS.Internal
     public interface ITypeSafeDictionary
     {
         void        FillWithIndexedEntityViews(ITypeSafeList entityViews);
-        bool        Remove(int                               entityId);
-        IEntityView GetIndexedEntityView(int                 entityID);
+        bool        Remove(EGID entityId);
+        IEntityView GetIndexedEntityView(EGID                 entityID);
     }
 
-    class TypeSafeDictionary<TValue> : Dictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityView
+    class TypeSafeDictionaryForClass<TValue> : Dictionary<int, TValue>, ITypeSafeDictionary where TValue : EntityView
     {
         internal static readonly ReadOnlyDictionary<int, TValue> Default =
             new ReadOnlyDictionary<int, TValue>(new Dictionary<int, TValue>());
@@ -34,7 +34,7 @@ namespace Svelto.ECS.Internal
                 {
                     var entityView = buffer[i];
 
-                    Add(entityView.ID, entityView);
+                    Add(entityView._ID.GID, entityView);
                 }
             }
             catch (Exception e)
@@ -43,16 +43,16 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public new bool Remove(int entityId)
+        public bool Remove(EGID entityId)
         {
-            base.Remove(entityId);
+            base.Remove(entityId.GID);
 
             return Count > 0;
         }
 
-        public IEntityView GetIndexedEntityView(int entityID)
+        public IEntityView GetIndexedEntityView(EGID entityID)
         {
-            return this[entityID];
+            return this[entityID.GID];
         }
     }
 }
