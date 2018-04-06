@@ -16,10 +16,13 @@ you can find a working example to learn how to use the framework here:
 
 * https://eagergames.wordpress.com/category/ecs/ 
 
-**Framework Articles:**
+**Framework articles:**
 
 * http://www.sebaslab.com/ecs-1-0/
 * http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
+* http://www.sebaslab.com/learning-svelto-ecs-by-example-the-unity-survival-example/
+* http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
+* http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
 
 **Theory related articles:**
 
