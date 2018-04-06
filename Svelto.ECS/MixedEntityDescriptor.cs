@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS
 {
-    public class MixedEntityDescriptor<T>:IEntityDescriptor where T : class, IEntityViewBuilder, new()
+    public abstract class MixedEntityDescriptor<T>:IEntityDescriptor where T : class, IEntityViewBuilder, new()
     {
         static MixedEntityDescriptor()
         {
@@ -15,7 +15,7 @@
         static readonly IEntityViewBuilder[] _entityViewsToBuild;
     }
 
-    public class MixedEntityDescriptor<T, U> : IEntityDescriptor where T : class, IEntityViewBuilder, new() 
+    public abstract class MixedEntityDescriptor<T, U> : IEntityDescriptor where T : class, IEntityViewBuilder, new() 
                                                                        where U : class, IEntityViewBuilder, new()
     {
         static MixedEntityDescriptor()
@@ -31,7 +31,7 @@
         static readonly IEntityViewBuilder[] _entityViewsToBuild;
     }
 
-    public class MixedEntityDescriptor<T, U, V> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
+    public abstract class MixedEntityDescriptor<T, U, V> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
                                                                           where U : class, IEntityViewBuilder, new()
                                                                           where V : class, IEntityViewBuilder, new()
     {
@@ -48,7 +48,7 @@
         static readonly IEntityViewBuilder[] _entityViewsToBuild;
     }
 
-    public class MixedEntityDescriptor<T, U, V, W> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
+    public abstract class MixedEntityDescriptor<T, U, V, W> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
                                                                              where U : class, IEntityViewBuilder, new()
                                                                              where V : class, IEntityViewBuilder, new()
                                                                              where W : class, IEntityViewBuilder, new()
@@ -66,7 +66,7 @@
         static readonly IEntityViewBuilder[] _entityViewsToBuild;
     }
 
-    public class MixedEntityDescriptor<T, U, V, W, X> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
+    public abstract class MixedEntityDescriptor<T, U, V, W, X> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
                                                                                 where U : class, IEntityViewBuilder, new()
                                                                                 where V : class, IEntityViewBuilder, new()
                                                                                 where W : class, IEntityViewBuilder, new()
@@ -85,7 +85,7 @@
         static readonly IEntityViewBuilder[] _entityViewsToBuild;
     }
 
-    public class MixedEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
+    public abstract class MixedEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor where T : class, IEntityViewBuilder, new()
                                                                                    where U : class, IEntityViewBuilder, new()
                                                                                    where V : class, IEntityViewBuilder, new()
                                                                                    where W : class, IEntityViewBuilder, new()
