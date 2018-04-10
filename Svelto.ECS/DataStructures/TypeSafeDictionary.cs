@@ -15,13 +15,13 @@ namespace Svelto.ECS.Internal
     {
         void        FillWithIndexedEntityViews(ITypeSafeList entityViews);
         bool        Remove(EGID entityId);
-        IEntityView GetIndexedEntityView(EGID                 entityID);
+        IEntityView GetIndexedEntityView(EGID entityID);
     }
 
-    class TypeSafeDictionaryForClass<TValue> : Dictionary<int, TValue>, ITypeSafeDictionary where TValue : EntityView
+    class TypeSafeDictionaryForClass<TValue> : Dictionary<long, TValue>, ITypeSafeDictionary where TValue : EntityView
     {
-        internal static readonly ReadOnlyDictionary<int, TValue> Default =
-            new ReadOnlyDictionary<int, TValue>(new Dictionary<int, TValue>());
+        internal static readonly ReadOnlyDictionary<long, TValue> Default =
+            new ReadOnlyDictionary<long, TValue>(new Dictionary<long, TValue>());
 
         public void FillWithIndexedEntityViews(ITypeSafeList entityViews)
         {

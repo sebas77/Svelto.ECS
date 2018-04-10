@@ -41,7 +41,7 @@ namespace Svelto.ECS
             _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeList>>();
             _globalEntityViewsDBDic = new Dictionary<Type, ITypeSafeDictionary>();
             
-            _entityInfos = new Dictionary<int, IEntityViewBuilder[]>();
+            _entityInfos = new Dictionary<long, IEntityViewBuilder[]>();
             
             _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>>();
 

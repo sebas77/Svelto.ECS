@@ -20,16 +20,16 @@ namespace Svelto.ECS.Internal
 
     class TypeSafeFasterListForECS<T> : FasterList<T> where T : IEntityView
     {
-        readonly Dictionary<int, int> _mappedIndices;
+        readonly Dictionary<long, int> _mappedIndices;
 
         protected TypeSafeFasterListForECS()
         {
-            _mappedIndices = new Dictionary<int, int>();
+            _mappedIndices = new Dictionary<long, int>();
         }
 
         protected TypeSafeFasterListForECS(int size) : base(size)
         {
-            _mappedIndices = new Dictionary<int, int>();
+            _mappedIndices = new Dictionary<long, int>();
         }
 
         public bool MappedRemove(EGID entityID)

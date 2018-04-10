@@ -1,25 +1,24 @@
-using DBC;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public struct EGID
     {
-        int _GID;
+        long _GID;
         
-        public int GID
+        public long GID
         {
             get { return _GID; }
         }
         
         public int ID
         {
-            get { return _GID & 0xFFFFFF; }
+            get { return (int) (_GID & 0xFFFFFFFF); }
         }
         
         public int group
         {
-            get { return (int) ((_GID & 0xFF000000) >> 24); }
+            get { return (int) (_GID >> 32); }
         }
 
         public EGID(int entityID, int groupID) : this()
@@ -32,13 +31,9 @@ namespace Svelto.ECS
             _GID = MAKE_GLOBAL_ID(entityID, ExclusiveGroups.StandardEntity);
         }
 
-        int MAKE_GLOBAL_ID(int entityId, int groupId)
+        static long MAKE_GLOBAL_ID(int entityId, int groupId)
         {
-#if DEBUG && !PROFILER
-            Check.Require(entityId <= 0xFFFFFF);
-            Check.Require(groupId <= 0xFF);
-#endif
-            return entityId | groupId << 24;
+            return entityId | (long)groupId << 32;
         }
 
         public bool IsEqualTo(EGID otherGID)

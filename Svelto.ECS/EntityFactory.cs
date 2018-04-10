@@ -11,20 +11,14 @@ namespace Svelto.ECS.Internal
         internal static void BuildGroupedEntityViews(int entityID, int groupID,
                                                      Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsByType,
                                                      EntityDescriptorInfo entityViewsToBuildDescriptor,
-                                                     Dictionary<int, IEntityViewBuilder[]> entityInfos,
+                                                     Dictionary<long, IEntityViewBuilder[]> entityInfos,
                                                      object[] implementors)
         {
             var @group = FetchGroup(groupID, groupEntityViewsByType);
 
             BuildEntityViewsAndAddToGroup(new EGID(entityID, groupID), group, entityViewsToBuildDescriptor, implementors);
-
-            AddEntityInfoView(new EGID(entityID, groupID), entityViewsToBuildDescriptor, entityInfos);
-        }
-
-        static void AddEntityInfoView(EGID entityID, EntityDescriptorInfo entityViewsToBuildDescriptor, 
-                                      Dictionary<int, IEntityViewBuilder[]> entityInfos)
-        {
-            entityInfos.Add(entityID.GID, entityViewsToBuildDescriptor.entityViewsToBuild);
+            
+            entityInfos.Add(new EGID(entityID, groupID).GID, entityViewsToBuildDescriptor.entityViewsToBuild);
         }
 
         static Dictionary<Type, ITypeSafeList> FetchGroup(int groupID, Dictionary<int, Dictionary<Type, ITypeSafeList>> groupEntityViewsByType)

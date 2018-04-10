@@ -278,10 +278,10 @@ namespace Svelto.ECS
         
         //Global pool of entity views when engines want to manage entityViews regardless
         //the group
-        readonly Dictionary<Type, ITypeSafeList>       _globalEntityViewsDB;
+        readonly Dictionary<Type, ITypeSafeList>        _globalEntityViewsDB;
         //indexable entity views when the entity ID is known. Usually useful to handle
         //event based logic.
-        readonly Dictionary<Type, ITypeSafeDictionary> _globalEntityViewsDBDic;
-        Dictionary<int, IEntityViewBuilder[]> _entityInfos;
+        readonly Dictionary<Type, ITypeSafeDictionary>  _globalEntityViewsDBDic;
+        readonly Dictionary<long, IEntityViewBuilder[]> _entityInfos;
     }
 }
