@@ -6,7 +6,7 @@ namespace Svelto.ECS
     {
         public void Add(IEntityData entityView)
         {
-            Add((T) entityView); //when byref returns will be vailable, this should be passed by reference, not copy!
+            Add((T) entityView);
         }
 
         public void Remove(IEntityData entityView)

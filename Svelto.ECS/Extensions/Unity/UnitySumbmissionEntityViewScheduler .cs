@@ -44,10 +44,10 @@ namespace Svelto.ECS.Schedulers.Unity
 
             internal WeakAction OnTick;
 
-            WaitForEndOfFrame _wait = new WaitForEndOfFrame();
+            readonly WaitForEndOfFrame _wait = new WaitForEndOfFrame();
         }
 
-        Scheduler _scheduler;
+        readonly Scheduler _scheduler;
     }
 }
 #endif

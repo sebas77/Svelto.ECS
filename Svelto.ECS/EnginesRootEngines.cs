@@ -34,18 +34,18 @@ namespace Svelto.ECS
         /// </summary>
         public EnginesRoot(EntitySubmissionScheduler entityViewScheduler)
         {
-            _entityViewEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngine>>();
+            _entityViewEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
 
-            _globalEntityViewsDB = new Dictionary<Type, ITypeSafeList>();
             _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeList>>();
+            _groupEntityViewsDB[ExclusiveGroups.StandardEntity] = new Dictionary<Type, ITypeSafeList>();
             _globalEntityViewsDBDic = new Dictionary<Type, ITypeSafeDictionary>();
             
             _entityInfos = new Dictionary<long, IEntityViewBuilder[]>();
             
             _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>>();
 
-            _DB = new EntityViewsDB(_globalEntityViewsDB, _globalEntityViewsDBDic, _groupEntityViewsDB);
+            _DB = new EntityViewsDB(_globalEntityViewsDBDic, _groupEntityViewsDB);
 
             _scheduler = entityViewScheduler;
             _scheduler.Schedule(new WeakAction(SubmitEntityViews));
@@ -56,7 +56,7 @@ namespace Svelto.ECS
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
             Profiler.EngineProfiler.AddEngine(engine);
 #endif
-            var viewEngine = engine as IHandleEntityViewEngine;
+            var viewEngine = engine as IHandleEntityViewEngineAbstracted;
             
             if (viewEngine != null)
                 CheckEntityViewsEngine(viewEngine);
@@ -75,12 +75,13 @@ namespace Svelto.ECS
         {
             var baseType = engine.GetType().GetBaseType();
 
-            while (baseType != _object)
+            while (baseType != _objectType)
             {
                 if (baseType.IsGenericTypeEx())
                 {
                     var genericArguments = baseType.GetGenericArgumentsEx();
-                    AddEngine(engine as IHandleEntityViewEngine, genericArguments, _entityViewEngines);
+                    
+                    AddEngine(engine as IHandleEntityViewEngineAbstracted, genericArguments, _entityViewEngines);
 
                     return;
                 }
@@ -117,10 +118,11 @@ namespace Svelto.ECS
             list.Add(engine);
         }
 
-        readonly Dictionary<Type, FasterList<IHandleEntityViewEngine>> _entityViewEngines;    
+        readonly Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> _entityViewEngines;    
         readonly FasterList<IEngine> _otherEngines;
         
         static readonly Type _entityViewType= typeof(IEntityData);
-        static readonly Type _object = typeof(object);
+        static readonly Type _objectType = typeof(object);
+        static readonly Type _valueType = typeof(ValueType);
     }
 }

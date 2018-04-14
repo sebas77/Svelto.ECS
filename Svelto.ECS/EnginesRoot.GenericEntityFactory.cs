@@ -27,16 +27,16 @@ namespace Svelto.ECS
                 _weakEngine.Target.BuildEntity(entityID, entityDescriptor, implementors);
             }
 
-            public void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors)
+            public void BuildEntity<T>(int entityID, int groupID, object[] implementors)
                 where T : IEntityDescriptor, new()
             {
-                _weakEngine.Target.BuildEntityInGroup<T>(entityID, groupID, implementors);
+                _weakEngine.Target.BuildEntity<T>(entityID, groupID, implementors);
             }
 
-            public void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor,
+            public void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor,
                                            object[] implementors)
             {
-                _weakEngine.Target.BuildEntityInGroup(entityID, groupID, entityDescriptor, implementors);
+                _weakEngine.Target.BuildEntity(entityID, groupID, entityDescriptor, implementors);
             }
 
             public void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new()
@@ -44,7 +44,7 @@ namespace Svelto.ECS
                 _weakEngine.Target.Preallocate<T>(ExclusiveGroups.StandardEntity, size);
             }
             
-            public void PreallocateEntitySpaceInGroup<T>(int groupID, int size) where T : IEntityDescriptor, new()
+            public void PreallocateEntitySpace<T>(int groupID, int size) where T : IEntityDescriptor, new()
             {
                 _weakEngine.Target.Preallocate<T>(groupID, size);
             }

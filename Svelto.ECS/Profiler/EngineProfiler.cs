@@ -12,28 +12,26 @@ namespace Svelto.ECS.Profiler
     {
         static readonly Stopwatch _stopwatch = new Stopwatch();
 
-        public static readonly Dictionary<Type, EngineInfo> engineInfos = new Dictionary<Type, EngineInfo>();
-
-        public static void MonitorAddDuration(IHandleEntityViewEngine engine, IEntityData entityView)
+        public static void MonitorAddDuration<T>(IHandleEntityViewEngineAbstracted engine, T entityView)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
-                engine.Add(entityView);
+                (engine as IHandleEntityStructEngine<T>).Add(ref entityView);
                 _stopwatch.Stop();
                 info.AddAddDuration(_stopwatch.Elapsed.TotalMilliseconds);
                 _stopwatch.Reset();
             }
         }
 
-        public static void MonitorRemoveDuration(IHandleEntityViewEngine engine, IEntityData entityView)
+        public static void MonitorRemoveDuration<T>(IHandleEntityViewEngineAbstracted engine, IEntityData entityView)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
-                engine.Remove(entityView);
+                (engine as IHandleEntityViewEngine).Remove(entityView);
                 _stopwatch.Stop();
 
                 info.AddRemoveDuration(_stopwatch.Elapsed.TotalMilliseconds);
@@ -44,12 +42,19 @@ namespace Svelto.ECS.Profiler
         public static void AddEngine(IEngine engine)
         {
             if (engineInfos.ContainsKey(engine.GetType()) == false)
+            {
                 engineInfos.Add(engine.GetType(), new EngineInfo(engine));
+            }
         }
 
         public static void ResetDurations()
         {
-            foreach (var engine in engineInfos) engine.Value.ResetDurations();
+            foreach (var engine in engineInfos)
+            {
+                engine.Value.ResetDurations();
+            }
         }
+
+        public static readonly Dictionary<Type, EngineInfo> engineInfos = new Dictionary<Type, EngineInfo>();
     }
 }

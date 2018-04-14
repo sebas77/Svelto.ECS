@@ -17,7 +17,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <param name="size"></param>
         void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new();
-        void PreallocateEntitySpaceInGroup<T>(int groupID, int size) where T : IEntityDescriptor, new();
+        void PreallocateEntitySpace<T>(int groupID, int size) where T : IEntityDescriptor, new();
 
         /// <summary>
         ///     Using this function is like building a normal entity, but the entityViews
@@ -29,8 +29,8 @@ namespace Svelto.ECS
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors) where T:IEntityDescriptor, new();
-        void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors);
+        void BuildEntity<T>(int entityID, int groupID, object[] implementors) where T:IEntityDescriptor, new();
+        void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors);
 
         /// <summary>
         ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity

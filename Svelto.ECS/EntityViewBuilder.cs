@@ -6,7 +6,7 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : IEntityData
+    public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : IEntityData, new()
     {
         public void BuildEntityViewAndAddToList(ref ITypeSafeList list, EGID entityID, object[] implementors)
         {

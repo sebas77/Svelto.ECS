@@ -57,8 +57,6 @@ namespace Svelto.ECS
                     //add the entity View in the group
                     if (entityViewsPerType.Value.isQueryiableEntityView == true)
                         AddEntityViewToDB(groupDB, entityViewsPerType);
-                    //add the entity view in the gloal pool
-                    AddEntityViewToDB(_globalEntityViewsDB, entityViewsPerType);
                     //and it's not a struct, add in the indexable DB too
                     AddEntityViewToEntityViewsDictionary(_globalEntityViewsDBDic, entityViewsPerType.Value, entityViewsPerType.Key);
                 }
@@ -66,16 +64,16 @@ namespace Svelto.ECS
 
             //then submit everything in the engines, so that the DB is up to date
             //with all the entity views and struct created by the entity built
-            foreach (var group in groupsToSubmit)
+            foreach (var groupToSubmit in groupsToSubmit)
             {
-                foreach (var entityViewList in group.Value)
+                foreach (var entityViewsPerType in groupToSubmit.Value)
                 {
-                    if (entityViewList.Value.isQueryiableEntityView)
-                    {
-                        var type = entityViewList.Key;
-                        for (var current = type; current != _entityViewType; current = current.BaseType)
-                            AddEntityViewToTheSuitableEngines(_entityViewEngines, entityViewList.Value, current);
-                    }
+                    var type = entityViewsPerType.Key;
+                    for (var current = type;
+                         current != _entityViewType && current != _objectType && current != _valueType;
+                         current = current.BaseType)
+                        AddEntityViewToTheSuitableEngines(_entityViewEngines, entityViewsPerType.Value,
+                                                          current);
                 }
             }
         }
@@ -108,30 +106,15 @@ namespace Svelto.ECS
             }
         }
 
-        static void AddEntityViewToTheSuitableEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines, ITypeSafeList entityViewsList, Type entityViewType)
+        static void AddEntityViewToTheSuitableEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines, 
+        ITypeSafeList entityViewsList, 
+        Type entityViewType)
         {
-            FasterList<IHandleEntityViewEngine> enginesForEntityView;
+            FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView;
 
             if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
             {
-                int viewsCount;
-
-                var entityViews = entityViewsList.ToArrayFast(out viewsCount);
-
-                for (int i = 0; i < viewsCount; i++)
-                {
-                    int count;
-                    var fastList = FasterList<IHandleEntityViewEngine>.NoVirt.ToArrayFast(enginesForEntityView, out count);
-                    IEntityData entityView = entityViews[i];
-                    for (int j = 0; j < count; j++)
-                    {
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-                        EngineProfiler.MonitorAddDuration(fastList[j], entityView);
-#else
-                        fastList[j].Add(entityView);
-#endif
-                    }
-                }
+                entityViewsList.Fill(enginesForEntityView);
             }
         }
         

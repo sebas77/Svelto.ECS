@@ -7,10 +7,20 @@ using Svelto.Utilities;
 namespace Svelto.ECS
 {   
     //todo: can I remove the ID from the struct?
-    
     public interface IEntityData
     {
         EGID ID { get; set; }
+    }
+    
+    public class EntityView : IEntityData
+    {
+        public EGID ID
+        {
+            get { return _ID; }
+            set { _ID = value; }
+        }
+
+        EGID _ID;
     }
     
     static class EntityView<T> where T: IEntityData, new()

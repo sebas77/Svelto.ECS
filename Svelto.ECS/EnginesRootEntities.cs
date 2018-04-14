@@ -14,10 +14,11 @@ namespace Svelto.ECS
     {
         public void Dispose()
         {
-            foreach (var entity in _globalEntityViewsDB)
-                if (entity.Value.isQueryiableEntityView)
-                    foreach (var entityView in entity.Value)
-                        RemoveEntityViewFromEngines(_entityViewEngines, entityView as IEntityData, entity.Key);
+            foreach (var groups in _groupEntityViewsDB)
+                foreach (var entity in groups.Value)
+                    if (entity.Value.isQueryiableEntityView == true)
+                        foreach (var entityView in entity.Value)
+                            RemoveEntityViewFromEngines(_entityViewEngines, entityView as IEntityData, entity.Key);
         }
 
         ///--------------------------------------------
@@ -36,13 +37,13 @@ namespace Svelto.ECS
 
         void BuildEntity<T>(int entityID, object[] implementors = null) where T : IEntityDescriptor, new()
         {
-            BuildEntityInGroup<T>
+            BuildEntity<T>
                 (entityID, ExclusiveGroups.StandardEntity, implementors);
         }
 
         void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors)
         {
-            BuildEntityInGroup
+            BuildEntity
                 (entityID, ExclusiveGroups.StandardEntity, entityDescriptor, implementors);
         }
 
@@ -55,7 +56,7 @@ namespace Svelto.ECS
         /// <param name="entityID"></param>
         /// <param name="groupID"></param>
         /// <param name="implementors"></param>
-        void BuildEntityInGroup<T>(int entityID, int groupID, object[] implementors = null)
+        void BuildEntity<T>(int entityID, int groupID, object[] implementors = null)
             where T : IEntityDescriptor, new()
         {
             EntityFactory.BuildGroupedEntityViews(entityID, groupID,
@@ -65,7 +66,7 @@ namespace Svelto.ECS
                                                   implementors);
         }
 
-        void BuildEntityInGroup(int entityID, int groupID, EntityDescriptorInfo entityDescriptor,
+        void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor,
                                 object[] implementors = null)
         {
             EntityFactory.BuildGroupedEntityViews(entityID, groupID,
@@ -95,10 +96,6 @@ namespace Svelto.ECS
 
                 //reserve space for the global pool
                 ITypeSafeList dbList;
-                if (_globalEntityViewsDB.TryGetValue(entityViewType, out dbList) == false)
-                    _globalEntityViewsDB[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
-                else
-                    dbList.AddCapacity(size);
 
                 //reserve space for the single group
                 Dictionary<Type, ITypeSafeList> @group;
@@ -144,8 +141,6 @@ namespace Svelto.ECS
                     InternalRemoveEntityViewFromDBDicAndEngines(entityViewType, entityGID);
                     RemoveEntityViewFromDB(@group, entityViewType, entityGID);
                 }
-
-                RemoveEntityViewFromDB(@_globalEntityViewsDB, entityViewType, entityGID);
             }
 
             _entityInfos.Remove(entityGID.GID);
@@ -163,21 +158,14 @@ namespace Svelto.ECS
         {
             foreach (var group in _groupEntityViewsDB[groupID])
             {
+                var entityViewType = group.Key;
+
+                var entities = group.Value.EntityIDS();
+
+                foreach (EGID entityID in entities)
                 {
-                    var entityViewType = group.Key;
-
-                    int count;
-                    var entities = group.Value.ToArrayFast(out count);
-
-                    for (var i = 0; i < count; i++)
-                    {
-                        var entityID = entities[i].ID;
-
-                        RemoveEntityViewFromDB(@_globalEntityViewsDB, entityViewType, entityID);
-
-                        if (group.Value.isQueryiableEntityView)
-                            InternalRemoveEntityViewFromDBDicAndEngines(entityViewType, entityID);
-                    }
+                    if (group.Value.isQueryiableEntityView)
+                        InternalRemoveEntityViewFromDBDicAndEngines(entityViewType, entityID);
                 }
             }
 
@@ -206,23 +194,23 @@ namespace Svelto.ECS
             typeSafeDictionary.Remove(id);
         }
         
-        static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines,
-                                                IEntityData                                           entityView,
-                                                Type                                                  entityViewType)
+        static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines,
+                                                IEntityData entityView, Type entityViewType)
         {
-            FasterList<IHandleEntityViewEngine> enginesForEntityView;
+            FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView;
 
             if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
             {
                 int count;
-                var fastList = FasterList<IHandleEntityViewEngine>.NoVirt.ToArrayFast(enginesForEntityView, out count);
+                var fastList = FasterList<IHandleEntityViewEngineAbstracted>.NoVirt.ToArrayFast(enginesForEntityView, out count);
 
                 for (var j = 0; j < count; j++)
                 {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
                     EngineProfiler.MonitorRemoveDuration(fastList[j], entityView);
 #else
-                    fastList[j].Remove(entityView);
+                    var handleMixedEntityViewEngine = (fastList[j] as IHandleEntityViewEngine);
+                    handleMixedEntityViewEngine.Remove(entityView);
 #endif
                 }
             }
@@ -276,9 +264,6 @@ namespace Svelto.ECS
         
         //TODO: Use faster dictionary and merge these two?
         
-        //Global pool of entity views when engines want to manage entityViews regardless
-        //the group
-        readonly Dictionary<Type, ITypeSafeList>        _globalEntityViewsDB;
         //indexable entity views when the entity ID is known. Usually useful to handle
         //event based logic.
         readonly Dictionary<Type, ITypeSafeDictionary>  _globalEntityViewsDBDic;

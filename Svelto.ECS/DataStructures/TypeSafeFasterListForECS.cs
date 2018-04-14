@@ -14,14 +14,40 @@ namespace Svelto.ECS.Internal
         ITypeSafeList       Create();
         bool                MappedRemove(EGID entityID);
         ITypeSafeDictionary CreateIndexedDictionary();
-        IEntityData[]       ToArrayFast(out int count);
+        EGIDEnumerator      EntityIDS();
         void                AddCapacity(int capacity);
+
+        void Fill(FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView);
+    }
+
+    public struct EGIDEnumerator:IEnumerable, IEnumerator
+    {
+        Dictionary<long, int>.Enumerator _keysEnumerator;
+
+        public EGIDEnumerator(Dictionary<long, int> mappedIndices)
+        {
+            _keysEnumerator = mappedIndices.GetEnumerator();
+        }
+
+        public bool MoveNext()
+        {
+            return _keysEnumerator.MoveNext();
+        }
+
+        public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Current { get { return new EGID(_keysEnumerator.Current.Key);} }
+        public IEnumerator GetEnumerator()
+        {
+            return this;
+        }
     }
 
     class TypeSafeFasterListForECS<T> : FasterList<T> where T : IEntityData
     {
-        readonly Dictionary<long, int> _mappedIndices;
-
         protected TypeSafeFasterListForECS()
         {
             _mappedIndices = new Dictionary<long, int>();
@@ -54,7 +80,6 @@ namespace Svelto.ECS.Internal
             var index = Count;
 
             base.AddRange(entityViewListValue as FasterList<T>);
-
 
             for (var i = index; i < Count; ++i)
             {
@@ -95,10 +120,16 @@ namespace Svelto.ECS.Internal
         {
             return _mappedIndices[entityID.GID];
         }
+        
+        public EGIDEnumerator EntityIDS()
+        {
+            return new EGIDEnumerator(_mappedIndices);
+        }
+
+        readonly Dictionary<long, int> _mappedIndices;
     }
 
-    class TypeSafeFasterListForECSForStructs<T> : TypeSafeFasterListForECS<T>, ITypeSafeList
-        where T : struct, IEntityData
+    class TypeSafeFasterListForECSForStructs<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:struct, IEntityData
     {
         public TypeSafeFasterListForECSForStructs(int size) : base(size)
         {}
@@ -118,12 +149,25 @@ namespace Svelto.ECS.Internal
 
         public ITypeSafeDictionary CreateIndexedDictionary()
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
 
-        public IEntityData[] ToArrayFast(out int count)
+        public void Fill(FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView)
         {
-            throw new Exception("Not Allowed");
+            var thisfastList = NoVirt.ToArrayFast(this);
+            for (int i = 0; i < Count; i++)
+            {
+                int count;
+                var fastList = FasterList<IHandleEntityViewEngineAbstracted>.NoVirt.ToArrayFast(enginesForEntityView, out count);
+                for (int j = 0; j < count; j++)
+                {
+#if ENGINE_PROFILER_ENABLED
+                    EngineProfiler.MonitorAddDuration<T>(fastList[j], entityView);
+#else
+                    (fastList[j] as IHandleEntityStructEngine<T>).Add(ref thisfastList[j]);
+#endif
+                }
+            }
         }
 
         public ITypeSafeList Create(int size)
@@ -131,8 +175,8 @@ namespace Svelto.ECS.Internal
             return new TypeSafeFasterListForECSForStructs<T>(size);
         }
     }
-
-    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T : IEntityData, new()
+    
+    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T:IEntityData, new()
     {
         public TypeSafeFasterListForECSForClasses(int size) : base(size)
         {}
@@ -155,11 +199,22 @@ namespace Svelto.ECS.Internal
             return new TypeSafeDictionaryForClass<T>();
         }
 
-        public IEntityData[] ToArrayFast(out int count)
+        public void Fill(FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView)
         {
-            count = Count;
-
-            return ToArrayFast();
+            var thisfastList = NoVirt.ToArrayFast(this);
+            for (int i = 0; i < Count; i++)
+            {
+                int count;
+                var fastList = FasterList<IHandleEntityViewEngineAbstracted>.NoVirt.ToArrayFast(enginesForEntityView, out count);
+                for (int j = 0; j < count; j++)
+                {
+#if ENGINE_PROFILER_ENABLED
+                    EngineProfiler.MonitorAddDuration(fastList[j], entityView);
+#else
+                    (fastList[j] as IHandleEntityStructEngine<T>).Add(ref thisfastList[j]);
+#endif
+                }
+            }
         }
 
         public ITypeSafeList Create(int size)

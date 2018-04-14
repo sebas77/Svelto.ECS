@@ -6,11 +6,9 @@ namespace Svelto.ECS.Internal
 {
     class EntityViewsDB : IEntityViewsDB
     {
-        internal EntityViewsDB(  Dictionary<Type, ITypeSafeList> entityViewsDB,
-                                Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
+        internal EntityViewsDB(  Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
                                 Dictionary<int, Dictionary<Type, ITypeSafeList>>  groupEntityViewsDB)
         {
-            _globalEntityViewsDB = entityViewsDB;
             _groupedEntityViewsDBDic = entityViewsDBdic;
             _groupEntityViewsDB = groupEntityViewsDB;
         }
@@ -21,7 +19,7 @@ namespace Svelto.ECS.Internal
 
             ITypeSafeList entityViews;
 
-            if (_globalEntityViewsDB.TryGetValue(type, out entityViews) == false)
+            if (_groupEntityViewsDB[ExclusiveGroups.StandardEntity].TryGetValue(type, out entityViews) == false)
                 return RetrieveEmptyEntityViewList<T>();
 
             return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
@@ -48,7 +46,7 @@ namespace Svelto.ECS.Internal
             
             ITypeSafeList entityViews;
 
-            if (_globalEntityViewsDB.TryGetValue(type, out entityViews) == false)
+            if (_groupEntityViewsDB[ExclusiveGroups.StandardEntity].TryGetValue(type, out entityViews) == false)
                 return RetrieveEmptyEntityViewArray<T>();
             
             return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews, out count);
@@ -122,9 +120,6 @@ namespace Svelto.ECS.Internal
      
         //grouped set of entity views, this is the standard way to handle entity views
         readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
-        //Global pool of entity views when engines want to manage entityViews regardless
-        //the group
-        readonly Dictionary<Type, ITypeSafeList> _globalEntityViewsDB;
         //indexable entity views when the entity ID is known. Usually useful to handle
         //event based logic.
         readonly Dictionary<Type, ITypeSafeDictionary> _groupedEntityViewsDBDic;

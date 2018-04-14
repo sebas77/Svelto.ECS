@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Svelto.DataStructures;
-using Svelto.Utilities;
-using Console = Utility.Console;
 
 namespace Svelto.ECS.Internal
 {
@@ -58,8 +55,6 @@ namespace Svelto.ECS.Internal
 
             var entityViewsPoolWillBeCreated =
                 entityViewsByType.TryGetValue(entityViewType, out entityViewsList) == false;
-
-            IEntityData entityViewObjectToFill;
 
             //passing the undefined entityViewsByType inside the entityViewBuilder will allow
             //it to be created with the correct type and casted back to the undefined list.

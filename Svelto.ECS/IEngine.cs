@@ -1,8 +1,12 @@
+using Svelto.ECS.Internal;
+
 namespace Svelto.ECS.Internal
 {
-    public interface IHandleEntityViewEngine : IEngine
+    public interface IHandleEntityViewEngineAbstracted : IEngine
+    {}
+    
+    public interface IHandleEntityViewEngine : IHandleEntityViewEngineAbstracted
     {
-        void Add(IEntityData    entityView);
         void Remove(IEntityData entityView);
     }
 }
@@ -10,6 +14,10 @@ namespace Svelto.ECS.Internal
 namespace Svelto.ECS
 {
     public interface IEngine
+    {}
+    
+    public interface IHandleEntityStructEngine<T> : IHandleEntityViewEngineAbstracted
     {
+        void Add(ref T entityView);
     }
 }
