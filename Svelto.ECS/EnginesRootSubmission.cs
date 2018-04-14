@@ -122,7 +122,7 @@ namespace Svelto.ECS
                 {
                     int count;
                     var fastList = FasterList<IHandleEntityViewEngine>.NoVirt.ToArrayFast(enginesForEntityView, out count);
-                    IEntityView entityView = entityViews[i];
+                    IEntityData entityView = entityViews[i];
                     for (int j = 0; j < count; j++)
                     {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR

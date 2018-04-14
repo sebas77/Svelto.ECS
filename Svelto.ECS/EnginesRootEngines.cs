@@ -120,7 +120,7 @@ namespace Svelto.ECS
         readonly Dictionary<Type, FasterList<IHandleEntityViewEngine>> _entityViewEngines;    
         readonly FasterList<IEngine> _otherEngines;
         
-        static readonly Type _entityViewType= typeof(EntityView);
+        static readonly Type _entityViewType= typeof(IEntityData);
         static readonly Type _object = typeof(object);
     }
 }

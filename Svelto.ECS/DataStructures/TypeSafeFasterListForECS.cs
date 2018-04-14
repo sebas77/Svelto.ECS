@@ -14,11 +14,11 @@ namespace Svelto.ECS.Internal
         ITypeSafeList       Create();
         bool                MappedRemove(EGID entityID);
         ITypeSafeDictionary CreateIndexedDictionary();
-        IEntityView[]       ToArrayFast(out int count);
+        IEntityData[]       ToArrayFast(out int count);
         void                AddCapacity(int capacity);
     }
 
-    class TypeSafeFasterListForECS<T> : FasterList<T> where T : IEntityView
+    class TypeSafeFasterListForECS<T> : FasterList<T> where T : IEntityData
     {
         readonly Dictionary<long, int> _mappedIndices;
 
@@ -98,7 +98,7 @@ namespace Svelto.ECS.Internal
     }
 
     class TypeSafeFasterListForECSForStructs<T> : TypeSafeFasterListForECS<T>, ITypeSafeList
-        where T : struct, IEntityStruct
+        where T : struct, IEntityData
     {
         public TypeSafeFasterListForECSForStructs(int size) : base(size)
         {}
@@ -121,7 +121,7 @@ namespace Svelto.ECS.Internal
             throw new NotSupportedException();
         }
 
-        public IEntityView[] ToArrayFast(out int count)
+        public IEntityData[] ToArrayFast(out int count)
         {
             throw new Exception("Not Allowed");
         }
@@ -132,7 +132,7 @@ namespace Svelto.ECS.Internal
         }
     }
 
-    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T : EntityView, new()
+    class TypeSafeFasterListForECSForClasses<T> : TypeSafeFasterListForECS<T>, ITypeSafeList where T : IEntityData, new()
     {
         public TypeSafeFasterListForECSForClasses(int size) : base(size)
         {}
@@ -155,7 +155,7 @@ namespace Svelto.ECS.Internal
             return new TypeSafeDictionaryForClass<T>();
         }
 
-        public IEntityView[] ToArrayFast(out int count)
+        public IEntityData[] ToArrayFast(out int count)
         {
             count = Count;
 

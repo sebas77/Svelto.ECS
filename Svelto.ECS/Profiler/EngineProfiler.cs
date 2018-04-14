@@ -14,7 +14,7 @@ namespace Svelto.ECS.Profiler
 
         public static readonly Dictionary<Type, EngineInfo> engineInfos = new Dictionary<Type, EngineInfo>();
 
-        public static void MonitorAddDuration(IHandleEntityViewEngine engine, IEntityView entityView)
+        public static void MonitorAddDuration(IHandleEntityViewEngine engine, IEntityData entityView)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))
@@ -27,7 +27,7 @@ namespace Svelto.ECS.Profiler
             }
         }
 
-        public static void MonitorRemoveDuration(IHandleEntityViewEngine engine, IEntityView entityView)
+        public static void MonitorRemoveDuration(IHandleEntityViewEngine engine, IEntityData entityView)
         {
             EngineInfo info;
             if (engineInfos.TryGetValue(engine.GetType(), out info))

@@ -17,7 +17,7 @@ namespace Svelto.ECS
             foreach (var entity in _globalEntityViewsDB)
                 if (entity.Value.isQueryiableEntityView)
                     foreach (var entityView in entity.Value)
-                        RemoveEntityViewFromEngines(_entityViewEngines, entityView as EntityView, entity.Key);
+                        RemoveEntityViewFromEngines(_entityViewEngines, entityView as IEntityData, entity.Key);
         }
 
         ///--------------------------------------------
@@ -192,7 +192,7 @@ namespace Svelto.ECS
 
                 //the reason why this for exists is because in the past hierarchical entity views
                 //where supported :(
-                //Only EntityView can be removed from engines (won't work for IEntityStruct or IEntityView)
+                //Only EntityView can be removed from engines (won't work for IEntityData or IEntityData)
                 for (var current = entityViewType; current != _entityViewType; current = current.BaseType)
                 {
 #if DEBUG && !PROFILER                    
@@ -207,7 +207,7 @@ namespace Svelto.ECS
         }
         
         static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngine>> entityViewEngines,
-                                                IEntityView                                           entityView,
+                                                IEntityData                                           entityView,
                                                 Type                                                  entityViewType)
         {
             FasterList<IHandleEntityViewEngine> enginesForEntityView;

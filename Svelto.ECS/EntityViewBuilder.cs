@@ -1,22 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using Svelto.DataStructures;
 using Svelto.ECS.Internal;
+using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    public interface IEntityViewBuilder
+    public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : IEntityData
     {
-        void BuildEntityViewAndAddToList(ref ITypeSafeList list, EGID entityID, out IEntityView entityView);
-        ITypeSafeList Preallocate(ref ITypeSafeList list, int size);
-
-        Type GetEntityViewType();
-        void MoveEntityView(EGID entityID, ITypeSafeList fromSafeList, ITypeSafeList toSafeList);
-        bool mustBeFilled { get; }
-        bool isQueryiableEntityView { get; }
-    }
-
-    public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : EntityView, new()
-    {
-        public void BuildEntityViewAndAddToList(ref ITypeSafeList list, EGID entityID, out IEntityView entityView)
+        public void BuildEntityViewAndAddToList(ref ITypeSafeList list, EGID entityID, object[] implementors)
         {
             if (list == null)
                 list = new TypeSafeFasterListForECSForClasses<EntityViewType>();
@@ -27,7 +19,12 @@ namespace Svelto.ECS
 
             castedList.Add(lentityView);
 
-            entityView = lentityView;
+            var entityView = lentityView;
+
+            this.FillEntityView(ref entityView
+                                             , entityViewBlazingFastReflection
+                                               , implementors
+                                               , DESCRIPTOR_NAME);
         }
 
         public ITypeSafeList Preallocate(ref ITypeSafeList list, int size)
@@ -53,77 +50,17 @@ namespace Svelto.ECS
             toCastedList.Add(fromCastedList[fromCastedList.GetIndexFromID(entityID)]);
         }
 
-        public bool mustBeFilled
-        {
-            get { return true; }
-        }
-        
         public bool isQueryiableEntityView
         {
             get { return true; }
         }
 
-        public static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);
+        FasterList<KeyValuePair<Type, CastedAction<EntityViewType>>> entityViewBlazingFastReflection
+        {
+            get { return EntityView<EntityViewType>.FieldCache<EntityViewType>.list; }
+        }
+
+        static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);
+        static string DESCRIPTOR_NAME = ENTITY_VIEW_TYPE.ToString();
     }
-
-    public class EntityViewStructBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : struct, IEntityStruct
-    {
-        public EntityViewStructBuilder()
-        {}
-        
-        public EntityViewStructBuilder(ref EntityViewType initializer)
-        {
-            _initializer = initializer;
-        }
-        
-        public void BuildEntityViewAndAddToList(ref ITypeSafeList list, EGID entityID, out IEntityView entityView)
-        {
-            _initializer.ID = entityID;
-            
-            if (list == null)
-                list = new TypeSafeFasterListForECSForStructs<EntityViewType>();
-
-            var castedList = list as TypeSafeFasterListForECSForStructs<EntityViewType>;
-            
-            castedList.Add(_initializer);
-
-            entityView = null;
-        }
-
-        public ITypeSafeList Preallocate(ref ITypeSafeList list, int size)
-        {
-            if (list == null)
-                list = new TypeSafeFasterListForECSForStructs<EntityViewType>(size);
-            else
-                list.AddCapacity(size);
-
-            return list;
-        }
-
-        public Type GetEntityViewType()
-        {
-            return ENTITY_VIEW_TYPE;
-        }
-
-        public void MoveEntityView(EGID entityID, ITypeSafeList fromSafeList, ITypeSafeList toSafeList)
-        {
-            var fromCastedList = fromSafeList as TypeSafeFasterListForECSForStructs<EntityViewType>;
-            var toCastedList = toSafeList as TypeSafeFasterListForECSForStructs<EntityViewType>;
-
-            toCastedList.Add(fromCastedList[fromCastedList.GetIndexFromID(entityID)]);
-        }
-
-        public bool mustBeFilled
-        {
-            get { return false; }
-        }
-
-        public bool isQueryiableEntityView
-        {
-            get { return false; }
-        }
-
-        public static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);
-        EntityViewType _initializer;
-   }    
 }

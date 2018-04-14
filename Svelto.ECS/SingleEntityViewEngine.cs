@@ -2,14 +2,14 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public abstract class SingleEntityViewEngine<T> : IHandleEntityViewEngine where T : EntityView, new()
+    public abstract class SingleEntityViewEngine<T> : IHandleEntityViewEngine where T : class, IEntityData
     {
-        public void Add(IEntityView entityView)
+        public void Add(IEntityData entityView)
         {
             Add((T) entityView); //when byref returns will be vailable, this should be passed by reference, not copy!
         }
 
-        public void Remove(IEntityView entityView)
+        public void Remove(IEntityData entityView)
         {
             Remove((T) entityView);
         }

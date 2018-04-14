@@ -15,7 +15,7 @@ namespace Svelto.ECS.Internal
             _groupEntityViewsDB = groupEntityViewsDB;
         }
 
-        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:EntityView
+        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:IEntityData
         {
             var type = typeof(T);
 
@@ -27,7 +27,7 @@ namespace Svelto.ECS.Internal
             return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
         }
 
-        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:EntityView
+        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:IEntityData
         {
             Dictionary<Type, ITypeSafeList> entitiesInGroupPerType;
 
@@ -41,7 +41,7 @@ namespace Svelto.ECS.Internal
             return new FasterReadOnlyList<T>((FasterList<T>) outList);
         }
 
-        public T[] QueryEntityViewsAsArray<T>(out int count) where T : IEntityView
+        public T[] QueryEntityViewsAsArray<T>(out int count) where T : IEntityData
         {
             var type = typeof(T);
             count = 0;
@@ -54,7 +54,7 @@ namespace Svelto.ECS.Internal
             return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews, out count);
         }
         
-        public T[] QueryGroupedEntityViewsAsArray<T>(int @group, out int count) where T : EntityView
+        public T[] QueryGroupedEntityViewsAsArray<T>(int @group, out int count) where T : IEntityData
         {
             var type = typeof(T);
             count = 0;
@@ -71,7 +71,7 @@ namespace Svelto.ECS.Internal
             return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entitiesInGroupPerType[type], out count);
         }
 
-        public T QueryEntityView<T>(EGID entityGID) where T : EntityView
+        public T QueryEntityView<T>(EGID entityGID) where T : IEntityData
         {
             T entityView;
 
@@ -80,22 +80,21 @@ namespace Svelto.ECS.Internal
             return entityView;
         }
 
-        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : EntityView
+        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : IEntityData
         {
             return TryQueryEntityViewInGroup(entityegid, out entityView);
         }
 
-        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:EntityView
+        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:IEntityData
         {
             var type = typeof(T);
 
             T internalEntityView;
 
             ITypeSafeDictionary entityViews;
-            TypeSafeDictionaryForClass<T> casted;
 
             _groupedEntityViewsDBDic.TryGetValue(type, out entityViews);
-            casted = entityViews as TypeSafeDictionaryForClass<T>;
+            var casted = entityViews as TypeSafeDictionaryForClass<T>;
 
             if (casted != null &&
                 casted.TryGetValue(entityGID.GID, out internalEntityView))
@@ -105,7 +104,7 @@ namespace Svelto.ECS.Internal
                 return true;
             }
 
-            entityView = null;
+            entityView = default(T);
 
             return false;
         }

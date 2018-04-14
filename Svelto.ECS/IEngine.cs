@@ -2,8 +2,8 @@ namespace Svelto.ECS.Internal
 {
     public interface IHandleEntityViewEngine : IEngine
     {
-        void Add(IEntityView    entityView);
-        void Remove(IEntityView entityView);
+        void Add(IEntityData    entityView);
+        void Remove(IEntityData entityView);
     }
 }
 

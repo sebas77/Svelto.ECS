@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS
 {
-    public abstract class GenericEntityDescriptor<T>:IEntityDescriptor where T : EntityView, new()
+    public abstract class GenericEntityDescriptor<T>:IEntityDescriptor where T : struct, IEntityData
     {
         static GenericEntityDescriptor()
         {
@@ -12,12 +12,12 @@
             get { return entityViewBuilders; }
         }
 
-        public static readonly IEntityViewBuilder[] entityViewBuilders;
+        static readonly IEntityViewBuilder[] entityViewBuilders;
         
     }
 
-    public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : EntityView, new() 
-                                                                       where U : EntityView, new()
+    public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : struct, IEntityData 
+                                                                       where U : struct, IEntityData
     {
         static GenericEntityDescriptor()
         {
@@ -28,13 +28,13 @@
         {
             get { return entityViewBuilders; }
         }
-        
-        public static readonly IEntityViewBuilder[] entityViewBuilders;
+
+        static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : EntityView, new()
-                                                                          where U : EntityView, new()
-                                                                          where V : EntityView, new()
+    public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : struct, IEntityData
+                                                                          where U : struct, IEntityData
+                                                                          where V : struct, IEntityData
     {
         static GenericEntityDescriptor()
         {
@@ -45,14 +45,14 @@
         {
             get { return entityViewBuilders; }
         }
-        
-        public static readonly IEntityViewBuilder[] entityViewBuilders;
+
+        static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : EntityView, new()
-                                                                             where U : EntityView, new()
-                                                                             where V : EntityView, new()
-                                                                             where W : EntityView, new()
+    public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : struct, IEntityData
+                                                                             where U : struct, IEntityData
+                                                                             where V : struct, IEntityData
+                                                                             where W : struct, IEntityData
     {
         static GenericEntityDescriptor()
         {
@@ -63,15 +63,15 @@
         {
             get { return entityViewBuilders; }
         }
-        
-        public static readonly IEntityViewBuilder[] entityViewBuilders;
+
+        static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : EntityView, new()
-                                                                                where U : EntityView, new()
-                                                                                where V : EntityView, new()
-                                                                                where W : EntityView, new()
-                                                                                where X : EntityView, new()
+    public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : struct, IEntityData
+                                                                                where U : struct, IEntityData
+                                                                                where V : struct, IEntityData
+                                                                                where W : struct, IEntityData
+                                                                                where X : struct, IEntityData
     {
         static GenericEntityDescriptor()
         {
@@ -82,16 +82,16 @@
         {
             get { return entityViewBuilders; }
         }
-        
-        public static readonly IEntityViewBuilder[] entityViewBuilders;
+
+        static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : EntityView, new()
-                                                                                   where U : EntityView, new()
-                                                                                   where V : EntityView, new()
-                                                                                   where W : EntityView, new()
-                                                                                   where X : EntityView, new()
-                                                                                   where Y : EntityView, new()
+    public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : struct, IEntityData
+                                                                                   where U : struct, IEntityData
+                                                                                   where V : struct, IEntityData
+                                                                                   where W : struct, IEntityData
+                                                                                   where X : struct, IEntityData
+                                                                                   where Y : struct, IEntityData
     {
         static GenericEntityDescriptor()
         {
@@ -102,7 +102,7 @@
         {
             get { return entityViewBuilders; }
         }
-        
-        public static readonly IEntityViewBuilder[] entityViewBuilders;
+
+        static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 }
