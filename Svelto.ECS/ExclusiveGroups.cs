@@ -2,6 +2,6 @@
 {
     static class ExclusiveGroups
     {
-        internal const int StandardEntity = 0xFF;
+        internal const int StandardEntity = int.MaxValue;
     }
 }

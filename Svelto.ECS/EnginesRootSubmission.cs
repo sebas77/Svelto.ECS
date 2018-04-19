@@ -40,85 +40,56 @@ namespace Svelto.ECS
             }
         }
         //todo: can I make the entity creation less complicated?
-        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeList>> groupsToSubmit)
+        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsToSubmit)
         {
             //for each groups there is a dictionary of built lists of EntityView grouped by type
             foreach (var groupToSubmit in groupsToSubmit)
             {
-                Dictionary<Type, ITypeSafeList> groupDB;
+                Dictionary<Type, ITypeSafeDictionary> groupDB;
                 int groupID = groupToSubmit.Key;
 
                 //if the group doesn't exist in the current DB let's create it frst
                 if (_groupEntityViewsDB.TryGetValue(groupID, out groupDB) == false)
-                    groupDB = _groupEntityViewsDB[groupID] = new Dictionary<Type, ITypeSafeList>();
+                    groupDB = _groupEntityViewsDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
-                foreach (var entityViewsPerType in groupToSubmit.Value)
+                foreach (var entityViewList in groupToSubmit.Value)
                 {
                     //add the entity View in the group
-                    if (entityViewsPerType.Value.isQueryiableEntityView == true)
-                        AddEntityViewToDB(groupDB, entityViewsPerType);
-                    //and it's not a struct, add in the indexable DB too
-                    AddEntityViewToEntityViewsDictionary(_globalEntityViewsDBDic, entityViewsPerType.Value, entityViewsPerType.Key);
+                    ITypeSafeDictionary dbList;
+                    if (groupDB.TryGetValue(entityViewList.Key, out dbList) == false)
+                        dbList = groupDB[entityViewList.Key] = entityViewList.Value.Create();
+
+                    dbList.FillWithIndexedEntityViews(entityViewList.Value);
                 }
             }
 
             //then submit everything in the engines, so that the DB is up to date
             //with all the entity views and struct created by the entity built
             foreach (var groupToSubmit in groupsToSubmit)
-            {
+            {    
                 foreach (var entityViewsPerType in groupToSubmit.Value)
                 {
                     var type = entityViewsPerType.Key;
                     for (var current = type;
                          current != _entityViewType && current != _objectType && current != _valueType;
                          current = current.BaseType)
-                        AddEntityViewToTheSuitableEngines(_entityViewEngines, entityViewsPerType.Value,
+                        AddEntityViewsToTheSuitableEngines(_entityViewEngines, entityViewsPerType.Value,
                                                           current);
                 }
             }
         }
 
-        static void AddEntityViewToDB(  Dictionary<Type, ITypeSafeList> entityViewsDB, 
-                                        KeyValuePair<Type, ITypeSafeList> entityViewList)
-        {
-            
-            {
-                ITypeSafeList dbList;
-
-                if (entityViewsDB.TryGetValue(entityViewList.Key, out dbList) == false)
-                    dbList = entityViewsDB[entityViewList.Key] = entityViewList.Value.Create();
-
-                dbList.AddRange(entityViewList.Value);
-            }
-        }
-
-        static void AddEntityViewToEntityViewsDictionary(Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
-                                                        ITypeSafeList entityViews, Type entityViewType)
-        {
-            if (entityViews.isQueryiableEntityView == true)
-            {
-                ITypeSafeDictionary entityViewsDic;
-    
-                if (entityViewsDBdic.TryGetValue(entityViewType, out entityViewsDic) == false)
-                    entityViewsDic = entityViewsDBdic[entityViewType] = entityViews.CreateIndexedDictionary();
-    
-                entityViewsDic.FillWithIndexedEntityViews(entityViews);
-            }
-        }
-
-        static void AddEntityViewToTheSuitableEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines, 
-        ITypeSafeList entityViewsList, 
-        Type entityViewType)
+        static void AddEntityViewsToTheSuitableEngines( Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines, 
+                                                        ITypeSafeDictionary entityViewsList, 
+                                                        Type entityViewType)
         {
             FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView;
 
             if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
-            {
-                entityViewsList.Fill(enginesForEntityView);
-            }
+                entityViewsList.AddEntityViewsToEngines(enginesForEntityView);
         }
         
-        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>> _groupedEntityViewsToAdd;
+        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityViewsToAdd;
         readonly EntitySubmissionScheduler _scheduler;
     }
 }

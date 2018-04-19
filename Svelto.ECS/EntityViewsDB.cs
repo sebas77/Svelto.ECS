@@ -6,70 +6,54 @@ namespace Svelto.ECS.Internal
 {
     class EntityViewsDB : IEntityViewsDB
     {
-        internal EntityViewsDB(  Dictionary<Type, ITypeSafeDictionary> entityViewsDBdic,
-                                Dictionary<int, Dictionary<Type, ITypeSafeList>>  groupEntityViewsDB)
+        internal EntityViewsDB(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>  groupEntityViewsDB)
         {
-            _groupedEntityViewsDBDic = entityViewsDBdic;
             _groupEntityViewsDB = groupEntityViewsDB;
         }
 
-        public FasterReadOnlyList<T> QueryEntityViews<T>() where T:IEntityData
+        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T:IEntityData
         {
-            var type = typeof(T);
-
-            ITypeSafeList entityViews;
-
-            if (_groupEntityViewsDB[ExclusiveGroups.StandardEntity].TryGetValue(type, out entityViews) == false)
-                return RetrieveEmptyEntityViewList<T>();
-
-            return new FasterReadOnlyList<T>((FasterList<T>)entityViews);
+            return QueryEntityViews<T>(ExclusiveGroups.StandardEntity);
         }
 
-        public FasterReadOnlyList<T> QueryGroupedEntityViews<T>(int @group) where T:IEntityData
+        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:IEntityData
         {
-            Dictionary<Type, ITypeSafeList> entitiesInGroupPerType;
+            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
 
             if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
                 return RetrieveEmptyEntityViewList<T>();
 
-            ITypeSafeList outList;
+            ITypeSafeDictionary outList;
             if (entitiesInGroupPerType.TryGetValue(typeof(T), out outList) == false)
                 return RetrieveEmptyEntityViewList<T>();
-            
-            return new FasterReadOnlyList<T>((FasterList<T>) outList);
+
+            return (outList as TypeSafeDictionary<T>).FasterValues;
         }
 
-        public T[] QueryEntityViewsAsArray<T>(out int count) where T : IEntityData
+        public T[] QueryEntityViewsCacheFriendly<T>(out int count) where T : IEntityData
         {
-            var type = typeof(T);
-            count = 0;
-            
-            ITypeSafeList entityViews;
-
-            if (_groupEntityViewsDB[ExclusiveGroups.StandardEntity].TryGetValue(type, out entityViews) == false)
-                return RetrieveEmptyEntityViewArray<T>();
-            
-            return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entityViews, out count);
+            return QueryEntityViewsCacheFriendly<T>(ExclusiveGroups.StandardEntity, out count);
         }
         
-        public T[] QueryGroupedEntityViewsAsArray<T>(int @group, out int count) where T : IEntityData
+        public T[] QueryEntityViewsCacheFriendly<T>(int @group, out int count) where T : IEntityData
         {
             var type = typeof(T);
             count = 0;
             
-            Dictionary<Type, ITypeSafeList> entitiesInGroupPerType;
+            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
             
             if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
                 return RetrieveEmptyEntityViewArray<T>();
             
-            ITypeSafeList outList;
+            ITypeSafeDictionary outList;
             if (entitiesInGroupPerType.TryGetValue(typeof(T), out outList) == false)
                 return RetrieveEmptyEntityViewArray<T>();
-                       
-            return FasterList<T>.NoVirt.ToArrayFast((FasterList<T>)entitiesInGroupPerType[type], out count);
+
+            var typeSafeDictionary = entitiesInGroupPerType[type];
+            return ((TypeSafeDictionary<T>) typeSafeDictionary).GetFasterValuesBuffer(out count);
         }
 
-        public T QueryEntityView<T>(EGID entityGID) where T : IEntityData
+        public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityData
         {
             T entityView;
 
@@ -88,11 +72,17 @@ namespace Svelto.ECS.Internal
             var type = typeof(T);
 
             T internalEntityView;
-
             ITypeSafeDictionary entityViews;
+            
+            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
+            if (_groupEntityViewsDB.TryGetValue(entityGID.groupID, out entitiesInGroupPerType) == false)
+            {
+                entityView = default(T);
+                return false;
+            }
 
-            _groupedEntityViewsDBDic.TryGetValue(type, out entityViews);
-            var casted = entityViews as TypeSafeDictionaryForClass<T>;
+            entitiesInGroupPerType.TryGetValue(type, out entityViews);
+            var casted = entityViews as TypeSafeDictionary<T>;
 
             if (casted != null &&
                 casted.TryGetValue(entityGID.GID, out internalEntityView))
@@ -107,21 +97,17 @@ namespace Svelto.ECS.Internal
             return false;
         }
 
-        static FasterReadOnlyList<T> RetrieveEmptyEntityViewList<T>()
+        static ReadOnlyCollectionStruct<T> RetrieveEmptyEntityViewList<T>()
         {
-            return FasterReadOnlyList<T>.DefaultList;
+            return ReadOnlyCollectionStruct<T>.DefaultList;
         }
 
         static T[] RetrieveEmptyEntityViewArray<T>()
         {
             return FasterList<T>.DefaultList.ToArrayFast();
         }
-        
      
         //grouped set of entity views, this is the standard way to handle entity views
-        readonly Dictionary<int, Dictionary<Type, ITypeSafeList>> _groupEntityViewsDB;
-        //indexable entity views when the entity ID is known. Usually useful to handle
-        //event based logic.
-        readonly Dictionary<Type, ITypeSafeDictionary> _groupedEntityViewsDBDic;
+        readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityViewsDB;
     }
 }

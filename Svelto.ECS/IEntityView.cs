@@ -22,36 +22,43 @@ namespace Svelto.ECS
 
         EGID _ID;
     }
-    
-    static class EntityView<T> where T: IEntityData, new()
+
+    public struct EntityInfoView : IEntityData
     {
-        internal static T BuildEntityView(EGID ID) 
+        public EGID ID { get; set; }
+        
+        public IEntityViewBuilder[] entityViewsToBuild;
+    }
+
+    public static class EntityView<T> where T: IEntityData, new()
+    {
+        internal static void BuildEntityView(EGID ID, out T entityView) 
         {
-            if (FieldCache<T>.list.Count == 0)
+            if (FieldCache.list == null)
             {
+                FieldCache.list = new FasterList<KeyValuePair<Type, CastedAction<T>>>();
+                
                 var type = typeof(T);
 
                 var fields = type.GetFields(BindingFlags.Public |
                                             BindingFlags.Instance);
-
+    
                 for (int i = fields.Length - 1; i >= 0; --i)
                 {
                     var field = fields[i];
 
                     CastedAction<T> setter = FastInvoke<T>.MakeSetter(field);
                     
-                    FieldCache<T>.list.Add(new KeyValuePair<Type, CastedAction<T>>(field.FieldType, setter));
+                    FieldCache.list.Add(new KeyValuePair<Type, CastedAction<T>>(field.FieldType, setter));
                 }
             }
 
-            return new T { ID = ID };
+            entityView = new T { ID = ID };
         }
 
-        //check if I can remove W
-        internal static class FieldCache<W>
+        public static class FieldCache
         {
-            internal static readonly FasterList<KeyValuePair<Type, CastedAction<T>>> list
-                = new FasterList<KeyValuePair<Type, CastedAction<T>>>();
+            public static FasterList<KeyValuePair<Type, CastedAction<T>>> list;
         }
     }
 }

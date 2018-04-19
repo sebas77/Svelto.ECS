@@ -11,18 +11,19 @@ namespace Svelto.ECS
             get { return _GID; }
         }
         
-        public int ID
+        public int entityID
         {
             get { return (int) (_GID & 0xFFFFFFFF); }
         }
         
-        public int group
+        public int groupID
         {
             get { return (int) (_GID >> 32); }
         }
 
         public EGID(int entityID, int groupID) : this()
         {
+            DBC.Check.Require(groupID != ExclusiveGroups.StandardEntity, "can't use an exclusive group ID");
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
         }
         
@@ -31,19 +32,9 @@ namespace Svelto.ECS
             _GID = MAKE_GLOBAL_ID(entityID, ExclusiveGroups.StandardEntity);
         }
 
-        internal EGID(long otherID)
-        {
-            _GID = otherID;
-        }
-
         static long MAKE_GLOBAL_ID(int entityId, int groupId)
         {
             return (long)groupId << 32 | (uint)entityId;
-        }
-
-        public bool IsEqualTo(EGID otherGID)
-        {
-            return otherGID._GID == _GID;
         }
     }
 }

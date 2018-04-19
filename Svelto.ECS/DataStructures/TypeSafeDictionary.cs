@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 
@@ -13,20 +13,31 @@ namespace Svelto.ECS.Internal
     /// </summary>
     public interface ITypeSafeDictionary
     {
-        void        FillWithIndexedEntityViews(ITypeSafeList entityViews);
-        bool        Remove(EGID entityId);
-        IEntityData GetIndexedEntityView(EGID entityID);
+        void RemoveEntityFromDicAndEngines(EGID entityGid,
+                                           Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
+                                               entityViewEnginesDB);
+        void RemoveEntityViewsFromEngines(
+            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines);
+        void AddCapacity(int size);
+        bool Remove(long idGid);
+        ITypeSafeDictionary Create();
+        int Count { get; }
+        void FillWithIndexedEntityViews(ITypeSafeDictionary entityViews);
+        void AddEntityViewsToEngines(FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView);
     }
 
-    class TypeSafeDictionaryForClass<TValue> : Dictionary<long, TValue>, ITypeSafeDictionary where TValue : IEntityData
+    class TypeSafeDictionary<TValue> : FasterDictionary<long, TValue>, ITypeSafeDictionary where TValue : IEntityData
     {
-        internal static readonly ReadOnlyDictionary<long, TValue> Default =
-            new ReadOnlyDictionary<long, TValue>(new Dictionary<long, TValue>());
+        public TypeSafeDictionary(int size):base(size)
+        {}
 
-        public void FillWithIndexedEntityViews(ITypeSafeList entityViews)
+        public TypeSafeDictionary()
+        {}
+
+        public void FillWithIndexedEntityViews(ITypeSafeDictionary entityViews)
         {
             int count;
-            var buffer = FasterList<TValue>.NoVirt.ToArrayFast((FasterList<TValue>) entityViews, out count);
+            var buffer = (entityViews as TypeSafeDictionary<TValue>).GetFasterValuesBuffer(out count);
 
             try
             {
@@ -43,16 +54,53 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public bool Remove(EGID entityId)
+        public void AddEntityViewsToEngines(FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView)
         {
-            base.Remove(entityId.GID);
-
-            return Count > 0;
+            throw new NotImplementedException();
         }
 
-        public IEntityData GetIndexedEntityView(EGID entityID)
+        public void RemoveEntityFromDicAndEngines(EGID entityGid,
+                                                  Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
+                                                      entityViewEnginesDB)
         {
-            return this[entityID.GID];
+            
+            
+            TValue entity = this[entityGid.GID];
+
+            RemoveEntityViewsFromEngines(entityViewEnginesDB, ref entity);
+
+            Remove(entityGid.GID);
+        }
+
+        public void RemoveEntityViewsFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
+        {
+            FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
+            if (entityViewEnginesDB.TryGetValue(typeof(TValue), out entityViewsEngines))
+                for (int i = 0; i < entityViewEnginesDB.Count; i++)
+                    (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).Remove(ref entity);
+        }
+        
+        public void RemoveEntityViewsFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
+        {
+            int count;
+            TValue[] values = this.GetFasterValuesBuffer(out count);
+
+            for (int i = 0; i < count; i++)
+            {
+                TValue entity = values[i];
+
+                RemoveEntityViewsFromEngines(entityViewEnginesDB, ref entity);
+            }
+        }
+
+        public void AddCapacity(int size)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ITypeSafeDictionary Create()
+        {
+            return new TypeSafeDictionary<TValue>();
         }
     }
 }

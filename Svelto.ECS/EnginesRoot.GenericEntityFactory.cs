@@ -19,24 +19,24 @@ namespace Svelto.ECS
 
             public void BuildEntity<T>(int entityID, object[] implementors) where T : IEntityDescriptor, new()
             {
-                _weakEngine.Target.BuildEntity<T>(entityID, implementors);
+                _weakEngine.Target.BuildEntity<T>(new EGID(entityID), implementors);
             }
 
             public void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
             {
-                _weakEngine.Target.BuildEntity(entityID, entityDescriptor, implementors);
+                _weakEngine.Target.BuildEntity(new EGID(entityID), entityDescriptor, implementors);
             }
 
             public void BuildEntity<T>(int entityID, int groupID, object[] implementors)
                 where T : IEntityDescriptor, new()
             {
-                _weakEngine.Target.BuildEntity<T>(entityID, groupID, implementors);
+                _weakEngine.Target.BuildEntity<T>(new EGID(entityID, groupID), implementors);
             }
 
             public void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor,
                                            object[] implementors)
             {
-                _weakEngine.Target.BuildEntity(entityID, groupID, entityDescriptor, implementors);
+                _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityDescriptor, implementors);
             }
 
             public void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new()

@@ -8,29 +8,48 @@ namespace Svelto.ECS
 {
     public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : IEntityData, new()
     {
-        public void BuildEntityViewAndAddToList(ref ITypeSafeList list, EGID entityID, object[] implementors)
+        public EntityViewBuilder(ref EntityViewType initializer)
+        {
+            _initializer = initializer;
+        }
+        
+        public EntityViewBuilder()
+        {}
+        
+        public void BuildEntityViewAndAddToList(ref ITypeSafeDictionary list, EGID entityID, object[] implementors)
         {
             if (list == null)
-                list = new TypeSafeFasterListForECSForClasses<EntityViewType>();
+                list = new TypeSafeDictionary<EntityViewType>();
 
-            var castedList = list as TypeSafeFasterListForECSForClasses<EntityViewType>;
+            var castedList = list as TypeSafeDictionary<EntityViewType>;
 
-            var lentityView = EntityView<EntityViewType>.BuildEntityView(entityID);
+            if (implementors != null)
+            {
+                EntityViewType lentityView; 
+                    
+                EntityView<EntityViewType>.BuildEntityView(entityID, out lentityView);
 
-            castedList.Add(lentityView);
-
-            var entityView = lentityView;
-
-            this.FillEntityView(ref entityView
-                                             , entityViewBlazingFastReflection
-                                               , implementors
-                                               , DESCRIPTOR_NAME);
+                this.FillEntityView(ref lentityView
+                                  , entityViewBlazingFastReflection
+                                  , implementors
+                                  , DESCRIPTOR_NAME);
+                
+                castedList.Add(entityID.GID, ref lentityView);
+            }
+            else
+            {
+                DBC.Check.Require(_initializer != null, "Implementors not found on a EntityView instance");
+                   
+                _initializer.ID = entityID;
+                
+                castedList.Add(entityID.GID, ref _initializer);
+            }
         }
 
-        public ITypeSafeList Preallocate(ref ITypeSafeList list, int size)
+        public ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary list, int size)
         {
             if (list == null)
-                list = new TypeSafeFasterListForECSForClasses<EntityViewType>(size);
+                list = new TypeSafeDictionary<EntityViewType>(size);
             else
                 list.AddCapacity(size);
 
@@ -42,24 +61,22 @@ namespace Svelto.ECS
             return ENTITY_VIEW_TYPE;
         }
 
-        public void MoveEntityView(EGID entityID, ITypeSafeList fromSafeList, ITypeSafeList toSafeList)
+        public void MoveEntityView(EGID entityID, ITypeSafeDictionary fromSafeList, ITypeSafeDictionary toSafeList)
         {
-            var fromCastedList = fromSafeList as TypeSafeFasterListForECSForClasses<EntityViewType>;
-            var toCastedList = toSafeList as TypeSafeFasterListForECSForClasses<EntityViewType>;
+            var fromCastedList = fromSafeList as TypeSafeDictionary<EntityViewType>;
+            var toCastedList = toSafeList as TypeSafeDictionary<EntityViewType>;
 
-            toCastedList.Add(fromCastedList[fromCastedList.GetIndexFromID(entityID)]);
-        }
-
-        public bool isQueryiableEntityView
-        {
-            get { return true; }
+            toCastedList.Add(entityID.GID, fromCastedList[entityID.GID]);
+            fromCastedList.Remove(entityID.GID);
         }
 
         FasterList<KeyValuePair<Type, CastedAction<EntityViewType>>> entityViewBlazingFastReflection
         {
-            get { return EntityView<EntityViewType>.FieldCache<EntityViewType>.list; }
+            get { return EntityView<EntityViewType>.FieldCache.list; }
         }
-
+        
+        internal EntityViewType _initializer;
+        
         static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);
         static string DESCRIPTOR_NAME = ENTITY_VIEW_TYPE.ToString();
     }

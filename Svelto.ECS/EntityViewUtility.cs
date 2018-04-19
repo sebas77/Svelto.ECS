@@ -5,13 +5,13 @@ using Svelto.ECS;
 using Svelto.Utilities;
 using Console = Utility.Console;
 
-static class FillEntityViewASD
+static class EntityViewUtility
 {
-    public static void FillEntityView<T>(this IEntityViewBuilder entityViewBuilder, 
-                                         ref T entityView, 
-                                         FasterList<KeyValuePair<Type, CastedAction<T>>> entityViewBlazingFastReflection , 
-                                         object[]           implementors
-                                         , string             entityDescriptorName)
+    public static void FillEntityView<T>(this IEntityViewBuilder entityViewBuilder
+                                       , ref T entityView
+                                       , FasterList<KeyValuePair<Type, CastedAction<T>>> entityViewBlazingFastReflection 
+                                       , object[] implementors
+                                       , string entityDescriptorName)
     {
         int count;
 
@@ -19,9 +19,10 @@ static class FillEntityViewASD
         var setters =
             FasterList<KeyValuePair<Type, CastedAction<T>>>
                .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out count);
-
-        if (count == 0) return;
-
+#if DEBUG && !PROFILER
+        if (count == 0) 
+            throw new Exception(NO_COMPONENTS_EXCEPTION.FastConcat("Type ", entityDescriptorName, " entityView ", entityViewBuilder.GetEntityViewType().ToString()));
+#endif
         for (var index = 0; index < implementors.Length; index++)
         {
             var implementor = implementors[index];
@@ -45,7 +46,7 @@ static class FillEntityViewASD
                     else
                         implementorsByType[componentType] = new Tuple<object, int>(implementor, 1);
 #else
-                        implementorsByType[componentType] = implementor;
+                    implementorsByType[componentType] = implementor;
 #endif
                 }
             }
@@ -65,7 +66,7 @@ static class FillEntityViewASD
 #if DEBUG && !PROFILER
             Tuple<object, int> component;
 #else
-                    object component;
+            object component;
 #endif
 
             if (implementorsByType.TryGetValue(fieldType, out component) == false)
@@ -88,7 +89,7 @@ static class FillEntityViewASD
 #if DEBUG && !PROFILER
             fieldSetter.Value.Call(ref entityView, component.implementorType);
 #else
-                fieldSetter.Value.Call(entityView, component);
+            fieldSetter.Value.Call(ref entityView, component);
 #endif
         }
 
@@ -118,7 +119,9 @@ static class FillEntityViewASD
     }
 #endif
     static readonly Dictionary<Type, Type[]> _cachedTypes = new Dictionary<Type, Type[]>();
-        
+    const string NO_COMPONENTS_EXCEPTION =
+        "<color=orange>Svelto.ECS</color> An entity view without component interfaces has been found, if you are using an entity view struct or an entity struct, do not pass implementors";
+
     const string DUPLICATE_IMPLEMENTOR_ERROR =
         "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is considered an error and MUST be fixed. ";
 

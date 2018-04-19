@@ -37,15 +37,12 @@ namespace Svelto.ECS
             _entityViewEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
 
-            _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeList>>();
-            _groupEntityViewsDB[ExclusiveGroups.StandardEntity] = new Dictionary<Type, ITypeSafeList>();
-            _globalEntityViewsDBDic = new Dictionary<Type, ITypeSafeDictionary>();
+            _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
+            _groupEntityViewsDB[ExclusiveGroups.StandardEntity] = new Dictionary<Type, ITypeSafeDictionary>();
             
-            _entityInfos = new Dictionary<long, IEntityViewBuilder[]>();
-            
-            _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeList>>>();
+            _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
-            _DB = new EntityViewsDB(_globalEntityViewsDBDic, _groupEntityViewsDB);
+            _DB = new EntityViewsDB(_groupEntityViewsDB);
 
             _scheduler = entityViewScheduler;
             _scheduler.Schedule(new WeakAction(SubmitEntityViews));
@@ -119,7 +116,7 @@ namespace Svelto.ECS
         }
 
         readonly Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> _entityViewEngines;    
-        readonly FasterList<IEngine> _otherEngines;
+        readonly FasterList<IEngine>                                             _otherEngines;
         
         static readonly Type _entityViewType= typeof(IEntityData);
         static readonly Type _objectType = typeof(object);

@@ -1,20 +1,8 @@
-using Svelto.ECS.Internal;
-
 namespace Svelto.ECS
 {
-    public abstract class SingleEntityViewEngine<T> : IHandleEntityViewEngine where T : class, IEntityData
+    public abstract class SingleEntityViewEngine<T> : IHandleEntityStructEngine<T> where T : IEntityData
     {
-        public void Add(IEntityData entityView)
-        {
-            Add((T) entityView);
-        }
-
-        public void Remove(IEntityData entityView)
-        {
-            Remove((T) entityView);
-        }
-
-        protected abstract void Add(T    entityView);
-        protected abstract void Remove(T entityView);
+        public abstract void Add(ref T    entityView);
+        public abstract void Remove(ref T entityView);
     }
 }
