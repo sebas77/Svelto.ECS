@@ -34,6 +34,8 @@ you can find a working example to learn how to use the framework here:
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
 
+Note: I included the IoC articles just to show you how I shifted over the years from using an IoC container to use a ECS framework.
+
 **The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
 * https://github.com/sebas77/Svelto.Tasks
