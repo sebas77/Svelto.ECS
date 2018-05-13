@@ -12,9 +12,10 @@ you can find a working example to learn how to use the framework here:
 
 ## Articles
 
-**Dario Oliveri's Svelto.ECS articles:**
+**Svelto users articles:**
 
-* https://eagergames.wordpress.com/category/ecs/ 
+* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
+* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
 
 **Framework articles:**
 
