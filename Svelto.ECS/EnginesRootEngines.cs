@@ -34,15 +34,15 @@ namespace Svelto.ECS
         /// </summary>
         public EnginesRoot(EntitySubmissionScheduler entityViewScheduler)
         {
-            _entityViewEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
+            _entityEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
 
-            _groupEntityViewsDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
-            _groupEntityViewsDB[ExclusiveGroups.StandardEntity] = new Dictionary<Type, ITypeSafeDictionary>();
+            _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
+            _groupEntityDB[ExclusiveGroups.StandardEntity] = new Dictionary<Type, ITypeSafeDictionary>();
             
-            _groupedEntityViewsToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
+            _groupedEntityToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
-            _DB = new EntityViewsDB(_groupEntityViewsDB);
+            _DB = new EntityViewsDB(_groupEntityDB);
 
             _scheduler = entityViewScheduler;
             _scheduler.Schedule(new WeakAction(SubmitEntityViews));
@@ -78,7 +78,7 @@ namespace Svelto.ECS
                 {
                     var genericArguments = baseType.GetGenericArgumentsEx();
                     
-                    AddEngine(engine as IHandleEntityViewEngineAbstracted, genericArguments, _entityViewEngines);
+                    AddEngine(engine as IHandleEntityViewEngineAbstracted, genericArguments, _entityEngines);
 
                     return;
                 }
@@ -115,11 +115,9 @@ namespace Svelto.ECS
             list.Add(engine);
         }
 
-        readonly Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> _entityViewEngines;    
+        readonly Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> _entityEngines;    
         readonly FasterList<IEngine>                                             _otherEngines;
         
-        static readonly Type _entityViewType= typeof(IEntityData);
         static readonly Type _objectType = typeof(object);
-        static readonly Type _valueType = typeof(ValueType);
     }
 }

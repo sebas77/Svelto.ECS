@@ -39,12 +39,12 @@ namespace Svelto.ECS.Internal
             for (var index = 0; index < count; ++index)
             {
                 var entityViewBuilder = entityViewsToBuild[index];
-                var entityViewType    = entityViewBuilder.GetEntityViewType();
+                var entityViewType    = entityViewBuilder.GetEntityType();
 
                 BuildEntityView(entityID, entityViewsByType, entityViewType, entityViewBuilder, implementors);
             }
 
-            _viewBuilder._initializer = new EntityInfoView {entityViewsToBuild = entityViewsToBuild};
+            _viewBuilder._initializer = new EntityInfoView {entityToBuild = entityViewsToBuild};
             BuildEntityView(entityID, entityViewsByType, _viewType, _viewBuilder, null);
         }
 
@@ -66,6 +66,6 @@ namespace Svelto.ECS.Internal
         }
         
         static readonly EntityViewStructBuilder<EntityInfoView> _viewBuilder = new EntityViewStructBuilder<EntityInfoView>();
-        static readonly Type                              _viewType = typeof(EntityInfoView);
+        static readonly Type                                    _viewType = typeof(EntityInfoView);
     }
 }

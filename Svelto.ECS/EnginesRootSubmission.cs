@@ -13,7 +13,7 @@ namespace Svelto.ECS
     {
         void SubmitEntityViews()
         {
-            bool newEntityViewsHaveBeenAddedWhileIterating =  _groupedEntityViewsToAdd.current.Count > 0;
+            bool newEntityViewsHaveBeenAddedWhileIterating =  _groupedEntityToAdd.current.Count > 0;
 
             int numberOfReenteringLoops = 0;
 
@@ -21,16 +21,16 @@ namespace Svelto.ECS
             {
                 //use other as source from now on
                 //current will be use to write new entityViews
-                _groupedEntityViewsToAdd.Swap();
+                _groupedEntityToAdd.Swap();
 
-                if (_groupedEntityViewsToAdd.other.Count > 0)
-                    AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityViewsToAdd.other);
+                if (_groupedEntityToAdd.other.Count > 0)
+                    AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
 
                 //other can be cleared now
-                _groupedEntityViewsToAdd.other.Clear();
+                _groupedEntityToAdd.other.Clear();
 
                 //has current new entityViews?
-                newEntityViewsHaveBeenAddedWhileIterating = _groupedEntityViewsToAdd.current.Count > 0;
+                newEntityViewsHaveBeenAddedWhileIterating = _groupedEntityToAdd.current.Count > 0;
 
                 if (numberOfReenteringLoops > 5)
                     throw new Exception("possible infinite loop found creating Entities inside IEntityViewsEngine Add method, please consider building entities outside IEntityViewsEngine Add method");
@@ -40,26 +40,27 @@ namespace Svelto.ECS
         }
         
         //todo: groupsToSubmit can be semplified as data structure?
-        void AddEntityViewsToTheDBAndSuitableEngines(ITypeSafeDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
+        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
         {
-            //for each groups there is a dictionary of built lists of EntityView grouped by type
+            //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
             foreach (var groupOfEntitiesToSubmit in groupsOfEntitiesToSubmit)
             {
                 Dictionary<Type, ITypeSafeDictionary> groupDB;
                 int groupID = groupOfEntitiesToSubmit.Key;
 
                 //if the group doesn't exist in the current DB let's create it first
-                if (_groupEntityViewsDB.TryGetValue(groupID, out groupDB) == false)
-                    groupDB = _groupEntityViewsDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
+                if (_groupEntityDB.TryGetValue(groupID, out groupDB) == false)
+                    groupDB = _groupEntityDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
-                //add the entity View in the group
-                foreach (var entityViewList in groupOfEntitiesToSubmit.Value)
+                //add the entityViews in the group
+                foreach (var entityViewTypeSafeDictionary in groupOfEntitiesToSubmit.Value)
                 {
-                    ITypeSafeDictionary dbList;
-                    if (groupDB.TryGetValue(entityViewList.Key, out dbList) == false)
-                        dbList = groupDB[entityViewList.Key] = entityViewList.Value.Create();
+                    ITypeSafeDictionary dbDic;
+                    if (groupDB.TryGetValue(entityViewTypeSafeDictionary.Key, out dbDic) == false)
+                        dbDic = groupDB[entityViewTypeSafeDictionary.Key] = entityViewTypeSafeDictionary.Value.Create();
 
-                    dbList.FillWithIndexedEntityViews(entityViewList.Value);
+                    //type safe copy
+                    dbDic.FillWithIndexedEntityViews(entityViewTypeSafeDictionary.Value);
                 }
             }
 
@@ -69,16 +70,17 @@ namespace Svelto.ECS
             {    
                 foreach (var entityViewsPerType in groupToSubmit.Value)
                 {
-                    var type = entityViewsPerType.Key;
-                    for (var current = type;
-                         current != _entityViewType && current != _objectType && current != _valueType;
-                         current = current.BaseType)
-                            entityViewsPerType.Value.AddEntityViewsToEngines(_entityViewEngines);
+                    entityViewsPerType.Value.AddEntityViewsToEngines(_entityEngines);
                 }
             }
         }
         
-        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityViewsToAdd;
+        //one datastructure rule them all:
+        //split by group
+        //split by type per group. It's possible to get all the entities of a give type T per group thanks 
+        //to the FasterDictionary capabilitiies OR it's possible to get a specific entityView indexed by
+        //ID. This ID doesn't need to be the EGID, it can be just the entityID
+        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
         readonly EntitySubmissionScheduler _scheduler;
     }
 }

@@ -21,7 +21,7 @@ static class EntityViewUtility
                .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out count);
 #if DEBUG && !PROFILER
         if (count == 0) 
-            throw new Exception(NO_COMPONENTS_EXCEPTION.FastConcat("Type ", entityDescriptorName, " entityView ", entityViewBuilder.GetEntityViewType().ToString()));
+            throw new Exception(NO_COMPONENTS_EXCEPTION.FastConcat("Type ", entityDescriptorName, " entityView ", entityViewBuilder.GetEntityType().ToString()));
 #endif
         for (var index = 0; index < implementors.Length; index++)
         {
@@ -53,7 +53,7 @@ static class EntityViewUtility
 #if DEBUG && !PROFILER
             else
             {
-                Console.LogError(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityViewBuilder.GetEntityViewType().ToString()));
+                Console.LogError(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityViewBuilder.GetEntityType().ToString()));
             }
 #endif
         }
@@ -73,7 +73,7 @@ static class EntityViewUtility
             {
                 var e = new Exception(NOT_FOUND_EXCEPTION + " Component Type: " + fieldType.Name +
                                       " - EntityView: " +
-                                      entityViewBuilder.GetEntityViewType().Name + " - EntityDescriptor " + entityDescriptorName);
+                                      entityViewBuilder.GetEntityType().Name + " - EntityDescriptor " + entityDescriptorName);
 
                 throw e;
             }
@@ -84,7 +84,7 @@ static class EntityViewUtility
                                                                         " implementor: ",
                                                                         component.implementorType.ToString()) +
                                  " - EntityView: " +
-                                 entityViewBuilder.GetEntityViewType().Name + " - EntityDescriptor " + entityDescriptorName);
+                                 entityViewBuilder.GetEntityType().Name + " - EntityDescriptor " + entityDescriptorName);
 #endif
 #if DEBUG && !PROFILER
             fieldSetter.Value(ref entityView, component.implementorType);

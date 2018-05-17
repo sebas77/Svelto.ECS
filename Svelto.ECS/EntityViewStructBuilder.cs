@@ -22,9 +22,9 @@ namespace Svelto.ECS
             if (list == null)
                 list = new TypeSafeDictionary<EntityViewType>();
 
-            var castedList = list as TypeSafeDictionary<EntityViewType>;
+            var castedDic = list as TypeSafeDictionary<EntityViewType>;
             
-            castedList.Add(entityID.GID, _initializer);
+            castedDic.Add(entityID.entityID, _initializer);
         }
 
         public ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary list, int size)
@@ -37,18 +37,18 @@ namespace Svelto.ECS
             return list;
         }
 
-        public Type GetEntityViewType()
+        public Type GetEntityType()
         {
             return ENTITY_VIEW_TYPE;
         }
 
         public void MoveEntityView(EGID entityID, ITypeSafeDictionary fromSafeList, ITypeSafeDictionary toSafeList)
         {
-            var fromCastedList = fromSafeList as TypeSafeDictionary<EntityViewType>;
-            var toCastedList   = toSafeList as TypeSafeDictionary<EntityViewType>;
+            var fromCastedDic = fromSafeList as TypeSafeDictionary<EntityViewType>;
+            var toCastedDic   = toSafeList as TypeSafeDictionary<EntityViewType>;
 
-            toCastedList.Add(entityID.GID, fromCastedList[entityID.GID]);
-            fromCastedList.Remove(entityID.GID);
+            toCastedDic.Add(entityID.entityID, fromCastedDic[entityID.entityID]);
+            fromCastedDic.Remove(entityID.entityID);
         }
 
         static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);

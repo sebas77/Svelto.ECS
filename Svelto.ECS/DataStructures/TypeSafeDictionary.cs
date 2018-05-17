@@ -13,21 +13,24 @@ namespace Svelto.ECS.Internal
     /// </summary>
     public interface ITypeSafeDictionary
     {
-        void RemoveEntityFromDicAndEngines(EGID entityGid,
+        void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
+                                           entityViewEnginesDB);
+
+        void RemoveEntityFromEngines(EGID entityGid,
                                            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                entityViewEnginesDB);
-        void RemoveEntityViewsFromEngines(
-            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines);
         void AddCapacity(int size);
-        bool Remove(long idGid);
+        bool Remove(int idGid);
         ITypeSafeDictionary Create();
         int Count { get; }
         void FillWithIndexedEntityViews(ITypeSafeDictionary entityViews);
         void AddEntityViewsToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB);
     }
 
-    class TypeSafeDictionary<TValue> : FasterDictionary<long, TValue>, ITypeSafeDictionary where TValue : IEntityData
+    class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityData
     {
+        static Type _type = typeof(TValue);
+
         public TypeSafeDictionary(int size):base(size)
         {}
 
@@ -45,7 +48,7 @@ namespace Svelto.ECS.Internal
                 {
                     var entityView = buffer[i];
 
-                    Add(entityView.ID.GID, entityView);
+                    Add(entityView.ID.entityID, entityView);
                 }
             }
             catch (Exception e)
@@ -70,42 +73,36 @@ namespace Svelto.ECS.Internal
         void AddEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
         {
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
-            if (entityViewEnginesDB.TryGetValue(typeof(TValue), out entityViewsEngines))
+            //get all the engines linked to TValue
+            if (entityViewEnginesDB.TryGetValue(_type, out entityViewsEngines))
                 for (int i = 0; i < entityViewsEngines.Count; i++)
                     (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).AddInternal(ref entity);
         }
 
-        public void RemoveEntityFromDicAndEngines(EGID entityGid,
+        public void RemoveEntityFromEngines(EGID entityGid,
                                                   Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                       entityViewEnginesDB)
         {
-            
-            
-            TValue entity = this[entityGid.GID];
-
-            RemoveEntityViewFromEngines(entityViewEnginesDB, ref entity);
-
-            Remove(entityGid.GID);
+            RemoveEntityViewFromEngines(entityViewEnginesDB, ref GetFasterValuesBuffer()[GetValueIndex(entityGid.entityID)]);
         }
 
-        static void RemoveEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
+        static void RemoveEntityViewFromEngines
+            (Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
         {
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
-            if (entityViewEnginesDB.TryGetValue(typeof(TValue), out entityViewsEngines))
+            if (entityViewEnginesDB.TryGetValue(_type, out entityViewsEngines))
                 for (int i = 0; i < entityViewsEngines.Count; i++)
                     (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).RemoveInternal(ref entity);
         }
         
-        public void RemoveEntityViewsFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
+        public void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
         {
             int count;
             TValue[] values = GetFasterValuesBuffer(out count);
 
             for (int i = 0; i < count; i++)
             {
-                TValue entity = values[i];
-
-                RemoveEntityViewFromEngines(entityViewEnginesDB, ref entity);
+                RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i]);
             }
         }
 

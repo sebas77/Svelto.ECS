@@ -13,7 +13,7 @@ namespace Svelto.ECS
             if (list == null)
                 list = new TypeSafeDictionary<EntityViewType>();
 
-            var castedList = list as TypeSafeDictionary<EntityViewType>;
+            var castedDic = list as TypeSafeDictionary<EntityViewType>;
 
             DBC.Check.Require(implementors != null, "Implementors not found while building an EntityView");
             {
@@ -26,7 +26,7 @@ namespace Svelto.ECS
                                   , implementors
                                   , DESCRIPTOR_NAME);
                 
-                castedList.Add(entityID.GID, ref lentityView);
+                castedDic.Add(entityID.entityID, ref lentityView);
             }
         }
 
@@ -40,18 +40,18 @@ namespace Svelto.ECS
             return list;
         }
 
-        public Type GetEntityViewType()
+        public Type GetEntityType()
         {
             return ENTITY_VIEW_TYPE;
         }
 
         public void MoveEntityView(EGID entityID, ITypeSafeDictionary fromSafeList, ITypeSafeDictionary toSafeList)
         {
-            var fromCastedList = fromSafeList as TypeSafeDictionary<EntityViewType>;
-            var toCastedList = toSafeList as TypeSafeDictionary<EntityViewType>;
+            var fromCastedDic = fromSafeList as TypeSafeDictionary<EntityViewType>;
+            var toCastedDic = toSafeList as TypeSafeDictionary<EntityViewType>;
 
-            toCastedList.Add(entityID.GID, fromCastedList[entityID.GID]);
-            fromCastedList.Remove(entityID.GID);
+            toCastedDic.Add(entityID.entityID, fromCastedDic[entityID.entityID]);
+            fromCastedDic.Remove(entityID.entityID);
         }
 
         FasterList<KeyValuePair<Type, ActionRef<EntityViewType>>> entityViewBlazingFastReflection

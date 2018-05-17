@@ -11,12 +11,12 @@ namespace Svelto.ECS.Internal
             _groupEntityViewsDB = groupEntityViewsDB;
         }
 
-        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T:IEntityData
+        public ReadOnlyCollectionStruct<T> QueryEntities<T>() where T:IEntityData
         {
-            return QueryEntityViews<T>(ExclusiveGroups.StandardEntity);
+            return QueryEntities<T>(ExclusiveGroups.StandardEntity);
         }
 
-        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:IEntityData
+        public ReadOnlyCollectionStruct<T> QueryEntities<T>(int @group) where T:IEntityData
         {
             Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
 
@@ -30,14 +30,13 @@ namespace Svelto.ECS.Internal
             return (outList as TypeSafeDictionary<T>).FasterValues;
         }
 
-        public T[] QueryEntityViewsCacheFriendly<T>(out int count) where T : struct, IEntityData
+        public T[] QueryEntitiesCacheFriendly<T>(out int count) where T : struct, IEntityData
         {
-            return QueryEntityViewsCacheFriendly<T>(ExclusiveGroups.StandardEntity, out count);
+            return QueryEntitiesCacheFriendly<T>(ExclusiveGroups.StandardEntity, out count);
         }
         
-        public T[] QueryEntityViewsCacheFriendly<T>(int @group, out int count) where T : struct, IEntityData
+        public T[] QueryEntitiesCacheFriendly<T>(int @group, out int count) where T : struct, IEntityData
         {
-            var type = typeof(T);
             count = 0;
             
             Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
@@ -45,12 +44,11 @@ namespace Svelto.ECS.Internal
             if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
                 return RetrieveEmptyEntityViewArray<T>();
             
-            ITypeSafeDictionary outList;
-            if (entitiesInGroupPerType.TryGetValue(typeof(T), out outList) == false)
+            ITypeSafeDictionary typeSafeDictionary;
+            if (entitiesInGroupPerType.TryGetValue(typeof(T), out typeSafeDictionary) == false)
                 return RetrieveEmptyEntityViewArray<T>();
 
-            var typeSafeDictionary = entitiesInGroupPerType[type];
-            return ((TypeSafeDictionary<T>) typeSafeDictionary).GetFasterValuesBuffer(out count);
+            return ((TypeSafeDictionary<T>)typeSafeDictionary).GetFasterValuesBuffer(out count);
         }
 
         public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityData
@@ -62,16 +60,39 @@ namespace Svelto.ECS.Internal
             return entityView;
         }
 
-        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : IEntityData
+        public bool EntityExists<T>(EGID entityGID) where T : IEntityData
+        {
+            var type = typeof(T);
+
+            ITypeSafeDictionary entityViews;
+            
+            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
+            if (_groupEntityViewsDB.TryGetValue(entityGID.groupID, out entitiesInGroupPerType) == false)
+            {
+                return false;
+            }
+
+            entitiesInGroupPerType.TryGetValue(type, out entityViews);
+            var casted = entityViews as TypeSafeDictionary<T>;
+
+            if (casted != null &&
+                casted.ContainsKey(entityGID.entityID))
+            {
+                return true;
+            }
+
+            return false;
+        }
+        
+        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityData
         {
             return TryQueryEntityViewInGroup(entityegid, out entityView);
         }
 
-        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:IEntityData
+        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:class, IEntityData
         {
             var type = typeof(T);
 
-            T internalEntityView;
             ITypeSafeDictionary entityViews;
             
             Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
@@ -85,10 +106,8 @@ namespace Svelto.ECS.Internal
             var casted = entityViews as TypeSafeDictionary<T>;
 
             if (casted != null &&
-                casted.TryGetValue(entityGID.GID, out internalEntityView))
+                casted.TryGetValue(entityGID.entityID, out entityView))
             {
-                entityView = internalEntityView;
-
                 return true;
             }
 
