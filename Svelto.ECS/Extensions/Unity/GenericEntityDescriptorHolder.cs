@@ -7,7 +7,7 @@ namespace Svelto.ECS
     {
         public EntityDescriptorInfo RetrieveDescriptor()
         {
-            return EntityDescriptorTemplate<T>.Default;
+            return EntityDescriptorTemplate<T>.Info;
         }
     }
 }

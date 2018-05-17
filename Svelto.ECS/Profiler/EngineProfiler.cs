@@ -18,7 +18,7 @@ namespace Svelto.ECS.Profiler
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
-                (engine as IHandleEntityStructEngine<T>).Add(ref entityView);
+                (engine as IHandleEntityStructEngine<T>).AddInternal(ref entityView);
                 _stopwatch.Stop();
                 info.AddAddDuration(_stopwatch.Elapsed.TotalMilliseconds);
                 _stopwatch.Reset();
@@ -31,7 +31,7 @@ namespace Svelto.ECS.Profiler
             if (engineInfos.TryGetValue(engine.GetType(), out info))
             {
                 _stopwatch.Start();
-                (engine as IHandleEntityStructEngine<T>).Remove(ref entityView);
+                (engine as IHandleEntityStructEngine<T>).RemoveInternal(ref entityView);
                 _stopwatch.Stop();
 
                 info.AddRemoveDuration(_stopwatch.Elapsed.TotalMilliseconds);

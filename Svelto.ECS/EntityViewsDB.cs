@@ -30,12 +30,12 @@ namespace Svelto.ECS.Internal
             return (outList as TypeSafeDictionary<T>).FasterValues;
         }
 
-        public T[] QueryEntityViewsCacheFriendly<T>(out int count) where T : IEntityData
+        public T[] QueryEntityViewsCacheFriendly<T>(out int count) where T : struct, IEntityData
         {
             return QueryEntityViewsCacheFriendly<T>(ExclusiveGroups.StandardEntity, out count);
         }
         
-        public T[] QueryEntityViewsCacheFriendly<T>(int @group, out int count) where T : IEntityData
+        public T[] QueryEntityViewsCacheFriendly<T>(int @group, out int count) where T : struct, IEntityData
         {
             var type = typeof(T);
             count = 0;

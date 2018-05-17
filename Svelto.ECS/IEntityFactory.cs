@@ -18,6 +18,18 @@ namespace Svelto.ECS
         /// <param name="size"></param>
         void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new();
         void PreallocateEntitySpace<T>(int groupID, int size) where T : IEntityDescriptor, new();
+        
+        /// <summary>
+        ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity
+        ///     itself in terms of EntityViews to build. The Implementors are passed to fill the
+        ///     references of the EntityViews components. Please read the articles on my blog
+        ///     to understand better the terminologies
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entityID"></param>
+        /// <param name="implementors"></param>
+        void BuildEntity<T>(int entityID, object[] implementors) where T:IEntityDescriptor, new();
+
 
         /// <summary>
         ///     Using this function is like building a normal entity, but the entityViews
@@ -30,18 +42,9 @@ namespace Svelto.ECS
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
         void BuildEntity<T>(int entityID, int groupID, object[] implementors) where T:IEntityDescriptor, new();
-        void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors);
-
-        /// <summary>
-        ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity
-        ///     itself in terms of EntityViews to build. The Implementors are passed to fill the
-        ///     references of the EntityViews components. Please read the articles on my blog
-        ///     to understand better the terminologies
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entityID"></param>
-        /// <param name="implementors"></param>
-        void BuildEntity<T>(int entityID, object[] implementors) where T:IEntityDescriptor, new();
+        
+        void BuildEntity<T>(EGID egid, object[] implementors) where T:IEntityDescriptor, new();
+        
 
         /// <summary>
         ///     When the type of the entity is not known (this is a special case!) an EntityDescriptorInfo
@@ -50,6 +53,9 @@ namespace Svelto.ECS
         /// <param name="entityID"></param>
         /// <param name="entityDescriptor"></param>
         /// <param name="implementors"></param>
+        /// 
+        void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors);
         void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptorInfo, object[] implementors);
+        void BuildEntity(EGID egid, EntityDescriptorInfo entityDescriptorInfo, object[] implementors);
     }
 }

@@ -21,7 +21,7 @@ namespace Svelto.ECS
 
     public static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
-        public static readonly EntityDescriptorInfo Default = new EntityDescriptorInfo(new TType());
+        public static readonly EntityDescriptorInfo Info = new EntityDescriptorInfo(new TType());
     }
 
     public class DynamicEntityDescriptorInfo<TType> : EntityDescriptorInfo where TType : IEntityDescriptor, new()
@@ -31,7 +31,7 @@ namespace Svelto.ECS
             Check.Require(extraEntityViews.Count > 0,
                           "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
 
-            var defaultEntityViewsToBuild = EntityDescriptorTemplate<TType>.Default.entityViewsToBuild;
+            var defaultEntityViewsToBuild = EntityDescriptorTemplate<TType>.Info.entityViewsToBuild;
             var length     = defaultEntityViewsToBuild.Length;
 
             entityViewsToBuild = new IEntityViewBuilder[length + extraEntityViews.Count];
@@ -39,7 +39,7 @@ namespace Svelto.ECS
             Array.Copy(defaultEntityViewsToBuild, 0, entityViewsToBuild, 0, length);
             Array.Copy(extraEntityViews.ToArrayFast(), 0, entityViewsToBuild, length, extraEntityViews.Count);
 
-            name = EntityDescriptorTemplate<TType>.Default.name;
+            name = EntityDescriptorTemplate<TType>.Info.name;
         }
     }
 

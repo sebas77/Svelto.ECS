@@ -11,6 +11,11 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot : IDisposable
     {
+        /// <summary>
+        /// Dispose an EngineRoot once not used anymore, so that all the
+        /// engines are notified with the entities removed.
+        /// It's a clean up process.
+        /// </summary>
         public void Dispose()
         {
             foreach (var groups in _groupEntityViewsDB)
@@ -32,29 +37,22 @@ namespace Svelto.ECS
 
         ///--------------------------------------------
 
-        /// <summary>
-        /// Build the entity using the entityID, inside the group with Id groupID, using the
-        /// implementors (if necessary). The entityViews generated will be stored to be
-        /// added later in the engines. 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entityID"></param>
-        /// <param name="implementors"></param>
-        void BuildEntity<T>(EGID entityID, object[] implementors = null)
+        
+        void BuildEntity<T>(EGID entityID, object[] implementors)
             where T : IEntityDescriptor, new()
         {
             EntityFactory.BuildGroupedEntityViews(entityID,
                                                   _groupedEntityViewsToAdd.current,
-                                                  EntityDescriptorTemplate<T>.Default,
+                                                  EntityDescriptorTemplate<T>.Info,
                                                   implementors);
         }
 
-        void BuildEntity(EGID entityID, EntityDescriptorInfo entityDescriptor,
-                                object[] implementors = null)
+        void BuildEntity(EGID entityID, EntityDescriptorInfo entityDescriptorInfo,
+                                object[] implementors)
         {
             EntityFactory.BuildGroupedEntityViews(entityID,
                                                   _groupedEntityViewsToAdd.current,
-                                                  entityDescriptor,
+                                                  entityDescriptorInfo,
                                                    implementors);
         }
 
@@ -68,7 +66,7 @@ namespace Svelto.ECS
         /// </summary>
         void Preallocate<T>(int groupID, int size) where T : IEntityDescriptor, new()
         {
-            var entityViewsToBuild = EntityDescriptorTemplate<T>.Default.entityViewsToBuild;
+            var entityViewsToBuild = EntityDescriptorTemplate<T>.Info.entityViewsToBuild;
             var count              = entityViewsToBuild.Length;
 
             for (var index = 0; index < count; index++)

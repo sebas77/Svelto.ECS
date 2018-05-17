@@ -36,7 +36,7 @@ namespace Svelto.ECS
         {
             if (FieldCache.list == null)
             {
-                FieldCache.list = new FasterList<KeyValuePair<Type, CastedAction<T>>>();
+                FieldCache.list = new FasterList<KeyValuePair<Type, ActionRef<T>>>();
                 
                 var type = typeof(T);
 
@@ -47,9 +47,9 @@ namespace Svelto.ECS
                 {
                     var field = fields[i];
 
-                    CastedAction<T> setter = FastInvoke<T>.MakeSetter(field);
+                    ActionRef<T> setter = FastInvoke<T>.MakeSetter(field);
                     
-                    FieldCache.list.Add(new KeyValuePair<Type, CastedAction<T>>(field.FieldType, setter));
+                    FieldCache.list.Add(new KeyValuePair<Type, ActionRef<T>>(field.FieldType, setter));
                 }
             }
 
@@ -58,7 +58,7 @@ namespace Svelto.ECS
 
         public static class FieldCache
         {
-            public static FasterList<KeyValuePair<Type, CastedAction<T>>> list;
+            public static FasterList<KeyValuePair<Type, ActionRef<T>>> list;
         }
     }
 }

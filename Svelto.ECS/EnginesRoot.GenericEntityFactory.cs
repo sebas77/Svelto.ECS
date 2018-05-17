@@ -22,22 +22,32 @@ namespace Svelto.ECS
                 _weakEngine.Target.BuildEntity<T>(new EGID(entityID), implementors);
             }
 
-            public void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptor, object[] implementors = null)
-            {
-                _weakEngine.Target.BuildEntity(new EGID(entityID), entityDescriptor, implementors);
-            }
-
-            public void BuildEntity<T>(int entityID, int groupID, object[] implementors)
-                where T : IEntityDescriptor, new()
+            public void BuildEntity<T>(int entityID, int groupID, object[] implementors) where T : IEntityDescriptor, new()
             {
                 _weakEngine.Target.BuildEntity<T>(new EGID(entityID, groupID), implementors);
             }
 
-            public void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor,
-                                           object[] implementors)
+            public void BuildEntity<T>(EGID egid, object[] implementors) where T : IEntityDescriptor, new()
             {
-                _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityDescriptor, implementors);
+                _weakEngine.Target.BuildEntity<T>(egid, implementors);
             }
+
+
+            public void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptorInfo, object[] implementors)
+            {
+                _weakEngine.Target.BuildEntity(new EGID(entityID), entityDescriptorInfo, implementors);
+            }
+
+            public void BuildEntity(EGID egid, EntityDescriptorInfo entityDescriptorInfo, object[] implementors)
+            {
+                _weakEngine.Target.BuildEntity(egid, entityDescriptorInfo, implementors);
+            }
+
+            public void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptorInfo, object[] implementors)
+            {
+                _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityDescriptorInfo, implementors);
+            }
+            
 
             public void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new()
             {

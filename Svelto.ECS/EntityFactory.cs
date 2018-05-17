@@ -10,12 +10,12 @@ namespace Svelto.ECS.Internal
                                                      EntityDescriptorInfo entityViewsToBuildDescriptor,
                                                      object[] implementors)
         {
-            var @group = FetchGroup(egid.groupID, groupEntityViewsByType);
+            var @group = FetchEntityViewGroup(egid.groupID, groupEntityViewsByType);
 
             BuildEntityViewsAndAddToGroup(egid, group, entityViewsToBuildDescriptor, implementors);
         }
 
-        static Dictionary<Type, ITypeSafeDictionary> FetchGroup(int groupID, Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType)
+        static Dictionary<Type, ITypeSafeDictionary> FetchEntityViewGroup(int groupID, Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType)
         {
             Dictionary<Type, ITypeSafeDictionary> group;
 
@@ -44,7 +44,7 @@ namespace Svelto.ECS.Internal
                 BuildEntityView(entityID, entityViewsByType, entityViewType, entityViewBuilder, implementors);
             }
 
-            _viewBuilder._initializer = new EntityInfoView() {entityViewsToBuild = entityViewsToBuild};
+            _viewBuilder._initializer = new EntityInfoView {entityViewsToBuild = entityViewsToBuild};
             BuildEntityView(entityID, entityViewsByType, _viewType, _viewBuilder, null);
         }
 
@@ -65,7 +65,7 @@ namespace Svelto.ECS.Internal
                 entityViewsByType.Add(entityViewType, safeDictionary);
         }
         
-        static readonly EntityViewBuilder<EntityInfoView> _viewBuilder = new EntityViewBuilder<EntityInfoView>();
+        static readonly EntityViewStructBuilder<EntityInfoView> _viewBuilder = new EntityViewStructBuilder<EntityInfoView>();
         static readonly Type                              _viewType = typeof(EntityInfoView);
     }
 }

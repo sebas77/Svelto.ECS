@@ -13,7 +13,7 @@ namespace Svelto.ECS
     
     public interface IHandleEntityStructEngine<T> : IHandleEntityViewEngineAbstracted
     {
-        void Add(ref T entityView);
-        void Remove(ref T entityView);
+        void AddInternal(ref T entityView);
+        void RemoveInternal(ref T entityView);
     }
 }

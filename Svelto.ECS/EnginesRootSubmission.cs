@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -39,22 +38,23 @@ namespace Svelto.ECS
                 numberOfReenteringLoops++;
             }
         }
-        //todo: can I make the entity creation less complicated?
-        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsToSubmit)
+        
+        //todo: groupsToSubmit can be semplified as data structure?
+        void AddEntityViewsToTheDBAndSuitableEngines(ITypeSafeDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
         {
             //for each groups there is a dictionary of built lists of EntityView grouped by type
-            foreach (var groupToSubmit in groupsToSubmit)
+            foreach (var groupOfEntitiesToSubmit in groupsOfEntitiesToSubmit)
             {
                 Dictionary<Type, ITypeSafeDictionary> groupDB;
-                int groupID = groupToSubmit.Key;
+                int groupID = groupOfEntitiesToSubmit.Key;
 
-                //if the group doesn't exist in the current DB let's create it frst
+                //if the group doesn't exist in the current DB let's create it first
                 if (_groupEntityViewsDB.TryGetValue(groupID, out groupDB) == false)
                     groupDB = _groupEntityViewsDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
-                foreach (var entityViewList in groupToSubmit.Value)
+                //add the entity View in the group
+                foreach (var entityViewList in groupOfEntitiesToSubmit.Value)
                 {
-                    //add the entity View in the group
                     ITypeSafeDictionary dbList;
                     if (groupDB.TryGetValue(entityViewList.Key, out dbList) == false)
                         dbList = groupDB[entityViewList.Key] = entityViewList.Value.Create();
@@ -65,7 +65,7 @@ namespace Svelto.ECS
 
             //then submit everything in the engines, so that the DB is up to date
             //with all the entity views and struct created by the entity built
-            foreach (var groupToSubmit in groupsToSubmit)
+            foreach (var groupToSubmit in groupsOfEntitiesToSubmit)
             {    
                 foreach (var entityViewsPerType in groupToSubmit.Value)
                 {
@@ -73,20 +73,9 @@ namespace Svelto.ECS
                     for (var current = type;
                          current != _entityViewType && current != _objectType && current != _valueType;
                          current = current.BaseType)
-                        AddEntityViewsToTheSuitableEngines(_entityViewEngines, entityViewsPerType.Value,
-                                                          current);
+                            entityViewsPerType.Value.AddEntityViewsToEngines(_entityViewEngines);
                 }
             }
-        }
-
-        static void AddEntityViewsToTheSuitableEngines( Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEngines, 
-                                                        ITypeSafeDictionary entityViewsList, 
-                                                        Type entityViewType)
-        {
-            FasterList<IHandleEntityViewEngineAbstracted> enginesForEntityView;
-
-            if (entityViewEngines.TryGetValue(entityViewType, out enginesForEntityView))
-                entityViewsList.AddEntityViewsToEngines(enginesForEntityView);
         }
         
         readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityViewsToAdd;

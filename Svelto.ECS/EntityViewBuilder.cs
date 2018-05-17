@@ -8,14 +8,6 @@ namespace Svelto.ECS
 {
     public class EntityViewBuilder<EntityViewType> : IEntityViewBuilder where EntityViewType : IEntityData, new()
     {
-        public EntityViewBuilder(ref EntityViewType initializer)
-        {
-            _initializer = initializer;
-        }
-        
-        public EntityViewBuilder()
-        {}
-        
         public void BuildEntityViewAndAddToList(ref ITypeSafeDictionary list, EGID entityID, object[] implementors)
         {
             if (list == null)
@@ -23,7 +15,7 @@ namespace Svelto.ECS
 
             var castedList = list as TypeSafeDictionary<EntityViewType>;
 
-            if (implementors != null)
+            DBC.Check.Require(implementors != null, "Implementors not found while building an EntityView");
             {
                 EntityViewType lentityView; 
                     
@@ -35,14 +27,6 @@ namespace Svelto.ECS
                                   , DESCRIPTOR_NAME);
                 
                 castedList.Add(entityID.GID, ref lentityView);
-            }
-            else
-            {
-                DBC.Check.Require(_initializer != null, "Implementors not found on a EntityView instance");
-                   
-                _initializer.ID = entityID;
-                
-                castedList.Add(entityID.GID, ref _initializer);
             }
         }
 
@@ -70,12 +54,10 @@ namespace Svelto.ECS
             fromCastedList.Remove(entityID.GID);
         }
 
-        FasterList<KeyValuePair<Type, CastedAction<EntityViewType>>> entityViewBlazingFastReflection
+        FasterList<KeyValuePair<Type, ActionRef<EntityViewType>>> entityViewBlazingFastReflection
         {
             get { return EntityView<EntityViewType>.FieldCache.list; }
         }
-        
-        internal EntityViewType _initializer;
         
         static readonly Type ENTITY_VIEW_TYPE = typeof(EntityViewType);
         static string DESCRIPTOR_NAME = ENTITY_VIEW_TYPE.ToString();
