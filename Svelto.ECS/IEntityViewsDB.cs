@@ -13,9 +13,11 @@ namespace Svelto.ECS
         T[] QueryEntitiesCacheFriendly<T>(int group, out int count) where T : struct, IEntityData;
 
         //to use with EntityViews
-        bool TryQueryEntityView<T>(EGID ID, out T entityView) where T : class, IEntityData;
-        T    QueryEntityView<T>(EGID entityGID) where T : class, IEntityData;
+        bool TryQueryEntityView<T>(EGID egid, out T entityView) where T : IEntityData;
+        T    QueryEntityView<T>(EGID egid) where T : class, IEntityData;
         
-        bool EntityExists<T>(EGID ID) where T : IEntityData;
+        bool Exists<T>(EGID egid) where T : IEntityData;
+        void Fetch<T>(out T entity) where T:IEntityData;
+        bool Has<T>() where T:IEntityData;
     }
 }

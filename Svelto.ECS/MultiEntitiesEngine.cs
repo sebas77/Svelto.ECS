@@ -1,7 +1,7 @@
 namespace Svelto.ECS
 {
-    public abstract class MultiEntitiesEngine<T, U> : SingleEntitiesEngine<T>, IHandleEntityStructEngine<U>
-        where U : struct, IEntityData where T : struct, IEntityData
+    public abstract class MultiEntitiesEngine<T, U> : SingleEntityEngine<T>, IHandleEntityStructEngine<U>
+        where U : IEntityData where T : IEntityData
     {
         public void AddInternal(ref U entityView)
         { Add(ref entityView); }
@@ -13,7 +13,7 @@ namespace Svelto.ECS
     }
     
     public abstract class MultiEntitiesEngine<T, U, V> : MultiEntitiesEngine<T, U>, IHandleEntityStructEngine<V>
-        where V :  struct, IEntityData where U :  struct, IEntityData where T :  struct, IEntityData
+        where V :  IEntityData where U :  IEntityData where T :  IEntityData
     {
         public void AddInternal(ref V entityView)
         { Add(ref entityView); }
@@ -30,7 +30,7 @@ namespace Svelto.ECS
     ///     already too many responsabilities.
     /// </summary>
     public abstract class MultiEntitiesEngine<T, U, V, W> : MultiEntitiesEngine<T, U, V>, IHandleEntityStructEngine<W>
-        where W :  struct, IEntityData where V :  struct, IEntityData where U :  struct, IEntityData where T : struct, IEntityData
+        where W :  IEntityData where V :  IEntityData where U :  IEntityData where T : IEntityData
     {
         public void AddInternal(ref W entityView)
         { Add(ref entityView); }

@@ -60,7 +60,7 @@ namespace Svelto.ECS.Internal
             return entityView;
         }
 
-        public bool EntityExists<T>(EGID entityGID) where T : IEntityData
+        public bool Exists<T>(EGID entityGID) where T : IEntityData
         {
             var type = typeof(T);
 
@@ -83,13 +83,23 @@ namespace Svelto.ECS.Internal
 
             return false;
         }
-        
-        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityData
+
+        public void Fetch<T>(out T entity) where T : IEntityData
+        {
+            entity = QueryEntities<T>()[0];
+        }
+
+        public bool Has<T>() where T : IEntityData
+        {
+            return QueryEntities<T>().Count > 0;
+        }
+
+        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : IEntityData
         {
             return TryQueryEntityViewInGroup(entityegid, out entityView);
         }
 
-        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:class, IEntityData
+        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:IEntityData
         {
             var type = typeof(T);
 
