@@ -65,7 +65,7 @@ namespace Svelto.ECS.Internal
                 entityViewsByType.Add(entityViewType, safeDictionary);
         }
         
-        static readonly EntityViewStructBuilder<EntityInfoView> _viewBuilder = new EntityViewStructBuilder<EntityInfoView>();
-        static readonly Type                                    _viewType = typeof(EntityInfoView);
+        static readonly EntityViewBuilder<EntityInfoView> _viewBuilder = new EntityViewBuilder<EntityInfoView>();
+        static readonly Type                              _viewType = typeof(EntityInfoView);
     }
 }

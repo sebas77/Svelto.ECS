@@ -12,7 +12,10 @@ namespace Svelto.ECS
         EGID ID { get; set; }
     }
     
-    public class EntityView : IEntityData
+    public interface IEntityView:IEntityData
+    {}
+    
+    public class EntityView : IEntityView
     {
         public EGID ID
         {
