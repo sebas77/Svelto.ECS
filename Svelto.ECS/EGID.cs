@@ -33,7 +33,7 @@ namespace Svelto.ECS
 
         static long MAKE_GLOBAL_ID(int entityId, int groupId)
         {
-            return (long)groupId << 32 | (uint)entityId;
+            return (long)groupId << 32 | (((long)(uint)entityId) & 0xFFFFFFFF);
         }
     }
 }
