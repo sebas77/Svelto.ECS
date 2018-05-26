@@ -17,44 +17,42 @@ namespace Svelto.ECS
                 _weakEngine = weakReference;
             }
 
-            public void BuildEntity<T>(int entityID, object[] implementors) where T : IEntityDescriptor, new()
+            public EntityStructInitializer BuildEntity<T>(int entityID, object[] implementors) where T : class, IEntityDescriptor, new()
             {
-                _weakEngine.Target.BuildEntity<T>(new EGID(entityID), implementors);
+                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID), implementors);
             }
 
-            public void BuildEntity<T>(int entityID, int groupID, object[] implementors) where T : IEntityDescriptor, new()
+            public EntityStructInitializer BuildEntity<T>(int entityID, int groupID, object[] implementors) where T : class, IEntityDescriptor, new()
             {
-                _weakEngine.Target.BuildEntity<T>(new EGID(entityID, groupID), implementors);
+                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID, groupID), implementors);
             }
 
-            public void BuildEntity<T>(EGID egid, object[] implementors) where T : IEntityDescriptor, new()
+            public EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T : class, IEntityDescriptor, new()
             {
-                _weakEngine.Target.BuildEntity<T>(egid, implementors);
+                return _weakEngine.Target.BuildEntity<T>(egid, implementors);
             }
 
-
-            public void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptorInfo, object[] implementors)
+            public EntityStructInitializer BuildEntity(int entityID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors)
             {
-                _weakEngine.Target.BuildEntity(new EGID(entityID), entityDescriptorInfo, implementors);
+                return _weakEngine.Target.BuildEntity(new EGID(entityID), entityViewsToBuild, implementors);
             }
 
-            public void BuildEntity(EGID egid, EntityDescriptorInfo entityDescriptorInfo, object[] implementors)
+            public EntityStructInitializer BuildEntity(EGID egid, IEntityViewBuilder[] entityViewsToBuild, object[] implementors)
             {
-                _weakEngine.Target.BuildEntity(egid, entityDescriptorInfo, implementors);
+                return _weakEngine.Target.BuildEntity(egid, entityViewsToBuild, implementors);
             }
 
-            public void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptorInfo, object[] implementors)
+            public EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors)
             {
-                _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityDescriptorInfo, implementors);
+                return _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityViewsToBuild, implementors);
             }
             
-
-            public void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new()
+            public void PreallocateEntitySpace<T>(int size) where T : class, IEntityDescriptor, new()
             {
                 _weakEngine.Target.Preallocate<T>(ExclusiveGroups.StandardEntity, size);
             }
             
-            public void PreallocateEntitySpace<T>(int groupID, int size) where T : IEntityDescriptor, new()
+            public void PreallocateEntitySpace<T>(int groupID, int size) where T : class, IEntityDescriptor, new()
             {
                 _weakEngine.Target.Preallocate<T>(groupID, size);
             }

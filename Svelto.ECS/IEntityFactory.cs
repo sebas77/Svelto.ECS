@@ -16,8 +16,8 @@ namespace Svelto.ECS
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="size"></param>
-        void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new();
-        void PreallocateEntitySpace<T>(int groupID, int size) where T : IEntityDescriptor, new();
+        void PreallocateEntitySpace<T>(int size) where T : class, IEntityDescriptor, new();
+        void PreallocateEntitySpace<T>(int groupID, int size) where T : class, IEntityDescriptor, new();
         
         /// <summary>
         ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity
@@ -28,7 +28,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <param name="entityID"></param>
         /// <param name="implementors"></param>
-        void BuildEntity<T>(int entityID, object[] implementors) where T:IEntityDescriptor, new();
+        EntityStructInitializer BuildEntity<T>(int entityID, object[] implementors) where T:class, IEntityDescriptor, new();
 
 
         /// <summary>
@@ -41,9 +41,9 @@ namespace Svelto.ECS
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        void BuildEntity<T>(int entityID, int groupID, object[] implementors) where T:IEntityDescriptor, new();
+        EntityStructInitializer BuildEntity<T>(int entityID, int groupID, object[] implementors) where T:class, IEntityDescriptor, new();
         
-        void BuildEntity<T>(EGID egid, object[] implementors) where T:IEntityDescriptor, new();
+        EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T:class, IEntityDescriptor, new();
         
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace Svelto.ECS
         /// <param name="entityDescriptor"></param>
         /// <param name="implementors"></param>
         /// 
-        void BuildEntity(int entityID, int groupID, EntityDescriptorInfo entityDescriptor, object[] implementors);
-        void BuildEntity(int entityID, EntityDescriptorInfo entityDescriptorInfo, object[] implementors);
-        void BuildEntity(EGID egid, EntityDescriptorInfo entityDescriptorInfo, object[] implementors);
+        EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors);
+        EntityStructInitializer BuildEntity(int entityID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors);
+        EntityStructInitializer BuildEntity(EGID egid, IEntityViewBuilder[] entityViewsToBuild, object[] implementors);
     }
 }

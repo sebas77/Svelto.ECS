@@ -13,7 +13,6 @@
         }
 
         static readonly IEntityViewBuilder[] entityViewBuilders;
-        
     }
 
     public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : IEntityData, new() 

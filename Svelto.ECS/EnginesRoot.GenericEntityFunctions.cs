@@ -12,7 +12,7 @@ namespace Svelto.ECS
         {
             readonly DataStructures.WeakReference<EnginesRoot> _weakReference;
 
-            public GenericEntityFunctions(DataStructures.WeakReference<EnginesRoot> weakReference)
+            internal GenericEntityFunctions(DataStructures.WeakReference<EnginesRoot> weakReference)
             {
                 _weakReference = weakReference;
             }
@@ -45,6 +45,11 @@ namespace Svelto.ECS
             public void SwapEntityGroup(int entityID, int toGroupID)
             {
                 _weakReference.Target.SwapEntityGroup(entityID, ExclusiveGroups.StandardEntity, toGroupID);
+            }
+
+            public EGID SwapFirstEntityGroup(int fromGroupID, int toGroupID)
+            {
+                return _weakReference.Target.SwapFirstEntityGroup( fromGroupID, toGroupID);
             }
         }
     }

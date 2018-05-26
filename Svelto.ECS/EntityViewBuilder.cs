@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if DEBUG && !PROFILER 
+using System.Reflection;
+#endif    
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.Utilities;
@@ -8,14 +11,33 @@ namespace Svelto.ECS
 {
     public class EntityViewBuilder<T> : IEntityViewBuilder where T : IEntityData, new()
     {
-        public EntityViewBuilder(ref T initializer)
-        {
-            _initializer = initializer;
-        }
-        
         public EntityViewBuilder()
         {
             _initializer = default(T);
+            
+#if DEBUG && !PROFILER           
+            if (needsReflection == false && typeof(T) != typeof(EntityInfoView))
+            {
+                var type = typeof(T);
+
+                var fields = type.GetFields(BindingFlags.Public |
+                                            BindingFlags.Instance);
+    
+                for (int i = fields.Length - 1; i >= 0; --i)
+                {
+                    var field = fields[i];
+
+                    if (field.FieldType.IsPrimitive == true || field.FieldType.IsValueType == true)
+                        continue;
+                    
+                    throw new EntityStructException();
+                }
+            }
+#endif            
+            if (needsReflection == true)
+            {
+                EntityView<T>.InitCache();
+            }
         }
         
         public void BuildEntityViewAndAddToList(ref ITypeSafeDictionary dictionary, EGID entityID, object[] implementors)
@@ -62,24 +84,37 @@ namespace Svelto.ECS
             return ENTITY_VIEW_TYPE;
         }
 
-        public void MoveEntityView(EGID entityID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic)
+        void IEntityViewBuilder.MoveEntityView(EGID entityID, int toGroupID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic)
+        {
+            MoveEntityView(entityID, toGroupID, fromSafeDic, toSafeDic);
+        }
+
+        public static void MoveEntityView(EGID entityID, int toGroupID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic)
         {
             var fromCastedDic = fromSafeDic as TypeSafeDictionary<T>;
             var toCastedDic = toSafeDic as TypeSafeDictionary<T>;
 
-            toCastedDic.Add(entityID.entityID, fromCastedDic[entityID.entityID]);
+            var entity = fromCastedDic[entityID.entityID];
+            entity.ID = new EGID(entityID.entityID, toGroupID);
+            toCastedDic.Add(entityID.entityID, entity);
             fromCastedDic.Remove(entityID.entityID);
         }
 
-        FasterList<KeyValuePair<Type, ActionRef<T>>> entityViewBlazingFastReflection
+        static FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection
         {
-            get { return EntityView<T>.FieldCache.list; }
+            get { return EntityView<T>.cachedFields; }
         }
         
         static readonly Type ENTITY_VIEW_TYPE = typeof(T);
-        static string DESCRIPTOR_NAME = ENTITY_VIEW_TYPE.ToString();
+        static readonly string DESCRIPTOR_NAME = ENTITY_VIEW_TYPE.ToString();
+        static readonly bool needsReflection = typeof(IEntityView).IsAssignableFrom(typeof(T));
 
         internal T _initializer;
-        readonly bool needsReflection = typeof(IEntityView).IsAssignableFrom(typeof(T));
+    }
+
+    public class EntityStructException : Exception
+    {
+        public EntityStructException():base("EntityStruct must contains only value types!")
+        {}
     }
 }

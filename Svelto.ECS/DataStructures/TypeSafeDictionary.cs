@@ -1,6 +1,7 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+ using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {
@@ -13,24 +14,26 @@ namespace Svelto.ECS.Internal
     /// </summary>
     public interface ITypeSafeDictionary
     {
+        ITypeSafeDictionary Create();
+        
         void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                            entityViewEnginesDB);
 
         void RemoveEntityFromEngines(EGID entityGid,
                                            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                entityViewEnginesDB);
+        
+        void FillWithIndexedEntityViews(ITypeSafeDictionary                                          entityViews);
+        void AddEntityViewsToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB);
+        
         void AddCapacity(int size);
         bool Remove(int idGid);
-        ITypeSafeDictionary Create();
+        
         int Count { get; }
-        void FillWithIndexedEntityViews(ITypeSafeDictionary entityViews);
-        void AddEntityViewsToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB);
     }
 
     class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityData
     {
-        static Type _type = typeof(TValue);
-
         public TypeSafeDictionary(int size):base(size)
         {}
 
@@ -115,5 +118,32 @@ namespace Svelto.ECS.Internal
         {
             return new TypeSafeDictionary<TValue>();
         }
+        
+        public void ExecuteOnEntityView<W>(int entityGidEntityId, ref W value, ActionRef<TValue, W> action)
+        {
+            uint findIndex;
+            if (FindIndex(entityGidEntityId, out findIndex))
+            {
+                action(ref _values[findIndex], ref value);
+            }
+        }
+        
+        public void ExecuteOnEntityView(int entityGidEntityId, ActionRef<TValue> action)
+        {
+            uint findIndex;
+            if (FindIndex(entityGidEntityId, out findIndex))
+            {
+                action(ref _values[findIndex]);
+            }
+        }
+        
+        public uint FindElementIndex(int entityGidEntityId)
+        {
+            uint findIndex;
+            if (FindIndex(entityGidEntityId, out findIndex) == false) throw new Exception("");
+            return findIndex;
+        }
+        
+        static readonly Type _type = typeof(TValue);
     }
 }

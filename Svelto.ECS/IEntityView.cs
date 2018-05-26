@@ -6,7 +6,6 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {   
-    //todo: can I remove the ID from the struct?
     public interface IEntityData
     {
         EGID ID { get; set; }
@@ -35,33 +34,33 @@ namespace Svelto.ECS
 
     public static class EntityView<T> where T: IEntityData, new()
     {
-        internal static void BuildEntityView(EGID ID, out T entityView) 
+        internal static readonly FasterList<KeyValuePair<Type, ActionCast<T>>> cachedFields;
+
+        static EntityView()
         {
-            if (FieldCache.list == null)
-            {
-                FieldCache.list = new FasterList<KeyValuePair<Type, ActionRef<T>>>();
+            cachedFields = new FasterList<KeyValuePair<Type, ActionCast<T>>>();
                 
-                var type = typeof(T);
+            var type = typeof(T);
 
-                var fields = type.GetFields(BindingFlags.Public |
-                                            BindingFlags.Instance);
+            var fields = type.GetFields(BindingFlags.Public |
+                                        BindingFlags.Instance);
     
-                for (int i = fields.Length - 1; i >= 0; --i)
-                {
-                    var field = fields[i];
+            for (int i = fields.Length - 1; i >= 0; --i)
+            {
+                var field = fields[i];
 
-                    ActionRef<T> setter = FastInvoke<T>.MakeSetter(field);
+                ActionCast<T> setter = FastInvoke<T>.MakeSetter(field);
                     
-                    FieldCache.list.Add(new KeyValuePair<Type, ActionRef<T>>(field.FieldType, setter));
-                }
+                cachedFields.Add(new KeyValuePair<Type, ActionCast<T>>(field.FieldType, setter));
             }
-
-            entityView = new T { ID = ID };
         }
 
-        public static class FieldCache
+        internal static void InitCache()
+        {}
+        
+        internal static void BuildEntityView(EGID ID, out T entityView) 
         {
-            public static FasterList<KeyValuePair<Type, ActionRef<T>>> list;
+            entityView = new T { ID = ID };
         }
     }
 }

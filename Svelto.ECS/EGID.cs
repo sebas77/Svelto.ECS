@@ -23,7 +23,6 @@ namespace Svelto.ECS
 
         public EGID(int entityID, int groupID) : this()
         {
-            DBC.Check.Require(groupID != ExclusiveGroups.StandardEntity, "can't use an exclusive group ID");
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
         }
         

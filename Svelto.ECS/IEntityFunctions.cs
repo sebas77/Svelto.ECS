@@ -1,3 +1,5 @@
+using Svelto.ECS.Internal;
+
 namespace Svelto.ECS
 {
     public interface IEntityFunctions
@@ -11,7 +13,8 @@ namespace Svelto.ECS
 
         void RemoveGroupAndEntities(int groupID);
         
-        void SwapEntityGroup(int entityID, int fromGroupID, int toGroupID);
+        void SwapEntityGroup(int entityID, int fromGroupID, int toGroupID = ExclusiveGroups.StandardEntity);
         void SwapEntityGroup(int entityID, int toGroupID);
+        EGID SwapFirstEntityGroup(int fromGroupID = ExclusiveGroups.StandardEntity, int toGroupID = ExclusiveGroups.StandardEntity);
     }
 }

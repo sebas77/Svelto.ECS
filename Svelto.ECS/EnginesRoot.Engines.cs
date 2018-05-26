@@ -13,17 +13,18 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot : IDisposable
     {
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR        
-        /// <summary>
-        /// I still need to find a good solution for this. Need to move somewhere else
-        /// </summary>
         static EnginesRoot()
         {
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
+/// <summary>
+/// I still need to find a good solution for this. Need to move somewhere else
+/// </summary>
             UnityEngine.GameObject debugEngineObject = new UnityEngine.GameObject("Svelto.ECS.Profiler");
             debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
             UnityEngine.GameObject.DontDestroyOnLoad(debugEngineObject);
+#endif
         }
-#endif        
+       
         /// <summary>
         /// Engines root contextualize your engines and entities. You don't need to limit yourself to one EngineRoot
         /// as multiple engines root could promote separation of scopes. The EntitySubmissionScheduler checks

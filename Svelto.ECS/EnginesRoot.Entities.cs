@@ -37,23 +37,26 @@ namespace Svelto.ECS
 
         ///--------------------------------------------
 
-        
-        void BuildEntity<T>(EGID entityID, object[] implementors)
-            where T : IEntityDescriptor, new()
+        EntityStructInitializer BuildEntity<T>(EGID entityID, object[] implementors)
+            where T : class, IEntityDescriptor, new()
         {
-            EntityFactory.BuildGroupedEntityViews(entityID,
+            var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                                                   _groupedEntityToAdd.current,
-                                                  EntityDescriptorTemplate<T>.Info,
+                                                  EntityDescriptorTemplate<T>.Info.entityViewsToBuild,
                                                   implementors);
+            
+            return new EntityStructInitializer(entityID, dic);
         }
 
-        void BuildEntity(EGID entityID, EntityDescriptorInfo entityDescriptorInfo,
+        EntityStructInitializer BuildEntity(EGID entityID, IEntityViewBuilder[] entityViewsToBuild,
                                 object[] implementors)
         {
-            EntityFactory.BuildGroupedEntityViews(entityID,
+            var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                                                   _groupedEntityToAdd.current,
-                                                  entityDescriptorInfo,
+                                                  entityViewsToBuild,
                                                    implementors);
+            
+            return new EntityStructInitializer(entityID, dic);
         }
 
         ///--------------------------------------------
@@ -64,7 +67,7 @@ namespace Svelto.ECS
         /// TODO: understand if this method is useful in a performance critical
         /// scenario
         /// </summary>
-        void Preallocate<T>(int groupID, int size) where T : IEntityDescriptor, new()
+        void Preallocate<T>(int groupID, int size) where T : class, IEntityDescriptor, new()
         {
             var entityViewsToBuild = EntityDescriptorTemplate<T>.Info.entityViewsToBuild;
             var count              = entityViewsToBuild.Length;
@@ -145,12 +148,10 @@ namespace Svelto.ECS
                           "can't move an entity to the same group where it already belongs to");
 
             var entityegid = new EGID(entityID, fromGroupID);
-            var entityViewBuilders =
-                ((TypeSafeDictionary<EntityInfoView>) _groupEntityDB[fromGroupID][_typeEntityInfoView])
-                [entityegid.entityID].entityToBuild;
-            var entityViewBuildersCount = entityViewBuilders.Length;
-
             var groupedEntities = _groupEntityDB[fromGroupID];
+            var entityInfoViewDictionary = (TypeSafeDictionary<EntityInfoView>) groupedEntities[_typeEntityInfoView];
+            var entityViewBuilders = entityInfoViewDictionary[entityegid.entityID].entityToBuild;
+            var entityViewBuildersCount = entityViewBuilders.Length;
 
             Dictionary<Type, ITypeSafeDictionary> groupedEntityViewsTyped;
             if (_groupEntityDB.TryGetValue(toGroupID, out groupedEntityViewsTyped) == false)
@@ -159,21 +160,37 @@ namespace Svelto.ECS
 
                 _groupEntityDB.Add(toGroupID, groupedEntityViewsTyped);
             }
+            
+            ITypeSafeDictionary toSafeList;
 
             for (var i = 0; i < entityViewBuildersCount; i++)
             {
                 var entityViewBuilder = entityViewBuilders[i];
                 var entityViewType    = entityViewBuilder.GetEntityType();
 
-                var           fromSafeList = groupedEntities[entityViewType];
-                ITypeSafeDictionary toSafeList;
-
+                var fromSafeList = groupedEntities[entityViewType];
                 if (groupedEntityViewsTyped.TryGetValue(entityViewType, out toSafeList) == false)
                     groupedEntityViewsTyped[entityViewType] = toSafeList = fromSafeList.Create();
 
-                entityViewBuilder.MoveEntityView(entityegid, fromSafeList, toSafeList);
+                entityViewBuilder.MoveEntityView(entityegid, toGroupID, fromSafeList, toSafeList);
                 fromSafeList.Remove(entityegid.entityID);
             }
+            
+            if (groupedEntityViewsTyped.TryGetValue(_typeEntityInfoView, out toSafeList) == false)
+                groupedEntityViewsTyped[_typeEntityInfoView] = toSafeList = entityInfoViewDictionary.Create();
+
+            EntityViewBuilder<EntityInfoView>.MoveEntityView(entityegid, toGroupID, entityInfoViewDictionary, toSafeList);
+            entityInfoViewDictionary.Remove(entityegid.entityID);
+        }
+        
+        EGID SwapFirstEntityGroup(int fromGroupID, int toGroupId)
+        {
+            var firstID =
+                ((TypeSafeDictionary<EntityInfoView>) _groupEntityDB[fromGroupID][_typeEntityInfoView]).FasterValues[0].ID.entityID;
+            
+            SwapEntityGroup(firstID, fromGroupID, toGroupId);
+            
+            return new EGID(firstID, toGroupId);
         }
 
         readonly EntityViewsDB _DB;
@@ -181,5 +198,26 @@ namespace Svelto.ECS
         //grouped set of entity views, this is the standard way to handle entity views
         readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>         _groupEntityDB;
         static readonly Type _typeEntityInfoView = typeof(EntityInfoView);
+    }
+
+    public struct EntityStructInitializer
+    {
+        public EntityStructInitializer(EGID id, Dictionary<Type, ITypeSafeDictionary> current)
+        {
+            _current = current;
+            _id = id;
+        }
+
+        public void Init<T>(ref T initializer) where T: struct, IEntityData
+        {
+            var typeSafeDictionary = (TypeSafeDictionary<T>) _current[typeof(T)];
+
+            initializer.ID = _id;
+            
+            typeSafeDictionary.GetFasterValuesBuffer()[typeSafeDictionary.FindElementIndex(_id.entityID)] = initializer;
+        }
+
+        readonly Dictionary<Type, ITypeSafeDictionary> _current;
+        readonly EGID _id;
     }
 }

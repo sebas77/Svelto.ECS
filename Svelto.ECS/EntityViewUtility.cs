@@ -9,7 +9,7 @@ static class EntityViewUtility
 {
     public static void FillEntityView<T>(this IEntityViewBuilder entityViewBuilder
                                        , ref T entityView
-                                       , FasterList<KeyValuePair<Type, ActionRef<T>>> entityViewBlazingFastReflection 
+                                       , FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection 
                                        , object[] implementors
                                        , string entityDescriptorName)
     {
@@ -17,7 +17,7 @@ static class EntityViewUtility
 
         //Very efficent way to collect the fields of every EntityViewType
         var setters =
-            FasterList<KeyValuePair<Type, ActionRef<T>>>
+            FasterList<KeyValuePair<Type, ActionCast<T>>>
                .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out count);
 #if DEBUG && !PROFILER
         if (count == 0) 
