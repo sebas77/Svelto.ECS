@@ -61,44 +61,48 @@ namespace Svelto.ECS
 
         ///--------------------------------------------
 
-        /// <summary>
-        /// This function is experimental and untested. I never used it in production
-        /// it may not be necessary.
-        /// TODO: understand if this method is useful in a performance critical
-        /// scenario
-        /// </summary>
         void Preallocate<T>(int groupID, int size) where T : class, IEntityDescriptor, new()
         {
             var entityViewsToBuild = EntityDescriptorTemplate<T>.Info.entityViewsToBuild;
             var count              = entityViewsToBuild.Length;
+
+            //reserve space in the database
+            Dictionary<Type, ITypeSafeDictionary> @group;
+            if (_groupEntityDB.TryGetValue(groupID, out group) == false)
+                group = _groupEntityDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
+
+            //reserve space in building buffer
+            Dictionary<Type, ITypeSafeDictionary> @groupBuffer;
+            if (_groupedEntityToAdd.current.TryGetValue(groupID, out @groupBuffer) == false)
+                @groupBuffer = _groupedEntityToAdd.current[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
+
+            ITypeSafeDictionary dbList;
 
             for (var index = 0; index < count; index++)
             {
                 var entityViewBuilder = entityViewsToBuild[index];
                 var entityViewType    = entityViewBuilder.GetEntityType();
 
-                //reserve space for the global pool
-                ITypeSafeDictionary dbList;
-
-                //reserve space for the single group
-                Dictionary<Type, ITypeSafeDictionary> @group;
-                if (_groupEntityDB.TryGetValue(groupID, out group) == false)
-                    group = _groupEntityDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
-                
                 if (group.TryGetValue(entityViewType, out dbList) == false)
                     group[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
                 else
                     dbList.AddCapacity(size);
                 
-                if (_groupedEntityToAdd.current.TryGetValue(groupID, out group) == false)
-                    group = _groupEntityDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
-                
-                //reserve space to the temporary buffer
-                if (group.TryGetValue(entityViewType, out dbList) == false)
-                    group[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
+                if (@groupBuffer.TryGetValue(entityViewType, out dbList) == false)
+                    @groupBuffer[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
                 else
                     dbList.AddCapacity(size);
             }
+
+            if (group.TryGetValue(_typeEntityInfoView, out dbList) == false)
+                group[_typeEntityInfoView] = EntityViewBuilder<EntityInfoView>.Preallocate(ref dbList, size);
+            else
+                dbList.AddCapacity(size);
+
+            if (@groupBuffer.TryGetValue(_typeEntityInfoView, out dbList) == false)
+                @groupBuffer[_typeEntityInfoView] = EntityViewBuilder<EntityInfoView>.Preallocate(ref dbList, size);
+            else
+                dbList.AddCapacity(size);
         }
         
         ///--------------------------------------------
@@ -161,26 +165,24 @@ namespace Svelto.ECS
                 _groupEntityDB.Add(toGroupID, groupedEntityViewsTyped);
             }
             
-            ITypeSafeDictionary toSafeList;
+            ITypeSafeDictionary toSafeDic;
 
             for (var i = 0; i < entityViewBuildersCount; i++)
             {
                 var entityViewBuilder = entityViewBuilders[i];
                 var entityViewType    = entityViewBuilder.GetEntityType();
 
-                var fromSafeList = groupedEntities[entityViewType];
-                if (groupedEntityViewsTyped.TryGetValue(entityViewType, out toSafeList) == false)
-                    groupedEntityViewsTyped[entityViewType] = toSafeList = fromSafeList.Create();
+                var fromSafeDic = groupedEntities[entityViewType];
+                if (groupedEntityViewsTyped.TryGetValue(entityViewType, out toSafeDic) == false)
+                    groupedEntityViewsTyped[entityViewType] = toSafeDic = fromSafeDic.Create();
 
-                entityViewBuilder.MoveEntityView(entityegid, toGroupID, fromSafeList, toSafeList);
-                fromSafeList.Remove(entityegid.entityID);
+                entityViewBuilder.MoveEntityView(entityegid, toGroupID, fromSafeDic, toSafeDic);
             }
             
-            if (groupedEntityViewsTyped.TryGetValue(_typeEntityInfoView, out toSafeList) == false)
-                groupedEntityViewsTyped[_typeEntityInfoView] = toSafeList = entityInfoViewDictionary.Create();
+            if (groupedEntityViewsTyped.TryGetValue(_typeEntityInfoView, out toSafeDic) == false)
+                groupedEntityViewsTyped[_typeEntityInfoView] = toSafeDic = entityInfoViewDictionary.Create();
 
-            EntityViewBuilder<EntityInfoView>.MoveEntityView(entityegid, toGroupID, entityInfoViewDictionary, toSafeList);
-            entityInfoViewDictionary.Remove(entityegid.entityID);
+            EntityViewBuilder<EntityInfoView>.MoveEntityView(entityegid, toGroupID, entityInfoViewDictionary, toSafeDic);
         }
         
         EGID SwapFirstEntityGroup(int fromGroupID, int toGroupId)
@@ -208,7 +210,7 @@ namespace Svelto.ECS
             _id = id;
         }
 
-        public void Init<T>(ref T initializer) where T: struct, IEntityData
+        public void Init<T>(ref T initializer) where T: struct, IEntityStruct
         {
             var typeSafeDictionary = (TypeSafeDictionary<T>) _current[typeof(T)];
 

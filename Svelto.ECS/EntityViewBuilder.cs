@@ -9,13 +9,13 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    public class EntityViewBuilder<T> : IEntityViewBuilder where T : IEntityData, new()
+    public class EntityViewBuilder<T> : IEntityViewBuilder where T : IEntityStruct, new()
     {
         public EntityViewBuilder()
         {
             _initializer = default(T);
-            
-#if DEBUG && !PROFILER           
+
+#if DEBUG && !PROFILER
             if (needsReflection == false && typeof(T) != typeof(EntityInfoView))
             {
                 var type = typeof(T);
@@ -30,10 +30,10 @@ namespace Svelto.ECS
                     if (field.FieldType.IsPrimitive == true || field.FieldType.IsValueType == true)
                         continue;
                     
-                    throw new EntityStructException();
+                    throw new EntityStructException(field.FieldType);
                 }
             }
-#endif            
+#endif
             if (needsReflection == true)
             {
                 EntityView<T>.InitCache();
@@ -69,7 +69,12 @@ namespace Svelto.ECS
             }
         }
 
-        public ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, int size)
+        ITypeSafeDictionary IEntityViewBuilder.Preallocate(ref ITypeSafeDictionary dictionary, int size)
+        {
+            return Preallocate(ref dictionary, size);
+        }
+
+        public static ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, int size)
         {
             if (dictionary == null)
                 dictionary = new TypeSafeDictionary<T>(size);
@@ -95,9 +100,9 @@ namespace Svelto.ECS
             var toCastedDic = toSafeDic as TypeSafeDictionary<T>;
 
             var entity = fromCastedDic[entityID.entityID];
+            fromCastedDic.Remove(entityID.entityID);
             entity.ID = new EGID(entityID.entityID, toGroupID);
             toCastedDic.Add(entityID.entityID, entity);
-            fromCastedDic.Remove(entityID.entityID);
         }
 
         static FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection
@@ -114,7 +119,7 @@ namespace Svelto.ECS
 
     public class EntityStructException : Exception
     {
-        public EntityStructException():base("EntityStruct must contains only value types!")
+        public EntityStructException(Type fieldType):base("EntityStruct must contains only value types! " + fieldType.ToString())
         {}
     }
 }

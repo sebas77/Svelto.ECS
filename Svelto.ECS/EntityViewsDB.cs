@@ -12,12 +12,12 @@ namespace Svelto.ECS.Internal
             _groupEntityViewsDB = groupEntityViewsDB;
         }
 
-        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T:class, IEntityData
+        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T:class, IEntityStruct
         {
             return QueryEntityViews<T>(ExclusiveGroups.StandardEntity);
         }
 
-        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:class, IEntityData
+        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:class, IEntityStruct
         {
             Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
 
@@ -31,12 +31,12 @@ namespace Svelto.ECS.Internal
             return (outList as TypeSafeDictionary<T>).FasterValues;
         }
 
-        public T[] QueryEntities<T>(out int count) where T : IEntityData
+        public T[] QueryEntities<T>(out int count) where T : IEntityStruct
         {
             return QueryEntities<T>(ExclusiveGroups.StandardEntity, out count);
         }
         
-        public T[] QueryEntities<T>(int @group, out int count) where T : IEntityData
+        public T[] QueryEntities<T>(int @group, out int count) where T : IEntityStruct
         {
             count = 0;
             
@@ -52,7 +52,7 @@ namespace Svelto.ECS.Internal
             return ((TypeSafeDictionary<T>)typeSafeDictionary).GetFasterValuesBuffer(out count);
         }
 
-        public T[] QueryEntities<T>(EGID entityGID, out uint index) where T : IEntityData
+        public T[] QueryEntities<T>(EGID entityGID, out uint index) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
             if (!FindSafeDictionary(entityGID, out casted))
@@ -74,7 +74,7 @@ namespace Svelto.ECS.Internal
             return QueryEntities<T>(out count);
         }
 
-        public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityData
+        public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityStruct
         {
             T entityView;
 
@@ -83,7 +83,7 @@ namespace Svelto.ECS.Internal
             return entityView;
         }
 
-        public void ExecuteOnEntity<T, W>(EGID entityGID, ref W value, ActionRef<T, W> action) where T : IEntityData
+        public void ExecuteOnEntity<T, W>(EGID entityGID, ref W value, ActionRef<T, W> action) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
             if (!FindSafeDictionary(entityGID, out casted)) return;
@@ -92,7 +92,7 @@ namespace Svelto.ECS.Internal
                 casted.ExecuteOnEntityView(entityGID.entityID, ref value, action);
         }
         
-        public void ExecuteOnEntity<T>(EGID entityGID, ActionRef<T> action) where T : IEntityData
+        public void ExecuteOnEntity<T>(EGID entityGID, ActionRef<T> action) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
             if (!FindSafeDictionary(entityGID, out casted)) return;
@@ -101,7 +101,7 @@ namespace Svelto.ECS.Internal
                 casted.ExecuteOnEntityView(entityGID.entityID, action);
         }
 
-        public bool Exists<T>(EGID entityGID) where T : IEntityData
+        public bool Exists<T>(EGID entityGID) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
             if (!FindSafeDictionary(entityGID, out casted)) return false;
@@ -115,7 +115,7 @@ namespace Svelto.ECS.Internal
             return false;
         }
 
-        bool FindSafeDictionary<T>(EGID entityGID, out TypeSafeDictionary<T> casted) where T : IEntityData
+        bool FindSafeDictionary<T>(EGID entityGID, out TypeSafeDictionary<T> casted) where T : IEntityStruct
         {
             var type = typeof(T);
 
@@ -133,26 +133,26 @@ namespace Svelto.ECS.Internal
             return true;
         }
 
-        public bool HasAny<T>() where T : IEntityData
+        public bool HasAny<T>() where T : IEntityStruct
         {
             int count;
             QueryEntities<T>(out count);
             return count > 0;
         }
 
-        public bool HasAny<T>(int @group) where T : IEntityData
+        public bool HasAny<T>(int @group) where T : IEntityStruct
         {
             int count;
             QueryEntities<T>(group, out count);
             return count > 0;
         }
 
-        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityData
+        public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityStruct
         {
             return TryQueryEntityViewInGroup(entityegid, out entityView);
         }
 
-        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:IEntityData
+        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:IEntityStruct
         {
             TypeSafeDictionary<T> casted;
             if (!FindSafeDictionary(entityGID, out casted))

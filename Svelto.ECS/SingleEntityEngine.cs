@@ -1,6 +1,6 @@
 namespace Svelto.ECS
 {
-    public abstract class SingleEntityEngine<T> : IHandleEntityStructEngine<T> where T : IEntityData
+    public abstract class SingleEntityEngine<T> : IHandleEntityStructEngine<T> where T : IEntityStruct
     {
         public void AddInternal(ref T entityView)
         { Add(ref entityView); }

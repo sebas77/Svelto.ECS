@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS
 {
-    public abstract class GenericEntityDescriptor<T>:IEntityDescriptor where T : IEntityData, new()
+    public abstract class GenericEntityDescriptor<T>:IEntityDescriptor where T : IEntityStruct, new()
     {
         static GenericEntityDescriptor()
         {
@@ -15,8 +15,8 @@
         static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : IEntityData, new() 
-                                                                       where U : IEntityData, new()
+    public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : IEntityStruct, new() 
+                                                                       where U : IEntityStruct, new()
     {
         static GenericEntityDescriptor()
         {
@@ -31,9 +31,9 @@
         static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : IEntityData, new()
-                                                                          where U : IEntityData, new()
-                                                                          where V : IEntityData, new()
+    public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : IEntityStruct, new()
+                                                                          where U : IEntityStruct, new()
+                                                                          where V : IEntityStruct, new()
     {
         static GenericEntityDescriptor()
         {
@@ -48,10 +48,10 @@
         static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : IEntityData, new()
-                                                                             where U : IEntityData, new()
-                                                                             where V : IEntityData, new()
-                                                                             where W : IEntityData, new()
+    public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : IEntityStruct, new()
+                                                                             where U : IEntityStruct, new()
+                                                                             where V : IEntityStruct, new()
+                                                                             where W : IEntityStruct, new()
     {
         static GenericEntityDescriptor()
         {
@@ -66,11 +66,11 @@
         static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : IEntityData, new()
-                                                                                where U : IEntityData, new()
-                                                                                where V : IEntityData, new()
-                                                                                where W : IEntityData, new()
-                                                                                where X : IEntityData, new()
+    public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : IEntityStruct, new()
+                                                                                where U : IEntityStruct, new()
+                                                                                where V : IEntityStruct, new()
+                                                                                where W : IEntityStruct, new()
+                                                                                where X : IEntityStruct, new()
     {
         static GenericEntityDescriptor()
         {
@@ -85,12 +85,12 @@
         static readonly IEntityViewBuilder[] entityViewBuilders;
     }
 
-    public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : IEntityData, new()
-                                                                                   where U : IEntityData, new()
-                                                                                   where V : IEntityData, new()
-                                                                                   where W : IEntityData, new()
-                                                                                   where X : IEntityData, new()
-                                                                                   where Y : IEntityData, new()
+    public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : IEntityStruct, new()
+                                                                                   where U : IEntityStruct, new()
+                                                                                   where V : IEntityStruct, new()
+                                                                                   where W : IEntityStruct, new()
+                                                                                   where X : IEntityStruct, new()
+                                                                                   where Y : IEntityStruct, new()
     {
         static GenericEntityDescriptor()
         {

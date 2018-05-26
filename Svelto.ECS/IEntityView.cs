@@ -5,13 +5,15 @@ using Svelto.DataStructures;
 using Svelto.Utilities;
 
 namespace Svelto.ECS
-{   
-    public interface IEntityData
+{
+    ///<summary>EntityStruct MUST implement IEntiyStruct</summary>
+    public interface IEntityStruct
     {
         EGID ID { get; set; }
     }
-    
-    public interface IEntityView:IEntityData
+
+    ///<summary>EntityViews and EntityViewStructs MUST implement IEntityView</summary>
+    public interface IEntityView:IEntityStruct
     {}
     
     public class EntityView : IEntityView
@@ -25,14 +27,14 @@ namespace Svelto.ECS
         EGID _ID;
     }
 
-    public struct EntityInfoView : IEntityData
+    public struct EntityInfoView : IEntityStruct
     {
         public EGID ID { get; set; }
         
         public IEntityViewBuilder[] entityToBuild;
     }
 
-    public static class EntityView<T> where T: IEntityData, new()
+    public static class EntityView<T> where T: IEntityStruct, new()
     {
         internal static readonly FasterList<KeyValuePair<Type, ActionCast<T>>> cachedFields;
 

@@ -32,7 +32,7 @@ namespace Svelto.ECS.Internal
         int Count { get; }
     }
 
-    class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityData
+    class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityStruct
     {
         public TypeSafeDictionary(int size):base(size)
         {}
@@ -107,11 +107,6 @@ namespace Svelto.ECS.Internal
             {
                 RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i]);
             }
-        }
-
-        public void AddCapacity(int size)
-        {
-            throw new NotImplementedException();
         }
 
         public ITypeSafeDictionary Create()
