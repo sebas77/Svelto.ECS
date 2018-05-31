@@ -1,4 +1,4 @@
-# Svelto Entity Component System 2.0
+# Svelto Entity Component System 2.5
 =====================================
 
 Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic, it comes with several unity extensions. 
@@ -19,8 +19,9 @@ you can find a working example to learn how to use the framework here:
 
 **Framework articles:**
 
-* http://www.sebaslab.com/ecs-1-0/
+* http://www.sebaslab.com/svelto-ecs-2-5-and-allocation-0-code/ (shows what's changed compared to 2.0)
 * http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
+* http://www.sebaslab.com/ecs-1-0/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-unity-survival-example/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
 * http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
