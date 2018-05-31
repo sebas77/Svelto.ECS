@@ -12,9 +12,10 @@ you can find a working example to learn how to use the framework here:
 
 ## Articles
 
-**Dario Oliveri's Svelto.ECS articles:**
+**Svelto users articles:**
 
-* https://eagergames.wordpress.com/category/ecs/ 
+* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
+* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
 
 **Framework articles:**
 
@@ -33,6 +34,8 @@ you can find a working example to learn how to use the framework here:
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
+
+Note: I included the IoC articles just to show you how I shifted over the years from using an IoC container to use a ECS framework.
 
 **The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
