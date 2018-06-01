@@ -8,7 +8,6 @@ you can find a working example to learn how to use the framework here:
 
 * **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
-* **Entities as struct, cache friendly data oriented code:** https://github.com/sebas77/Svelto.ECS.Examples.CacheFriendlyECSWithEntityStructs (including article)
 
 ## Articles
 
@@ -24,7 +23,7 @@ you can find a working example to learn how to use the framework here:
 * http://www.sebaslab.com/ecs-1-0/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-unity-survival-example/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
-* http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
+* http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/ (since I don't like the example much, I didn't update the code, but the article is still valid)
 
 **Theory related articles:**
 
