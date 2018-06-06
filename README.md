@@ -1,7 +1,7 @@
 # Svelto Entity Component System 2.5
 =====================================
 
-Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic, it comes with several unity extensions. 
+Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, multi-threaded, code without pain. Although the framework is platform agnostic (compatible with .net 3.5, .net 4.5 and .net standard 2.0), it comes with several unity extensions. 
 you can find a working example to learn how to use the framework here:
 
 ## Examples
