@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.ECS;
 using Svelto.Utilities;
-using Console = Utility.Console;
 
 static class EntityViewUtility
 {
@@ -53,7 +52,7 @@ static class EntityViewUtility
 #if DEBUG && !PROFILER
             else
             {
-                Console.LogError(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityViewBuilder.GetEntityType().ToString()));
+                Utility.Console.LogError(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityViewBuilder.GetEntityType().ToString()));
             }
 #endif
         }
@@ -79,7 +78,7 @@ static class EntityViewUtility
             }
 #if DEBUG && !PROFILER
             if (component.numberOfImplementations > 1)
-                Console.LogError(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
+                Utility.Console.LogError(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
                                                                         "Component Type: ", fieldType.Name,
                                                                         " implementor: ",
                                                                         component.implementorType.ToString()) +

@@ -1,0 +1,13 @@
+{
+    "name": "Svelto.ECS.Profiler",
+    "references": [
+        "Svelto.ECS",
+        "Svelto.Common"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
