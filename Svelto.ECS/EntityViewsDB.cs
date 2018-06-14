@@ -52,7 +52,7 @@ namespace Svelto.ECS.Internal
             return ((TypeSafeDictionary<T>)typeSafeDictionary).GetFasterValuesBuffer(out count);
         }
 
-        public T[] QueryEntities<T>(EGID entityGID, out uint index) where T : IEntityStruct
+        public T[] QueryEntitiesAndIndex<T>(EGID entityGID, out uint index) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
             if (!FindSafeDictionary(entityGID, out casted))

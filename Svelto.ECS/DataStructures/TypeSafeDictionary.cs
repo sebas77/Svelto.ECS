@@ -1,6 +1,7 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+ using Svelto.DataStructures.Experimental;
  using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
@@ -135,7 +136,9 @@ namespace Svelto.ECS.Internal
         public uint FindElementIndex(int entityGidEntityId)
         {
             uint findIndex;
-            if (FindIndex(entityGidEntityId, out findIndex) == false) throw new Exception("");
+            if (FindIndex(entityGidEntityId, out findIndex) == false)
+                throw new Exception("Entity not found in this group");
+
             return findIndex;
         }
         
