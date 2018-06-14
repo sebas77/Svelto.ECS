@@ -49,7 +49,7 @@ namespace Svelto.ECS
 
             if (needsReflection == true)
             {
-                DBC.Check.Require(implementors != null, "Implementors not found while building an EntityView");
+                DBC.ECS.Check.Require(implementors != null, "Implementors not found while building an EntityView");
 
                 T lentityView;
                 EntityView<T>.BuildEntityView(entityID, out lentityView);

@@ -30,7 +30,7 @@ namespace Svelto.ECS
         
         public DynamicEntityDescriptorInfo(FasterList<IEntityViewBuilder> extraEntityViews)
         {
-            Check.Require(extraEntityViews.Count > 0,
+            DBC.ECS.Check.Require(extraEntityViews.Count > 0,
                           "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
 
             var defaultEntityViewsToBuild = EntityDescriptorTemplate<TType>.Info.entityViewsToBuild;

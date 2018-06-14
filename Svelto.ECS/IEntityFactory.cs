@@ -42,7 +42,6 @@ namespace Svelto.ECS
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
         EntityStructInitializer BuildEntity<T>(int entityID, int groupID, object[] implementors) where T:class, IEntityDescriptor, new();
-        
         EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T:class, IEntityDescriptor, new();
         
 

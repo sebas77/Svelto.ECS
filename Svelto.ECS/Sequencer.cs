@@ -35,12 +35,15 @@ namespace Svelto.ECS
         void Step(ref T token, C condition);
     }
     
+    public interface IEnumStep<T>:IStep
+    {
+        void Step(ref T token, Enum condition);
+    }
+    
     public interface ISequencer
     {
         void Next<T>(IEngine engine, ref T param);
-
         void Next<T>(IEngine engine, ref T param, int condition);
-
         void Next<T, C>(IEngine engine, ref T param, C condition) where C : struct, IConvertible;
     }
 
@@ -64,6 +67,16 @@ namespace Svelto.ECS
             if (steps != null)
                 for (int i = 0; i < steps.Length; i++)
                     ((IStep<T>)steps[i]).Step(ref param, condition);
+        }
+        
+        public void Next<T>(IEngine engine, ref T param, Enum condition)
+        {
+            int branch = Convert.ToInt32(condition);
+            var steps  = (_steps[engine] as Dictionary<int, IStep[]>)[branch];
+
+            if (steps != null)
+                for (int i = 0; i < steps.Length; i++)
+                    ((IEnumStep<T>)steps[i]).Step(ref param, condition);
         }
 
         public void Next<T, C>(IEngine engine, ref T param, C condition) where C:struct,IConvertible

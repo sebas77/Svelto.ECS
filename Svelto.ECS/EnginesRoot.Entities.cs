@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DBC;
 using Svelto.ECS.Internal;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
@@ -148,7 +147,7 @@ namespace Svelto.ECS
 
         void SwapEntityGroup(int entityID, int fromGroupID, int toGroupID)
         {
-            Check.Require(fromGroupID != toGroupID,
+            DBC.ECS.Check.Require(fromGroupID != toGroupID,
                           "can't move an entity to the same group where it already belongs to");
 
             var entityegid = new EGID(entityID, fromGroupID);

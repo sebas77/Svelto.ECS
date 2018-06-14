@@ -1,0 +1,10 @@
+{
+    "name": "Svelto.ECS",
+    "references": [
+        "Svelto.Common"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
