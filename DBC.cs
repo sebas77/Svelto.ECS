@@ -1,5 +1,7 @@
 using System;
+#if PROFILER || !DEBUG
 using System.Diagnostics;
+#endif
 
 namespace DBC.ECS
 {
