@@ -18,9 +18,9 @@ namespace Svelto.ECS
         public IEntityViewBuilder[] entityViewsToBuild { get; }
     }
 
-    public static class EntityDescriptorTemplate<TType> where TType : class, IEntityDescriptor, new()
+    public static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
-        public static readonly EntityDescriptorInfo Info = new EntityDescriptorInfo(new TType());
+        public static readonly EntityDescriptorInfo<TType> Info = new EntityDescriptorInfo<TType>(new TType());
     }
 
     public struct DynamicEntityDescriptorInfo<TType> where TType : class, IEntityDescriptor, new()
@@ -42,11 +42,11 @@ namespace Svelto.ECS
         }
     }
 
-    public struct EntityDescriptorInfo
+    public struct EntityDescriptorInfo<TType> where TType : IEntityDescriptor
     {
         public readonly IEntityViewBuilder[] entityViewsToBuild;
 
-        internal EntityDescriptorInfo(IEntityDescriptor descriptor)
+        internal EntityDescriptorInfo(TType descriptor)
         {
             entityViewsToBuild = descriptor.entityViewsToBuild;
         }

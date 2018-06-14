@@ -2,6 +2,6 @@ namespace Svelto.ECS
 {
     public interface IEntityDescriptorHolder
     {
-        EntityDescriptorInfo RetrieveDescriptorInfo();
+        EntityDescriptorInfo<T> RetrieveDescriptorInfo<T>() where T : IEntityDescriptor;
     }
 }

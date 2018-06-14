@@ -5,7 +5,7 @@ namespace Svelto.ECS
         UnityEngine.MonoBehaviour , IEntityDescriptorHolder
             where T: class, IEntityDescriptor, new()
     {
-        public EntityDescriptorInfo RetrieveDescriptorInfo()
+        public EntityDescriptorInfo<T> RetrieveDescriptorInfo<T>()
         {
             return EntityDescriptorTemplate<T>.Info;
         }

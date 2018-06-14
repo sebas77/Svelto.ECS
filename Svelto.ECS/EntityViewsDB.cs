@@ -71,7 +71,7 @@ namespace Svelto.ECS.Internal
 
             int count;
             
-            return QueryEntities<T>(out count);
+            return QueryEntities<T>(entityGID.groupID, out count);
         }
 
         public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityStruct

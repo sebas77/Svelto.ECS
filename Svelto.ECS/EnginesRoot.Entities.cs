@@ -37,17 +37,18 @@ namespace Svelto.ECS
         ///--------------------------------------------
 
         EntityStructInitializer BuildEntity<T>(EGID entityID, object[] implementors)
-            where T : class, IEntityDescriptor, new()
+            where T : IEntityDescriptor, new()
         {
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
-                                                  _groupedEntityToAdd.current,
-                                                  EntityDescriptorTemplate<T>.Info.entityViewsToBuild,
-                                                  implementors);
+                              _groupedEntityToAdd.current,
+                              EntityDescriptorTemplate<T>.Info.entityViewsToBuild,
+                              implementors);
             
             return new EntityStructInitializer(entityID, dic);
         }
 
-        EntityStructInitializer BuildEntity(EGID entityID, IEntityViewBuilder[] entityViewsToBuild,
+        EntityStructInitializer BuildEntity(EGID entityID, 
+                                IEntityViewBuilder[] entityViewsToBuild,
                                 object[] implementors)
         {
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
@@ -60,7 +61,7 @@ namespace Svelto.ECS
 
         ///--------------------------------------------
 
-        void Preallocate<T>(int groupID, int size) where T : class, IEntityDescriptor, new()
+        void Preallocate<T>(int groupID, int size) where T : IEntityDescriptor, new()
         {
             var entityViewsToBuild = EntityDescriptorTemplate<T>.Info.entityViewsToBuild;
             var count              = entityViewsToBuild.Length;
@@ -209,7 +210,7 @@ namespace Svelto.ECS
             _id = id;
         }
 
-        public void Init<T>(ref T initializer) where T: struct, IEntityStruct
+        public void Init<T>(T initializer) where T: struct, IEntityStruct
         {
             var typeSafeDictionary = (TypeSafeDictionary<T>) _current[typeof(T)];
 
