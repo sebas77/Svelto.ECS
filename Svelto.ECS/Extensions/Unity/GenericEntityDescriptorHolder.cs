@@ -7,7 +7,7 @@ namespace Svelto.ECS
     {
         public IEntityBuilder[] GetEntitiesToBuild()
         {
-            return EntityDescriptorTemplate<T>.descriptor.EntityToBuild;
+            return EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
         }
     }
 }
