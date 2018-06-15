@@ -41,7 +41,7 @@ namespace Svelto.ECS
         {
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                               _groupedEntityToAdd.current,
-                              EntityDescriptorTemplate<T>.descriptor.EntityToBuild,
+                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild,
                               implementors);
             
             return new EntityStructInitializer(entityID, dic);
@@ -63,7 +63,7 @@ namespace Svelto.ECS
 
         void Preallocate<T>(int groupID, int size) where T : IEntityDescriptor, new()
         {
-            var entityViewsToBuild = EntityDescriptorTemplate<T>.descriptor.EntityToBuild;
+            var entityViewsToBuild = EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
             var count              = entityViewsToBuild.Length;
 
             //reserve space in the database

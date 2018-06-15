@@ -13,10 +13,10 @@ namespace Svelto.ECS
     }
 
     ///<summary>EntityViews and EntityViewStructs MUST implement IEntityView</summary>
-    public interface IEntityView:IEntityStruct
+    public interface IEntityViewStruct:IEntityStruct
     {}
     
-    public class EntityView : IEntityView
+    public class EntityView : IEntityViewStruct
     {
         public EGID ID
         {

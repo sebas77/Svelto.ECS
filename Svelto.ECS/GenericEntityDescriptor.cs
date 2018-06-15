@@ -7,7 +7,7 @@
             EntityBuilders = new IEntityBuilder[] { new EntityBuilder<T>() };
         }
         
-        public IEntityBuilder[] EntityToBuild
+        public IEntityBuilder[] entitiesToBuild
         {
             get { return EntityBuilders; }
         }
@@ -23,7 +23,7 @@
             EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>()};
         }
 
-        public IEntityBuilder[] EntityToBuild
+        public IEntityBuilder[] entitiesToBuild
         {
             get { return EntityBuilders; }
         }
@@ -40,7 +40,7 @@
             EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>()};
         }
 
-        public IEntityBuilder[] EntityToBuild
+        public IEntityBuilder[] entitiesToBuild
         {
             get { return EntityBuilders; }
         }
@@ -58,7 +58,7 @@
             EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>()};
         }
 
-        public IEntityBuilder[] EntityToBuild
+        public IEntityBuilder[] entitiesToBuild
         {
             get { return EntityBuilders; }
         }
@@ -77,7 +77,7 @@
             EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>(), new EntityBuilder<X>()};
         }
 
-        public IEntityBuilder[] EntityToBuild
+        public IEntityBuilder[] entitiesToBuild
         {
             get { return EntityBuilders; }
         }
@@ -97,7 +97,7 @@
             EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>(), new EntityBuilder<X>(), new EntityBuilder<Y>()};
         }
 
-        public IEntityBuilder[] EntityToBuild
+        public IEntityBuilder[] entitiesToBuild
         {
             get { return EntityBuilders; }
         }
