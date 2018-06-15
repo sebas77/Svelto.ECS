@@ -3,7 +3,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public interface IEntityViewBuilder
+    public interface IEntityBuilder
     {
         void BuildEntityViewAndAddToList(ref ITypeSafeDictionary dictionary, EGID entityID, object[] implementors);
         ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, int size);

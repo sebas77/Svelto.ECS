@@ -4,15 +4,15 @@
     {
         static GenericEntityDescriptor()
         {
-            entityViewBuilders = new IEntityViewBuilder[] { new EntityViewBuilder<T>() };
+            EntityBuilders = new IEntityBuilder[] { new EntityBuilder<T>() };
         }
         
-        public IEntityViewBuilder[] entityViewsToBuild
+        public IEntityBuilder[] EntityToBuild
         {
-            get { return entityViewBuilders; }
+            get { return EntityBuilders; }
         }
 
-        static readonly IEntityViewBuilder[] entityViewBuilders;
+        static readonly IEntityBuilder[] EntityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor     where T : IEntityStruct, new() 
@@ -20,15 +20,15 @@
     {
         static GenericEntityDescriptor()
         {
-            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>()};
+            EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>()};
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild
+        public IEntityBuilder[] EntityToBuild
         {
-            get { return entityViewBuilders; }
+            get { return EntityBuilders; }
         }
 
-        static readonly IEntityViewBuilder[] entityViewBuilders;
+        static readonly IEntityBuilder[] EntityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor     where T : IEntityStruct, new()
@@ -37,15 +37,15 @@
     {
         static GenericEntityDescriptor()
         {
-            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>()};
+            EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>()};
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild
+        public IEntityBuilder[] EntityToBuild
         {
-            get { return entityViewBuilders; }
+            get { return EntityBuilders; }
         }
 
-        static readonly IEntityViewBuilder[] entityViewBuilders;
+        static readonly IEntityBuilder[] EntityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor     where T : IEntityStruct, new()
@@ -55,15 +55,15 @@
     {
         static GenericEntityDescriptor()
         {
-            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>(), new EntityViewBuilder<W>()};
+            EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>()};
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild
+        public IEntityBuilder[] EntityToBuild
         {
-            get { return entityViewBuilders; }
+            get { return EntityBuilders; }
         }
 
-        static readonly IEntityViewBuilder[] entityViewBuilders;
+        static readonly IEntityBuilder[] EntityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor     where T : IEntityStruct, new()
@@ -74,15 +74,15 @@
     {
         static GenericEntityDescriptor()
         {
-            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>(), new EntityViewBuilder<W>(), new EntityViewBuilder<X>()};
+            EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>(), new EntityBuilder<X>()};
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild
+        public IEntityBuilder[] EntityToBuild
         {
-            get { return entityViewBuilders; }
+            get { return EntityBuilders; }
         }
 
-        static readonly IEntityViewBuilder[] entityViewBuilders;
+        static readonly IEntityBuilder[] EntityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor     where T : IEntityStruct, new()
@@ -94,14 +94,14 @@
     {
         static GenericEntityDescriptor()
         {
-            entityViewBuilders = new IEntityViewBuilder[] {new EntityViewBuilder<T>(), new EntityViewBuilder<U>(), new EntityViewBuilder<V>(), new EntityViewBuilder<W>(), new EntityViewBuilder<X>(), new EntityViewBuilder<Y>()};
+            EntityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>(), new EntityBuilder<X>(), new EntityBuilder<Y>()};
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild
+        public IEntityBuilder[] EntityToBuild
         {
-            get { return entityViewBuilders; }
+            get { return EntityBuilders; }
         }
 
-        static readonly IEntityViewBuilder[] entityViewBuilders;
+        static readonly IEntityBuilder[] EntityBuilders;
     }
 }

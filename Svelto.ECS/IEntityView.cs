@@ -31,7 +31,7 @@ namespace Svelto.ECS
     {
         public EGID ID { get; set; }
         
-        public IEntityViewBuilder[] entityToBuild;
+        public IEntityBuilder[] entityToBuild;
     }
 
     public static class EntityView<T> where T: IEntityStruct, new()

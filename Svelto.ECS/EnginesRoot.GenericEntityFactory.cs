@@ -32,19 +32,19 @@ namespace Svelto.ECS
                 return _weakEngine.Target.BuildEntity<T>(egid, implementors);
             }
 
-            public EntityStructInitializer BuildEntity(int entityID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors)
+            public EntityStructInitializer BuildEntity(int entityID, IEntityBuilder[] entityToBuild, object[] implementors)
             {
-                return _weakEngine.Target.BuildEntity(new EGID(entityID), entityViewsToBuild, implementors);
+                return _weakEngine.Target.BuildEntity(new EGID(entityID), entityToBuild, implementors);
             }
 
-            public EntityStructInitializer BuildEntity(EGID egid, IEntityViewBuilder[] entityViewsToBuild, object[] implementors)
+            public EntityStructInitializer BuildEntity(EGID egid, IEntityBuilder[] entityToBuild, object[] implementors)
             {
-                return _weakEngine.Target.BuildEntity(egid, entityViewsToBuild, implementors);
+                return _weakEngine.Target.BuildEntity(egid, entityToBuild, implementors);
             }
 
-            public EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors)
+            public EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityBuilder[] entityToBuild, object[] implementors)
             {
-                return _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityViewsToBuild, implementors);
+                return _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityToBuild, implementors);
             }
             
             public void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new()

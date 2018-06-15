@@ -53,8 +53,8 @@ namespace Svelto.ECS
         /// <param name="entityDescriptor"></param>
         /// <param name="implementors"></param>
         /// 
-        EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors);
-        EntityStructInitializer BuildEntity(int entityID, IEntityViewBuilder[] entityViewsToBuild, object[] implementors);
-        EntityStructInitializer BuildEntity(EGID egid, IEntityViewBuilder[] entityViewsToBuild, object[] implementors);
+        EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityBuilder[] entityToBuild, object[] implementors);
+        EntityStructInitializer BuildEntity(int entityID, IEntityBuilder[] entityToBuild, object[] implementors);
+        EntityStructInitializer BuildEntity(EGID egid, IEntityBuilder[] entityToBuild, object[] implementors);
     }
 }

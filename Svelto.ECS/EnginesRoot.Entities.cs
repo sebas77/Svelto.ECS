@@ -41,19 +41,19 @@ namespace Svelto.ECS
         {
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                               _groupedEntityToAdd.current,
-                              EntityDescriptorTemplate<T>.Info.entityViewsToBuild,
+                              EntityDescriptorTemplate<T>.descriptor.EntityToBuild,
                               implementors);
             
             return new EntityStructInitializer(entityID, dic);
         }
 
         EntityStructInitializer BuildEntity(EGID entityID, 
-                                IEntityViewBuilder[] entityViewsToBuild,
+                                IEntityBuilder[] entityToBuild,
                                 object[] implementors)
         {
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                                                   _groupedEntityToAdd.current,
-                                                  entityViewsToBuild,
+                                                  entityToBuild,
                                                    implementors);
             
             return new EntityStructInitializer(entityID, dic);
@@ -63,7 +63,7 @@ namespace Svelto.ECS
 
         void Preallocate<T>(int groupID, int size) where T : IEntityDescriptor, new()
         {
-            var entityViewsToBuild = EntityDescriptorTemplate<T>.Info.entityViewsToBuild;
+            var entityViewsToBuild = EntityDescriptorTemplate<T>.descriptor.EntityToBuild;
             var count              = entityViewsToBuild.Length;
 
             //reserve space in the database
@@ -95,12 +95,12 @@ namespace Svelto.ECS
             }
 
             if (group.TryGetValue(_typeEntityInfoView, out dbList) == false)
-                group[_typeEntityInfoView] = EntityViewBuilder<EntityInfoView>.Preallocate(ref dbList, size);
+                group[_typeEntityInfoView] = EntityBuilder<EntityInfoView>.Preallocate(ref dbList, size);
             else
                 dbList.AddCapacity(size);
 
             if (@groupBuffer.TryGetValue(_typeEntityInfoView, out dbList) == false)
-                @groupBuffer[_typeEntityInfoView] = EntityViewBuilder<EntityInfoView>.Preallocate(ref dbList, size);
+                @groupBuffer[_typeEntityInfoView] = EntityBuilder<EntityInfoView>.Preallocate(ref dbList, size);
             else
                 dbList.AddCapacity(size);
         }
@@ -182,7 +182,7 @@ namespace Svelto.ECS
             if (groupedEntityViewsTyped.TryGetValue(_typeEntityInfoView, out toSafeDic) == false)
                 groupedEntityViewsTyped[_typeEntityInfoView] = toSafeDic = entityInfoViewDictionary.Create();
 
-            EntityViewBuilder<EntityInfoView>.MoveEntityView(entityegid, toGroupID, entityInfoViewDictionary, toSafeDic);
+            EntityBuilder<EntityInfoView>.MoveEntityView(entityegid, toGroupID, entityInfoViewDictionary, toSafeDic);
         }
         
         EGID SwapFirstEntityGroup(int fromGroupID, int toGroupId)

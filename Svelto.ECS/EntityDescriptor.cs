@@ -5,50 +5,50 @@ namespace Svelto.ECS
 {
     public interface IEntityDescriptor
     {
-        IEntityViewBuilder[] entityViewsToBuild { get; }
+        IEntityBuilder[] EntityToBuild { get; }
     }
 
     public class EntityDescriptor : IEntityDescriptor
     {
-        protected EntityDescriptor(IEntityViewBuilder[] entityViewsToBuild)
+        protected EntityDescriptor(IEntityBuilder[] entityToBuild)
         {
-            this.entityViewsToBuild = entityViewsToBuild;
+            this.EntityToBuild = entityToBuild;
         }
 
-        public IEntityViewBuilder[] entityViewsToBuild { get; }
+        public IEntityBuilder[] EntityToBuild { get; }
     }
 
     public static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
-        public static readonly EntityDescriptorInfo<TType> Info = new EntityDescriptorInfo<TType>(new TType());
+        public static readonly EntityDescriptor<TType> descriptor = new EntityDescriptor<TType>(new TType());
     }
 
-    public struct DynamicEntityDescriptorInfo<TType> where TType : class, IEntityDescriptor, new()
+    public struct DynamicEntityDescriptorInfo<TType>:IEntityDescriptor where TType : IEntityDescriptor, new()
     {
-        public readonly IEntityViewBuilder[] entityViewsToBuild;
-        
-        public DynamicEntityDescriptorInfo(FasterList<IEntityViewBuilder> extraEntityViews)
+        public DynamicEntityDescriptorInfo(FasterList<IEntityBuilder> extraEntityViews)
         {
             DBC.ECS.Check.Require(extraEntityViews.Count > 0,
                           "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
 
-            var defaultEntityViewsToBuild = EntityDescriptorTemplate<TType>.Info.entityViewsToBuild;
+            var defaultEntityViewsToBuild = EntityDescriptorTemplate<TType>.descriptor.EntityToBuild;
             var length     = defaultEntityViewsToBuild.Length;
 
-            entityViewsToBuild = new IEntityViewBuilder[length + extraEntityViews.Count];
+            EntityToBuild = new IEntityBuilder[length + extraEntityViews.Count];
 
-            Array.Copy(defaultEntityViewsToBuild, 0, entityViewsToBuild, 0, length);
-            Array.Copy(extraEntityViews.ToArrayFast(), 0, entityViewsToBuild, length, extraEntityViews.Count);
+            Array.Copy(defaultEntityViewsToBuild, 0, EntityToBuild, 0, length);
+            Array.Copy(extraEntityViews.ToArrayFast(), 0, EntityToBuild, length, extraEntityViews.Count);
         }
+
+        public IEntityBuilder[] EntityToBuild { get; }
     }
 
-    public struct EntityDescriptorInfo<TType> where TType : IEntityDescriptor
+    public struct EntityDescriptor<TType>:IEntityDescriptor where TType : IEntityDescriptor
     {
-        public readonly IEntityViewBuilder[] entityViewsToBuild;
-
-        internal EntityDescriptorInfo(TType descriptor)
+        internal EntityDescriptor(TType descriptor)
         {
-            entityViewsToBuild = descriptor.entityViewsToBuild;
+            EntityToBuild = descriptor.EntityToBuild;
         }
+
+        public IEntityBuilder[] EntityToBuild { get; }
     }
 }

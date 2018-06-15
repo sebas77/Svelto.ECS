@@ -9,9 +9,9 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    public class EntityViewBuilder<T> : IEntityViewBuilder where T : IEntityStruct, new()
+    public class EntityBuilder<T> : IEntityBuilder where T : IEntityStruct, new()
     {
-        public EntityViewBuilder()
+        public EntityBuilder()
         {
             _initializer = default(T);
 
@@ -69,7 +69,7 @@ namespace Svelto.ECS
             }
         }
 
-        ITypeSafeDictionary IEntityViewBuilder.Preallocate(ref ITypeSafeDictionary dictionary, int size)
+        ITypeSafeDictionary IEntityBuilder.Preallocate(ref ITypeSafeDictionary dictionary, int size)
         {
             return Preallocate(ref dictionary, size);
         }
@@ -89,7 +89,7 @@ namespace Svelto.ECS
             return ENTITY_VIEW_TYPE;
         }
 
-        void IEntityViewBuilder.MoveEntityView(EGID entityID, int toGroupID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic)
+        void IEntityBuilder.MoveEntityView(EGID entityID, int toGroupID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic)
         {
             MoveEntityView(entityID, toGroupID, fromSafeDic, toSafeDic);
         }
