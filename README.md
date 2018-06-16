@@ -72,6 +72,10 @@ Best option is to fork and clone https://github.com/sebas77/Svelto.ECS.Tests, ad
 
 It needs love and as far as I understood, anyone can edit it. Feel free to do so if you have a good understanding of Svelto!
 
+## FAQ
+
+https://github.com/sebas77/Svelto.ECS/wiki/FAQ
+
 ## Svelto Framework is used to develop the following products(*):
 
 ![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
