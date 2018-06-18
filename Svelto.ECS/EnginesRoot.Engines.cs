@@ -61,10 +61,10 @@ namespace Svelto.ECS
             else            
                 _otherEngines.Add(engine);
             
-            var queryableEntityViewEngine = engine as IQueryingEntityViewEngine;
+            var queryableEntityViewEngine = engine as IQueryingEntitiesEngine;
             if (queryableEntityViewEngine != null)
             {
-                queryableEntityViewEngine.EntityDb = _DB;
+                queryableEntityViewEngine.entitiesDB = _DB;
                 queryableEntityViewEngine.Ready();
             }
         }
