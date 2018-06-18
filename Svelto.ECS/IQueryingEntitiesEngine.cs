@@ -2,7 +2,7 @@ namespace Svelto.ECS
 {
     public interface IQueryingEntitiesEngine : IEngine
     {
-        IEntityDB entitiesDB { set; }
+        IEntitiesDB entitiesDB { set; }
 
         void Ready();
     }

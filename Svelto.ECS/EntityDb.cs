@@ -5,9 +5,9 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {
-    class EntityDb : IEntityDB
+    class entitiesDB : IEntitiesDB
     {
-        internal EntityDb(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB)
+        internal entitiesDB(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB)
         {
             _groupEntityViewsDB = groupEntityViewsDB;
         }

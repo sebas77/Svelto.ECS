@@ -195,7 +195,7 @@ namespace Svelto.ECS
             return new EGID(firstID, toGroupId);
         }
 
-        readonly EntityDb _DB;
+        readonly entitiesDB _DB;
         
         //grouped set of entity views, this is the standard way to handle entity views
         readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>         _groupEntityDB;
