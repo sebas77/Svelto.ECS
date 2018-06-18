@@ -72,6 +72,11 @@ Best option is to fork and clone https://github.com/sebas77/Svelto.ECS.Tests, ad
 
 It needs love and as far as I understood, anyone can edit it. Feel free to do so if you have a good understanding of Svelto!
 
+## I like the project, how can I help?
+
+Hey thanks a lot for considering this. You can help in two ways. First one is with the documentation, updating the wiki or writing your own articles. The second one is helping me coding new features.
+Svelto.ECS 2.5 has all the features currently needed to make a game with the ECS pattern. The design can very likely still improved and tweaked, but I hope I won't need to add any major feature anymore or undergo any major refactoring. The tools I'd like to have, but that probably I won't have the time to develop, are visual tools. What I have in mind is to use reflection to analyze the assemblies and visualize with a visual tool the engines, entities and maybe their relations. The Context are also designed to be able to be substituted with config files, so it would be theoretically possible to generate EnginesRoots, add Engines, inject Sequencers automatically instead to do it manually in the CompositionRoot.
+
 ## FAQ
 
 https://github.com/sebas77/Svelto.ECS/wiki/FAQ
