@@ -43,7 +43,7 @@ namespace Svelto.ECS
             
             _groupedEntityToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
-            _DB = new EntityViewsDB(_groupEntityDB);
+            _DB = new EntityDb(_groupEntityDB);
 
             _scheduler = entityViewScheduler;
             _scheduler.Schedule(new WeakAction(SubmitEntityViews));
@@ -64,7 +64,7 @@ namespace Svelto.ECS
             var queryableEntityViewEngine = engine as IQueryingEntityViewEngine;
             if (queryableEntityViewEngine != null)
             {
-                queryableEntityViewEngine.entityViewsDB = _DB;
+                queryableEntityViewEngine.EntityDb = _DB;
                 queryableEntityViewEngine.Ready();
             }
         }

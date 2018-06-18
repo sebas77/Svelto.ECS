@@ -1,8 +1,8 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
- using Svelto.DataStructures.Experimental;
- using Svelto.Utilities;
+using Svelto.DataStructures.Experimental;
+using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {

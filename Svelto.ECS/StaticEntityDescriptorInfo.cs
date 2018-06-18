@@ -15,17 +15,17 @@ namespace Svelto.ECS
             this.entitiesToBuild = entityToBuild;
         }
 
-        public IEntityBuilder[] entitiesToBuild { get; }
+        public IEntityBuilder[] entitiesToBuild { get; private set; }
     }
 
     public static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
-        public static readonly EntityDescriptor<TType> descriptor = new EntityDescriptor<TType>(new TType());
+        public static readonly StaticEntityDescriptorInfo<TType> descriptor = new StaticEntityDescriptorInfo<TType>(new TType());
     }
 
-    public struct DynamicEntityDescriptorInfo<TType>:IEntityDescriptor where TType : IEntityDescriptor, new()
+    public struct DynamicEntityDescriptorInfo<TType> where TType : IEntityDescriptor, new()
     {
-        public DynamicEntityDescriptorInfo(FasterList<IEntityBuilder> extraEntityViews)
+        public DynamicEntityDescriptorInfo(FasterList<IEntityBuilder> extraEntityViews) : this()
         {
             DBC.ECS.Check.Require(extraEntityViews.Count > 0,
                           "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
@@ -39,16 +39,16 @@ namespace Svelto.ECS
             Array.Copy(extraEntityViews.ToArrayFast(), 0, entitiesToBuild, length, extraEntityViews.Count);
         }
 
-        public IEntityBuilder[] entitiesToBuild { get; }
+        public IEntityBuilder[] entitiesToBuild { get; private set; }
     }
 
-    public struct EntityDescriptor<TType>:IEntityDescriptor where TType : IEntityDescriptor
+    public struct StaticEntityDescriptorInfo<TType> where TType : IEntityDescriptor
     {
-        internal EntityDescriptor(TType descriptor)
+        internal StaticEntityDescriptorInfo(TType descriptor) : this()
         {
             entitiesToBuild = descriptor.entitiesToBuild;
         }
 
-        public IEntityBuilder[] entitiesToBuild { get; }
+        public IEntityBuilder[] entitiesToBuild { get; private set; }
     }
 }

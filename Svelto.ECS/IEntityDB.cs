@@ -3,7 +3,7 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    public interface IEntityViewsDB
+    public interface IEntityDB
     {
         /// <summary>
         /// All the EntityView related methods are left for back compatibility, but
