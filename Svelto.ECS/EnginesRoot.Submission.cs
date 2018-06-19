@@ -23,6 +23,12 @@ namespace Svelto.ECS
                 //current will be use to write new entityViews
                 _groupedEntityToAdd.Swap();
 
+                //Note: if N entity of the same type are added on the same frame
+                //the Add callback is called N times on the same frame.
+                //if the Add calback builds a new entity, that entity will not
+                //be available in the database until the N callbacks are done
+                //solving it could be complicated as callback and database update
+                //must be interleaved.
                 if (_groupedEntityToAdd.other.Count > 0)
                     AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
 

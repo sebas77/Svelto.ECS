@@ -70,11 +70,11 @@ namespace Svelto.ECS.Internal
             {
                 TValue entity = values[i];
 
-                AddEntityViewFromEngines(entityViewEnginesDB, ref entity);
+                AddEntityViewToEngines(entityViewEnginesDB, ref entity);
             }
         }
 
-        void AddEntityViewFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
+        void AddEntityViewToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
         {
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
             //get all the engines linked to TValue
