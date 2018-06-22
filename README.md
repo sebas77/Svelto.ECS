@@ -53,6 +53,7 @@ Note: I included the IoC articles just to show how I shifted over the years from
 **Official Chat**
 
 * https://gitter.im/Svelto-ECS/Lobby
+* https://discord.gg/3qAdjDb (Discord chat is under test, if it will become more popular I will drop gitter support)
 
 **NED-Studio Svelto ECS inspector (WIP)**
 
