@@ -6,18 +6,24 @@ namespace Svelto.ECS
     /// an EnginesRoot reference cannot be held by anything else than the Composition Root
     /// where it has been created. IEntityFactory and IEntityFunctions allow a weakreference
     /// of the EnginesRoot to be passed around.
+    ///
+    /// ExclusiveGroups must be used in your game like:
+    /// static class GameExclusiveGroup
+    ///{
+    ///   public static readonly ExclusiveGroups PlayerEntitiesGroup = new ExclusiveGroups();
+    ///}
+    /// 
     /// </summary>
     public interface IEntityFactory
     {
-
-        /// <summary>
+    /// <summary>
         ///where performance is critical, you may wish to pre allocate the space needed
         ///to store the entities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="size"></param>
         void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new();
-        void PreallocateEntitySpace<T>(int groupID, int size) where T : IEntityDescriptor, new();
+        void PreallocateEntitySpace<T>(ExclusiveGroups groupID, int size) where T : IEntityDescriptor, new();
         
         /// <summary>
         ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity
@@ -41,7 +47,7 @@ namespace Svelto.ECS
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        EntityStructInitializer BuildEntity<T>(int entityID, int groupID, object[] implementors) where T:IEntityDescriptor, new();
+        EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroups groupID, object[] implementors) where T:IEntityDescriptor, new();
         EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T:IEntityDescriptor, new();
         
 
@@ -53,7 +59,7 @@ namespace Svelto.ECS
         /// <param name="entityDescriptor"></param>
         /// <param name="implementors"></param>
         /// 
-        EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityBuilder[] entityToBuild, object[] implementors);
+        EntityStructInitializer BuildEntity(int entityID, ExclusiveGroups groupID, IEntityBuilder[] entityToBuild, object[] implementors);
         EntityStructInitializer BuildEntity(int entityID, IEntityBuilder[] entityToBuild, object[] implementors);
         EntityStructInitializer BuildEntity(EGID egid, IEntityBuilder[] entityToBuild, object[] implementors);
     }

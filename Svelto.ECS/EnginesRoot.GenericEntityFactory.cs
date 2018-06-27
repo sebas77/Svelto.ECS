@@ -1,6 +1,4 @@
-﻿using Svelto.ECS.Internal;
-
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
+﻿#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
 using Svelto.ECS.Profiler;
 #endif
 
@@ -22,9 +20,9 @@ namespace Svelto.ECS
                 return _weakEngine.Target.BuildEntity<T>(new EGID(entityID), implementors);
             }
 
-            public EntityStructInitializer BuildEntity<T>(int entityID, int groupID, object[] implementors) where T : IEntityDescriptor, new()
+            public EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroups groupID, object[] implementors) where T : IEntityDescriptor, new()
             {
-                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID, groupID), implementors);
+                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID, (int)groupID), implementors);
             }
 
             public EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T : IEntityDescriptor, new()
@@ -42,9 +40,9 @@ namespace Svelto.ECS
                 return _weakEngine.Target.BuildEntity(egid, entityToBuild, implementors);
             }
 
-            public EntityStructInitializer BuildEntity(int entityID, int groupID, IEntityBuilder[] entityToBuild, object[] implementors)
+            public EntityStructInitializer BuildEntity(int entityID, ExclusiveGroups groupID, IEntityBuilder[] entityToBuild, object[] implementors)
             {
-                return _weakEngine.Target.BuildEntity(new EGID(entityID, groupID), entityToBuild, implementors);
+                return _weakEngine.Target.BuildEntity(new EGID(entityID, (int)groupID), entityToBuild, implementors);
             }
             
             public void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new()
@@ -52,9 +50,9 @@ namespace Svelto.ECS
                 _weakEngine.Target.Preallocate<T>(ExclusiveGroups.StandardEntity, size);
             }
             
-            public void PreallocateEntitySpace<T>(int groupID, int size) where T : IEntityDescriptor, new()
+            public void PreallocateEntitySpace<T>(ExclusiveGroups groupID, int size) where T : IEntityDescriptor, new()
             {
-                _weakEngine.Target.Preallocate<T>(groupID, size);
+                _weakEngine.Target.Preallocate<T>((int)groupID, size);
             }
         }
     }
