@@ -28,7 +28,7 @@ namespace Svelto.ECS
         
         public EGID(int entityID) : this()
         {
-            _GID = MAKE_GLOBAL_ID(entityID, ExclusiveGroups.StandardEntity);
+            _GID = MAKE_GLOBAL_ID(entityID, ExclusiveGroup.StandardEntitiesGroup);
         }
 
         static long MAKE_GLOBAL_ID(int entityId, int groupId)

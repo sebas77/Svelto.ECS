@@ -23,7 +23,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <param name="size"></param>
         void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new();
-        void PreallocateEntitySpace<T>(ExclusiveGroups groupID, int size) where T : IEntityDescriptor, new();
+        void PreallocateEntitySpace<T>(ExclusiveGroup groupID, int size) where T : IEntityDescriptor, new();
         
         /// <summary>
         ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity
@@ -47,7 +47,7 @@ namespace Svelto.ECS
         /// <param name="groupID"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroups groupID, object[] implementors) where T:IEntityDescriptor, new();
+        EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroup groupID, object[] implementors) where T:IEntityDescriptor, new();
         EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T:IEntityDescriptor, new();
         
 
@@ -59,7 +59,7 @@ namespace Svelto.ECS
         /// <param name="entityDescriptor"></param>
         /// <param name="implementors"></param>
         /// 
-        EntityStructInitializer BuildEntity(int entityID, ExclusiveGroups groupID, IEntityBuilder[] entityToBuild, object[] implementors);
+        EntityStructInitializer BuildEntity(int entityID, ExclusiveGroup groupID, IEntityBuilder[] entityToBuild, object[] implementors);
         EntityStructInitializer BuildEntity(int entityID, IEntityBuilder[] entityToBuild, object[] implementors);
         EntityStructInitializer BuildEntity(EGID egid, IEntityBuilder[] entityToBuild, object[] implementors);
     }

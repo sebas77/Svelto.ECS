@@ -14,7 +14,7 @@ namespace Svelto.ECS.Internal
 
         public ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T:class, IEntityStruct
         {
-            return QueryEntityViews<T>(ExclusiveGroups.StandardEntity);
+            return QueryEntityViews<T>(ExclusiveGroup.StandardEntitiesGroup);
         }
 
         public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:class, IEntityStruct
@@ -33,7 +33,7 @@ namespace Svelto.ECS.Internal
 
         public T[] QueryEntities<T>(out int count) where T : IEntityStruct
         {
-            return QueryEntities<T>(ExclusiveGroups.StandardEntity, out count);
+            return QueryEntities<T>(ExclusiveGroup.StandardEntitiesGroup, out count);
         }
         
         public T[] QueryEntities<T>(int @group, out int count) where T : IEntityStruct

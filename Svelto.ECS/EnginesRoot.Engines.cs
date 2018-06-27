@@ -39,7 +39,7 @@ namespace Svelto.ECS
             _otherEngines = new FasterList<IEngine>();
 
             _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
-            _groupEntityDB[ExclusiveGroups.StandardEntity] = new Dictionary<Type, ITypeSafeDictionary>();
+            _groupEntityDB[ExclusiveGroup.StandardEntitiesGroup] = new Dictionary<Type, ITypeSafeDictionary>();
             
             _groupedEntityToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 

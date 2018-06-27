@@ -42,14 +42,14 @@ namespace Svelto.ECS
                 _weakReference.Target.SwapEntityGroup(entityID, fromGroupID, toGroupID);
             }
 
-            public void SwapEntityGroup(EGID id, int toGroupID = ExclusiveGroups.StandardEntity)
+            public void SwapEntityGroup(EGID id, int toGroupID = ExclusiveGroup.StandardEntitiesGroup)
             {
                 _weakReference.Target.SwapEntityGroup(id.entityID, id.groupID, toGroupID);
             }
 
             public void SwapEntityGroup(int entityID, int toGroupID)
             {
-                _weakReference.Target.SwapEntityGroup(entityID, ExclusiveGroups.StandardEntity, toGroupID);
+                _weakReference.Target.SwapEntityGroup(entityID, ExclusiveGroup.StandardEntitiesGroup, toGroupID);
             }
 
             public EGID SwapFirstEntityGroup(int fromGroupID, int toGroupID)
