@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Principal;
 using Svelto.DataStructures;
 using Svelto.Utilities;
 
@@ -99,6 +100,42 @@ namespace Svelto.ECS.Internal
 
             if (casted != null)
                 casted.ExecuteOnEntityView(entityGID.entityID, action);
+        }
+
+        public void ExecuteOnEntities<T>(int groupID, ActionRef<T> action) where T : IEntityStruct
+        {
+            int count;
+            var entities = QueryEntities<T>(groupID, out count);
+
+            for (int i = 0; i < count; i++)
+                action(ref entities[i]);
+        }
+
+        public void ExecuteOnEntities<T>(ActionRef<T> action) where T : IEntityStruct
+        {
+            int count;
+            var entities = QueryEntities<T>(out count);
+
+            for (int i = 0; i < count; i++)
+                action(ref entities[i]);
+        }
+
+        public void ExecuteOnEntities<T, W>(int groupID, ref W value, ActionRef<T, W> action) where T : IEntityStruct
+        {
+            int count;
+            var entities = QueryEntities<T>(out count);
+
+            for (int i = 0; i < count; i++)
+                action(ref entities[i], ref value);
+        }
+
+        public void ExecuteOnEntities<T, W>(ref W value, ActionRef<T, W> action) where T : IEntityStruct
+        {
+            int count;
+            var entities = QueryEntities<T>(out count);
+
+            for (int i = 0; i < count; i++)
+                action(ref entities[i], ref value);
         }
 
         public bool Exists<T>(EGID entityGID) where T : IEntityStruct
