@@ -102,6 +102,26 @@ namespace Svelto.ECS.Internal
                 casted.ExecuteOnEntityView(entityGID.entityID, action);
         }
 
+        public void ExecuteOnEntity<T>(int id, ActionRef<T> action) where T : IEntityStruct
+        {
+            ExecuteOnEntity(new EGID(id, ExclusiveGroup.StandardEntitiesGroup), action);
+        }
+
+        public void ExecuteOnEntity<T>(int id, int groupid, ActionRef<T> action) where T : IEntityStruct
+        {
+            ExecuteOnEntity(new EGID(id, groupid), action);
+        }
+
+        public void ExecuteOnEntity<T, W>(int id, ref W value, ActionRef<T, W> action) where T : IEntityStruct
+        {
+            ExecuteOnEntity(new EGID(id, ExclusiveGroup.StandardEntitiesGroup), ref value, action);
+        }
+
+        public void ExecuteOnEntity<T, W>(int id, int groupid, ref W value, ActionRef<T, W> action) where T : IEntityStruct
+        {
+            ExecuteOnEntity(new EGID(id, groupid), ref value, action);
+        }
+
         public void ExecuteOnEntities<T>(int groupID, ActionRef<T> action) where T : IEntityStruct
         {
             int count;

@@ -39,6 +39,12 @@ namespace Svelto.ECS
         void ExecuteOnEntity<T, W>(EGID egid, ref W value, ActionRef<T, W> action) where T : IEntityStruct;
         void ExecuteOnEntity<T>(EGID egid, ActionRef<T> action) where T : IEntityStruct;
         
+        void ExecuteOnEntity<T>(int id, ActionRef<T> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T>(int id, int groupid, ActionRef<T> action) where T : IEntityStruct;
+        
+        void ExecuteOnEntity<T, W>(int id, ref W value, ActionRef<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T, W>(int id, int groupid, ref W value, ActionRef<T, W> action) where T : IEntityStruct;
+        
         void ExecuteOnEntities<T>(int groupID, ActionRef<T> action) where T : IEntityStruct;
         void ExecuteOnEntities<T>(ActionRef<T> action) where T : IEntityStruct;
         
