@@ -52,7 +52,7 @@ static class EntityViewUtility
 #if DEBUG && !PROFILER
             else
             {
-                Utility.Console.LogError(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityBuilder.GetEntityType().ToString()));
+                Utility.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityBuilder.GetEntityType().ToString()));
             }
 #endif
         }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Principal;
 using Svelto.DataStructures;
 using Svelto.Utilities;
 
@@ -75,11 +74,20 @@ namespace Svelto.ECS.Internal
             return QueryEntities<T>(entityGID.groupID, out count);
         }
 
+        public bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : IEntityStruct
+        {
+            if ((array = QueryEntitiesAndIndex<T>(entityGid, out index)) != null)
+                return true;
+            
+            return false;
+        }
+
         public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityStruct
         {
             T entityView;
 
-            TryQueryEntityViewInGroup(entityGID, out entityView);
+            if (TryQueryEntityViewInGroup(entityGID, out entityView) == false)
+                throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
 
             return entityView;
         }
@@ -87,19 +95,27 @@ namespace Svelto.ECS.Internal
         public void ExecuteOnEntity<T, W>(EGID entityGID, ref W value, ActionRef<T, W> action) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
-            if (!FindSafeDictionary(entityGID, out casted)) return;
+            if (FindSafeDictionary(entityGID, out casted))
+            {
+                if (casted != null)
+                    if (casted.ExecuteOnEntityView(entityGID.entityID, ref value, action) == true)
+                        return;
+            }
 
-            if (casted != null)
-                casted.ExecuteOnEntityView(entityGID.entityID, ref value, action);
+            throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
         }
         
         public void ExecuteOnEntity<T>(EGID entityGID, ActionRef<T> action) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
-            if (!FindSafeDictionary(entityGID, out casted)) return;
+            if (FindSafeDictionary(entityGID, out casted))
+            {
+                if (casted != null)
+                    if (casted.ExecuteOnEntityView(entityGID.entityID, action) == true)
+                        return;
+            }
 
-            if (casted != null)
-                casted.ExecuteOnEntityView(entityGID.entityID, action);
+            throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
         }
 
         public void ExecuteOnEntity<T>(int id, ActionRef<T> action) where T : IEntityStruct

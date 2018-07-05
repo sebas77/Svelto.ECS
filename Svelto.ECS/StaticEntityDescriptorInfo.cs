@@ -23,7 +23,7 @@ namespace Svelto.ECS
         public static readonly StaticEntityDescriptorInfo<TType> descriptor = new StaticEntityDescriptorInfo<TType>(new TType());
     }
 
-    public struct DynamicEntityDescriptorInfo<TType> where TType : IEntityDescriptor, new()
+    public struct DynamicEntityDescriptorInfo<TType>:IEntityDescriptor where TType : IEntityDescriptor, new()
     {
         public DynamicEntityDescriptorInfo(FasterList<IEntityBuilder> extraEntityViews) : this()
         {
@@ -42,7 +42,7 @@ namespace Svelto.ECS
         public IEntityBuilder[] entitiesToBuild { get; private set; }
     }
 
-    public struct StaticEntityDescriptorInfo<TType> where TType : IEntityDescriptor
+    public struct StaticEntityDescriptorInfo<TType>: IEntityDescriptor where TType : IEntityDescriptor
     {
         internal StaticEntityDescriptorInfo(TType descriptor) : this()
         {
