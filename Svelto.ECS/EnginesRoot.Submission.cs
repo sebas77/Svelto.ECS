@@ -45,7 +45,7 @@ namespace Svelto.ECS
             }
         }
         
-        //todo: groupsToSubmit can be semplified as data structure?
+        //todo: groupsToSubmit can be simplified as data structure?
         void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
         {
             //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
@@ -66,7 +66,7 @@ namespace Svelto.ECS
                         dbDic = groupDB[entityViewTypeSafeDictionary.Key] = entityViewTypeSafeDictionary.Value.Create();
 
                     //type safe copy
-                    dbDic.FillWithIndexedEntityViews(entityViewTypeSafeDictionary.Value);
+                    dbDic.FillWithIndexedEntities(entityViewTypeSafeDictionary.Value);
                 }
             }
 
@@ -86,7 +86,7 @@ namespace Svelto.ECS
         //split by type per group. It's possible to get all the entities of a give type T per group thanks 
         //to the FasterDictionary capabilitiies OR it's possible to get a specific entityView indexed by
         //ID. This ID doesn't need to be the EGID, it can be just the entityID
-        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
-        readonly EntitySubmissionScheduler _scheduler;
+        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>    _groupedEntityToAdd;
+        readonly EntitySubmissionScheduler                                                            _scheduler;
     }
 }

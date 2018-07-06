@@ -5,10 +5,11 @@ namespace Svelto.ECS.Internal
 {
     static class EntityFactory
     {
-        internal static Dictionary<Type, ITypeSafeDictionary> BuildGroupedEntityViews(EGID egid,
-                                                     Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType,
-                                                     IEntityBuilder[] entityToBuild,
-                                                     object[] implementors)
+        internal static Dictionary<Type, ITypeSafeDictionary> 
+            BuildGroupedEntityViews(EGID egid,
+                 Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType,
+                 IEntityBuilder[] entityToBuild,
+                 object[] implementors)
         {
             var @group = FetchEntityViewGroup(egid.groupID, groupEntityViewsByType);
 
@@ -17,7 +18,8 @@ namespace Svelto.ECS.Internal
             return group;
         }
 
-        static Dictionary<Type, ITypeSafeDictionary> FetchEntityViewGroup(int groupID, Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType)
+        static Dictionary<Type, ITypeSafeDictionary> FetchEntityViewGroup(int groupID, 
+            Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType)
         {
             Dictionary<Type, ITypeSafeDictionary> group;
 
@@ -45,8 +47,8 @@ namespace Svelto.ECS.Internal
                 BuildEntityView(entityID, @group, entityViewType, entityViewBuilder, implementors);
             }
 
-            Builder._initializer = new EntityInfoView {entityToBuild = entityToBuild};
-            BuildEntityView(entityID, @group, _viewType, Builder, null);
+            _builder._initializer = new EntityInfoView {entityToBuild = entityToBuild};
+            BuildEntityView(entityID, @group, _viewType, _builder, null);
         }
 
         static void BuildEntityView(EGID  entityID, Dictionary<Type, ITypeSafeDictionary> @group,
@@ -66,7 +68,7 @@ namespace Svelto.ECS.Internal
                 @group.Add(entityViewType, safeDictionary);
         }
         
-        static readonly EntityBuilder<EntityInfoView> Builder = new EntityBuilder<EntityInfoView>();
-        static readonly Type                              _viewType = typeof(EntityInfoView);
+        static readonly EntityBuilder<EntityInfoView> _builder = new EntityBuilder<EntityInfoView>();
+        static readonly Type                          _viewType = typeof(EntityInfoView);
     }
 }

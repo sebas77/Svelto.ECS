@@ -24,7 +24,7 @@ namespace Svelto.ECS.Internal
                                            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                entityViewEnginesDB);
         
-        void FillWithIndexedEntityViews(ITypeSafeDictionary                                          entityViews);
+        void FillWithIndexedEntities(ITypeSafeDictionary                                          entities);
         void AddEntityViewsToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB);
         
         void AddCapacity(int size);
@@ -41,10 +41,10 @@ namespace Svelto.ECS.Internal
         public TypeSafeDictionary()
         {}
 
-        public void FillWithIndexedEntityViews(ITypeSafeDictionary entityViews)
+        public void FillWithIndexedEntities(ITypeSafeDictionary entities)
         {
             int count;
-            var buffer = (entityViews as TypeSafeDictionary<TValue>).GetFasterValuesBuffer(out count);
+            var buffer = (entities as TypeSafeDictionary<TValue>).GetFasterValuesBuffer(out count);
 
             try
             {
