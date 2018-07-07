@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -63,10 +64,14 @@ namespace Svelto.ECS
                 {
                     ITypeSafeDictionary dbDic;
                     if (groupDB.TryGetValue(entityViewTypeSafeDictionary.Key, out dbDic) == false)
+                    {
                         dbDic = groupDB[entityViewTypeSafeDictionary.Key] = entityViewTypeSafeDictionary.Value.Create();
+                        //_groupedGroups[entityViewTypeSafeDictionary.Key] = new FasterDictionary<int, ITypeSafeDictionary>();
+                    }
 
                     //type safe copy
                     dbDic.FillWithIndexedEntities(entityViewTypeSafeDictionary.Value);
+                  //  _groupedGroups[entityViewTypeSafeDictionary.Key][groupID] = dbDic;
                 }
             }
 
@@ -86,7 +91,9 @@ namespace Svelto.ECS
         //split by type per group. It's possible to get all the entities of a give type T per group thanks 
         //to the FasterDictionary capabilitiies OR it's possible to get a specific entityView indexed by
         //ID. This ID doesn't need to be the EGID, it can be just the entityID
-        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>    _groupedEntityToAdd;
+        
+        readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityDB;
+//        readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups; //yes I am being sarcastic
         readonly EntitySubmissionScheduler                                                            _scheduler;
     }
 }
