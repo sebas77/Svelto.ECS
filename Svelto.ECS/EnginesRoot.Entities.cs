@@ -138,14 +138,18 @@ namespace Svelto.ECS
                 {
                     safeDictionary = fromTypeSafeDictionary.Create();
                     toGroup.Add(entityType, safeDictionary);
-                    //_groupedGroups[entityType] = new FasterDictionary<int, ITypeSafeDictionary>();
+                    _groupedGroups[entityType] = new FasterDictionary<int, ITypeSafeDictionary>();
                 }
+
+                _groupedGroups[entityType][toGroupID] = safeDictionary;
             }
 
             fromTypeSafeDictionary.MoveEntityFromDictionaryAndEngines(fromEntityGID, toGroupID, safeDictionary, _entityEngines);
 
             if (fromTypeSafeDictionary.Count == 0) //clean up
             {
+                _groupedGroups[entityType].Remove(toGroupID);
+
                 fromGroup.Remove(entityType);
             }
             
@@ -188,7 +192,6 @@ namespace Svelto.ECS
         readonly entitiesDB                                                _DB;
         readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
         
-
         static readonly Type                                               _typeEntityInfoView = typeof(EntityInfoView);
     }
 
@@ -205,8 +208,9 @@ namespace Svelto.ECS
             var typeSafeDictionary = (TypeSafeDictionary<T>) _current[typeof(T)];
 
             initializer.ID = _id;
-            
-            typeSafeDictionary.GetFasterValuesBuffer()[typeSafeDictionary.FindElementIndex(_id.entityID)] = initializer;
+
+            int count;
+            typeSafeDictionary.GetFasterValuesBuffer(out count)[typeSafeDictionary.FindElementIndex(_id.entityID)] = initializer;
         }
 
         readonly Dictionary<Type, ITypeSafeDictionary> _current;

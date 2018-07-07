@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+using Svelto.DataStructures.Experimental;
 using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {
     class entitiesDB : IEntitiesDB
     {
-        internal entitiesDB(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB)
+        internal entitiesDB(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB,
+            Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> groupedGroups)
         {
             _groupEntityViewsDB = groupEntityViewsDB;
+            _groupedGroups = groupedGroups;
         }
 
         public ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T:class, IEntityStruct
@@ -159,7 +162,7 @@ namespace Svelto.ECS.Internal
         public void ExecuteOnEntities<T, W>(int groupID, ref W value, ActionRef<T, W> action) where T : IEntityStruct
         {
             int count;
-            var entities = QueryEntities<T>(out count);
+            var entities = QueryEntities<T>(groupID, out count);
 
             for (int i = 0; i < count; i++)
                 action(ref entities[i], ref value);
@@ -172,6 +175,36 @@ namespace Svelto.ECS.Internal
 
             for (int i = 0; i < count; i++)
                 action(ref entities[i], ref value);
+        }
+
+        public void ExecuteOnAllEntities<T>(ActionRef<T> action) where T : IEntityStruct
+        {
+            int count;
+            var typeSafeDictionaries = _groupedGroups[typeof(T)].GetFasterValuesBuffer(out count);
+            for (int j = 0; j < count; j++)
+            {
+                int count2;
+                var safedic = typeSafeDictionaries[j];
+                TypeSafeDictionary<T> casted = safedic as TypeSafeDictionary<T>;
+                var entities = casted.GetFasterValuesBuffer(out count2);
+                for (int i = 0; i < count2; i++)
+                    action(ref entities[i]);
+            }
+        }
+
+        public void ExecuteOnAllEntities<T, W>(ref W value, ActionRef<T, W> action) where T : IEntityStruct
+        {
+            int count;
+            var typeSafeDictionaries = _groupedGroups[typeof(T)].GetFasterValuesBuffer(out count);
+            for (int j = 0; j < count; j++)
+            {
+                int count2;
+                var safedic = typeSafeDictionaries[j];
+                TypeSafeDictionary<T> casted = safedic as TypeSafeDictionary<T>;
+                var entities = casted.GetFasterValuesBuffer(out count2);
+                for (int i = 0; i < count2; i++)
+                    action(ref entities[i], ref value);
+            }
         }
 
         public bool Exists<T>(EGID entityGID) where T : IEntityStruct
@@ -257,5 +290,6 @@ namespace Svelto.ECS.Internal
      
         //grouped set of entity views, this is the standard way to handle entity views
         readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityViewsDB;
+        Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups;
     }
 }

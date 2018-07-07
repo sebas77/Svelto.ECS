@@ -63,15 +63,18 @@ namespace Svelto.ECS
                 foreach (var entityViewTypeSafeDictionary in groupOfEntitiesToSubmit.Value)
                 {
                     ITypeSafeDictionary dbDic;
+                    FasterDictionary<int, ITypeSafeDictionary> groupedGroup = null;
                     if (groupDB.TryGetValue(entityViewTypeSafeDictionary.Key, out dbDic) == false)
                     {
                         dbDic = groupDB[entityViewTypeSafeDictionary.Key] = entityViewTypeSafeDictionary.Value.Create();
-                        //_groupedGroups[entityViewTypeSafeDictionary.Key] = new FasterDictionary<int, ITypeSafeDictionary>();
+                        
+                        if (_groupedGroups.TryGetValue(entityViewTypeSafeDictionary.Key, out groupedGroup) == false)
+                            groupedGroup = _groupedGroups[entityViewTypeSafeDictionary.Key] = new FasterDictionary<int, ITypeSafeDictionary>();
                     }
 
                     //type safe copy
                     dbDic.FillWithIndexedEntities(entityViewTypeSafeDictionary.Value);
-                  //  _groupedGroups[entityViewTypeSafeDictionary.Key][groupID] = dbDic;
+                    groupedGroup[groupID] = dbDic;
                 }
             }
 
@@ -92,8 +95,8 @@ namespace Svelto.ECS
         //to the FasterDictionary capabilitiies OR it's possible to get a specific entityView indexed by
         //ID. This ID doesn't need to be the EGID, it can be just the entityID
         
-        readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityDB;
-//        readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups; //yes I am being sarcastic
-        readonly EntitySubmissionScheduler                                                            _scheduler;
+        readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>       _groupEntityDB;
+        readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups; //yes I am being sarcastic
+        readonly EntitySubmissionScheduler                                    _scheduler;
     }
 }

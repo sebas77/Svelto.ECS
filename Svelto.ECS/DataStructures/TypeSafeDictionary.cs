@@ -88,7 +88,8 @@ namespace Svelto.ECS.Internal
                                                          Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                              entityViewEnginesDB)
         {
-            var fasterValuesBuffer = GetFasterValuesBuffer();
+            int count;
+            var fasterValuesBuffer = GetFasterValuesBuffer(out count);
             var valueIndex = GetValueIndex(fromEntityGid.entityID);
 
             if (entityViewEnginesDB != null)
@@ -101,7 +102,7 @@ namespace Svelto.ECS.Internal
                 toGroupCasted.Add(fromEntityGid.entityID, ref fasterValuesBuffer[valueIndex]);
                 
                 if (entityViewEnginesDB != null)
-                    AddEntityViewToEngines(entityViewEnginesDB, ref toGroupCasted.GetFasterValuesBuffer()[toGroupCasted.GetValueIndex(fromEntityGid.entityID)]);
+                    AddEntityViewToEngines(entityViewEnginesDB, ref toGroupCasted.GetFasterValuesBuffer(out count)[toGroupCasted.GetValueIndex(fromEntityGid.entityID)]);
             }
 
             Remove(fromEntityGid.entityID);
