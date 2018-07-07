@@ -19,17 +19,17 @@ namespace Svelto.ECS
 
             public void RemoveEntity(int entityID)
             {
-                _weakReference.Target.RemoveEntity(new EGID(entityID));
+                _weakReference.Target.MoveEntity(new EGID(entityID));
             }
             
             public void RemoveEntity(int entityID, int groupID)
             {
-                _weakReference.Target.RemoveEntity(new EGID(entityID, groupID));
+                _weakReference.Target.MoveEntity(new EGID(entityID, groupID));
             }
 
             public void RemoveEntity(EGID entityEGID)
             {
-                _weakReference.Target.RemoveEntity(entityEGID);
+                _weakReference.Target.MoveEntity(entityEGID);
             }
 
             public void RemoveGroupAndEntities(int groupID)

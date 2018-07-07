@@ -89,22 +89,6 @@ namespace Svelto.ECS
             return ENTITY_VIEW_TYPE;
         }
 
-        void IEntityBuilder.MoveEntityView(EGID entityID, int toGroupID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic)
-        {
-            MoveEntityView(entityID, toGroupID, fromSafeDic, toSafeDic);
-        }
-
-        public static void MoveEntityView(EGID entityID, int toGroupID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic)
-        {
-            var fromCastedDic = fromSafeDic as TypeSafeDictionary<T>;
-            var toCastedDic = toSafeDic as TypeSafeDictionary<T>;
-
-            var entity = fromCastedDic[entityID.entityID];
-            fromCastedDic.Remove(entityID.entityID);
-            entity.ID = new EGID(entityID.entityID, toGroupID);
-            toCastedDic.Add(entityID.entityID, entity);
-        }
-
         static FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection
         {
             get { return EntityView<T>.cachedFields; }

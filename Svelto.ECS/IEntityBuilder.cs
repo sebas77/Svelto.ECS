@@ -9,6 +9,5 @@ namespace Svelto.ECS
         ITypeSafeDictionary Preallocate(ref ITypeSafeDictionary dictionary, int size);
 
         Type GetEntityType();
-        void MoveEntityView(EGID entityID, int toGroupID, ITypeSafeDictionary fromSafeDic, ITypeSafeDictionary toSafeDic);
     }
 }

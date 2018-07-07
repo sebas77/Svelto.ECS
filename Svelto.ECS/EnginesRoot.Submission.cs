@@ -76,7 +76,7 @@ namespace Svelto.ECS
             {    
                 foreach (var entityViewsPerType in groupToSubmit.Value)
                 {
-                    entityViewsPerType.Value.AddEntityViewsToEngines(_entityEngines);
+                    entityViewsPerType.Value.AddEntitiesToEngines(_entityEngines);
                 }
             }
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 using Svelto.WeakEvents;
@@ -38,9 +39,11 @@ namespace Svelto.ECS
             _entityEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
 
-            _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
-            _groupEntityDB[ExclusiveGroup.StandardEntitiesGroup] = new Dictionary<Type, ITypeSafeDictionary>();
-            
+            _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>
+            {
+                [ExclusiveGroup.StandardEntitiesGroup] = new Dictionary<Type, ITypeSafeDictionary>()
+            };
+            _groupedGroups = new Dictionary<Type, FasterDictionary<int, int>>();
             _groupedEntityToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
             _DB = new entitiesDB(_groupEntityDB);
