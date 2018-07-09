@@ -65,12 +65,10 @@ namespace Svelto.ECS
                     ITypeSafeDictionary dbDic;
                     FasterDictionary<int, ITypeSafeDictionary> groupedGroup = null;
                     if (groupDB.TryGetValue(entityViewTypeSafeDictionary.Key, out dbDic) == false)
-                    {
                         dbDic = groupDB[entityViewTypeSafeDictionary.Key] = entityViewTypeSafeDictionary.Value.Create();
-                        
-                        if (_groupedGroups.TryGetValue(entityViewTypeSafeDictionary.Key, out groupedGroup) == false)
-                            groupedGroup = _groupedGroups[entityViewTypeSafeDictionary.Key] = new FasterDictionary<int, ITypeSafeDictionary>();
-                    }
+                    
+                    if (_groupedGroups.TryGetValue(entityViewTypeSafeDictionary.Key, out groupedGroup) == false)
+                        groupedGroup = _groupedGroups[entityViewTypeSafeDictionary.Key] = new FasterDictionary<int, ITypeSafeDictionary>();
 
                     //type safe copy
                     dbDic.FillWithIndexedEntities(entityViewTypeSafeDictionary.Value);
