@@ -29,8 +29,8 @@ namespace Svelto.ECS
         /// <summary>
         /// Engines root contextualize your engines and entities. You don't need to limit yourself to one EngineRoot
         /// as multiple engines root could promote separation of scopes. The EntitySubmissionScheduler checks
-        /// periodically if new entity must be submited to the database and the engines. It's an external
-        /// dependencies to be indipendent by the running platform as the user can define it.
+        /// periodically if new entity must be submitted to the database and the engines. It's an external
+        /// dependencies to be independent by the running platform as the user can define it.
         /// The EntitySubmissionScheduler cannot hold an EnginesRoot reference, that's why
         /// it must receive a weak reference of the EnginesRoot callback.
         /// </summary>
@@ -39,10 +39,8 @@ namespace Svelto.ECS
             _entityEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
 
-            _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>
-            {
-                [ExclusiveGroup.StandardEntitiesGroup] = new Dictionary<Type, ITypeSafeDictionary>()
-            };
+            _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
+            _groupEntityDB[ExclusiveGroup.StandardEntitiesGroup] = new Dictionary<Type, ITypeSafeDictionary>();
             _groupedGroups = new Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
