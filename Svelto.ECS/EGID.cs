@@ -1,5 +1,3 @@
-using Svelto.ECS.Internal;
-
 namespace Svelto.ECS
 {
     public struct EGID

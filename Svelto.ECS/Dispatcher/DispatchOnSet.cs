@@ -4,22 +4,17 @@ namespace Svelto.ECS
 {
     public class DispatchOnSet<T> where T:struct
     {
-        public DispatchOnSet(int senderID):this()
+        public DispatchOnSet(int senderID)
         {
-            _senderID    = new EGID(senderID, ExclusiveGroup.StandardEntitiesGroup);
-        }
-        
-        public DispatchOnSet(EGID senderID):this()
-        {
-            _senderID = senderID;
-        }
-        
-        public DispatchOnSet()
-        {
-            _senderID    = new EGID();
-            _subscribers = new WeakEvent<EGID, T>();
+            _senderID    = senderID;
+            _subscribers = new WeakEvent<int, T>();
         }
 
+        public DispatchOnSet()
+        {      
+            _subscribers = new WeakEvent<int, T>();
+        }
+        
         public T value
         {
             set
@@ -35,19 +30,19 @@ namespace Svelto.ECS
             }
         }
         
-        public void NotifyOnValueSet(System.Action<EGID, T> action)
+        public void NotifyOnValueSet(System.Action<int, T> action)
         {
             _subscribers += action;
         }
 
-        public void StopNotify(System.Action<EGID, T> action)
+        public void StopNotify(System.Action<int, T> action)
         {
             _subscribers -= action;
         }
 
         protected T      _value;
-        readonly EGID _senderID;
+        readonly int _senderID;
 
-        WeakEvent<EGID, T> _subscribers;
+        WeakEvent<int, T> _subscribers;
     }
 }

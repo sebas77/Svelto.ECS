@@ -150,7 +150,9 @@ namespace Svelto.ECS
             {
                 _groupedGroups[entityType].Remove(toGroupID);
 
-                fromGroup.Remove(entityType);
+                //it's probably better to not remove this, but the dictionary should be trimmed?
+                //fromGroup.Remove(entityType);
+                fromTypeSafeDictionary.Trim();
             }
             
             //it doesn't eliminate the fromGroup itself on purpose

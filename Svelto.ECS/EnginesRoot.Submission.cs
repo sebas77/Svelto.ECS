@@ -90,7 +90,7 @@ namespace Svelto.ECS
         //one datastructure rule them all:
         //split by group
         //split by type per group. It's possible to get all the entities of a give type T per group thanks 
-        //to the FasterDictionary capabilitiies OR it's possible to get a specific entityView indexed by
+        //to the FasterDictionary capabilities OR it's possible to get a specific entityView indexed by
         //ID. This ID doesn't need to be the EGID, it can be just the entityID
         
         readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>       _groupEntityDB;

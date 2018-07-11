@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
@@ -32,6 +32,7 @@ namespace Svelto.ECS.Internal
         bool Remove(int idGid);
         
         int Count { get; }
+        void Trim();
     }
 
     class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityStruct
