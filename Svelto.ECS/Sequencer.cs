@@ -47,7 +47,7 @@ namespace Svelto.ECS
         void Next<T, C>(IEngine engine, ref T param, C condition) where C : struct, IConvertible;
     }
 
-    public class Sequencer : ISequencer
+    public abstract class Sequencer : ISequencer
     {
         public void SetSequence(Steps steps)       
         {

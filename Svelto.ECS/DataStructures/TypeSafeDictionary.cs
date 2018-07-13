@@ -52,9 +52,7 @@ namespace Svelto.ECS.Internal
             {
                 for (var i = 0; i < count; i++)
                 {
-                    var entityView = buffer[i];
-
-                    Add(entityView.ID.entityID, entityView);
+                    Add(buffer[i].ID.entityID, ref buffer[i]);
                 }
             }
             catch (Exception e)
@@ -167,6 +165,11 @@ namespace Svelto.ECS.Internal
                 throw new Exception("Entity not found in this group");
 
             return findIndex;
+        }
+        
+        public bool TryFindElementIndex(int entityGidEntityId, out uint index)
+        {
+            return FindIndex(entityGidEntityId, out index);
         }
         
         static readonly Type _type = typeof(TValue);

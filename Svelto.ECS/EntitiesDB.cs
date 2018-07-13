@@ -64,9 +64,7 @@ namespace Svelto.ECS.Internal
                 return null;
             }
 
-            if (casted != null)
-                index = casted.FindElementIndex(entityGID.entityID);
-            else
+            if (casted == null || casted.TryFindElementIndex(entityGID.entityID, out index) == false)
             {
                 index = 0;
                 return null;
