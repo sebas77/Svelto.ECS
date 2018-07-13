@@ -1,7 +1,7 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
-namespace Svelto.ECS
+namespace Svelto.ECS.Unity
 {
-    public class UnityEntityDescriptorHolder<T>: 
+    public class GenericEntityDescriptorHolder<T>: 
         UnityEngine.MonoBehaviour , IEntityDescriptorHolder
             where T: IEntityDescriptor, new()
     {

@@ -40,14 +40,7 @@ namespace Svelto.ECS
         void Step(ref T token, Enum condition);
     }
     
-    public interface ISequencer
-    {
-        void Next<T>(IEngine engine, ref T param);
-        void Next<T>(IEngine engine, ref T param, int condition);
-        void Next<T, C>(IEngine engine, ref T param, C condition) where C : struct, IConvertible;
-    }
-
-    public abstract class Sequencer : ISequencer
+    public abstract class Sequencer
     {
         public void SetSequence(Steps steps)       
         {
