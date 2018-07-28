@@ -46,10 +46,6 @@ namespace Svelto.ECS.Internal
 
                 BuildEntityView(entityID, @group, entityViewType, entityViewBuilder, implementors);
             }
-
-            _builder._initializer = new EntityInfoView {entityToBuild = entityToBuild};
-            
-            BuildEntityView(entityID, @group, _viewType, _builder, null);
         }
 
         static void BuildEntityView(EGID  entityID, Dictionary<Type, ITypeSafeDictionary> @group,
@@ -69,8 +65,5 @@ namespace Svelto.ECS.Internal
             if (entityViewsPoolWillBeCreated)
                 @group.Add(entityViewType, safeDictionary);
         }
-        
-        static readonly EntityBuilder<EntityInfoView> _builder = new EntityBuilder<EntityInfoView>();
-        static readonly Type                          _viewType = typeof(EntityInfoView);
     }
 }

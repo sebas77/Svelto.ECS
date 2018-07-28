@@ -41,30 +41,21 @@ namespace Svelto.ECS
         EntityStructInitializer BuildEntity<T>(EGID entityID, object[] implementors)
             where T : IEntityDescriptor, new()
         {
-            var descriptorEntitiesToBuild = EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
-#if DEBUG && !PROFILER             
-            CheckEntityID(entityID, descriptorEntitiesToBuild);
-#endif            
-            var dic = EntityFactory.BuildGroupedEntityViews(entityID,
-                              _groupedEntityToAdd.current,
-                              descriptorEntitiesToBuild,
-                              implementors);
-
-            _newEntitiesBuiltToProcess++;
-            
-            return new EntityStructInitializer(entityID, dic);
+            return BuildEntity(entityID, EntityDescriptorTemplate<T>.descriptor, implementors);
         }
 
         EntityStructInitializer BuildEntity(EGID entityID, 
-                                IEntityBuilder[] entityToBuild,
+                                IEntityDescriptor entityDescriptor,
                                 object[] implementors)
         {
+            var descriptorEntitiesToBuild = entityDescriptor.entitiesToBuild;
+            
 #if DEBUG && !PROFILER            
-            CheckEntityID(entityID, entityToBuild);
+            CheckEntityID(entityID, entityDescriptor);
 #endif            
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                                                   _groupedEntityToAdd.current,
-                                                  entityToBuild,
+                                                            descriptorEntitiesToBuild,
                                                    implementors);
             
             _newEntitiesBuiltToProcess++;
@@ -72,27 +63,28 @@ namespace Svelto.ECS
             return new EntityStructInitializer(entityID, dic);
         }
         
-        void CheckEntityID(EGID entityID, IEntityBuilder[] descriptorEntitiesToBuild)
+        void CheckEntityID(EGID entityID, IEntityDescriptor descriptorEntity)
         {
             Dictionary<Type, ITypeSafeDictionary> @group;
+            var descriptorEntitiesToBuild = descriptorEntity.entitiesToBuild;
+            
             if (_groupEntityDB.TryGetValue(entityID.groupID, out @group) == true)
             {
                 for (int i = 0; i < descriptorEntitiesToBuild.Length; i++)
                 {
-                    CheckEntityID(entityID, descriptorEntitiesToBuild[i].GetEntityType(), @group);
+                    CheckEntityID(entityID, descriptorEntitiesToBuild[i].GetEntityType(), @group, descriptorEntity.ToString());
                 }
-                CheckEntityID(entityID, _typeEntityInfoView, @group);
             }
         }
 
-        static void CheckEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group)
+        static void CheckEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group, string name)
         {
             ITypeSafeDictionary entities;
             if (@group.TryGetValue(entityType, out entities))
             {
                 if (entities.Has(entityID.entityID) == true)
                 {
-                    Utility.Console.LogError("Entity with used ID is about to be built: "
+                    Utility.Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
                                             .FastConcat(entityType)
                                             .FastConcat(" id: ")
                                             .FastConcat(entityID.entityID)
@@ -136,24 +128,13 @@ namespace Svelto.ECS
                 else
                     dbList.AddCapacity(size);
             }
-
-            if (group.TryGetValue(_typeEntityInfoView, out dbList) == false)
-                group[_typeEntityInfoView] = EntityBuilder<EntityInfoView>.Preallocate(ref dbList, size);
-            else
-                dbList.AddCapacity(size);
-
-            if (@groupBuffer.TryGetValue(_typeEntityInfoView, out dbList) == false)
-                @groupBuffer[_typeEntityInfoView] = EntityBuilder<EntityInfoView>.Preallocate(ref dbList, size);
-            else
-                dbList.AddCapacity(size);
         }
         
         ///--------------------------------------------
         /// 
-        void MoveEntity(EGID entityGID, int toGroupID = -1, Dictionary<Type, ITypeSafeDictionary> toGroup = null)
+        void MoveEntity<T>(EGID entityGID, int toGroupID = -1, Dictionary<Type, ITypeSafeDictionary> toGroup = null) where T:IEntityDescriptor, new ()
         {
-            var entityViewInfoDictionary = _groupEntityDB[entityGID.groupID][_typeEntityInfoView] as TypeSafeDictionary<EntityInfoView>;
-            var entityBuilders = entityViewInfoDictionary[entityGID.entityID].entityToBuild;
+            var entityBuilders = EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
             var entityBuildersCount = entityBuilders.Length;
            
             //for each entity view generated by the entity descriptor
@@ -161,13 +142,11 @@ namespace Svelto.ECS
             {
                 var entityType = entityBuilders[i].GetEntityType();
                 
-                MoveEntity(entityGID, toGroupID, toGroup, entityType);
+                MoveEntity<T>(entityGID, toGroupID, toGroup, entityType);
             }
-
-            MoveEntity(entityGID, toGroupID, toGroup, _typeEntityInfoView);
         }
 
-        void MoveEntity(EGID fromEntityGID, int toGroupID, Dictionary<Type, ITypeSafeDictionary> toGroup, Type entityType)
+        void MoveEntity<T>(EGID fromEntityGID, int toGroupID, Dictionary<Type, ITypeSafeDictionary> toGroup, Type entityType) where T:IEntityDescriptor, new ()
         {
             var fromGroup = _groupEntityDB[fromEntityGID.groupID];
 
@@ -210,7 +189,7 @@ namespace Svelto.ECS
 
         ///--------------------------------------------
 
-        void SwapEntityGroup(int entityID, int fromGroupID, int toGroupID)
+        void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T:IEntityDescriptor, new ()
         {
             DBC.ECS.Check.Require(fromGroupID != toGroupID,
                           "can't move an entity to the same fromGroup where it already belongs to");
@@ -220,22 +199,21 @@ namespace Svelto.ECS
             if (_groupEntityDB.TryGetValue(toGroupID, out toGroup) == false)
                 toGroup = _groupEntityDB[toGroupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
-            MoveEntity(new EGID(entityID, fromGroupID), toGroupID, toGroup);
+            MoveEntity<T>(new EGID(entityID, fromGroupID), toGroupID, toGroup);
         }
         
-        EGID SwapFirstEntityInGroup(int fromGroupID, int toGroupId)
+        EGID SwapFirstEntityInGroup<T>(int fromGroupID, int toGroupId) where T:IEntityDescriptor, new()
         {
-            var firstID =
-                ((TypeSafeDictionary<EntityInfoView>) _groupEntityDB[fromGroupID][_typeEntityInfoView]).FasterValues[0].ID.entityID;
+            var firstID = _groupEntityDB[fromGroupID][EntityDescriptorTemplate<T>.descriptor.entitiesToBuild[0]
+                                                                                 .GetEntityType()].GetFirstID();
             
-            SwapEntityGroup(firstID, fromGroupID, toGroupId);
+            SwapEntityGroup<T>(firstID, fromGroupID, toGroupId);
             
             return new EGID(firstID, toGroupId);
         }
 
         readonly entitiesDB         _DB;
         
-        static readonly Type        _typeEntityInfoView = typeof(EntityInfoView);
         int                         _newEntitiesBuiltToProcess;
     }
 

@@ -42,9 +42,9 @@ namespace Svelto.ECS
         public IEntityBuilder[] entitiesToBuild { get; private set; }
     }
 
-    public struct StaticEntityDescriptorInfo<TType>: IEntityDescriptor where TType : IEntityDescriptor
+    public class StaticEntityDescriptorInfo<TType>: IEntityDescriptor where TType : IEntityDescriptor
     {
-        internal StaticEntityDescriptorInfo(TType descriptor) : this()
+        internal StaticEntityDescriptorInfo(TType descriptor)
         {
             entitiesToBuild = descriptor.entitiesToBuild;
         }
