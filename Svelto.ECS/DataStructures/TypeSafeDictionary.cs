@@ -34,6 +34,7 @@ namespace Svelto.ECS.Internal
         void Trim();
         void Clear();
         bool Has(int entityIdEntityId);
+        int GetFirstID();
     }
 
     class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityStruct
@@ -78,6 +79,11 @@ namespace Svelto.ECS.Internal
         public bool Has(int entityIdEntityId)
         {
             return ContainsKey(entityIdEntityId);
+        }
+
+        public int GetFirstID()
+        {
+            return FasterValues[0].ID.entityID;
         }
 
         void AddEntityViewToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
