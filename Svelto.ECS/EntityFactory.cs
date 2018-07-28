@@ -48,6 +48,7 @@ namespace Svelto.ECS.Internal
             }
 
             _builder._initializer = new EntityInfoView {entityToBuild = entityToBuild};
+            
             BuildEntityView(entityID, @group, _viewType, _builder, null);
         }
 
@@ -62,6 +63,7 @@ namespace Svelto.ECS.Internal
             //passing the undefined entityViewsByType inside the entityViewBuilder will allow
             //it to be created with the correct type and casted back to the undefined list.
             //that's how the list will be eventually of the target type.
+            
             entityBuilder.BuildEntityViewAndAddToList(ref safeDictionary, entityID, implementors);
 
             if (entityViewsPoolWillBeCreated)

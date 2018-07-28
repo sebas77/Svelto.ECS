@@ -18,20 +18,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER
             if (needsReflection == false && typeof(T) != typeof(EntityInfoView))
             {
-                var type = typeof(T);
-
-                var fields = type.GetFields(BindingFlags.Public |
-                                            BindingFlags.Instance);
-    
-                for (int i = fields.Length - 1; i >= 0; --i)
-                {
-                    var field = fields[i];
-
-                    if (field.FieldType.IsPrimitive == true || field.FieldType.IsValueType == true)
-                        continue;
-                    
-                    throw new EntityStructException(field.FieldType);
-                }
+                CheckFields(typeof(T));
             }
 #endif
             if (needsReflection == true)
@@ -39,7 +26,32 @@ namespace Svelto.ECS
                 EntityView<T>.InitCache();
             }
         }
-        
+#if DEBUG && !PROFILER
+        static void CheckFields(Type type)
+        {
+            var fields = type.GetFields(BindingFlags.Public |
+                                        BindingFlags.Instance);
+
+            for (int i = fields.Length - 1; i >= 0; --i)
+            {
+                var field = fields[i];
+
+                var fieldFieldType = field.FieldType;
+                if (fieldFieldType.IsPrimitive == true || fieldFieldType.IsValueType == true)
+                {
+                    if (fieldFieldType.IsValueType && !fieldFieldType.IsEnum)
+                    {
+                        CheckFields(fieldFieldType);
+                    }
+
+                    continue;
+                }
+
+                throw new EntityStructException(fieldFieldType);
+            }
+        }
+#endif        
+
         public void BuildEntityViewAndAddToList(ref ITypeSafeDictionary dictionary, EGID entityID, object[] implementors)
         {
             if (dictionary == null)

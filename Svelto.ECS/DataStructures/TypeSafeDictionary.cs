@@ -29,10 +29,11 @@ namespace Svelto.ECS.Internal
         void AddEntitiesToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB);
         
         void AddCapacity(int size);
-        bool Remove(int idGid);
         
         int Count { get; }
         void Trim();
+        void Clear();
+        bool Has(int entityIdEntityId);
     }
 
     class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityStruct
@@ -72,6 +73,11 @@ namespace Svelto.ECS.Internal
 
                 AddEntityViewToEngines(entityViewEnginesDB, ref entity);
             }
+        }
+
+        public bool Has(int entityIdEntityId)
+        {
+            return ContainsKey(entityIdEntityId);
         }
 
         void AddEntityViewToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)

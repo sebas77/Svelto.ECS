@@ -57,27 +57,16 @@ namespace Svelto.ECS.Internal
 
         public T[] QueryEntitiesAndIndex<T>(EGID entityGID, out uint index) where T : IEntityStruct
         {
-            TypeSafeDictionary<T> casted;
-            if (!FindSafeDictionary(entityGID, out casted))
-            {
-                index = 0;
-                return null;
-            }
-
-            if (casted == null || casted.TryFindElementIndex(entityGID.entityID, out index) == false)
-            {
-                index = 0;
-                return null;
-            }
-
-            int count;
+            T[] array;
+            if ((array = QueryEntitiesAndIndexInternal<T>(entityGID, out index)) != null)
+                return array;
             
-            return QueryEntities<T>(entityGID.groupID, out count);
+            throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID)); 
         }
-
+        
         public bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : IEntityStruct
         {
-            if ((array = QueryEntitiesAndIndex<T>(entityGid, out index)) != null)
+            if ((array = QueryEntitiesAndIndexInternal<T>(entityGid, out index)) != null)
                 return true;
             
             return false;
@@ -275,7 +264,26 @@ namespace Svelto.ECS.Internal
 
             return false;
         }
+        
+        T[] QueryEntitiesAndIndexInternal<T>(EGID entityGID, out uint index) where T : IEntityStruct
+        {
+            TypeSafeDictionary<T> casted;
+            if (!FindSafeDictionary(entityGID, out casted))
+            {
+                index = 0;
+                return null;
+            }
 
+            if (casted == null || casted.TryFindElementIndex(entityGID.entityID, out index) == false)
+            {
+                index = 0;
+                return null;
+            }
+
+            int count;
+            
+            return QueryEntities<T>(entityGID.groupID, out count);
+        }
         static ReadOnlyCollectionStruct<T> RetrieveEmptyEntityViewList<T>()
         {
             return ReadOnlyCollectionStruct<T>.DefaultList;

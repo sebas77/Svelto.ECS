@@ -54,7 +54,7 @@ namespace Svelto.ECS
 
             public EGID SwapFirstEntityGroup(int fromGroupID, int toGroupID)
             {
-                return _weakReference.Target.SwapFirstEntityGroup( fromGroupID, toGroupID);
+                return _weakReference.Target.SwapFirstEntityInGroup( fromGroupID, toGroupID);
             }
         }
     }

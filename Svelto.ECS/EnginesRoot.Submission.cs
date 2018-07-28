@@ -14,11 +14,10 @@ namespace Svelto.ECS
     {
         void SubmitEntityViews()
         {
-            bool newEntityViewsHaveBeenAddedWhileIterating =  _groupedEntityToAdd.current.Count > 0;
-
             int numberOfReenteringLoops = 0;
 
-            while (newEntityViewsHaveBeenAddedWhileIterating)
+            //are there new entities built to process?
+            while ( _newEntitiesBuiltToProcess > 0)
             {
                 //use other as source from now on
                 //current will be use to write new entityViews
@@ -33,15 +32,13 @@ namespace Svelto.ECS
                 if (_groupedEntityToAdd.other.Count > 0)
                     AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
 
-                //other can be cleared now
-                _groupedEntityToAdd.other.Clear();
-
-                //has current new entityViews?
-                newEntityViewsHaveBeenAddedWhileIterating = _groupedEntityToAdd.current.Count > 0;
+                //other can be cleared now, but let's avoid deleting the dictionary every time
+                _groupedEntityToAdd.ClearOther();
 
                 if (numberOfReenteringLoops > 5)
                     throw new Exception("possible infinite loop found creating Entities inside IEntityViewsEngine Add method, please consider building entities outside IEntityViewsEngine Add method");
 
+                _newEntitiesBuiltToProcess = 0;
                 numberOfReenteringLoops++;
             }
         }
@@ -70,7 +67,7 @@ namespace Svelto.ECS
                     if (_groupedGroups.TryGetValue(entityViewTypeSafeDictionary.Key, out groupedGroup) == false)
                         groupedGroup = _groupedGroups[entityViewTypeSafeDictionary.Key] = new FasterDictionary<int, ITypeSafeDictionary>();
 
-                    //type safe copy
+                    //Fill the DB with the entity views generate this frame.
                     dbDic.FillWithIndexedEntities(entityViewTypeSafeDictionary.Value);
                     groupedGroup[groupID] = dbDic;
                 }
@@ -95,6 +92,7 @@ namespace Svelto.ECS
         
         readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>       _groupEntityDB;
         readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups; //yes I am being sarcastic
+        readonly DoubleBufferedEntitiesToAdd<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
         readonly EntitySubmissionScheduler                                    _scheduler;
     }
 }

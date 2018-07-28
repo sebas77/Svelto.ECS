@@ -20,7 +20,8 @@ static class EntityViewUtility
                .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out count);
 #if DEBUG && !PROFILER
         if (count == 0) 
-            throw new Exception(NO_COMPONENTS_EXCEPTION.FastConcat("Type ", entityDescriptorName, " entityView ", entityBuilder.GetEntityType().ToString()));
+            throw new Exception(NO_COMPONENTS_EXCEPTION.FastConcat("Type ", entityDescriptorName, " entityView ", 
+                                                                   entityBuilder.GetEntityType().ToString()));
 #endif
         for (var index = 0; index < implementors.Length; index++)
         {
@@ -52,7 +53,8 @@ static class EntityViewUtility
 #if DEBUG && !PROFILER
             else
             {
-                Utility.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", entityBuilder.GetEntityType().ToString()));
+                Utility.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", 
+                                                                      entityBuilder.GetEntityType().ToString()));
             }
 #endif
         }
@@ -71,8 +73,8 @@ static class EntityViewUtility
             if (implementorsByType.TryGetValue(fieldType, out component) == false)
             {
                 var e = new Exception(NOT_FOUND_EXCEPTION + " Component Type: " + fieldType.Name +
-                                      " - EntityView: " +
-                                      entityBuilder.GetEntityType().Name + " - EntityDescriptor " + entityDescriptorName);
+                                      " - EntityView: " + entityBuilder.GetEntityType().Name + 
+                                      " - EntityDescriptor " + entityDescriptorName);
 
                 throw e;
             }

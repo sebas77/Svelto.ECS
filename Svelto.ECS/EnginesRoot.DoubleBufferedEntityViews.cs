@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using Svelto.ECS.Internal;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
 using Svelto.ECS.Profiler;
@@ -8,12 +11,12 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        class DoubleBufferedEntityViews<T> where T : class, IDictionary, new()
+        class DoubleBufferedEntitiesToAdd<T> where T : Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>, new()
         {
             readonly T _entityViewsToAddBufferA = new T();
             readonly T _entityViewsToAddBufferB = new T();
 
-            internal DoubleBufferedEntityViews()
+            internal DoubleBufferedEntitiesToAdd()
             {
                 this.other = _entityViewsToAddBufferA;
                 this.current = _entityViewsToAddBufferB;
@@ -21,12 +24,23 @@ namespace Svelto.ECS
 
             internal T other;
             internal T current;
-
+            
             internal void Swap()
             {
                 var toSwap = other;
                 other = current;
                 current = toSwap;
+            }
+
+            public void ClearOther()
+            {
+                foreach (var item in other)
+                {
+                    foreach (var subitem in item.Value)
+                    {
+                        subitem.Value.Clear();
+                    }
+                }
             }
         }
     }

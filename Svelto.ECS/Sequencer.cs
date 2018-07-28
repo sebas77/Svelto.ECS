@@ -7,39 +7,30 @@ namespace Svelto.ECS
     public class Steps : Dictionary<IEngine, IDictionary>
     {}
 
-    public class To : Dictionary<int, IStep[]>
+    public class To<C> : Dictionary<C, IStep[]> where C : struct, IConvertible
     {
-        public void Add(IStep engine)
+        public void Add(C condition, IStep engine)
         {
-            Add(Condition.Always, new [] {engine});
+            Add(condition, new [] {engine});
         }
-        public void Add(IStep[] engines)
+        public void Add(C condition, params IStep[] engines)
         {
-            Add(Condition.Always, engines);
+            Add(condition, engines);
+        }
+        public void Add(params IStep[] engines)
+        {
+            Add(default(C), engines);
         }
     }
-    
-    public class To<C> : Dictionary<C, IStep[]> where C:struct,IConvertible
-    {}
     
     public interface IStep
     {}
 
-    public interface IStep<T>:IStep
+    public interface IStep<in C>:IStep where C:struct,IConvertible
     {
-        void Step(ref T token, int condition);
+        void Step(C condition, EGID id);
     }
-    
-    public interface IStep<T, in C>:IStep where C:struct,IConvertible
-    {
-        void Step(ref T token, C condition);
-    }
-    
-    public interface IEnumStep<T>:IStep
-    {
-        void Step(ref T token, Enum condition);
-    }
-    
+
     public abstract class Sequencer
     {
         public void SetSequence(Steps steps)       
@@ -47,39 +38,25 @@ namespace Svelto.ECS
             _steps = steps;
         }
 
-        public void Next<T>(IEngine engine, ref T param)
+        public void Next(IEngine engine, EGID id)
         {
-            Next(engine, ref param, Condition.Always);
-        }
-
-        public void Next<T>(IEngine engine, ref T param, int condition)
-        {
-            int branch = condition;
-            var steps = (_steps[engine] as Dictionary<int, IStep[]>)[branch];
-
-            if (steps != null)
-                for (int i = 0; i < steps.Length; i++)
-                    ((IStep<T>)steps[i]).Step(ref param, condition);
+            Next(engine, Condition.Always, id);
         }
         
-        public void Next<T>(IEngine engine, ref T param, Enum condition)
+        public void Next(IEngine engine)
         {
-            int branch = Convert.ToInt32(condition);
-            var steps  = (_steps[engine] as Dictionary<int, IStep[]>)[branch];
-
-            if (steps != null)
-                for (int i = 0; i < steps.Length; i++)
-                    ((IEnumStep<T>)steps[i]).Step(ref param, condition);
+            Next(engine, Condition.Always);
         }
 
-        public void Next<T, C>(IEngine engine, ref T param, C condition) where C:struct,IConvertible
+        public void Next<C>(IEngine engine, C condition, EGID id = new EGID()) where C:struct,IConvertible
         {
             C branch = condition;
             var steps  = (_steps[engine] as Dictionary<C, IStep[]>)[branch];
 
-            if (steps != null)
-                for (int i = 0; i < steps.Length; i++)
-                    ((IStep<T, C>)steps[i]).Step(ref param, condition);
+            if (steps == null) return;
+            
+            for (var i = 0; i < steps.Length; i++)
+                ((IStep<C>)steps[i]).Step(condition, id);
         }
 
         Steps _steps;
@@ -89,4 +66,4 @@ namespace Svelto.ECS
     {
         public const int Always = 0;
     }
-}   
+}       

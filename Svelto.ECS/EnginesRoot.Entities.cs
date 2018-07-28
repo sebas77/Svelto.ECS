@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 
@@ -40,10 +41,16 @@ namespace Svelto.ECS
         EntityStructInitializer BuildEntity<T>(EGID entityID, object[] implementors)
             where T : IEntityDescriptor, new()
         {
+            var descriptorEntitiesToBuild = EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
+#if DEBUG && !PROFILER             
+            CheckEntityID(entityID, descriptorEntitiesToBuild);
+#endif            
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                               _groupedEntityToAdd.current,
-                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild,
+                              descriptorEntitiesToBuild,
                               implementors);
+
+            _newEntitiesBuiltToProcess++;
             
             return new EntityStructInitializer(entityID, dic);
         }
@@ -52,12 +59,47 @@ namespace Svelto.ECS
                                 IEntityBuilder[] entityToBuild,
                                 object[] implementors)
         {
+#if DEBUG && !PROFILER            
+            CheckEntityID(entityID, entityToBuild);
+#endif            
             var dic = EntityFactory.BuildGroupedEntityViews(entityID,
                                                   _groupedEntityToAdd.current,
                                                   entityToBuild,
                                                    implementors);
             
+            _newEntitiesBuiltToProcess++;
+            
             return new EntityStructInitializer(entityID, dic);
+        }
+        
+        void CheckEntityID(EGID entityID, IEntityBuilder[] descriptorEntitiesToBuild)
+        {
+            Dictionary<Type, ITypeSafeDictionary> @group;
+            if (_groupEntityDB.TryGetValue(entityID.groupID, out @group) == true)
+            {
+                for (int i = 0; i < descriptorEntitiesToBuild.Length; i++)
+                {
+                    CheckEntityID(entityID, descriptorEntitiesToBuild[i].GetEntityType(), @group);
+                }
+                CheckEntityID(entityID, _typeEntityInfoView, @group);
+            }
+        }
+
+        static void CheckEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group)
+        {
+            ITypeSafeDictionary entities;
+            if (@group.TryGetValue(entityType, out entities))
+            {
+                if (entities.Has(entityID.entityID) == true)
+                {
+                    Utility.Console.LogError("Entity with used ID is about to be built: "
+                                            .FastConcat(entityType)
+                                            .FastConcat(" id: ")
+                                            .FastConcat(entityID.entityID)
+                                            .FastConcat(" groupid: ")
+                                            .FastConcat(entityID.groupID));
+                }
+            }
         }
 
         ///--------------------------------------------
@@ -181,7 +223,7 @@ namespace Svelto.ECS
             MoveEntity(new EGID(entityID, fromGroupID), toGroupID, toGroup);
         }
         
-        EGID SwapFirstEntityGroup(int fromGroupID, int toGroupId)
+        EGID SwapFirstEntityInGroup(int fromGroupID, int toGroupId)
         {
             var firstID =
                 ((TypeSafeDictionary<EntityInfoView>) _groupEntityDB[fromGroupID][_typeEntityInfoView]).FasterValues[0].ID.entityID;
@@ -191,10 +233,10 @@ namespace Svelto.ECS
             return new EGID(firstID, toGroupId);
         }
 
-        readonly entitiesDB                                                _DB;
-        readonly DoubleBufferedEntityViews<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
+        readonly entitiesDB         _DB;
         
-        static readonly Type                                               _typeEntityInfoView = typeof(EntityInfoView);
+        static readonly Type        _typeEntityInfoView = typeof(EntityInfoView);
+        int                         _newEntitiesBuiltToProcess;
     }
 
     public struct EntityStructInitializer
