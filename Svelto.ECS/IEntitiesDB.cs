@@ -33,6 +33,7 @@ namespace Svelto.ECS
         //to use with EntityViews, EntityStructs and EntityViewStructs
         T[] QueryEntities<T>(out int count) where T : IEntityStruct;
         T[] QueryEntities<T>(int group, out int count) where T : IEntityStruct;
+        T[] QueryEntities<T>(int groupID, ref EGIDMapper<T> mapper) where T : IEntityStruct;
         
         T[] QueryEntitiesAndIndex<T>(EGID entityGid, out uint index) where T : IEntityStruct;
         bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : IEntityStruct;

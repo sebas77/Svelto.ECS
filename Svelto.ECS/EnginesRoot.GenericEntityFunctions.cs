@@ -37,19 +37,19 @@ namespace Svelto.ECS
                 _weakReference.Target.RemoveGroupAndEntitiesFromDB(groupID);
             }
 
-            public void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
+            public EGID SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.SwapEntityGroup<T>(entityID, fromGroupID, toGroupID);
+                return _weakReference.Target.SwapEntityGroup<T>(entityID, fromGroupID, toGroupID);
             }
 
-            public void SwapEntityGroup<T>(EGID id, int toGroupID = ExclusiveGroup.StandardEntitiesGroup) where T : IEntityDescriptor, new()
+            public EGID SwapEntityGroup<T>(EGID id, int toGroupID = ExclusiveGroup.StandardEntitiesGroup) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.SwapEntityGroup<T>(id.entityID, id.groupID, toGroupID);
+                return _weakReference.Target.SwapEntityGroup<T>(id.entityID, id.groupID, toGroupID);
             }
 
-            public void SwapEntityGroup<T>(int entityID, int toGroupID) where T : IEntityDescriptor, new()
+            public EGID SwapEntityGroup<T>(int entityID, int toGroupID) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.SwapEntityGroup<T>(entityID, ExclusiveGroup.StandardEntitiesGroup, toGroupID);
+                return _weakReference.Target.SwapEntityGroup<T>(entityID, ExclusiveGroup.StandardEntitiesGroup, toGroupID);
             }
 
             public EGID SwapFirstEntityGroup<T>(int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()

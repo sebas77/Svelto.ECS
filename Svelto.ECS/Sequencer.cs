@@ -5,28 +5,26 @@ using System.Collections.Generic;
 namespace Svelto.ECS
 {
     public class Steps : Dictionary<IEngine, IDictionary>
-    {}
-
-    public class To<C> : Dictionary<C, IStep[]> where C : struct, IConvertible
     {
-        public void Add(C condition, IStep engine)
+        public new void Add(IEngine engine, IDictionary dictionary)
         {
-            Add(condition, new [] {engine});
+            if (ContainsKey(engine))
+            {
+                Utility.Console.LogError("can't hold multiple steps with the same engine as origin in a Sequencer");
+            }
+            base.Add(engine, dictionary);
         }
-        public void Add(C condition, params IStep[] engines)
+    }
+
+    public class To<C> : Dictionary<C, IStep<C>[]> where C : struct, IConvertible
+    {
+        public new void Add(C condition, params IStep<C>[] engines)
         {
-            Add(condition, engines);
-        }
-        public void Add(params IStep[] engines)
-        {
-            Add(default(C), engines);
+            base.Add(condition, engines);
         }
     }
     
-    public interface IStep
-    {}
-
-    public interface IStep<in C>:IStep where C:struct,IConvertible
+    public interface IStep<in C> where C:struct,IConvertible
     {
         void Step(C condition, EGID id);
     }
@@ -38,32 +36,18 @@ namespace Svelto.ECS
             _steps = steps;
         }
 
-        public void Next(IEngine engine, EGID id)
-        {
-            Next(engine, Condition.Always, id);
-        }
-        
-        public void Next(IEngine engine)
-        {
-            Next(engine, Condition.Always);
-        }
-
-        public void Next<C>(IEngine engine, C condition, EGID id = new EGID()) where C:struct,IConvertible
+        public void Next<C>(IEngine engine, C condition, EGID id) where C:struct,IConvertible
         {
             C branch = condition;
-            var steps  = (_steps[engine] as Dictionary<C, IStep[]>)[branch];
+            var steps  = (_steps[engine] as Dictionary<C, IStep<C>[]>)[branch];
 
-            if (steps == null) return;
+            if (steps == null)
+                Utility.Console.LogError("selected steps not found in sequencer ".FastConcat(this.ToString()));
             
             for (var i = 0; i < steps.Length; i++)
-                ((IStep<C>)steps[i]).Step(condition, id);
+                steps[i].Step(condition, id);
         }
 
         Steps _steps;
-    }
-
-    public static class Condition
-    {
-        public const int Always = 0;
     }
 }       

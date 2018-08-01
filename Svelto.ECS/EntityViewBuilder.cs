@@ -37,18 +37,44 @@ namespace Svelto.ECS
                 var field = fields[i];
 
                 var fieldFieldType = field.FieldType;
-                if (fieldFieldType.IsPrimitive == true || fieldFieldType.IsValueType == true)
-                {
-                    if (fieldFieldType.IsValueType && !fieldFieldType.IsEnum)
-                    {
-                        CheckFields(fieldFieldType);
-                    }
+                
+                SubCheckFields(fieldFieldType);
+            }
 
-                    continue;
+            if (type.Assembly == Assembly.GetCallingAssembly())
+            {
+                var methods = type.GetMethods(BindingFlags.Public |
+                                              BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                var properties = type.GetProperties(BindingFlags.Public |
+                                                    BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                if (methods.Length > properties.Length + 1)
+                    throw new EntityStructException(type);
+
+                for (int i = properties.Length - 1; i >= 0; --i)
+                {
+                    var propertyInfo = properties[i];
+
+                    var fieldFieldType = propertyInfo.PropertyType;
+                    SubCheckFields(fieldFieldType);
+                }
+            }
+        }
+
+        static void SubCheckFields(Type fieldFieldType)
+        {
+            if (fieldFieldType.IsPrimitive == true || fieldFieldType.IsValueType == true)
+            {
+                if (fieldFieldType.IsValueType && !fieldFieldType.IsEnum && fieldFieldType.IsPrimitive == false)
+                {
+                    CheckFields(fieldFieldType);
                 }
 
-                throw new EntityStructException(fieldFieldType);
+                return;
             }
+
+            throw new EntityStructException(fieldFieldType);
         }
 #endif        
 
@@ -115,7 +141,7 @@ namespace Svelto.ECS
 
     public class EntityStructException : Exception
     {
-        public EntityStructException(Type fieldType):base("EntityStruct must contains only value types! " + fieldType.ToString())
+        public EntityStructException(Type fieldType):base("EntityStruct must contains only value types and no public methods! " + fieldType.ToString())
         {}
     }
 }

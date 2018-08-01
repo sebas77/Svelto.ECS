@@ -142,11 +142,11 @@ namespace Svelto.ECS
             {
                 var entityType = entityBuilders[i].GetEntityType();
                 
-                MoveEntity<T>(entityGID, toGroupID, toGroup, entityType);
+                MoveEntity(entityGID, toGroupID, toGroup, entityType);
             }
         }
 
-        void MoveEntity<T>(EGID fromEntityGID, int toGroupID, Dictionary<Type, ITypeSafeDictionary> toGroup, Type entityType) where T:IEntityDescriptor, new ()
+        void MoveEntity(EGID fromEntityGID, int toGroupID, Dictionary<Type, ITypeSafeDictionary> toGroup, Type entityType)
         {
             var fromGroup = _groupEntityDB[fromEntityGID.groupID];
 
@@ -169,7 +169,7 @@ namespace Svelto.ECS
 
             if (fromTypeSafeDictionary.Count == 0) //clean up
             {
-                _groupedGroups[entityType].Remove(toGroupID);
+                _groupedGroups[entityType].Remove(fromEntityGID.groupID);
 
                 //it's probably better to not remove this, but the dictionary should be trimmed?
                 //fromGroup.Remove(entityType);
@@ -189,7 +189,7 @@ namespace Svelto.ECS
 
         ///--------------------------------------------
 
-        void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T:IEntityDescriptor, new ()
+        EGID SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T:IEntityDescriptor, new ()
         {
             DBC.ECS.Check.Require(fromGroupID != toGroupID,
                           "can't move an entity to the same fromGroup where it already belongs to");
@@ -200,6 +200,8 @@ namespace Svelto.ECS
                 toGroup = _groupEntityDB[toGroupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
             MoveEntity<T>(new EGID(entityID, fromGroupID), toGroupID, toGroup);
+            
+            return new EGID(entityID, toGroupID);
         }
         
         EGID SwapFirstEntityInGroup<T>(int fromGroupID, int toGroupId) where T:IEntityDescriptor, new()

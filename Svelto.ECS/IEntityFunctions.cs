@@ -13,9 +13,9 @@ namespace Svelto.ECS
 
         void RemoveGroupAndEntities(int groupID);
         
-        void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID = ExclusiveGroup.StandardEntitiesGroup) where T : IEntityDescriptor, new();
-        void SwapEntityGroup<T>(EGID id, int toGroupID = ExclusiveGroup.StandardEntitiesGroup) where T : IEntityDescriptor, new();
-        void SwapEntityGroup<T>(int entityID, int toGroupID) where T : IEntityDescriptor, new();
+        EGID SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID = ExclusiveGroup.StandardEntitiesGroup) where T : IEntityDescriptor, new();
+        EGID SwapEntityGroup<T>(EGID id, int toGroupID = ExclusiveGroup.StandardEntitiesGroup) where T : IEntityDescriptor, new();
+        EGID SwapEntityGroup<T>(int entityID, int toGroupID) where T : IEntityDescriptor, new();
         EGID SwapFirstEntityGroup<T>(int fromGroupID = ExclusiveGroup.StandardEntitiesGroup, int toGroupID = ExclusiveGroup.StandardEntitiesGroup) where T : IEntityDescriptor, new();
     }
 }

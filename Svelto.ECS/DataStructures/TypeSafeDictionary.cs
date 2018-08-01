@@ -108,7 +108,7 @@ namespace Svelto.ECS.Internal
 
             if (toGroup != null)
             {
-                var toGroupCasted = (toGroup as TypeSafeDictionary<TValue>);
+                var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
                 fasterValuesBuffer[valueIndex].ID = new EGID(fromEntityGid.entityID, toGroupID);
                 toGroupCasted.Add(fromEntityGid.entityID, ref fasterValuesBuffer[valueIndex]);
                 
