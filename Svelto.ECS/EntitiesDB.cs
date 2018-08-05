@@ -22,16 +22,10 @@ namespace Svelto.ECS.Internal
 
         public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:class, IEntityStruct
         {
-            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
+            TypeSafeDictionary<T> typeSafeDictionary;
+            if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return RetrieveEmptyEntityViewList<T>();
 
-            if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
-                return RetrieveEmptyEntityViewList<T>();
-
-            ITypeSafeDictionary outList;
-            if (entitiesInGroupPerType.TryGetValue(typeof(T), out outList) == false)
-                return RetrieveEmptyEntityViewList<T>();
-
-            return (outList as TypeSafeDictionary<T>).FasterValues;
+            return typeSafeDictionary.FasterValues;
         }
 
         public T[] QueryEntities<T>(out int count) where T : IEntityStruct
@@ -41,32 +35,24 @@ namespace Svelto.ECS.Internal
         
         public T[] QueryEntities<T>(int @group, out int count) where T : IEntityStruct
         {
+            TypeSafeDictionary<T> typeSafeDictionary;
             count = 0;
-            
-            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
-            
-            if (_groupEntityViewsDB.TryGetValue(group, out entitiesInGroupPerType) == false)
-                return RetrieveEmptyEntityViewArray<T>();
-            
-            ITypeSafeDictionary typeSafeDictionary;
-            if (entitiesInGroupPerType.TryGetValue(typeof(T), out typeSafeDictionary) == false)
-                return RetrieveEmptyEntityViewArray<T>();
+            if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return RetrieveEmptyEntityViewArray<T>();
 
-            return ((TypeSafeDictionary<T>)typeSafeDictionary).GetFasterValuesBuffer(out count);
+            return typeSafeDictionary.GetFasterValuesBuffer(out count);
         }
-
+        
         public T[] QueryEntities<T>(int groupID, ref EGIDMapper<T> mapper) where T : IEntityStruct
         {
-            TypeSafeDictionary<T> casted;
-            if (!FindSafeDictionary(groupID, out casted))
-            {
-                throw new Exception("Entity group found type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(groupID));
-            }
-
-            mapper.map = casted;
+            TypeSafeDictionary<T> typeSafeDictionary;
+            
+            if (QueryEntitySafeDictionary(groupID, out typeSafeDictionary) == false) 
+                throw new EntitiesDBException("Entity group not found type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(groupID));
+            
+            mapper.map = typeSafeDictionary;
 
             int count;
-            return QueryEntities<T>(groupID, out count);
+            return typeSafeDictionary.GetFasterValuesBuffer(out count);
         }
 
         public T[] QueryEntitiesAndIndex<T>(EGID entityGID, out uint index) where T : IEntityStruct
@@ -75,7 +61,7 @@ namespace Svelto.ECS.Internal
             if ((array = QueryEntitiesAndIndexInternal<T>(entityGID, out index)) != null)
                 return array;
             
-            throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID)); 
+            throw new EntitiesDBException("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID)); 
         }
         
         public bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : IEntityStruct
@@ -90,8 +76,8 @@ namespace Svelto.ECS.Internal
         {
             T entityView;
 
-            if (TryQueryEntityViewInGroup(entityGID, out entityView) == false)
-                throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
+            if (TryQueryEntityViewInGroupInternal(entityGID, out entityView) == false)
+                throw new EntitiesDBException("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
 
             return entityView;
         }
@@ -99,27 +85,27 @@ namespace Svelto.ECS.Internal
         public void ExecuteOnEntity<T, W>(EGID entityGID, ref W value, ActionRef<T, W> action) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
-            if (FindSafeDictionary(entityGID.groupID, out casted))
+            if (QueryEntitySafeDictionary(entityGID.groupID, out casted))
             {
                 if (casted != null)
                     if (casted.ExecuteOnEntityView(entityGID.entityID, ref value, action) == true)
                         return;
             }
 
-            throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
+            throw new EntitiesDBException("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
         }
         
         public void ExecuteOnEntity<T>(EGID entityGID, ActionRef<T> action) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
-            if (FindSafeDictionary(entityGID.groupID, out casted))
+            if (QueryEntitySafeDictionary(entityGID.groupID, out casted))
             {
                 if (casted != null)
                     if (casted.ExecuteOnEntityView(entityGID.entityID, action) == true)
                         return;
             }
 
-            throw new Exception("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
+            throw new EntitiesDBException("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
         }
 
         public void ExecuteOnEntity<T>(int id, ActionRef<T> action) where T : IEntityStruct
@@ -172,71 +158,77 @@ namespace Svelto.ECS.Internal
 
         public void ExecuteOnAllEntities<T>(ActionRef<T> action) where T : IEntityStruct
         {
-            int count;
-            var typeSafeDictionaries = _groupedGroups[typeof(T)].GetFasterValuesBuffer(out count);
-            for (int j = 0; j < count; j++)
+            var type = typeof(T);
+            FasterDictionary<int, ITypeSafeDictionary> dic;
+            if (_groupedGroups.TryGetValue(type, out dic))
             {
-                int count2;
-                var safedic = typeSafeDictionaries[j];
-                TypeSafeDictionary<T> casted = safedic as TypeSafeDictionary<T>;
-                var entities = casted.GetFasterValuesBuffer(out count2);
-                for (int i = 0; i < count2; i++)
-                    action(ref entities[i]);
+                int count;
+                var typeSafeDictionaries = dic.GetFasterValuesBuffer(out count);
+                for (int j = 0; j < count; j++)
+                {
+                    int innerCount;
+                    var safedic  = typeSafeDictionaries[j];
+                    var casted   = safedic as TypeSafeDictionary<T>;
+                    var entities = casted.GetFasterValuesBuffer(out innerCount);
+                    for (int i = 0; i < innerCount; i++)
+                        action(ref entities[i]);
+                }
             }
         }
 
         public void ExecuteOnAllEntities<T, W>(ref W value, ActionRef<T, W> action) where T : IEntityStruct
         {
-            int count;
-            var typeSafeDictionaries = _groupedGroups[typeof(T)].GetFasterValuesBuffer(out count);
-            for (int j = 0; j < count; j++)
+            var  type = typeof(T);
+            FasterDictionary<int, ITypeSafeDictionary> dic;
+            if (_groupedGroups.TryGetValue(type, out dic))
             {
-                int count2;
-                var safedic = typeSafeDictionaries[j];
-                TypeSafeDictionary<T> casted = safedic as TypeSafeDictionary<T>;
-                var entities = casted.GetFasterValuesBuffer(out count2);
-                for (int i = 0; i < count2; i++)
-                    action(ref entities[i], ref value);
+                int count;
+                var typeSafeDictionaries = dic.GetFasterValuesBuffer(out count);
+                for (int j = 0; j < count; j++)
+                {
+                    int innerCount;
+                    var safedic  = typeSafeDictionaries[j];
+                    var casted   = safedic as TypeSafeDictionary<T>;
+                    var entities = casted.GetFasterValuesBuffer(out innerCount);
+                    for (int i = 0; i < innerCount; i++)
+                        action(ref entities[i], ref value);
+                }
             }
+        }
+
+        public void ExecuteOnEntities<T, T1>(int group, ActionRef<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct
+        {
+            int count;
+            TypeSafeDictionary<T> typeSafeDictionary;
+            if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return;
+            
+            var entities  = typeSafeDictionary.GetFasterValuesBuffer(out count);
+            
+            for (var i = 0; i < count; i++)
+            {
+                uint index;
+                action(ref entities[i], ref QueryEntitiesAndIndex<T1>(entities[i].ID, out index)[index]);
+                if (typeSafeDictionary.Count != count)
+                    throw new EntitiesDBException("Entities cannot be swapped or removed during an iteration");
+            }
+        }
+
+        public void ExecuteOnEntities<T, T1>(ActionRef<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct
+        {
+            ExecuteOnEntities(ExclusiveGroup.StandardEntitiesGroup, action);
         }
 
         public bool Exists<T>(EGID entityGID) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
-            if (!FindSafeDictionary(entityGID.groupID, out casted)) return false;
+            if (QueryEntitySafeDictionary(entityGID.groupID, out casted) == false) return false;
 
-            if (casted != null &&
-                casted.ContainsKey(entityGID.entityID))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        bool FindSafeDictionary<T>(int groupID, out TypeSafeDictionary<T> casted) where T : IEntityStruct
-        {
-            var type = typeof(T);
-
-            ITypeSafeDictionary entityViews;
-
-            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
-            if (_groupEntityViewsDB.TryGetValue(groupID, out entitiesInGroupPerType) == false)
-            {
-                casted = null;
-                return false;
-            }
-
-            entitiesInGroupPerType.TryGetValue(type, out entityViews);
-            casted = entityViews as TypeSafeDictionary<T>;
-            return true;
+            return casted != null && casted.ContainsKey(entityGID.entityID);
         }
 
         public bool HasAny<T>() where T : IEntityStruct
         {
-            int count;
-            QueryEntities<T>(out count);
-            return count > 0;
+            return HasAny<T>(ExclusiveGroup.StandardEntitiesGroup);
         }
 
         public bool HasAny<T>(int @group) where T : IEntityStruct
@@ -248,48 +240,51 @@ namespace Svelto.ECS.Internal
 
         public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityStruct
         {
-            return TryQueryEntityViewInGroup(entityegid, out entityView);
-        }
-
-        bool TryQueryEntityViewInGroup<T>(EGID entityGID, out T entityView) where T:IEntityStruct
-        {
-            TypeSafeDictionary<T> casted;
-            if (!FindSafeDictionary(entityGID.groupID, out casted))
-            {
-                entityView = default(T);
-                return false;
-            }
-
-            if (casted != null &&
-                casted.TryGetValue(entityGID.entityID, out entityView))
-            {
-                return true;
-            }
-
-            entityView = default(T);
-
-            return false;
+            return TryQueryEntityViewInGroupInternal(entityegid, out entityView);
         }
         
+        bool TryQueryEntityViewInGroupInternal<T>(EGID entityGID, out T entityView) where T:class, IEntityStruct
+        {
+            entityView = null;
+            TypeSafeDictionary<T> safeDictionary;
+            if (QueryEntitySafeDictionary(entityGID.groupID, out safeDictionary) == false) return false;
+
+            return safeDictionary.TryGetValue(entityGID.entityID, out entityView) != false;
+        }
+
         T[] QueryEntitiesAndIndexInternal<T>(EGID entityGID, out uint index) where T : IEntityStruct
         {
-            TypeSafeDictionary<T> casted;
-            if (!FindSafeDictionary(entityGID.groupID, out casted))
-            {
-                index = 0;
-                throw new Exception("Entity group found type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
-            }
+            TypeSafeDictionary<T> safeDictionary;
+            if (QueryEntitySafeDictionary(entityGID.groupID, out safeDictionary) == false)
+                throw new EntitiesDBException("Entity not found, type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(entityGID.entityID));
 
-            if (casted == null || casted.TryFindElementIndex(entityGID.entityID, out index) == false)
-            {
-                index = 0;
-                throw new Exception("Entity not found type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(entityGID.entityID));
-            }
+            if (safeDictionary.TryFindElementIndex(entityGID.entityID, out index) == false)
+                throw new EntitiesDBException("Entity not found, type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(entityGID.entityID));
 
             int count;
-            
-            return QueryEntities<T>(entityGID.groupID, out count);
+            return safeDictionary.GetFasterValuesBuffer(out count);
         }
+        
+        bool QueryEntitySafeDictionary<T>(int @group, out TypeSafeDictionary<T> typeSafeDictionary) where T : IEntityStruct
+        {
+            Dictionary<Type, ITypeSafeDictionary> entitiesInGroupPerType;
+            typeSafeDictionary = null;
+
+            //search for the group 
+            if (_groupEntityViewsDB.TryGetValue(@group, out entitiesInGroupPerType) == false)
+                return false;
+
+            //search for the indexed entities in the group
+            ITypeSafeDictionary safeDictionary;
+            if (entitiesInGroupPerType.TryGetValue(typeof(T), out safeDictionary) == false)
+                return false;
+
+            //return the indexes entities if they exist
+            typeSafeDictionary = (safeDictionary as TypeSafeDictionary<T>);
+            
+            return true;
+        }
+
         static ReadOnlyCollectionStruct<T> RetrieveEmptyEntityViewList<T>()
         {
             return ReadOnlyCollectionStruct<T>.DefaultList;

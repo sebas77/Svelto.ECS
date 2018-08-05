@@ -1,3 +1,4 @@
+using System;
 using Svelto.DataStructures;
 using Svelto.Utilities;
 
@@ -56,10 +57,14 @@ namespace Svelto.ECS
 
         void ExecuteOnAllEntities<T>(ActionRef<T> action) where T : IEntityStruct;
         void ExecuteOnAllEntities<T, W>(ref W value, ActionRef<T, W> action) where T : IEntityStruct;
+        
+        void ExecuteOnEntities<T, T1>(int groupID, ActionRef<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
+        void ExecuteOnEntities<T, T1>(ActionRef<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
 
         bool Exists<T>(EGID egid) where T : IEntityStruct;
         
         bool HasAny<T>() where T:IEntityStruct;
         bool HasAny<T>(int group) where T:IEntityStruct;
+        
     }
 }

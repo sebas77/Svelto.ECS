@@ -192,7 +192,7 @@ namespace Svelto.ECS
         EGID SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T:IEntityDescriptor, new ()
         {
             DBC.ECS.Check.Require(fromGroupID != toGroupID,
-                          "can't move an entity to the same fromGroup where it already belongs to");
+                          "the entity is already in this group");
 
             Dictionary<Type, ITypeSafeDictionary> toGroup;
 
