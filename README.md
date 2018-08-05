@@ -86,7 +86,6 @@ https://github.com/sebas77/Svelto.ECS/wiki/FAQ
 
 ![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
-![Robocraft Royale](https://static.altchar.com/live/media/images/950x633_ct/7707_Robocraft_Royale_2bc6bb8ceab8ce0a1568fb37bd826b3f.jpg)!
 ![Cardlife](https://i.ytimg.com/vi/q2jaUZjnNyg/maxresdefault.jpg)
 
 *if you want your products made with Svelto here, just send me an email or whatever, I'll be super happy to add them.
