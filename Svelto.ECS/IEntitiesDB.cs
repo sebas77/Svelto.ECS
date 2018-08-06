@@ -1,5 +1,4 @@
 using Svelto.DataStructures;
-using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
@@ -60,10 +59,10 @@ namespace Svelto.ECS
         /// <param name="egid"></param>
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
-        void ExecuteOnEntities<T>(int groupID, ActionRef<T> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T>(ActionRef<T> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T, W>(int groupID, ref W value, ActionRef<T, W> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T, W>(ref W value, ActionRef<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntities<T>(int groupID, EntitiesAction<T> action) where T : IEntityStruct;
+        void ExecuteOnEntities<T>(EntitiesAction<T> action) where T : IEntityStruct;
+        void ExecuteOnEntities<T, W>(int groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntities<T, W>(ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
         /// <summary>
         /// This specialized version allows to execute actions on multiple entity views or entity structs
         /// Safety checks are in place. This function doesn't guarantee cache
@@ -73,12 +72,10 @@ namespace Svelto.ECS
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="T1"></typeparam>
-        void ExecuteOnEntities<T, T1>(int groupID, ActionRef<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
-        void ExecuteOnEntities<T, T1>(ActionRef<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
-        
-        void ExecuteOnEntities<T, T1, W>(int groupID, ref W value, ActionRef<T, T1, W> action) where T : IEntityStruct where T1 : IEntityStruct;
-        void ExecuteOnEntities<T, T1, W>(ref W value, ActionRef<T, T1, W> action) where T : IEntityStruct where T1 : IEntityStruct;
-        void ExecuteOnEntities<T, T1, W>(W value, ActionRef<T, T1, W> action) where T : IEntityStruct where T1 : IEntityStruct;
+        void ExecuteOnEntities<T, T1>(int groupID, EntitiesAction<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
+        void ExecuteOnEntities<T, T1>(EntitiesAction<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
+        void ExecuteOnEntities<T, T1, W>(int groupID, ref W value, EntitiesAction<T, T1, W> action) where T : IEntityStruct where T1 : IEntityStruct;
+        void ExecuteOnEntities<T, T1, W>(ref W value, EntitiesAction<T, T1, W> action) where T : IEntityStruct where T1 : IEntityStruct;
         /// <summary>
         /// Execute an action on ALL the entities regardless the group. This function doesn't guarantee cache
         /// friendliness even if just EntityStructs are used. 
@@ -86,8 +83,8 @@ namespace Svelto.ECS
         /// </summary>
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
-        void ExecuteOnAllEntities<T>(ActionRef<T> action) where T : IEntityStruct;
-        void ExecuteOnAllEntities<T, W>(ref W  value, ActionRef<T, W> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T>(EntityAction<T> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T, W>(ref W  value, EntityAction<T, W> action) where T : IEntityStruct;
         /// <summary>
         /// ECS is meant to work on a set of Entities. Working on a single entity is sometime necessary, but using
         /// the following functions inside a loop would be a mistake as performance can be significantly impacted
@@ -108,16 +105,22 @@ namespace Svelto.ECS
         /// <param name="egid"></param>
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
-        void ExecuteOnEntity<T>(EGID egid, ActionRef<T> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T>(int     id,   ActionRef<T> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T>(int     id,   int          groupid, ActionRef<T>    action) where T : IEntityStruct;
-        void ExecuteOnEntity<T, W>(EGID egid, ref W        value,   ActionRef<T, W> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T, W>(int  id,   ref W        value,   ActionRef<T, W> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T, W>(int  id,   int          groupid, ref W           value, ActionRef<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T>(EGID egid, EntityAction<T> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T>(int     id,   EntityAction<T> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T>(int     id,   int          groupid, EntityAction<T>    action) where T : IEntityStruct;
+        void ExecuteOnEntity<T, W>(EGID egid, ref W        value,   EntityAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T, W>(int  id,   ref W        value,   EntityAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T, W>(int  id,   int          groupid, ref W           value, EntityAction<T, W> action) where T : IEntityStruct;
 
         bool Exists<T>(EGID egid) where T : IEntityStruct;
         
         bool HasAny<T>() where T:IEntityStruct;
         bool HasAny<T>(int group) where T:IEntityStruct;
     }
+
+    public delegate void EntityAction<T, W>(ref T target, ref W value);
+    public delegate void EntityAction<T>(ref T target);
+    public delegate void EntitiesAction<T, T1, W>(ref T target, ref T1 target1, ref W value, int index);
+    public delegate void EntitiesAction<T, W>(ref T target, ref W value, int index);
+    public delegate void EntitiesAction<T>(ref T target, int index);
 }

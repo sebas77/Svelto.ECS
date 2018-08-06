@@ -16,7 +16,7 @@ namespace Svelto.ECS
             _initializer = default(T);
 
 #if DEBUG && !PROFILER
-            if (needsReflection == false && typeof(T) != typeof(EntityInfoView))
+            if (needsReflection == false)
             {
                 CheckFields(typeof(T));
             }

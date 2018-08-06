@@ -144,7 +144,7 @@ namespace Svelto.ECS.Internal
             return new TypeSafeDictionary<TValue>();
         }
         
-        public bool ExecuteOnEntityView<W>(int entityGidEntityId, ref W value, ActionRef<TValue, W> action)
+        public bool ExecuteOnEntityView<W>(int entityGidEntityId, ref W value, EntityAction<TValue, W> action)
         {
             uint findIndex;
             if (FindIndex(entityGidEntityId, out findIndex))
@@ -157,7 +157,7 @@ namespace Svelto.ECS.Internal
             return false;
         }
         
-        public bool ExecuteOnEntityView(int entityGidEntityId, ActionRef<TValue> action)
+        public bool ExecuteOnEntityView(int entityGidEntityId, EntityAction<TValue> action)
         {
             uint findIndex;
             if (FindIndex(entityGidEntityId, out findIndex))
