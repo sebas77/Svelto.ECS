@@ -176,7 +176,7 @@ namespace Svelto.ECS.Internal
                     for (int i = 0; i < innerCount; i++)
                         action(ref entities[i]);
 
-                    SafetyChecks(casted, count);
+                    SafetyChecks(casted, innerCount);
                 }
             }
         }
@@ -202,7 +202,7 @@ namespace Svelto.ECS.Internal
                     for (int i = 0; i < innerCount; i++)
                         action(ref entities[i], ref value);
 
-                    SafetyChecks(casted, count);
+                    SafetyChecks(casted, innerCount);
                 }
             }
         }
