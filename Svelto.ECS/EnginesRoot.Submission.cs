@@ -19,16 +19,14 @@ namespace Svelto.ECS
             //are there new entities built to process?
             while ( _newEntitiesBuiltToProcess > 0)
             {
+                _newEntitiesBuiltToProcess = 0;
                 //use other as source from now on
                 //current will be use to write new entityViews
                 _groupedEntityToAdd.Swap();
 
-                //Note: if N entity of the same type are added on the same frame
-                //the Add callback is called N times on the same frame.
-                //if the Add calback builds a new entity, that entity will not
-                //be available in the database until the N callbacks are done
-                //solving it could be complicated as callback and database update
-                //must be interleaved.
+                //Note: if N entity of the same type are added on the same frame the Add callback is called N times on
+                //the same frame. if the Add calback builds a new entity, that entity will not be available in the
+                //database until the N callbacks are done.
                 if (_groupedEntityToAdd.other.Count > 0)
                     AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
 
@@ -38,7 +36,6 @@ namespace Svelto.ECS
                 if (numberOfReenteringLoops > 5)
                     throw new Exception("possible infinite loop found creating Entities inside IEntityViewsEngine Add method, please consider building entities outside IEntityViewsEngine Add method");
 
-                _newEntitiesBuiltToProcess = 0;
                 numberOfReenteringLoops++;
             }
         }

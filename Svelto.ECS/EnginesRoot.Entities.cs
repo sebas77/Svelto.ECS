@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 
