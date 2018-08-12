@@ -22,7 +22,6 @@ namespace Svelto.ECS
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="size"></param>
-        void PreallocateEntitySpace<T>(int size) where T : IEntityDescriptor, new();
         void PreallocateEntitySpace<T>(ExclusiveGroup groupID, int size) where T : IEntityDescriptor, new();
         
         /// <summary>
@@ -30,15 +29,7 @@ namespace Svelto.ECS
         ///     itself in terms of EntityViews to build. The Implementors are passed to fill the
         ///     references of the EntityViews components. Please read the articles on my blog
         ///     to understand better the terminologies
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entityID"></param>
-        /// <param name="implementors"></param>
-        EntityStructInitializer BuildEntity<T>(int entityID, object[] implementors) where T:IEntityDescriptor, new();
-
-
-        /// <summary>
-        ///     Using this function is like building a normal entity, but the entityViews
+        ///     Using this function is like building a normal entity, but the entity views
         ///     are grouped by groupID to be more efficently processed inside engines and
         ///     improve cache locality. Either class entityViews and struct entityViews can be
         ///     grouped.
@@ -49,8 +40,6 @@ namespace Svelto.ECS
         /// <param name="implementors"></param>
         EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroup groupID, object[] implementors) where T:IEntityDescriptor, new();
         EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T:IEntityDescriptor, new();
-        
-
         /// <summary>
         ///     When the type of the entity is not known (this is a special case!) an EntityDescriptorInfo
         ///     can be built in place of the generic parameter T.
@@ -60,7 +49,6 @@ namespace Svelto.ECS
         /// <param name="implementors"></param>
         /// 
         EntityStructInitializer BuildEntity(int entityID, ExclusiveGroup groupID, IEntityDescriptor descriptorEntity, object[] implementors);
-        EntityStructInitializer BuildEntity(int entityID, IEntityDescriptor descriptorEntity, object[] implementors);
         EntityStructInitializer BuildEntity(EGID egid, IEntityDescriptor descriptorEntity, object[] implementors);
     }
 }

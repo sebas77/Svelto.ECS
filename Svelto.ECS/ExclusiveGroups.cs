@@ -1,4 +1,4 @@
-﻿namespace Svelto.ECS
+﻿﻿namespace Svelto.ECS
 {
     /// <summary>
     /// Exclusive Groups guarantee that the GroupID is unique.
@@ -13,8 +13,6 @@
     
     public class ExclusiveGroup
     {
-        internal const int StandardEntitiesGroup = int.MaxValue;
-
         public ExclusiveGroup()
         {
             _id       =  _globalId;

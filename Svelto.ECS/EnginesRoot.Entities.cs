@@ -1,5 +1,6 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 
@@ -213,7 +214,7 @@ namespace Svelto.ECS
             return new EGID(firstID, toGroupId);
         }
 
-        readonly entitiesDB         _DB;
+        readonly EntitiesDB         _DB;
         
         int                         _newEntitiesBuiltToProcess;
     }

@@ -2,22 +2,16 @@ using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
-using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {
-    partial class entitiesDB : IEntitiesDB
+    partial class EntitiesDB : IEntitiesDB
     {
-        internal entitiesDB(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB,
+        internal EntitiesDB(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB,
             Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> groupedGroups)
         {
             _groupEntityViewsDB = groupEntityViewsDB;
             _groupedGroups = groupedGroups;
-        }
-
-        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T:class, IEntityStruct
-        {
-            return QueryEntityViews<T>(ExclusiveGroup.StandardEntitiesGroup);
         }
 
         public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:class, IEntityStruct
@@ -28,11 +22,6 @@ namespace Svelto.ECS.Internal
             return typeSafeDictionary.FasterValues;
         }
 
-        public T[] QueryEntities<T>(out int count) where T : IEntityStruct
-        {
-            return QueryEntities<T>(ExclusiveGroup.StandardEntitiesGroup, out count);
-        }
-        
         public T[] QueryEntities<T>(int @group, out int count) where T : IEntityStruct
         {
             TypeSafeDictionary<T> typeSafeDictionary;
@@ -41,12 +30,12 @@ namespace Svelto.ECS.Internal
 
             return typeSafeDictionary.GetFasterValuesBuffer(out count);
         }
-        
-        public EGIDMapper<T> QueryMappedEntities<T>() where T : IEntityStruct
+
+        public T[] QueryEntities<T>(ExclusiveGroup @group, out int targetsCount) where T : IEntityStruct
         {
-            return QueryMappedEntities<T>(ExclusiveGroup.StandardEntitiesGroup);
+            return QueryEntities<T>((int) @group, out targetsCount);
         }
-        
+
         public EGIDMapper<T> QueryMappedEntities<T>(int groupID) where T : IEntityStruct
         {
             TypeSafeDictionary<T> typeSafeDictionary;
@@ -61,6 +50,11 @@ namespace Svelto.ECS.Internal
             typeSafeDictionary.GetFasterValuesBuffer(out count);
 
             return mapper;
+        }
+
+        public EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup groupID) where T : IEntityStruct
+        {
+            return QueryMappedEntities<T>((int) groupID);
         }
 
         public T[] QueryEntitiesAndIndex<T>(EGID entityGID, out uint index) where T : IEntityStruct
@@ -98,16 +92,16 @@ namespace Svelto.ECS.Internal
             return casted != null && casted.ContainsKey(entityGID.entityID);
         }
 
-        public bool HasAny<T>() where T : IEntityStruct
-        {
-            return HasAny<T>(ExclusiveGroup.StandardEntitiesGroup);
-        }
-
         public bool HasAny<T>(int @group) where T : IEntityStruct
         {
             int count;
             QueryEntities<T>(group, out count);
             return count > 0;
+        }
+
+        public bool HasAny<T>(ExclusiveGroup @group) where T : IEntityStruct
+        {
+            return HasAny<T>((int) group);
         }
 
         public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityStruct

@@ -9,12 +9,6 @@ namespace Svelto.ECS
         /// shouldn't be used anymore. Always pick EntityViewStruct or EntityStruct
         /// over EntityView
         /// </summary>
-        ReadOnlyCollectionStruct<T> QueryEntityViews<T>() where T : class, IEntityStruct;
-        /// <summary>
-        /// All the EntityView related methods are left for back compatibility, but
-        /// shouldn't be used anymore. Always pick EntityViewStruct or EntityStruct
-        /// over EntityView
-        /// </summary>
         ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int group) where T : class, IEntityStruct;
         /// <summary>
         /// All the EntityView related methods are left for back compatibility, but
@@ -36,8 +30,8 @@ namespace Svelto.ECS
         /// <param name="count"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        T[] QueryEntities<T>(out int count) where T : IEntityStruct;
-        T[] QueryEntities<T>(int group, out int count) where T : IEntityStruct;       
+        T[] QueryEntities<T>(int group, out int count) where T : IEntityStruct;
+        T[] QueryEntities<T>(ExclusiveGroup @group, out int targetsCount) where T : IEntityStruct;
         /// <summary>
         /// this version returns a mapped version of the entity array so that is possible to find the
         /// index of the entity inside the returned buffer through it's EGID
@@ -48,7 +42,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         EGIDMapper<T> QueryMappedEntities<T>(int groupID) where T : IEntityStruct;
-        EGIDMapper<T> QueryMappedEntities<T>() where T : IEntityStruct;
+        EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup groupID) where T : IEntityStruct;
         /// <summary>
         /// Execute an action on entities. Be sure that the action is not capturing variables
         /// otherwise you will allocate memory which will have a great impact on the execution performance.
@@ -60,31 +54,22 @@ namespace Svelto.ECS
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
         void ExecuteOnEntities<T>(int groupID, EntitiesAction<T> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T>(EntitiesAction<T> action) where T : IEntityStruct;
+        void ExecuteOnEntities<T>(ExclusiveGroup groupID, EntitiesAction<T> action) where T : IEntityStruct;
         void ExecuteOnEntities<T, W>(int groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
-        void ExecuteOnEntities<T, W>(ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
-        /// <summary>
-        /// This specialized version allows to execute actions on multiple entity views or entity structs
-        /// Safety checks are in place. This function doesn't guarantee cache
-        /// friendliness even if just EntityStructs are used. 
-        /// </summary>
-        /// <param name="groupID"></param>
-        /// <param name="action"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="T1"></typeparam>
-        void ExecuteOnEntities<T, T1>(int groupID, EntitiesAction<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
-        void ExecuteOnEntities<T, T1>(EntitiesAction<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct;
-        void ExecuteOnEntities<T, T1, W>(int groupID, ref W value, EntitiesAction<T, T1, W> action) where T : IEntityStruct where T1 : IEntityStruct;
-        void ExecuteOnEntities<T, T1, W>(ref W value, EntitiesAction<T, T1, W> action) where T : IEntityStruct where T1 : IEntityStruct;
+        void ExecuteOnEntities<T, W>(ExclusiveGroup groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
+
         /// <summary>
         /// Execute an action on ALL the entities regardless the group. This function doesn't guarantee cache
         /// friendliness even if just EntityStructs are used. 
         /// Safety checks are in place 
         /// </summary>
+        /// <param name="damageableGroups"></param>
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
-        void ExecuteOnAllEntities<T>(EntityAction<T> action) where T : IEntityStruct;
-        void ExecuteOnAllEntities<T, W>(ref W  value, EntityAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T>(ExclusiveGroup[] damageableGroups, AllEntitiesAction<T> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T, W>(ref W  value, AllEntitiesAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T>(ExclusiveGroup[] groups, EntitiesAction<T> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T, W>(ExclusiveGroup[] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
         /// <summary>
         /// ECS is meant to work on a set of Entities. Working on a single entity is sometime necessary, but using
         /// the following functions inside a loop would be a mistake as performance can be significantly impacted
@@ -106,21 +91,24 @@ namespace Svelto.ECS
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
         void ExecuteOnEntity<T>(EGID egid, EntityAction<T> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T>(int     id,   EntityAction<T> action) where T : IEntityStruct;
         void ExecuteOnEntity<T>(int     id,   int          groupid, EntityAction<T>    action) where T : IEntityStruct;
+        void ExecuteOnEntity<T>(int id, ExclusiveGroup groupid, EntityAction<T> action) where T : IEntityStruct;
         void ExecuteOnEntity<T, W>(EGID egid, ref W        value,   EntityAction<T, W> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T, W>(int  id,   ref W        value,   EntityAction<T, W> action) where T : IEntityStruct;
         void ExecuteOnEntity<T, W>(int  id,   int          groupid, ref W           value, EntityAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T, W>(int id, ExclusiveGroup groupid, ref W value, EntityAction<T, W> action) where T : IEntityStruct;
 
         bool Exists<T>(EGID egid) where T : IEntityStruct;
         
-        bool HasAny<T>() where T:IEntityStruct;
         bool HasAny<T>(int group) where T:IEntityStruct;
+        bool HasAny<T>(ExclusiveGroup group) where T:IEntityStruct;
     }
 
-    public delegate void EntityAction<T, W>(ref T target, ref W value);
-    public delegate void EntityAction<T>(ref T target);
-    public delegate void EntitiesAction<T, T1, W>(ref T target, ref T1 target1, ref W value, int index);
-    public delegate void EntitiesAction<T, W>(ref T target, ref W value, int index);
-    public delegate void EntitiesAction<T>(ref T target, int index);
+    public delegate void EntityAction<T, W>(ref T target, ref W       value);
+    public delegate void EntityAction<T>(ref    T target);
+
+    public delegate void AllEntitiesAction<T, W>(ref T target, ref W value, IEntitiesDB entitiesDb);
+    public delegate void AllEntitiesAction<T>(ref T target, IEntitiesDB entitiesDb);
+    
+    public delegate void EntitiesAction<T, W>(ref T target, ref W value, IEntitiesDB entitiesDb, int index);
+    public delegate void EntitiesAction<T>(ref T target, IEntitiesDB entitiesDb, int index);
 }

@@ -1,10 +1,14 @@
 using Svelto.DataStructures.Experimental;
-using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {
-    partial class entitiesDB
+    partial class EntitiesDB
     {
+        public void ExecuteOnEntity<T>(int id, ExclusiveGroup groupid, EntityAction<T> action) where T : IEntityStruct
+        {
+            ExecuteOnEntity(id, (int)groupid, action);
+        }
+
         public void ExecuteOnEntity<T, W>(EGID entityGID, ref W value, EntityAction<T, W> action) where T : IEntityStruct
         {
             TypeSafeDictionary<T> casted;
@@ -35,19 +39,9 @@ namespace Svelto.ECS.Internal
                                          .FastConcat(entityGID.groupID));
         }
 
-        public void ExecuteOnEntity<T>(int id, EntityAction<T> action) where T : IEntityStruct
-        {
-            ExecuteOnEntity(new EGID(id, ExclusiveGroup.StandardEntitiesGroup), action);
-        }
-
         public void ExecuteOnEntity<T>(int id, int groupid, EntityAction<T> action) where T : IEntityStruct
         {
             ExecuteOnEntity(new EGID(id, groupid), action);
-        }
-
-        public void ExecuteOnEntity<T, W>(int id, ref W value, EntityAction<T, W> action) where T : IEntityStruct
-        {
-            ExecuteOnEntity(new EGID(id, ExclusiveGroup.StandardEntitiesGroup), ref value, action);
         }
 
         public void ExecuteOnEntity<T, W>(int id, int groupid, ref W value, EntityAction<T, W> action)
@@ -55,7 +49,12 @@ namespace Svelto.ECS.Internal
         {
             ExecuteOnEntity(new EGID(id, groupid), ref value, action);
         }
-        
+
+        public void ExecuteOnEntity<T, W>(int id, ExclusiveGroup groupid, ref W value, EntityAction<T, W> action) where T : IEntityStruct
+        {
+            ExecuteOnEntity(id, (int)groupid, ref value, action);
+        }
+
         //----------------------------------------------------------------------------------------------------------
 
         public void ExecuteOnEntities<T>(int groupID, EntitiesAction<T> action) where T : IEntityStruct
@@ -67,14 +66,14 @@ namespace Svelto.ECS.Internal
             var entities = typeSafeDictionary.GetFasterValuesBuffer(out count);
 
             for (var i = 0; i < count; i++)
-                action(ref entities[i], i);
+                action(ref entities[i], this, i);
 
             SafetyChecks(typeSafeDictionary, count);
         }
 
-        public void ExecuteOnEntities<T>(EntitiesAction<T> action) where T : IEntityStruct
+        public void ExecuteOnEntities<T>(ExclusiveGroup groupID, EntitiesAction<T> action) where T : IEntityStruct
         {
-            ExecuteOnEntities(ExclusiveGroup.StandardEntitiesGroup, action);
+            ExecuteOnEntities((int)groupID, action);
         }
 
         public void ExecuteOnEntities<T, W>(int groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
@@ -86,76 +85,19 @@ namespace Svelto.ECS.Internal
             var entities = typeSafeDictionary.GetFasterValuesBuffer(out count);
 
             for (var i = 0; i < count; i++)
-                action(ref entities[i], ref value, i);
+                action(ref entities[i], ref value, this, i);
 
             SafetyChecks(typeSafeDictionary, count);
         }
 
-        public void ExecuteOnEntities<T, W>(ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
+        public void ExecuteOnEntities<T, W>(ExclusiveGroup groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
         {
-            ExecuteOnEntities(ExclusiveGroup.StandardEntitiesGroup, ref value, action);
+            ExecuteOnEntities((int)groupID, ref value, action);
         }
 
-        public void ExecuteOnEntities<T, T1, W>(W value, EntitiesAction<T, T1, W> action)
-            where T : IEntityStruct where T1 : IEntityStruct
-        {
-            ExecuteOnEntities(ExclusiveGroup.StandardEntitiesGroup, ref value, action);
-        }
-
-        public void ExecuteOnEntities<T, T1>(int group, EntitiesAction<T, T1> action)
-            where T : IEntityStruct where T1 : IEntityStruct
-        {
-            int                   count;
-            TypeSafeDictionary<T> typeSafeDictionary;
-            if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return;
-
-            var entities = typeSafeDictionary.GetFasterValuesBuffer(out count);
-
-            EGIDMapper<T1> map = QueryMappedEntities<T1>(@group);
-
-            for (var i = 0; i < count; i++)
-            {
-                uint index;
-                action(ref entities[i], ref map.entities(entities[i].ID, out index)[index], i);
-            }
-
-            SafetyChecks(typeSafeDictionary, count);
-        }
-
-        public void ExecuteOnEntities<T, T1, W>(int group, ref W value, EntitiesAction<T, T1, W> action)
-            where T : IEntityStruct where T1 : IEntityStruct
-        {
-            int                   count;
-            TypeSafeDictionary<T> typeSafeDictionary;
-            if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return;
-
-            var entities = typeSafeDictionary.GetFasterValuesBuffer(out count);
-
-            EGIDMapper<T1> map = QueryMappedEntities<T1>(@group);
-
-            for (var i = 0; i < count; i++)
-            {
-                uint index;
-                action(ref entities[i], ref map.entities(entities[i].ID, out index)[index], ref value, i);
-            }
-
-            SafetyChecks(typeSafeDictionary, count);
-        }
-
-        public void ExecuteOnEntities<T, T1>(EntitiesAction<T, T1> action) where T : IEntityStruct where T1 : IEntityStruct
-        {
-            ExecuteOnEntities(ExclusiveGroup.StandardEntitiesGroup, action);
-        }
-
-        public void ExecuteOnEntities<T, T1, W>(ref W value, EntitiesAction<T, T1, W> action)
-            where T : IEntityStruct where T1 : IEntityStruct
-        {
-            ExecuteOnEntities(ExclusiveGroup.StandardEntitiesGroup, ref value, action);
-        }
-        
         //-----------------------------------------------------------------------------------------------------------
         
-        public void ExecuteOnAllEntities<T>(EntityAction<T> action) where T : IEntityStruct
+        public void ExecuteOnAllEntities<T>(ExclusiveGroup[] damageableGroups, AllEntitiesAction<T> action) where T : IEntityStruct
         {
             var                                        type = typeof(T);
             FasterDictionary<int, ITypeSafeDictionary> dic;
@@ -174,14 +116,14 @@ namespace Svelto.ECS.Internal
                     var entities = casted.GetFasterValuesBuffer(out innerCount);
 
                     for (int i = 0; i < innerCount; i++)
-                        action(ref entities[i]);
+                        action(ref entities[i], this);
 
                     SafetyChecks(casted, innerCount);
                 }
             }
         }
 
-        public void ExecuteOnAllEntities<T, W>(ref W value, EntityAction<T, W> action) where T : IEntityStruct
+        public void ExecuteOnAllEntities<T, W>(ref W value, AllEntitiesAction<T, W> action) where T : IEntityStruct
         {
             var                                        type = typeof(T);
             FasterDictionary<int, ITypeSafeDictionary> dic;
@@ -200,13 +142,27 @@ namespace Svelto.ECS.Internal
                     var entities = casted.GetFasterValuesBuffer(out innerCount);
 
                     for (int i = 0; i < innerCount; i++)
-                        action(ref entities[i], ref value);
+                        action(ref entities[i], ref value, this);
 
                     SafetyChecks(casted, innerCount);
                 }
             }
         }
 
+        public void ExecuteOnAllEntities<T>(ExclusiveGroup[] groups, EntitiesAction<T> action) where T : IEntityStruct
+        {
+            foreach (var group in groups)
+            {
+                ExecuteOnEntities(group, action);
+            }
+        }
 
+        public void ExecuteOnAllEntities<T, W>(ExclusiveGroup[] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
+        {
+            foreach (var group in groups)
+            {
+                ExecuteOnEntities(group, ref value, action);
+            }
+        }
     }
 }

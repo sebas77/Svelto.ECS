@@ -5,17 +5,12 @@ using UnityEngine;
 
 namespace Svelto.ECS.Schedulers.Unity
 {
-    //The EntityViewSubmissionScheduler has been introduced to make
-    //the entityView submission logic platform indipendent.
-    //Please don't be tempted to create your own submission to 
-    //adapt to your game level code design. For example,
-    //you may be tempted to write a submission logic to submit
-    //the entityViews immediatly just because convenient for your game
-    //logic. This is not how it works.
+    //The EntitySubmissionScheduler has been introduced to make the entity views submission logic platform independent
+    //You can customize the scheduler if you wish
     
-    public class UnitySumbmissionEntityViewScheduler : EntitySubmissionScheduler
+    public class UnityEntitySubmissionScheduler : EntitySubmissionScheduler
     {
-        public UnitySumbmissionEntityViewScheduler()
+        public UnityEntitySubmissionScheduler()
         {
             GameObject go = new GameObject("ECSScheduler");
 

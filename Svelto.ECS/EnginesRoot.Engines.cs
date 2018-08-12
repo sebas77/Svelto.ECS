@@ -40,11 +40,10 @@ namespace Svelto.ECS
             _otherEngines = new FasterList<IEngine>();
 
             _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
-            _groupEntityDB[ExclusiveGroup.StandardEntitiesGroup] = new Dictionary<Type, ITypeSafeDictionary>();
             _groupedGroups = new Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
-            _DB = new entitiesDB(_groupEntityDB, _groupedGroups);
+            _DB = new EntitiesDB(_groupEntityDB, _groupedGroups);
 
             _scheduler = entityViewScheduler;
             _scheduler.Schedule(new WeakAction(SubmitEntityViews));

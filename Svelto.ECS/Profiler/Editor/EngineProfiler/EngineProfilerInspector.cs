@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+#if UNITY_EDITOR && ENGINE_PROFILER_ENABLED
 using System;
 using UnityEditor;
 using UnityEngine;
