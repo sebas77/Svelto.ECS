@@ -16,10 +16,12 @@ You can find a working example to learn how to use the framework here:
 
 ## Articles
 
-**Svelto users articles:**
+**Svelto users articles (note they may use outdated version of Svelto):**
 
 * https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
 * https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
+
+_If you write an article about Svelto, please let me know, I will add it here!_
 
 **Framework articles:**
 
@@ -30,7 +32,7 @@ You can find a working example to learn how to use the framework here:
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
 * http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/ (since I don't like the example much, I didn't update the code, but the article is still valid)
 
-**Theory related articles:**
+**Theory related articles (please read them to understand why I think ECS is great to write maintainable code):**
 
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
