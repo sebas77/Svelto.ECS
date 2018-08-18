@@ -1,6 +1,8 @@
 ﻿﻿using System;
-using System.Collections.Generic;
-using Svelto.DataStructures.Experimental;
+ using System.Collections;
+ using System.Collections.Generic;
+ using Svelto.DataStructures;
+ using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -14,6 +16,28 @@ namespace Svelto.ECS
     {
         void SubmitEntityViews()
         {
+            var entitiesOperations = _entitiesOperations.ToArrayFast();
+            for (int i = 0; i < _entitiesOperations.Count; i++)
+            {
+                switch (entitiesOperations[i].type)
+                {
+                    case EntitySubmitOperationType.Swap:
+                        SwapEntityGroup(entitiesOperations[i].builders, entitiesOperations[i].id, entitiesOperations[i].fromGroupID, entitiesOperations[i].toGroupID);
+                        break;
+                    case EntitySubmitOperationType.Remove:
+                        MoveEntity(entitiesOperations[i].builders, new EGID(entitiesOperations[i].id, entitiesOperations[i].fromGroupID));
+                        break;
+                    case EntitySubmitOperationType.FirstSwap:
+                        SwapFirstEntityInGroup(entitiesOperations[i].builders, entitiesOperations[i].fromGroupID, entitiesOperations[i].toGroupID);
+                        break;
+                    case EntitySubmitOperationType.RemoveGroup:
+                        RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
+                        break;
+                }
+            }
+            
+            _entitiesOperations.FastClear();
+            
             int numberOfReenteringLoops = 0;
 
             //are there new entities built to process?
@@ -44,7 +68,7 @@ namespace Svelto.ECS
         }
         
         //todo: groupsToSubmit can be simplified as data structure?
-        void AddEntityViewsToTheDBAndSuitableEngines(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
+        void AddEntityViewsToTheDBAndSuitableEngines(FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
         {
             //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
             foreach (var groupOfEntitiesToSubmit in groupsOfEntitiesToSubmit)
@@ -90,9 +114,10 @@ namespace Svelto.ECS
         //to the FasterDictionary capabilities OR it's possible to get a specific entityView indexed by
         //ID. This ID doesn't need to be the EGID, it can be just the entityID
         
-        readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>       _groupEntityDB;
+        readonly FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityDB;
         readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups; //yes I am being sarcastic
-        readonly DoubleBufferedEntitiesToAdd<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
+        readonly DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
         readonly EntitySubmissionScheduler                                    _scheduler;
+        readonly FasterList<EntitySubmitOperation>                            _entitiesOperations;
     }
 }

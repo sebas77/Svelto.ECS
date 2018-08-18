@@ -19,58 +19,73 @@ namespace Svelto.ECS
 
             public void RemoveEntity<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.MoveEntity<T>(new EGID(entityID, groupID));
+                _weakReference.Target.QueueEntitySubmitOperation(new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, groupID, -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
             public void RemoveEntity<T>(int entityID, ExclusiveGroup groupID) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.MoveEntity<T>(new EGID(entityID, (int) groupID));
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, (int)groupID, -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.MoveEntity<T>(entityEGID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID.entityID, entityEGID.groupID, -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
             public void RemoveGroupAndEntities(int groupID)
             {
-                _weakReference.Target.RemoveGroupAndEntitiesFromDB(groupID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, groupID, -1, null));
             }
 
             public void RemoveGroupAndEntities(ExclusiveGroup groupID)
             {
-                _weakReference.Target.RemoveGroupAndEntitiesFromDB((int) groupID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, (int)groupID, -1, null));
             }
 
-            public EGID SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
             {
-                return _weakReference.Target.SwapEntityGroup<T>(entityID, fromGroupID, toGroupID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, entityID, fromGroupID, toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
-            public EGID SwapEntityGroup<T>(int entityID, ExclusiveGroup fromGroupID, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup<T>(int entityID, ExclusiveGroup fromGroupID, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
             {
-                return _weakReference.Target.SwapEntityGroup<T>(entityID, (int) fromGroupID, (int) toGroupID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, entityID, (int) fromGroupID, (int) toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
-            public EGID SwapEntityGroup<T>(EGID id, int toGroupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup<T>(EGID id, int toGroupID) where T : IEntityDescriptor, new()
             {
-                return _weakReference.Target.SwapEntityGroup<T>(id.entityID, id.groupID, toGroupID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, id.entityID, id.groupID, toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
-            public EGID SwapEntityGroup<T>(EGID id, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup<T>(EGID id, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
             {
-                return _weakReference.Target.SwapEntityGroup<T>(id.entityID, id.groupID, (int) toGroupID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, id.entityID, id.groupID, (int)toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
+            }
+            
+            public void SwapFirstEntityGroup<T>(int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
+            {
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.FirstSwap, -1, fromGroupID, toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
-            public EGID SwapFirstEntityGroup<T>(int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
+            public void SwapFirstEntityGroup<T>(ExclusiveGroup fromGroupID, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
             {
-                return _weakReference.Target.SwapFirstEntityInGroup<T>( fromGroupID, toGroupID);
+                _weakReference.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.FirstSwap, -1, (int)fromGroupID, (int)toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
+        }
 
-            public EGID SwapFirstEntityGroup<T>(ExclusiveGroup fromGroupID, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
-            {
-                return _weakReference.Target.SwapFirstEntityInGroup<T>( (int) fromGroupID, (int) toGroupID);
-            }
+        void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)
+        {
+            _entitiesOperations.AddRef(ref entitySubmitOperation);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
@@ -11,7 +12,7 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        class DoubleBufferedEntitiesToAdd<T> where T : Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>, new()
+        class DoubleBufferedEntitiesToAdd<T> where T : FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>, new()
         {
             readonly T _entityViewsToAddBufferA = new T();
             readonly T _entityViewsToAddBufferB = new T();

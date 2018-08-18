@@ -36,12 +36,13 @@ namespace Svelto.ECS
         /// </summary>
         public EnginesRoot(EntitySubmissionScheduler entityViewScheduler)
         {
+            _entitiesOperations = new FasterList<EntitySubmitOperation>();
             _entityEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
 
-            _groupEntityDB = new Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
+            _groupEntityDB = new FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
             _groupedGroups = new Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>>();
-            _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd<Dictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
+            _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
             _DB = new EntitiesDB(_groupEntityDB, _groupedGroups);
 

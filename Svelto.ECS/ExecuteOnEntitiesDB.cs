@@ -63,7 +63,7 @@ namespace Svelto.ECS.Internal
             TypeSafeDictionary<T> typeSafeDictionary;
             if (QueryEntitySafeDictionary(@groupID, out typeSafeDictionary) == false) return;
 
-            var entities = typeSafeDictionary.GetFasterValuesBuffer(out count);
+            var entities = typeSafeDictionary.GetValuesArray(out count);
 
             for (var i = 0; i < count; i++)
                 action(ref entities[i], this, i);
@@ -82,7 +82,7 @@ namespace Svelto.ECS.Internal
             TypeSafeDictionary<T> typeSafeDictionary;
             if (QueryEntitySafeDictionary(@groupID, out typeSafeDictionary) == false) return;
 
-            var entities = typeSafeDictionary.GetFasterValuesBuffer(out count);
+            var entities = typeSafeDictionary.GetValuesArray(out count);
 
             for (var i = 0; i < count; i++)
                 action(ref entities[i], ref value, this, i);
@@ -105,7 +105,7 @@ namespace Svelto.ECS.Internal
             if (_groupedGroups.TryGetValue(type, out dic))
             {
                 int count;
-                var typeSafeDictionaries = dic.GetFasterValuesBuffer(out count);
+                var typeSafeDictionaries = dic.GetValuesArray(out count);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -113,7 +113,7 @@ namespace Svelto.ECS.Internal
                     var typeSafeDictionary = typeSafeDictionaries[j];
                     var casted             = typeSafeDictionary as TypeSafeDictionary<T>;
 
-                    var entities = casted.GetFasterValuesBuffer(out innerCount);
+                    var entities = casted.GetValuesArray(out innerCount);
 
                     for (int i = 0; i < innerCount; i++)
                         action(ref entities[i], this);
@@ -131,7 +131,7 @@ namespace Svelto.ECS.Internal
             if (_groupedGroups.TryGetValue(type, out dic))
             {
                 int count;
-                var typeSafeDictionaries = dic.GetFasterValuesBuffer(out count);
+                var typeSafeDictionaries = dic.GetValuesArray(out count);
 
                 for (int j = 0; j < count; j++)
                 {
@@ -139,7 +139,7 @@ namespace Svelto.ECS.Internal
                     var typeSafeDictionary = typeSafeDictionaries[j];
                     var casted             = typeSafeDictionary as TypeSafeDictionary<T>;
 
-                    var entities = casted.GetFasterValuesBuffer(out innerCount);
+                    var entities = casted.GetValuesArray(out innerCount);
 
                     for (int i = 0; i < innerCount; i++)
                         action(ref entities[i], ref value, this);

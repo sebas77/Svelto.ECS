@@ -7,7 +7,7 @@ namespace Svelto.ECS.Internal
 {
     partial class EntitiesDB : IEntitiesDB
     {
-        internal EntitiesDB(Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB,
+        internal EntitiesDB(FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsDB,
             Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> groupedGroups)
         {
             _groupEntityViewsDB = groupEntityViewsDB;
@@ -19,7 +19,7 @@ namespace Svelto.ECS.Internal
             TypeSafeDictionary<T> typeSafeDictionary;
             if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return RetrieveEmptyEntityViewList<T>();
 
-            return typeSafeDictionary.FasterValues;
+            return typeSafeDictionary.Values;
         }
 
         public T[] QueryEntities<T>(int @group, out int count) where T : IEntityStruct
@@ -28,7 +28,7 @@ namespace Svelto.ECS.Internal
             count = 0;
             if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return RetrieveEmptyEntityViewArray<T>();
 
-            return typeSafeDictionary.GetFasterValuesBuffer(out count);
+            return typeSafeDictionary.GetValuesArray(out count);
         }
 
         public T[] QueryEntities<T>(ExclusiveGroup @group, out int targetsCount) where T : IEntityStruct
@@ -47,7 +47,7 @@ namespace Svelto.ECS.Internal
             mapper.map = typeSafeDictionary;
 
             int count;
-            typeSafeDictionary.GetFasterValuesBuffer(out count);
+            typeSafeDictionary.GetValuesArray(out count);
 
             return mapper;
         }
@@ -121,14 +121,15 @@ namespace Svelto.ECS.Internal
         T[] QueryEntitiesAndIndexInternal<T>(EGID entityGID, out uint index) where T : IEntityStruct
         {
             TypeSafeDictionary<T> safeDictionary;
+            index = 0;
             if (QueryEntitySafeDictionary(entityGID.groupID, out safeDictionary) == false)
-                throw new EntitiesDBException("Entity not found, type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(entityGID.entityID));
+                return null;
 
             if (safeDictionary.TryFindElementIndex(entityGID.entityID, out index) == false)
-                throw new EntitiesDBException("Entity not found, type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(entityGID.entityID));
+                return null;
 
             int count;
-            return safeDictionary.GetFasterValuesBuffer(out count);
+            return safeDictionary.GetValuesArray(out count);
         }
         
         bool QueryEntitySafeDictionary<T>(int @group, out TypeSafeDictionary<T> typeSafeDictionary) where T : IEntityStruct
@@ -170,7 +171,11 @@ namespace Svelto.ECS.Internal
         }
      
         //grouped set of entity views, this is the standard way to handle entity views
-        readonly Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityViewsDB;
+        //entity views are grouped per group, then indexable per type, then indexable per EGID. 
+        //however the TypeSafeDictionary can return an array of values directly, that can be
+        //iterated over, so that is possible to iterate over all the entity views of 
+        //a specific type inside a specific group.
+        readonly FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityViewsDB;
         //needed to be able to iterate over all the entities of the same type regardless the group
         //may change in future
         readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups;

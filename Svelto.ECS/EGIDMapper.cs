@@ -10,7 +10,7 @@ namespace Svelto.ECS
         {
                 int count;
                 index = map.FindElementIndex(id.entityID); 
-                return map.GetFasterValuesBuffer(out count);
+                return map.GetValuesArray(out count);
         }
     }
 }

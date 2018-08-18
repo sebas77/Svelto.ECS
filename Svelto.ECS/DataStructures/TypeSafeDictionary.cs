@@ -2,17 +2,9 @@
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
-using Svelto.Utilities;
 
 namespace Svelto.ECS.Internal
 {
-    /// <summary>
-    ///     This is just a place holder at the moment
-    ///     I always wanted to create my own Dictionary
-    ///     data structure as excercise, but never had the
-    ///     time to. At the moment I need the custom interface
-    ///     wrapped though.
-    /// </summary>
     public interface ITypeSafeDictionary
     {
         ITypeSafeDictionary Create();
@@ -20,12 +12,11 @@ namespace Svelto.ECS.Internal
         void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                            entityViewEnginesDB);
 
-        void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, int toGroupID,
-                                                ITypeSafeDictionary toGroup,
+        void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, int toGroupID, ITypeSafeDictionary toGroup,
                                                   Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                       entityViewEnginesDB);
         
-        void FillWithIndexedEntities(ITypeSafeDictionary                                          entities);
+        void FillWithIndexedEntities(ITypeSafeDictionary entities);
         void AddEntitiesToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB);
         
         void AddCapacity(int size);
@@ -48,7 +39,7 @@ namespace Svelto.ECS.Internal
         public void FillWithIndexedEntities(ITypeSafeDictionary entities)
         {
             int count;
-            var buffer = (entities as TypeSafeDictionary<TValue>).GetFasterValuesBuffer(out count);
+            var buffer = (entities as TypeSafeDictionary<TValue>).GetValuesArray(out count);
 
             try
             {
@@ -63,10 +54,11 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void AddEntitiesToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
+        public void AddEntitiesToEngines(
+            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
         {
             int      count;
-            TValue[] values = GetFasterValuesBuffer(out count);
+            TValue[] values = GetValuesArray(out count);
 
             for (int i = 0; i < count; i++)
             {
@@ -83,10 +75,11 @@ namespace Svelto.ECS.Internal
 
         public int GetFirstID()
         {
-            return FasterValues[0].ID.entityID;
+            return Values[0].ID.entityID;
         }
 
-        void AddEntityViewToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
+        void AddEntityViewToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
+                                    ref TValue                                                      entity)
         {
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
             //get all the engines linked to TValue
@@ -100,7 +93,7 @@ namespace Svelto.ECS.Internal
                                                              entityViewEnginesDB)
         {
             int count;
-            var fasterValuesBuffer = GetFasterValuesBuffer(out count);
+            var fasterValuesBuffer = GetValuesArray(out count);
             var valueIndex = GetValueIndex(fromEntityGid.entityID);
 
             if (entityViewEnginesDB != null)
@@ -113,7 +106,7 @@ namespace Svelto.ECS.Internal
                 toGroupCasted.Add(fromEntityGid.entityID, ref fasterValuesBuffer[valueIndex]);
                 
                 if (entityViewEnginesDB != null)
-                    AddEntityViewToEngines(entityViewEnginesDB, ref toGroupCasted.GetFasterValuesBuffer(out count)[toGroupCasted.GetValueIndex(fromEntityGid.entityID)]);
+                    AddEntityViewToEngines(entityViewEnginesDB, ref toGroupCasted.GetValuesArray(out count)[toGroupCasted.GetValueIndex(fromEntityGid.entityID)]);
             }
 
             Remove(fromEntityGid.entityID);
@@ -131,7 +124,7 @@ namespace Svelto.ECS.Internal
         public void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
         {
             int count;
-            TValue[] values = GetFasterValuesBuffer(out count);
+            TValue[] values = GetValuesArray(out count);
 
             for (int i = 0; i < count; i++)
             {

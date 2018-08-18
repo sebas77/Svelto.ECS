@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Svelto.DataStructures.Experimental;
 
 namespace Svelto.ECS.Internal
 {
@@ -7,7 +8,7 @@ namespace Svelto.ECS.Internal
     {
         internal static Dictionary<Type, ITypeSafeDictionary> 
             BuildGroupedEntityViews(EGID egid,
-                 Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType,
+                 FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType,
                  IEntityBuilder[] entityToBuild,
                  object[] implementors)
         {
@@ -19,7 +20,7 @@ namespace Svelto.ECS.Internal
         }
 
         static Dictionary<Type, ITypeSafeDictionary> FetchEntityViewGroup(int groupID, 
-            Dictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType)
+            FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupEntityViewsByType)
         {
             Dictionary<Type, ITypeSafeDictionary> group;
 
@@ -53,13 +54,11 @@ namespace Svelto.ECS.Internal
         {
             ITypeSafeDictionary safeDictionary;
 
-            var entityViewsPoolWillBeCreated =
-                @group.TryGetValue(entityViewType, out safeDictionary) == false;
+            var entityViewsPoolWillBeCreated = @group.TryGetValue(entityViewType, out safeDictionary) == false;
 
             //passing the undefined entityViewsByType inside the entityViewBuilder will allow
             //it to be created with the correct type and casted back to the undefined list.
             //that's how the list will be eventually of the target type.
-            
             entityBuilder.BuildEntityViewAndAddToList(ref safeDictionary, entityID, implementors);
 
             if (entityViewsPoolWillBeCreated)
