@@ -31,7 +31,7 @@ _If you write an article about Svelto, please let me know, I will add it here!_
 * http://www.sebaslab.com/ecs-1-0/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-unity-survival-example/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
-* http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/ (since I don't like the example much, I didn't update the code, but the article is still valid)
+* http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
 
 **Theory related articles (please read them to understand why I think ECS is great to write maintainable code):**
 
