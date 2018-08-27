@@ -25,7 +25,7 @@ _If you write an article about Svelto, please let me know, I will add it here!_
 
 **Framework articles:**
 
-* http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/
+* http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/ (shows what's changed compared to 2.5)
 * http://www.sebaslab.com/svelto-ecs-2-5-and-allocation-0-code/ (shows what's changed compared to 2.0)
 * http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
 * http://www.sebaslab.com/ecs-1-0/
