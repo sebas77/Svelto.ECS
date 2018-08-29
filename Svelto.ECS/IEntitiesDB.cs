@@ -66,7 +66,7 @@ namespace Svelto.ECS
         /// <param name="damageableGroups"></param>
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
-        void ExecuteOnAllEntities<T>(ExclusiveGroup[] damageableGroups, AllEntitiesAction<T> action) where T : IEntityStruct;
+        void ExecuteOnAllEntities<T>(AllEntitiesAction<T> action) where T : IEntityStruct;
         void ExecuteOnAllEntities<T, W>(ref W  value, AllEntitiesAction<T, W> action) where T : IEntityStruct;
         void ExecuteOnAllEntities<T>(ExclusiveGroup[] groups, EntitiesAction<T> action) where T : IEntityStruct;
         void ExecuteOnAllEntities<T, W>(ExclusiveGroup[] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;

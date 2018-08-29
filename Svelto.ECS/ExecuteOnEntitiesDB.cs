@@ -97,7 +97,7 @@ namespace Svelto.ECS.Internal
 
         //-----------------------------------------------------------------------------------------------------------
         
-        public void ExecuteOnAllEntities<T>(ExclusiveGroup[] damageableGroups, AllEntitiesAction<T> action) where T : IEntityStruct
+        public void ExecuteOnAllEntities<T>(AllEntitiesAction<T> action) where T : IEntityStruct
         {
             var                                        type = typeof(T);
             FasterDictionary<int, ITypeSafeDictionary> dic;
