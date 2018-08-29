@@ -16,7 +16,7 @@ You can find a working example to learn how to use the framework here:
 
 ## Articles
 
-**Svelto users articles (note they may use outdated version of Svelto):**
+**Svelto users articles (note they may use an outdated version of Svelto):**
 
 * https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
 * https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
@@ -25,12 +25,13 @@ _If you write an article about Svelto, please let me know, I will add it here!_
 
 **Framework articles:**
 
+* http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/ (shows what's changed compared to 2.5)
 * http://www.sebaslab.com/svelto-ecs-2-5-and-allocation-0-code/ (shows what's changed compared to 2.0)
 * http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
 * http://www.sebaslab.com/ecs-1-0/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-unity-survival-example/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
-* http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/ (since I don't like the example much, I didn't update the code, but the article is still valid)
+* http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
 
 **Theory related articles (please read them to understand why I think ECS is great to write maintainable code):**
 
