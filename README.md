@@ -7,21 +7,12 @@ Real Entity-Component-System for c#. Enables to write encapsulated, decoupled, m
 
 _Svelto.ECS wasn't born just from the needs of a large team, but also as result of years of reasoning behind software engineering applied to game development(*). Compared to Unity.ECS the main goals and reasons for Svelto.ECS to exist are different enough to justify its on going development (plus Svelto is platform agnostic, so it has been written with portability in mind). Svelto.ECS hasn't been built just to develop faster code, it has been built to help develop better code. Performance gain is one of the benefits in using Svelto.ECS, as ECS in general is a great way to write cache-friendly code, but the main reasons why Svelto.ECS has been written orbit around the shifting of paradigm from Object Oriented Programming, the consequent improvement of the code design and maintainability, the approachability by junior programmers that won't need to worry too much about the architecture and can focus on the solution of the problems thanks to the rigid directions that the framework gives. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be "junior coder proof"._
 
-You can find a working example to learn how to use the framework here:
-
 ## Examples
 
 * **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
 
 ## Articles
-
-**Svelto users articles (note they may use an outdated version of Svelto):**
-
-* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
-* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
-
-_If you write an article about Svelto, please let me know, I will add it here!_
 
 **Framework articles:**
 
@@ -44,6 +35,13 @@ _If you write an article about Svelto, please let me know, I will add it here!_
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
 
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
+
+**Svelto users articles (note they may use an outdated version of Svelto):**
+
+* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
+* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
+
+_If you write an article about Svelto, please let me know, I will add it here!_
 
 **The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
