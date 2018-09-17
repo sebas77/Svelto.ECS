@@ -43,6 +43,7 @@ namespace Svelto.ECS
             //are there new entities built to process?
             while ( _newEntitiesBuiltToProcess > 0)
             {
+                _newEntitiesBuiltToProcess = 0;
                 //use other as source from now on
                 //current will be use to write new entityViews
                 _groupedEntityToAdd.Swap();
@@ -62,7 +63,6 @@ namespace Svelto.ECS
                 if (numberOfReenteringLoops > 5)
                     throw new Exception("possible infinite loop found creating Entities inside IEntityViewsEngine Add method, please consider building entities outside IEntityViewsEngine Add method");
 
-                _newEntitiesBuiltToProcess = 0;
                 numberOfReenteringLoops++;
             }
         }
