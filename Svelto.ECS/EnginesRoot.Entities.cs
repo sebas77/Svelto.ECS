@@ -200,13 +200,6 @@ namespace Svelto.ECS
             MoveEntity(builders, new EGID(entityID, fromGroupID), toGroupID, toGroup);
         }
         
-        void SwapFirstEntityInGroup(IEntityBuilder[] builders, int fromGroupID, int toGroupId)
-        {
-            var firstID = _groupEntityDB[fromGroupID][builders[0].GetEntityType()].GetFirstID();
-            
-            SwapEntityGroup(builders, firstID, fromGroupID, toGroupId);
-        }
-
         readonly EntitiesDB         _DB;
         int                         _newEntitiesBuiltToProcess;
     }

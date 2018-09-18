@@ -69,18 +69,6 @@ namespace Svelto.ECS
                 _weakReference.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap, id.entityID, id.groupID, (int)toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
-            
-            public void SwapFirstEntityGroup<T>(int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
-            {
-                _weakReference.Target.QueueEntitySubmitOperation(
-                    new EntitySubmitOperation(EntitySubmitOperationType.FirstSwap, -1, fromGroupID, toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
-            }
-
-            public void SwapFirstEntityGroup<T>(ExclusiveGroup fromGroupID, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
-            {
-                _weakReference.Target.QueueEntitySubmitOperation(
-                    new EntitySubmitOperation(EntitySubmitOperationType.FirstSwap, -1, (int)fromGroupID, (int)toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
-            }
         }
 
         void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)

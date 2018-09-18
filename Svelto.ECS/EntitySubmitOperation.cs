@@ -22,7 +22,6 @@
     {
         Swap,
         Remove,
-        FirstSwap,
         RemoveGroup
     }
 }

@@ -27,9 +27,6 @@ namespace Svelto.ECS
                     case EntitySubmitOperationType.Remove:
                         MoveEntity(entitiesOperations[i].builders, new EGID(entitiesOperations[i].id, entitiesOperations[i].fromGroupID));
                         break;
-                    case EntitySubmitOperationType.FirstSwap:
-                        SwapFirstEntityInGroup(entitiesOperations[i].builders, entitiesOperations[i].fromGroupID, entitiesOperations[i].toGroupID);
-                        break;
                     case EntitySubmitOperationType.RemoveGroup:
                         RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
                         break;
