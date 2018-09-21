@@ -16,7 +16,7 @@ namespace Svelto.ECS
             _initializer = default(T);
 
 #if DEBUG && !PROFILER
-            if (needsReflection == false)
+            if (needsReflection == false && typeof(T) != typeof(EntityInfoView) )
             {
                 CheckFields(typeof(T));
             }
@@ -78,7 +78,7 @@ namespace Svelto.ECS
         }
 #endif        
 
-        public void BuildEntityViewAndAddToList(ref ITypeSafeDictionary dictionary, EGID entityID, object[] implementors)
+        public void BuildEntityAndAddToList(ref ITypeSafeDictionary dictionary, EGID entityID, object[] implementors)
         {
             if (dictionary == null)
                 dictionary = new TypeSafeDictionary<T>();

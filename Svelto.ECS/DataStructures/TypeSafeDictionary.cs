@@ -25,7 +25,6 @@ namespace Svelto.ECS.Internal
         void Trim();
         void Clear();
         bool Has(int entityIdEntityId);
-        int GetFirstID();
     }
 
     class TypeSafeDictionary<TValue> : FasterDictionary<int, TValue>, ITypeSafeDictionary where TValue : IEntityStruct
