@@ -22,6 +22,9 @@ namespace Svelto.ECS
             foreach (var groups in _groupEntityDB)
                 foreach (var entityList in groups.Value)
                     entityList.Value.RemoveEntitiesFromEngines(_entityEngines);
+            
+            foreach (var engine in _disposableEngines)
+                engine.Dispose();
         }
 
         ///--------------------------------------------
@@ -166,40 +169,49 @@ namespace Svelto.ECS
         {
             DBC.ECS.Check.Require(fromGroup.ContainsKey(entityType) == true, "from group not found");
             var                 fromTypeSafeDictionary = fromGroup[entityType];
-            ITypeSafeDictionary safeDictionary         = null;
+            ITypeSafeDictionary dictionaryOfEntities         = null;
 
+            //in case we want to move to a new group, otherwise is just a remove
             if (toGroup != null)
             {
-                if (toGroup.TryGetValue(entityType, out safeDictionary) == false)
+                if (toGroup.TryGetValue(entityType, out dictionaryOfEntities) == false)
                 {
-                    safeDictionary = fromTypeSafeDictionary.Create();
-                    toGroup.Add(entityType, safeDictionary);
-                    _groupedGroups[entityType] = new FasterDictionary<int, ITypeSafeDictionary>();
+                    dictionaryOfEntities = fromTypeSafeDictionary.Create();
+                    toGroup.Add(entityType, dictionaryOfEntities);
                 }
 
-                _groupedGroups[entityType][toGroupID] = safeDictionary;
+                FasterDictionary<int, ITypeSafeDictionary> groupedGroup;
+                if (_groupedGroups.TryGetValue(entityType, out groupedGroup) == false)
+                    groupedGroup = _groupedGroups[entityType] = new FasterDictionary<int, ITypeSafeDictionary>();
+                
+                groupedGroup[toGroupID] = dictionaryOfEntities;
             }
 
             DBC.ECS.Check.Assert(fromTypeSafeDictionary.Has(entityGID.entityID), "entity not found");
-            fromTypeSafeDictionary.MoveEntityFromDictionaryAndEngines(entityGID, toGroupID, safeDictionary, _entityEngines);
+            fromTypeSafeDictionary.MoveEntityFromDictionaryAndEngines(entityGID, toGroupID, dictionaryOfEntities, _entityEngines);
 
             if (fromTypeSafeDictionary.Count == 0) //clean up
             {
                 _groupedGroups[entityType].Remove(entityGID.groupID);
 
-                //it's probably better to not remove this, but the dictionary should be trimmed?
-                //fromGroup.Remove(entityType);
+                //I don't remove the group if empty on purpose, in case it needs to be reused
+                //however I trim it to save memory
                 fromTypeSafeDictionary.Trim();
             }
-
-            //it doesn't eliminate the fromGroup itself on purpose
         }
 
         void RemoveGroupAndEntitiesFromDB(int groupID)
         {
-            foreach (var entiTypeSafeList in _groupEntityDB[groupID])
-                entiTypeSafeList.Value.RemoveEntitiesFromEngines(_entityEngines);
+            var dictionariesOfEntities = _groupEntityDB[groupID];
+            foreach (var dictionaryOfEntities in dictionariesOfEntities)
+            {
+                dictionaryOfEntities.Value.RemoveEntitiesFromEngines(_entityEngines);
+                var groupedGroupOfEntities = _groupedGroups[dictionaryOfEntities.Key];
+                groupedGroupOfEntities.Remove(groupID);
+            }
 
+            //careful, in this case I assume you really don't want to use this group anymore
+            //so I remove it from the database
             _groupEntityDB.Remove(groupID);
         }
 

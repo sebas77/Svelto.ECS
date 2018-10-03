@@ -39,6 +39,7 @@ namespace Svelto.ECS
             _entitiesOperations = new FasterList<EntitySubmitOperation>();
             _entityEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
+            _disposableEngines = new FasterList<IDisposable>();
 
             _groupEntityDB = new FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
             _groupedGroups = new Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>>();
@@ -61,6 +62,9 @@ namespace Svelto.ECS
                 CheckEntityViewsEngine(viewEngine);
             else            
                 _otherEngines.Add(engine);
+            
+            if (engine is IDisposable)
+                _disposableEngines.Add(engine as IDisposable);
             
             var queryableEntityViewEngine = engine as IQueryingEntitiesEngine;
             if (queryableEntityViewEngine != null)
@@ -119,6 +123,7 @@ namespace Svelto.ECS
 
         readonly Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> _entityEngines;    
         readonly FasterList<IEngine>                                             _otherEngines;
+        readonly FasterList<IDisposable>                                         _disposableEngines;
         
         static readonly Type _objectType = typeof(object);
     }

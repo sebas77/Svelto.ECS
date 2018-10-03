@@ -86,7 +86,8 @@ namespace Svelto.ECS
                         dbDic = groupDB[entityViewTypeSafeDictionary.Key] = entityViewTypeSafeDictionary.Value.Create();
                     
                     if (_groupedGroups.TryGetValue(entityViewTypeSafeDictionary.Key, out groupedGroup) == false)
-                        groupedGroup = _groupedGroups[entityViewTypeSafeDictionary.Key] = new FasterDictionary<int, ITypeSafeDictionary>();
+                        groupedGroup = _groupedGroups[entityViewTypeSafeDictionary.Key] =
+                                           new FasterDictionary<int, ITypeSafeDictionary>();
 
                     //Fill the DB with the entity views generate this frame.
                     dbDic.FillWithIndexedEntities(entityViewTypeSafeDictionary.Value);
@@ -111,7 +112,9 @@ namespace Svelto.ECS
         //to the FasterDictionary capabilities OR it's possible to get a specific entityView indexed by
         //ID. This ID doesn't need to be the EGID, it can be just the entityID
         
+        //for each group id, save a dictionary indexed by entity type of entities indexed by id
         readonly FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityDB;
+        //for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are found indexed by group id 
         readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups; //yes I am being sarcastic
         readonly DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
         readonly EntitySubmissionScheduler                                    _scheduler;
