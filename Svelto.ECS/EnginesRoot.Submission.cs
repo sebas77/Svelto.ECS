@@ -1,8 +1,7 @@
 ﻿﻿using System;
- using System.Collections;
- using System.Collections.Generic;
- using Svelto.DataStructures;
- using Svelto.DataStructures.Experimental;
+using System.Collections.Generic;
+using Svelto.DataStructures;
+using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 
@@ -19,18 +18,31 @@ namespace Svelto.ECS
             var entitiesOperations = _entitiesOperations.ToArrayFast();
             for (int i = 0; i < _entitiesOperations.Count; i++)
             {
-                switch (entitiesOperations[i].type)
+#if DEBUG
+                try
                 {
-                    case EntitySubmitOperationType.Swap:
-                        SwapEntityGroup(entitiesOperations[i].builders, entitiesOperations[i].id, entitiesOperations[i].fromGroupID, entitiesOperations[i].toGroupID);
-                        break;
-                    case EntitySubmitOperationType.Remove:
-                        MoveEntity(entitiesOperations[i].builders, new EGID(entitiesOperations[i].id, entitiesOperations[i].fromGroupID));
-                        break;
-                    case EntitySubmitOperationType.RemoveGroup:
-                        RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
-                        break;
+#endif
+                    switch (entitiesOperations[i].type)
+                    {
+                        case EntitySubmitOperationType.Swap:
+                            SwapEntityGroup(entitiesOperations[i].builders,    entitiesOperations[i].id,
+                                            entitiesOperations[i].fromGroupID, entitiesOperations[i].toGroupID);
+                            break;
+                        case EntitySubmitOperationType.Remove:
+                            MoveEntity(entitiesOperations[i].builders,
+                                       new EGID(entitiesOperations[i].id, entitiesOperations[i].fromGroupID));
+                            break;
+                        case EntitySubmitOperationType.RemoveGroup:
+                            RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
+                            break;
+                    }
+#if DEBUG
                 }
+                catch (ECSException e)
+                {
+                    Utility.Console.LogError(e.Message.FastConcat(" ", entitiesOperations[i].trace));
+                }
+#endif
             }
             
             _entitiesOperations.FastClear();

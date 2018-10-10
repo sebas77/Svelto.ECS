@@ -1,4 +1,4 @@
-﻿﻿using Svelto.ECS.Internal;
+﻿﻿using System;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
 using Svelto.ECS.Profiler;
@@ -73,6 +73,9 @@ namespace Svelto.ECS
 
         void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)
         {
+#if DEBUG            
+            entitySubmitOperation.trace = Environment.StackTrace;
+#endif            
             _entitiesOperations.AddRef(ref entitySubmitOperation);
         }
     }
