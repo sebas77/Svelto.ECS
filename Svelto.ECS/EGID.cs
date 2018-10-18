@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
+
 namespace Svelto.ECS
 {
-    public struct EGID
+    public struct EGID:IEquatable<long>,IEqualityComparer<long>
     {
         long _GID;
         
@@ -32,6 +35,21 @@ namespace Svelto.ECS
         static long MAKE_GLOBAL_ID(int entityId, int groupId)
         {
             return (long)groupId << 32 | ((long)(uint)entityId & 0xFFFFFFFF);
+        }
+
+        public bool Equals(long other)
+        {
+            return _GID == other;
+        }
+
+        public bool Equals(long x, long y)
+        {
+            return x == y;
+        }
+
+        public int GetHashCode(long obj)
+        {
+            return _GID.GetHashCode();
         }
     }
 }
