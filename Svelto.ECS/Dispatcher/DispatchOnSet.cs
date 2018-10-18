@@ -23,11 +23,11 @@ namespace Svelto.ECS
 
                 _subscribers.Invoke(_senderID, value);
             }
-        }
 
-        public static implicit operator T(DispatchOnSet<T> dispatch)
-        {
-            return dispatch._value;
+            get 
+            {
+                return _value;
+            }
         }
         
         public void NotifyOnValueSet(System.Action<int, T> action)
@@ -40,8 +40,8 @@ namespace Svelto.ECS
             _subscribers -= action;
         }
 
-        protected T   _value;
-        readonly  int _senderID;
+        protected T      _value;
+        readonly int _senderID;
 
         WeakEvent<int, T> _subscribers;
     }
