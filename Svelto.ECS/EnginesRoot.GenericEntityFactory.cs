@@ -25,9 +25,9 @@ namespace Svelto.ECS
                 return _weakEngine.Target.BuildEntity<T>(egid, implementors);
             }
 
-            public EntityStructInitializer BuildEntity<T>(EGID egid, T descriptorEntity, object[] implementors)  where T:IEntityDescriptor
+            public EntityStructInitializer BuildEntity<T>(EGID egid, T entityDescriptor, object[] implementors)  where T:IEntityDescriptor
             {
-                return _weakEngine.Target.BuildEntity(egid, descriptorEntity, implementors);
+                return _weakEngine.Target.BuildEntity(egid, entityDescriptor, implementors);
             }
 
             public EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroup groupID, T descriptorEntity, object[] implementors)  where T:IEntityDescriptor

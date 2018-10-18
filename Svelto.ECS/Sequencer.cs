@@ -10,7 +10,7 @@ namespace Svelto.ECS
         {
             if (ContainsKey(engine))
             {
-                Utility.Console.LogError("can't hold multiple steps with the same engine as origin in a Sequencer");
+                Svelto.Utilities.Console.LogError("can't hold multiple steps with the same engine as origin in a Sequencer");
             }
             base.Add(engine, dictionary);
         }
@@ -42,7 +42,7 @@ namespace Svelto.ECS
             var steps  = (_steps[engine] as Dictionary<C, IStep<C>[]>)[branch];
 
             if (steps == null)
-                Utility.Console.LogError("selected steps not found in sequencer ".FastConcat(this.ToString()));
+                Svelto.Utilities.Console.LogError("selected steps not found in sequencer ".FastConcat(this.ToString()));
             
             for (var i = 0; i < steps.Length; i++)
                 steps[i].Step(condition, id);

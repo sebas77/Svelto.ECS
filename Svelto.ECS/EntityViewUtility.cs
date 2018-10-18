@@ -53,7 +53,7 @@ static class EntityViewUtility
 #if DEBUG && !PROFILER
             else
             {
-                Utility.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", 
+                Svelto.Utilities.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", 
                                                                       entityBuilder.GetEntityType().ToString()));
             }
 #endif
@@ -80,7 +80,7 @@ static class EntityViewUtility
             }
 #if DEBUG && !PROFILER
             if (component.numberOfImplementations > 1)
-                Utility.Console.LogError(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
+                Svelto.Utilities.Console.LogError(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
                                                                         "Component Type: ", fieldType.Name,
                                                                         " implementor: ",
                                                                         component.implementorType.ToString()) +

@@ -57,7 +57,6 @@ namespace Svelto.ECS
         void ExecuteOnEntities<T>(ExclusiveGroup groupID, EntitiesAction<T> action) where T : IEntityStruct;
         void ExecuteOnEntities<T, W>(int groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
         void ExecuteOnEntities<T, W>(ExclusiveGroup groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct;
-
         /// <summary>
         /// Execute an action on ALL the entities regardless the group. This function doesn't guarantee cache
         /// friendliness even if just EntityStructs are used. 

@@ -41,7 +41,11 @@ namespace Svelto.ECS
                     {
                         subitem.Value.Clear();
                     }
+                    
+                    item.Value.Clear();
                 }
+                
+                other.Clear();
             }
         }
     }

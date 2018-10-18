@@ -87,7 +87,7 @@ namespace Svelto.ECS
             {
                 if (entities.Has(entityID.entityID) == true)
                 {
-                    Utility.Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
+                    Svelto.Utilities.Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
                                             .FastConcat(entityType)
                                             .FastConcat(" id: ")
                                             .FastConcat(entityID.entityID)

@@ -18,10 +18,8 @@ namespace Svelto.ECS
             var entitiesOperations = _entitiesOperations.ToArrayFast();
             for (int i = 0; i < _entitiesOperations.Count; i++)
             {
-#if DEBUG
                 try
                 {
-#endif
                     switch (entitiesOperations[i].type)
                     {
                         case EntitySubmitOperationType.Swap:
@@ -36,13 +34,15 @@ namespace Svelto.ECS
                             RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
                             break;
                     }
-#if DEBUG
                 }
                 catch (ECSException e)
                 {
-                    Utility.Console.LogError(e.Message.FastConcat(" ", entitiesOperations[i].trace));
-                }
+                    Svelto.Utilities.Console.LogError(e.Message.FastConcat(" ", entitiesOperations[i].trace));
+                    
+#if DEBUG
+                    throw;
 #endif
+                }
             }
             
             _entitiesOperations.FastClear();
@@ -128,7 +128,8 @@ namespace Svelto.ECS
         readonly FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityDB;
         //for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are found indexed by group id 
         readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupedGroups; //yes I am being sarcastic
-        readonly DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>> _groupedEntityToAdd;
+        readonly DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>>
+            _groupedEntityToAdd;
         readonly EntitySubmissionScheduler                                    _scheduler;
         readonly FasterList<EntitySubmitOperation>                            _entitiesOperations;
     }
