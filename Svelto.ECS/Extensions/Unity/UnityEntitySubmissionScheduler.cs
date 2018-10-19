@@ -7,21 +7,8 @@ namespace Svelto.ECS.Schedulers.Unity
 {
     //The EntitySubmissionScheduler has been introduced to make the entity views submission logic platform independent
     //You can customize the scheduler if you wish
-    
-    public class UnityEntitySubmissionScheduler : EntitySubmissionScheduler
+    public class UnityEntitySubmissionScheduler : IEntitySubmissionScheduler
     {
-        public UnityEntitySubmissionScheduler()
-        {
-            GameObject go = new GameObject("ECSScheduler");
-
-            _scheduler = go.AddComponent<Scheduler>();
-        }
-
-        public override void Schedule(WeakAction submitEntityViews)
-        {
-            _scheduler.OnTick = submitEntityViews;
-        }
-
         class Scheduler : MonoBehaviour
         {
             IEnumerator Start()
@@ -30,19 +17,34 @@ namespace Svelto.ECS.Schedulers.Unity
                 {
                     yield return _wait;
 
-                    if (OnTick.IsValid)
-                        OnTick.Invoke();
+                    if (onTick.IsValid)
+                        onTick.Invoke();
                     else
                         yield break;
+
                 }
             }
 
-            internal WeakAction OnTick;
-
             readonly WaitForEndOfFrame _wait = new WaitForEndOfFrame();
+            
+            public WeakAction onTick;
+        }
+        
+        public WeakAction onTick
+        {
+            set
+            {
+                if (_scheduler == null)
+                {
+                    GameObject go = new GameObject("ECSScheduler");
+
+                    _scheduler = go.AddComponent<Scheduler>();
+                }
+                _scheduler.onTick = value;
+            }
         }
 
-        readonly Scheduler _scheduler;
+        Scheduler _scheduler;
     }
 }
 #endif

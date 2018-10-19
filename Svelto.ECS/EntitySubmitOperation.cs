@@ -13,7 +13,11 @@ namespace Svelto.ECS
         public string trace;
 #endif        
 
-        public EntitySubmitOperation(EntitySubmitOperationType operation, int entityId, int fromGroupId, int toGroupId, IEntityBuilder[] builders)
+        public EntitySubmitOperation(EntitySubmitOperationType operation,
+                                     int                       entityId,
+                                     int                       fromGroupId,
+                                     int                       toGroupId,
+                                     IEntityBuilder[]          builders)
         {
             type = operation;
             this.builders = builders;
@@ -30,6 +34,6 @@ namespace Svelto.ECS
     {
         Swap,
         Remove,
-        RemoveGroup
+        RemoveGroup,
     }
 }

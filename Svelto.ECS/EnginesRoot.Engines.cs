@@ -14,17 +14,18 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot : IDisposable
     {
+#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR        
         static EnginesRoot()
         {
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
+
 /// <summary>
 /// I still need to find a good solution for this. Need to move somewhere else
 /// </summary>
             UnityEngine.GameObject debugEngineObject = new UnityEngine.GameObject("Svelto.ECS.Profiler");
             debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
             UnityEngine.GameObject.DontDestroyOnLoad(debugEngineObject);
-#endif
         }
+#endif    
        
         /// <summary>
         /// Engines root contextualize your engines and entities. You don't need to limit yourself to one EngineRoot
@@ -34,21 +35,22 @@ namespace Svelto.ECS
         /// The EntitySubmissionScheduler cannot hold an EnginesRoot reference, that's why
         /// it must receive a weak reference of the EnginesRoot callback.
         /// </summary>
-        public EnginesRoot(EntitySubmissionScheduler entityViewScheduler)
+        public EnginesRoot(IEntitySubmissionScheduler entityViewScheduler)
         {
             _entitiesOperations = new FasterList<EntitySubmitOperation>();
             _entityEngines = new Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>();
             _otherEngines = new FasterList<IEngine>();
             _disposableEngines = new FasterList<IDisposable>();
+            _transientEntitiesOperations = new FasterList<EntitySubmitOperation>();
 
             _groupEntityDB = new FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>();
-            _groupedGroups = new Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>>();
+            _groupsPerEntity = new Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>>();
 
-            _DB = new EntitiesDB(_groupEntityDB, _groupedGroups);
+            _DB = new EntitiesDB(_groupEntityDB, _groupsPerEntity);
 
             _scheduler = entityViewScheduler;
-            _scheduler.Schedule(new WeakAction(SubmitEntityViews));
+            _scheduler.onTick = new WeakAction(SubmitEntityViews);
         }
 
         public void AddEngine(IEngine engine)

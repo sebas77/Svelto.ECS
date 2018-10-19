@@ -2,8 +2,8 @@ using Svelto.WeakEvents;
 
 namespace Svelto.ECS.Schedulers
 {
-    public abstract class EntitySubmissionScheduler
+    public interface IEntitySubmissionScheduler
     {
-        public abstract void Schedule(WeakAction submitEntityViews);
+        WeakAction onTick { set; }
     }
 }

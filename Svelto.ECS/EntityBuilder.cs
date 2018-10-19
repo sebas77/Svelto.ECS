@@ -41,7 +41,7 @@ namespace Svelto.ECS
                 SubCheckFields(fieldFieldType);
             }
 
-            if (type.Assembly == Assembly.GetCallingAssembly())
+            if (type.Assembly == Assembly.GetCallingAssembly() && type != typeof(Svelto.ECS.EGID))
             {
                 var methods = type.GetMethods(BindingFlags.Public |
                                               BindingFlags.Instance | BindingFlags.DeclaredOnly);
@@ -141,7 +141,8 @@ namespace Svelto.ECS
 
     public class EntityStructException : Exception
     {
-        public EntityStructException(Type fieldType):base("EntityStruct must contains only value types and no public methods! " + fieldType.ToString())
+        public EntityStructException(Type fieldType) :
+            base("EntityStruct must contains only value types and no public methods! " + fieldType.ToString())
         {}
     }
 }

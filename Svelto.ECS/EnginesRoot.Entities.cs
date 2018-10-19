@@ -1,7 +1,8 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Svelto.DataStructures.Experimental;
+ using Svelto.DataStructures;
+ using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
@@ -58,10 +59,8 @@ namespace Svelto.ECS
 #endif            
             var dic = EntityFactory.BuildGroupedEntities(entityID,
                                                   _groupedEntityToAdd.current,
-                                                            descriptorEntitiesToBuild,
+                                                   descriptorEntitiesToBuild,
                                                    implementors);
-            
-            _newEntitiesBuiltToProcess++;
             
             return new EntityStructInitializer(entityID, dic);
         }
@@ -96,7 +95,6 @@ namespace Svelto.ECS
                 }
             }
         }
-
         ///--------------------------------------------
 
         void Preallocate<T>(int groupID, int size) where T : IEntityDescriptor, new()
@@ -188,8 +186,8 @@ namespace Svelto.ECS
                 }
 
                 FasterDictionary<int, ITypeSafeDictionary> groupedGroup;
-                if (_groupedGroups.TryGetValue(entityType, out groupedGroup) == false)
-                    groupedGroup = _groupedGroups[entityType] = new FasterDictionary<int, ITypeSafeDictionary>();
+                if (_groupsPerEntity.TryGetValue(entityType, out groupedGroup) == false)
+                    groupedGroup = _groupsPerEntity[entityType] = new FasterDictionary<int, ITypeSafeDictionary>();
                 
                 groupedGroup[toGroupID] = dictionaryOfEntities;
             }
@@ -202,7 +200,7 @@ namespace Svelto.ECS
 
             if (fromTypeSafeDictionary.Count == 0) //clean up
             {
-                _groupedGroups[entityType].Remove(entityGID.groupID);
+                _groupsPerEntity[entityType].Remove(entityGID.groupID);
 
                 //I don't remove the group if empty on purpose, in case it needs to be reused
                 //however I trim it to save memory
@@ -216,7 +214,7 @@ namespace Svelto.ECS
             foreach (var dictionaryOfEntities in dictionariesOfEntities)
             {
                 dictionaryOfEntities.Value.RemoveEntitiesFromEngines(_entityEngines);
-                var groupedGroupOfEntities = _groupedGroups[dictionaryOfEntities.Key];
+                var groupedGroupOfEntities = _groupsPerEntity[dictionaryOfEntities.Key];
                 groupedGroupOfEntities.Remove(groupID);
             }
 
@@ -240,7 +238,6 @@ namespace Svelto.ECS
         }
         
         readonly EntitiesDB         _DB;
-        int                         _newEntitiesBuiltToProcess;
         Type                        _entityInfoView = typeof(EntityInfoView);
     }
 

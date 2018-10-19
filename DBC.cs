@@ -1,7 +1,8 @@
-using System;
-#if PROFILER || !DEBUG
+#if DISABLE_DBC || !DEBUG || PROFILER
+#define DISABLE_CHECKS
 using System.Diagnostics;
 #endif
+using System;
 
 namespace DBC.ECS
 {
@@ -59,7 +60,7 @@ namespace DBC.ECS
 		/// <summary>
 		/// Precondition check.
 		/// </summary>
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Require(bool assertion, string message)
@@ -79,7 +80,7 @@ namespace DBC.ECS
 		/// Precondition check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Require(bool assertion, string message, Exception inner)
@@ -99,7 +100,7 @@ namespace DBC.ECS
 		/// Precondition check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Require(bool assertion)
@@ -119,7 +120,7 @@ namespace DBC.ECS
 		/// Postcondition check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Ensure(bool assertion, string message)
@@ -139,7 +140,7 @@ namespace DBC.ECS
 		/// Postcondition check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Ensure(bool assertion, string message, Exception inner)
@@ -159,7 +160,7 @@ namespace DBC.ECS
 		/// Postcondition check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Ensure(bool assertion)
@@ -179,7 +180,7 @@ namespace DBC.ECS
 		/// Invariant check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Invariant(bool assertion, string message)
@@ -199,7 +200,7 @@ namespace DBC.ECS
 		/// Invariant check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Invariant(bool assertion, string message, Exception inner)
@@ -219,7 +220,7 @@ namespace DBC.ECS
 		/// Invariant check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Invariant(bool assertion)
@@ -238,7 +239,7 @@ namespace DBC.ECS
 		/// <summary>
 		/// Assertion check.
 		/// </summary>
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Assert(bool assertion, string message)
@@ -258,7 +259,7 @@ namespace DBC.ECS
 		/// Assertion check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Assert(bool assertion, string message, Exception inner)
@@ -278,7 +279,7 @@ namespace DBC.ECS
 		/// Assertion check.
 		/// </summary>
 		/// 
-#if PROFILER || !DEBUG
+#if DISABLE_DBC
 		[Conditional("__NEVER_DEFINED__")]
 #endif
 		public static void Assert(bool assertion)
