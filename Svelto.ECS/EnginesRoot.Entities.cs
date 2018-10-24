@@ -64,7 +64,7 @@ namespace Svelto.ECS
             
             return new EntityStructInitializer(entityID, dic);
         }
-        
+#if DEBUG && !PROFILER                    
         void CheckEntityID(EGID entityID, IEntityDescriptor descriptorEntity)
         {
             Dictionary<Type, ITypeSafeDictionary> @group;
@@ -79,14 +79,16 @@ namespace Svelto.ECS
             }
         }
 
-        static void CheckEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group, string name)
+        static void CheckEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group, 
+            string name)
         {
             ITypeSafeDictionary entities;
             if (@group.TryGetValue(entityType, out entities))
             {
                 if (entities.Has(entityID.entityID) == true)
                 {
-                    Svelto.Utilities.Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
+                    Svelto.Utilities.Console.LogError("Entity ".FastConcat
+                                            (name, " with used ID is about to be built: ")
                                             .FastConcat(entityType)
                                             .FastConcat(" id: ")
                                             .FastConcat(entityID.entityID)
@@ -95,6 +97,7 @@ namespace Svelto.ECS
                 }
             }
         }
+#endif
         ///--------------------------------------------
 
         void Preallocate<T>(int groupID, int size) where T : IEntityDescriptor, new()
