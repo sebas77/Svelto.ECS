@@ -22,12 +22,12 @@ namespace Svelto.ECS
             get { return (int) (_GID >> 32); }
         }
 
-        public EGID(int entityID, int groupID) : this()
+        internal EGID(int entityID, int groupID) : this()
         {
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
         }
         
-        public EGID(int entityID, ExclusiveGroup groupID) : this()
+        public EGID(int entityID, ExclusiveGroup.ExclusiveGroupStruct  groupID) : this()
         {
             _GID = MAKE_GLOBAL_ID(entityID, (int) groupID);
         }

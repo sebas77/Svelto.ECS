@@ -11,7 +11,7 @@ namespace Svelto.ECS
                                   "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
 
             var defaultEntities = EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild;
-            var length                    = defaultEntities.Length;
+            var length = defaultEntities.Length;
 
             entitiesToBuild = new IEntityBuilder[length + extraEntities.Count + 1];
 

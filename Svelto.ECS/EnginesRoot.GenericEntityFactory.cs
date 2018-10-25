@@ -15,9 +15,9 @@ namespace Svelto.ECS
                 _weakEngine = weakReference;
             }
 
-            public EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroup groupID, object[] implementors) where T : IEntityDescriptor, new()
+            public EntityStructInitializer BuildEntity<T>(int entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, object[] implementors) where T : IEntityDescriptor, new()
             {
-                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID, (int)groupID), implementors);
+                return _weakEngine.Target.BuildEntity<T>(new EGID(entityID, (int)groupStructId), implementors);
             }
 
             public EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T : IEntityDescriptor, new()
@@ -30,14 +30,14 @@ namespace Svelto.ECS
                 return _weakEngine.Target.BuildEntity(egid, entityDescriptor, implementors);
             }
 
-            public EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroup groupID, T descriptorEntity, object[] implementors)  where T:IEntityDescriptor
+            public EntityStructInitializer BuildEntity<T>(int entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, T descriptorEntity, object[] implementors)  where T:IEntityDescriptor
             {
-                return _weakEngine.Target.BuildEntity(new EGID(entityID, (int)groupID), descriptorEntity, implementors);
+                return _weakEngine.Target.BuildEntity(new EGID(entityID, (int)groupStructId), descriptorEntity, implementors);
             }
             
-            public void PreallocateEntitySpace<T>(ExclusiveGroup groupID, int size) where T : IEntityDescriptor, new()
+            public void PreallocateEntitySpace<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, int size) where T : IEntityDescriptor, new()
             {
-                _weakEngine.Target.Preallocate<T>((int)groupID, size);
+                _weakEngine.Target.Preallocate<T>((int)groupStructId, size);
             }
         }
     }

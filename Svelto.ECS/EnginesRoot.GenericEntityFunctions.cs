@@ -22,7 +22,7 @@ namespace Svelto.ECS
                 _weakReference.Target.QueueEntitySubmitOperation(new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, groupID, -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
-            public void RemoveEntity<T>(int entityID, ExclusiveGroup groupID) where T : IEntityDescriptor, new()
+            public void RemoveEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct  groupID) where T : IEntityDescriptor, new()
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, (int)groupID, -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
@@ -40,31 +40,25 @@ namespace Svelto.ECS
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, groupID, -1, null));
             }
 
-            public void RemoveGroupAndEntities(ExclusiveGroup groupID)
+            public void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct  groupID)
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, (int)groupID, -1, null));
             }
 
-            public void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup<T>(int entityID, int fromGroupID, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new()
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, entityID, fromGroupID, toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
+                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, entityID, fromGroupID, (int)toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
-            public void SwapEntityGroup<T>(int entityID, ExclusiveGroup fromGroupID, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct  fromGroupID, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new()
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap, entityID, (int) fromGroupID, (int) toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
             }
 
-            public void SwapEntityGroup<T>(EGID id, int toGroupID) where T : IEntityDescriptor, new()
-            {
-                _weakReference.Target.QueueEntitySubmitOperation(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, id.entityID, id.groupID, toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
-            }
-
-            public void SwapEntityGroup<T>(EGID id, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new()
+            public void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new()
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap, id.entityID, id.groupID, (int)toGroupID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));

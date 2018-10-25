@@ -31,9 +31,9 @@ namespace Svelto.ECS.Internal
             return typeSafeDictionary.GetValuesArray(out count);
         }
 
-        public T[] QueryEntities<T>(ExclusiveGroup @group, out int targetsCount) where T : IEntityStruct
+        public T[] QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out int targetsCount) where T : IEntityStruct
         {
-            return QueryEntities<T>((int) @group, out targetsCount);
+            return QueryEntities<T>((int) groupStruct, out targetsCount);
         }
 
         public EGIDMapper<T> QueryMappedEntities<T>(int groupID) where T : IEntityStruct
@@ -52,9 +52,9 @@ namespace Svelto.ECS.Internal
             return mapper;
         }
 
-        public EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup groupID) where T : IEntityStruct
+        public EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId) where T : IEntityStruct
         {
-            return QueryMappedEntities<T>((int) groupID);
+            return QueryMappedEntities<T>((int) groupStructId);
         }
 
         public T[] QueryEntitiesAndIndex<T>(EGID entityGID, out uint index) where T : IEntityStruct
@@ -92,6 +92,12 @@ namespace Svelto.ECS.Internal
             return casted != null && casted.ContainsKey(entityGID.entityID);
         }
 
+        public bool Exists (ExclusiveGroup.ExclusiveGroupStruct gid)
+        {
+            //search for the group 
+            return _groupEntityViewsDB.ContainsKey((int) @gid);
+        }
+
         public bool HasAny<T>(int @group) where T : IEntityStruct
         {
             int count;
@@ -99,9 +105,9 @@ namespace Svelto.ECS.Internal
             return count > 0;
         }
 
-        public bool HasAny<T>(ExclusiveGroup @group) where T : IEntityStruct
+        public bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : IEntityStruct
         {
-            return HasAny<T>((int) group);
+            return HasAny<T>((int) groupStruct);
         }
 
         public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityStruct

@@ -4,7 +4,7 @@ namespace Svelto.ECS.Internal
 {
     partial class EntitiesDB
     {
-        public void ExecuteOnEntity<T>(int id, ExclusiveGroup groupid, EntityAction<T> action) where T : IEntityStruct
+        public void ExecuteOnEntity<T>(int id, ExclusiveGroup.ExclusiveGroupStruct groupid, EntityAction<T> action) where T : IEntityStruct
         {
             ExecuteOnEntity(id, (int)groupid, action);
         }
@@ -50,7 +50,7 @@ namespace Svelto.ECS.Internal
             ExecuteOnEntity(new EGID(id, groupid), ref value, action);
         }
 
-        public void ExecuteOnEntity<T, W>(int id, ExclusiveGroup groupid, ref W value, EntityAction<T, W> action) where T : IEntityStruct
+        public void ExecuteOnEntity<T, W>(int id, ExclusiveGroup.ExclusiveGroupStruct groupid, ref W value, EntityAction<T, W> action) where T : IEntityStruct
         {
             ExecuteOnEntity(id, (int)groupid, ref value, action);
         }
@@ -71,9 +71,9 @@ namespace Svelto.ECS.Internal
             SafetyChecks(typeSafeDictionary, count);
         }
 
-        public void ExecuteOnEntities<T>(ExclusiveGroup groupID, EntitiesAction<T> action) where T : IEntityStruct
+        public void ExecuteOnEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, EntitiesAction<T> action) where T : IEntityStruct
         {
-            ExecuteOnEntities((int)groupID, action);
+            ExecuteOnEntities((int)groupStructId, action);
         }
 
         public void ExecuteOnEntities<T, W>(int groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
@@ -90,9 +90,9 @@ namespace Svelto.ECS.Internal
             SafetyChecks(typeSafeDictionary, count);
         }
 
-        public void ExecuteOnEntities<T, W>(ExclusiveGroup groupID, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
+        public void ExecuteOnEntities<T, W>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
         {
-            ExecuteOnEntities((int)groupID, ref value, action);
+            ExecuteOnEntities((int)groupStructId, ref value, action);
         }
 
         //-----------------------------------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void ExecuteOnAllEntities<T>(ExclusiveGroup[] groups, EntitiesAction<T> action) where T : IEntityStruct
+        public void ExecuteOnAllEntities<T>(Svelto.ECS.ExclusiveGroup [] groups, EntitiesAction<T> action) where T : IEntityStruct
         {
             foreach (var group in groups)
             {
@@ -157,7 +157,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void ExecuteOnAllEntities<T, W>(ExclusiveGroup[] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
+        public void ExecuteOnAllEntities<T, W>(Svelto.ECS.ExclusiveGroup [] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
         {
             foreach (var group in groups)
             {

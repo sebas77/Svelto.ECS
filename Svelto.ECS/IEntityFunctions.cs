@@ -8,15 +8,14 @@ namespace Svelto.ECS
         //an entity is removed. Not specifying the group will attempt to remove
         //the entity from the special standard group.
         void RemoveEntity<T>(int entityID, int groupID) where T : IEntityDescriptor, new();
-        void RemoveEntity<T>(int entityID, ExclusiveGroup groupID) where T : IEntityDescriptor, new();
+        void RemoveEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct  groupID) where T : IEntityDescriptor, new();
         void RemoveEntity<T>(EGID entityegid) where T : IEntityDescriptor, new();
 
         void RemoveGroupAndEntities(int groupID);
-        void RemoveGroupAndEntities(ExclusiveGroup groupID);
+        void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct  groupID);
         
-        void SwapEntityGroup<T>(int entityID, int fromGroupID, int toGroupID) where T : IEntityDescriptor, new();
-        void SwapEntityGroup<T>(int entityID, ExclusiveGroup fromGroupID, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new();
-        void SwapEntityGroup<T>(EGID id, int toGroupID) where T : IEntityDescriptor, new();
-        void SwapEntityGroup<T>(EGID id, ExclusiveGroup toGroupID) where T : IEntityDescriptor, new();
+        void SwapEntityGroup<T>(int entityID, int fromGroupID, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
+        void SwapEntityGroup<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct  fromGroupID, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
+        void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
     }
 }
