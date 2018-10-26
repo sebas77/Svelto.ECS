@@ -17,34 +17,34 @@ namespace Svelto.ECS
         }
     }
 
-    public class To
+    public class To 
     {
         public To(IStep engine)
         {
             this.engine = engine;
         }
         
-        public To(params IStep[] engine)
+        public To(params IStep[] engines)
         {
-            this.engines = engine;
+            this.engines = engines;
         }
 
         public IStep engine { get; set; }
         public IStep[] engines { get; set; }
     }
 
-    public class To<C>:To where C : struct, IConvertible
+    public class To<C>:To, IEnumerable where C : struct, IConvertible
     {
         internal readonly Dictionary<C, IStep<C>[]> _tos = new Dictionary<C, IStep<C>[]>();
 
-        public To(C condition, params IStep<C>[] steps)
+        public IEnumerator GetEnumerator()
         {
-            _tos[condition] = steps;
+            throw new NotImplementedException();
         }
-        
-        public To(C condition, IStep<C> step)
+
+        public void Add(C condition, params IStep<C>[] engine)
         {
-            _tos[condition] = new[] { step };
+            _tos[condition] = engine;
         }
     }
 
