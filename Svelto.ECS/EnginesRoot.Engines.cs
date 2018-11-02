@@ -12,7 +12,7 @@ using Svelto.ECS.Profiler;
 
 namespace Svelto.ECS
 {
-    public partial class EnginesRoot : IDisposable
+    public partial class EnginesRoot
     {
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR        
         static EnginesRoot()

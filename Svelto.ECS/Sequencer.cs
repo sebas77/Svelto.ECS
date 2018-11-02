@@ -104,7 +104,7 @@ namespace Svelto.ECS
             _steps = steps;
         }
 
-        public void Next<C>(IEngine engine, C condition, EGID id) where C:struct,IConvertible
+        public void Next<C>(IEngine engine, C condition, EGID id) where C:struct, IConvertible
         {
             C branch = condition;
             var to = (_steps._steps[engine] as To<C>);
@@ -120,7 +120,7 @@ namespace Svelto.ECS
             var to  = _steps._steps[engine];
             var steps = to.engines;
             
-            if (steps != null)
+            if (steps != null && steps.Length > 1)
                 for (var i = 0; i < steps.Length; i++)
                     steps[i].Step(id);
             else

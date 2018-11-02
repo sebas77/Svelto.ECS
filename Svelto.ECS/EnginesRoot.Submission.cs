@@ -14,7 +14,7 @@ using Svelto.ECS.Profiler;
 
 namespace Svelto.ECS
 {
-    public partial class EnginesRoot : IDisposable
+    public partial class EnginesRoot
     {
         void SubmitEntityViews()
         {

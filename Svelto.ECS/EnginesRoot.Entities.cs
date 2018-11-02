@@ -11,7 +11,7 @@ using Svelto.ECS.Profiler;
 
 namespace Svelto.ECS
 {
-    public partial class EnginesRoot : IDisposable
+    public partial class EnginesRoot: IDisposable
     {
         /// <summary>
         /// Dispose an EngineRoot once not used anymore, so that all the
@@ -26,6 +26,13 @@ namespace Svelto.ECS
             
             foreach (var engine in _disposableEngines)
                 engine.Dispose();
+            
+            GC.SuppressFinalize(this);
+        }
+
+        ~EnginesRoot()
+        {
+            Dispose();
         }
 
         ///--------------------------------------------
