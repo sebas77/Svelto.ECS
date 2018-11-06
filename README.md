@@ -12,6 +12,10 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 * **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
 
+## Users Examples (software made by Svelto users)
+
+* **Gungi (Unity)**: https://github.com/grovemaster/Unity3D-Game-App
+
 ## Articles
 
 **Framework articles:**
