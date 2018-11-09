@@ -37,6 +37,11 @@ namespace Svelto.ECS
             return (long)groupId << 32 | ((long)(uint)entityId & 0xFFFFFFFF);
         }
 
+        public static implicit operator int(EGID id)
+        {
+            return id.entityID;
+        }
+
         public bool Equals(long other)
         {
             return _GID == other;

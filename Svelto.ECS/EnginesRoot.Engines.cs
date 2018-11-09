@@ -97,8 +97,6 @@ namespace Svelto.ECS
             throw new ArgumentException("Not Supported Engine " + engine.ToString());
         }
 
-        //The T parameter allows to pass datastructure sthat not necessarly are
-        //defined with IEngine, but must be defined with IEngine implementations
         static void AddEngine<T>(T engine, Type[] entityViewTypes,
                               Dictionary<Type, FasterList<T>> engines) where T:IEngine
         {

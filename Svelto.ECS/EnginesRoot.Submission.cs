@@ -18,7 +18,7 @@ namespace Svelto.ECS
     {
         void SubmitEntityViews()
         {
-            using (new PlatformProfiler("Svelto.ECS submit"))
+            using (new PlatformProfiler("Svelto.ECS").Sample("Entities submit"))
             {
                 if (_entitiesOperations.Count > 0)
                 {

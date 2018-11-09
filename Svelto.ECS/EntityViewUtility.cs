@@ -14,15 +14,11 @@ static class EntityViewUtility
     {
         int count;
 
-        //Very efficent way to collect the fields of every EntityViewType
+        //efficient way to collect the fields of every EntityViewType
         var setters =
             FasterList<KeyValuePair<Type, ActionCast<T>>>
                .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out count);
-#if DEBUG && !PROFILER
-        if (count == 0) 
-            throw new Exception(NO_COMPONENTS_EXCEPTION.FastConcat("Type ", entityDescriptorName, " entityView ", 
-                                                                   entityBuilder.GetEntityType().ToString()));
-#endif
+
         for (var index = 0; index < implementors.Length; index++)
         {
             var implementor = implementors[index];
@@ -120,9 +116,7 @@ static class EntityViewUtility
     }
 #endif
     static readonly Dictionary<Type, Type[]> _cachedTypes = new Dictionary<Type, Type[]>();
-    const string NO_COMPONENTS_EXCEPTION =
-        "<color=orange>Svelto.ECS</color> An entity view without component interfaces has been found, if you are using an entity view struct or an entity struct, do not pass implementors";
-
+ 
     const string DUPLICATE_IMPLEMENTOR_ERROR =
         "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is considered an error and MUST be fixed. ";
 
