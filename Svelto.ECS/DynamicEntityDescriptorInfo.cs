@@ -1,5 +1,4 @@
 using System;
-using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -32,12 +31,12 @@ namespace Svelto.ECS
     {
         public DynamicEntityDescriptorInfoRef(IEntityBuilder[] extraEntities)
         {
-            _dynamicDescriptor = new  DynamicEntityDescriptorInfo(extraEntities);
+            _dynamicDescriptor = new  DynamicEntityDescriptorInfo<TType>(extraEntities);
         }
 
-        public IEntityBuilder[] entitiesToBuild { get { return _dynamicDescriptor.entitiesToBuild } }
+        public IEntityBuilder[] entitiesToBuild { get { return _dynamicDescriptor.entitiesToBuild; } }
 
-        DynamicEntityDescriptorInfo<T> _dynamicDescriptor;
+        DynamicEntityDescriptorInfo<TType> _dynamicDescriptor;
     }
     
     public struct EntityInfoView : IEntityStruct
