@@ -12,10 +12,10 @@ namespace Svelto.ECS
         void RemoveEntity<T>(EGID entityegid) where T : IEntityDescriptor, new();
 
         void RemoveGroupAndEntities(int groupID);
-        void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct  groupID);
+        void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID);
         
-        void SwapEntityGroup<T>(int entityID, int fromGroupID, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
         void SwapEntityGroup<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct  fromGroupID, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
         void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
+        void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup, ExclusiveGroup.ExclusiveGroupStruct toGroupID) where T : IEntityDescriptor, new();
     }
 }

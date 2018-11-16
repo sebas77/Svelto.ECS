@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
@@ -22,6 +21,9 @@ namespace Svelto.ECS
             {
                 if (_entitiesOperations.Count > 0)
                 {
+#if DEBUG && !PROFILER                        
+                    _entitiesOperationsDebug.Clear();
+#endif                    
                     _transientEntitiesOperations.FastClear();
                     _transientEntitiesOperations.AddRange(_entitiesOperations);
                     _entitiesOperations.FastClear();
@@ -33,12 +35,14 @@ namespace Svelto.ECS
                             switch (entitiesOperations[i].type)
                             {
                                 case EntitySubmitOperationType.Swap:
-                                    SwapEntityGroup(entitiesOperations[i].builders,    entitiesOperations[i].id,
+                                    SwapEntityGroup(entitiesOperations[i].builders,
+                                                    entitiesOperations[i].entityDescriptor,    entitiesOperations[i].id,
                                                     entitiesOperations[i].fromGroupID, entitiesOperations[i].toGroupID);
                                     break;
                                 case EntitySubmitOperationType.Remove:
                                     MoveEntity(entitiesOperations[i].builders,
-                                               new EGID(entitiesOperations[i].id, entitiesOperations[i].fromGroupID));
+                                               new EGID(entitiesOperations[i].id, entitiesOperations[i].fromGroupID),
+                                               entitiesOperations[i].entityDescriptor);
                                     break;
                                 case EntitySubmitOperationType.RemoveGroup:
                                     RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
@@ -47,9 +51,8 @@ namespace Svelto.ECS
                         }
                         catch (Exception e)
                         {
-#if DEBUG
-                            var str = "Entity ".FastConcat(entitiesOperations[i].type.ToString(),
-                                                           " with used ID is about to be built: ")
+#if DEBUG && !PROFILER                        
+                            var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
                                                .FastConcat(" id: ")
                                                .FastConcat(entitiesOperations[i].id)
                                                .FastConcat(" from groupid: ")
@@ -58,8 +61,6 @@ namespace Svelto.ECS
                                                .FastConcat(entitiesOperations[i].toGroupID);
 
                             Console.LogError(e.Message.FastConcat(" ", str, " ", entitiesOperations[i].trace));
-
-                            throw;
 #else
                             Console.LogException(e);
 #endif
@@ -71,34 +72,30 @@ namespace Svelto.ECS
                 {
                     if (_groupedEntityToAdd.current.Count > 0)
                     {
-                        //use other as source from now on
-                        //current will be use to write new entityViews
+                        //use other as source from now on current will be use to write new entityViews
                         _groupedEntityToAdd.Swap();
 
-                        //Note: if N entity of the same type are added on the same frame
-                        //the Add callback is called N times on the same frame.
-                        //if the Add callback builds a new entity, that entity will not
-                        //be available in the database until the N callbacks are done
-                        //solving it could be complicated as callback and database update
-                        //must be interleaved.
-
+                        //Note: if N entity of the same type are added on the same frame the Add callback is called N
+                        //times on the same frame. if the Add callback builds a new entity, that entity will not
+                        //be available in the database until the N callbacks are done solving it could be complicated as
+                        //callback and database update must be interleaved.
                         AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
-
-                        //other can be cleared now, but let's avoid deleting the dictionary every time
-                        _groupedEntityToAdd.ClearOther();
                     }
                 }
                 catch (Exception e)
                 {
                     Console.LogException(e);
-#if DEBUG
-                    throw;
-#endif                    
+                }
+                finally
+                {
+                    //other can be cleared now, but let's avoid deleting the dictionary every time
+                    _groupedEntityToAdd.ClearOther();                    
                 }
             }
         }
         
-         void AddEntityViewsToTheDBAndSuitableEngines(FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
+         void AddEntityViewsToTheDBAndSuitableEngines(
+             FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> groupsOfEntitiesToSubmit)
         {
             //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
             foreach (var groupOfEntitiesToSubmit in groupsOfEntitiesToSubmit)
@@ -140,22 +137,10 @@ namespace Svelto.ECS
         }
 
         readonly FasterList<EntitySubmitOperation> _entitiesOperations;
-
+        
         readonly DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>>
             _groupedEntityToAdd;
 
-        //for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are
-        //found indexed by group id 
-        readonly Dictionary<Type, FasterDictionary<int, ITypeSafeDictionary>> _groupsPerEntity; //yes I am being sarcastic
-
-        //one datastructure rule them all:
-        //split by group
-        //split by type per group. It's possible to get all the entities of a give type T per group thanks 
-        //to the FasterDictionary capabilities OR it's possible to get a specific entityView indexed by
-        //ID. This ID doesn't need to be the EGID, it can be just the entityID
-
-        //for each group id, save a dictionary indexed by entity type of entities indexed by id
-        readonly FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>> _groupEntityDB;
         readonly IEntitySubmissionScheduler                                   _scheduler;
         readonly FasterList<EntitySubmitOperation>                            _transientEntitiesOperations;
     }

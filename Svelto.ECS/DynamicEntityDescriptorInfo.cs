@@ -19,7 +19,11 @@ namespace Svelto.ECS
 
             var _builder = new EntityBuilder<EntityInfoView>
             {
-                _initializer = new EntityInfoView { entitiesToBuild = entitiesToBuild }
+                _initializer = new EntityInfoView 
+                { 
+                    entitiesToBuild = entitiesToBuild,
+                    type = typeof(TType)
+                }
             };
             entitiesToBuild[entitiesToBuild.Length - 1] = _builder;
         }
@@ -27,22 +31,11 @@ namespace Svelto.ECS
         public IEntityBuilder[] entitiesToBuild { get; }
     }
 
-    public class DynamicEntityDescriptorInfoRef<TType>:IEntityDescriptor where TType : IEntityDescriptor, new()
-    {
-        public DynamicEntityDescriptorInfoRef(IEntityBuilder[] extraEntities)
-        {
-            _dynamicDescriptor = new  DynamicEntityDescriptorInfo<TType>(extraEntities);
-        }
-
-        public IEntityBuilder[] entitiesToBuild { get { return _dynamicDescriptor.entitiesToBuild; } }
-
-        DynamicEntityDescriptorInfo<TType> _dynamicDescriptor;
-    }
-    
     public struct EntityInfoView : IEntityStruct
     {
         public EGID ID { get; set; }
-        
+        public Type type { get; set; }
+
         public IEntityBuilder[] entitiesToBuild;
     }
 }

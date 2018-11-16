@@ -13,12 +13,12 @@ namespace Svelto.ECS
     {
         public EntityBuilder()
         {
-            _initializer = default(T);
+            _initializer = defaultIt;
 
 #if DEBUG && !PROFILER
-            if (needsReflection == false && typeof(T) != typeof(EntityInfoView) )
+            if (needsReflection == false && ENTITY_VIEW_TYPE != typeof(EntityInfoView) )
             {
-                CheckFields(typeof(T));
+                CheckFields(ENTITY_VIEW_TYPE);
             }
 #endif
             if (needsReflection == true)
@@ -41,7 +41,7 @@ namespace Svelto.ECS
                 SubCheckFields(fieldFieldType);
             }
 
-            if (type.Assembly == Assembly.GetCallingAssembly() && type != typeof(Svelto.ECS.EGID))
+            if (type.Assembly == Assembly.GetCallingAssembly() && type != EGIDType)
             {
                 var methods = type.GetMethods(BindingFlags.Public |
                                               BindingFlags.Instance | BindingFlags.DeclaredOnly);
@@ -137,6 +137,8 @@ namespace Svelto.ECS
         static readonly Type ENTITY_VIEW_TYPE = typeof(T);
         static readonly string DESCRIPTOR_NAME = ENTITY_VIEW_TYPE.ToString();
         static readonly bool needsReflection = typeof(IEntityViewStruct).IsAssignableFrom(typeof(T));
+        static readonly T defaultIt = default(T);
+        static readonly Type EGIDType = typeof(Svelto.ECS.EGID);
 
         internal T _initializer;
     }

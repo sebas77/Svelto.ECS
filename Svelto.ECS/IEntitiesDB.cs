@@ -10,21 +10,21 @@ namespace Svelto.ECS
         /// over EntityView
         /// </summary>
         ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int group) where T : class, IEntityStruct;
-        ReadOnlyCollectionStruct<T> QueryEntityViews<T>(ExclusiveGroup group) where T : class, IEntityStruct;
+        ReadOnlyCollectionStruct<T> QueryEntityViews<T>(ExclusiveGroup.ExclusiveGroupStruct group) where T : class, IEntityStruct;
         /// <summary>
         /// All the EntityView related methods are left for back compatibility, but
         /// shouldn't be used anymore. Always pick EntityViewStruct or EntityStruct
         /// over EntityView
         /// </summary>
         bool TryQueryEntityView<T>(EGID egid, out T entityView) where T : class, IEntityStruct;
-        bool TryQueryEntityView<T>(int id, ExclusiveGroup group, out T entityView) where T : class, IEntityStruct;
+        bool TryQueryEntityView<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group, out T entityView) where T : class, IEntityStruct;
         /// <summary>
         /// All the EntityView related methods are left for back compatibility, but
         /// shouldn't be used anymore. Always pick EntityViewStruct or EntityStruct
         /// over EntityView
         /// </summary>
         T QueryEntityView<T>(EGID egid) where T : class, IEntityStruct;
-        T QueryEntityView<T>(int id, ExclusiveGroup group) where T : class, IEntityStruct;
+        T QueryEntityView<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group) where T : class, IEntityStruct;
         /// <summary>
         /// Fast and raw (therefore not safe) return of entities buffer
         /// Modifying a buffer would compromise the integrity of the whole DB

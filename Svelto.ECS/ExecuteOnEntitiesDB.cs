@@ -149,7 +149,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void ExecuteOnAllEntities<T>(Svelto.ECS.ExclusiveGroup [] groups, EntitiesAction<T> action) where T : IEntityStruct
+        public void ExecuteOnAllEntities<T>(Svelto.ECS.ExclusiveGroup[] groups, EntitiesAction<T> action) where T : IEntityStruct
         {
             foreach (var group in groups)
             {
@@ -157,7 +157,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void ExecuteOnAllEntities<T, W>(Svelto.ECS.ExclusiveGroup [] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
+        public void ExecuteOnAllEntities<T, W>(Svelto.ECS.ExclusiveGroup[] groups, ref W value, EntitiesAction<T, W> action) where T : IEntityStruct
         {
             foreach (var group in groups)
             {

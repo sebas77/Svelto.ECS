@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System;
 
 namespace Svelto.ECS
 {
@@ -9,7 +9,8 @@ namespace Svelto.ECS
         public readonly int id;
         public readonly int toGroupID;
         public readonly int fromGroupID;
-#if DEBUG        
+        public readonly Type entityDescriptor;
+#if DEBUG && !PROFILER        
         public string trace;
 #endif        
 
@@ -17,14 +18,17 @@ namespace Svelto.ECS
                                      int                       entityId,
                                      int                       fromGroupId,
                                      int                       toGroupId,
-                                     IEntityBuilder[]          builders)
+                                     IEntityBuilder[]          builders,
+                                     Type                     entityDescriptor)
         {
             type = operation;
             this.builders = builders;
             id = entityId;
+            
             toGroupID = toGroupId;
             fromGroupID = fromGroupId;
-#if DEBUG                    
+            this.entityDescriptor = entityDescriptor;
+#if DEBUG && !PROFILER       
             trace = string.Empty;
 #endif            
         }

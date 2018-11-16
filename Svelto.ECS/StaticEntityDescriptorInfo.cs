@@ -7,7 +7,7 @@ namespace Svelto.ECS
             entitiesToBuild = descriptor.entitiesToBuild;
         }
 
-        public IEntityBuilder[] entitiesToBuild { get; }
+        public IEntityBuilder[] entitiesToBuild { get; private set; }
     }
 }
 

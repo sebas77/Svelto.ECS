@@ -38,7 +38,7 @@ namespace Svelto.ECS
         }
     }
 
-    ///<summary>EntityViews can inherit from the EntityView class</summary>
+    [Obsolete("You should only use IEntityViewStruct or IEntityStructs struct implementations now")]
     public class EntityView : IEntityViewStruct
     {
         public EGID ID

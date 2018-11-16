@@ -1,5 +1,10 @@
+#if DEBUG && !PROFILER
+#define ENABLE_DEBUG_FUNC
+#endif
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
 
@@ -17,19 +22,20 @@ namespace Svelto.ECS.Internal
         public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(int @group) where T:class, IEntityStruct
         {
             TypeSafeDictionary<T> typeSafeDictionary;
-            if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return RetrieveEmptyEntityViewList<T>();
+            if (QueryEntitySafeDictionary(@group, out typeSafeDictionary) == false) return 
+                new ReadOnlyCollectionStruct<T>(RetrieveEmptyEntityViewArray<T>(), 0);
 
             return typeSafeDictionary.Values;
         }
 
-        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(ExclusiveGroup @group) where T : class, IEntityStruct
+        public ReadOnlyCollectionStruct<T> QueryEntityViews<T>(ExclusiveGroup.ExclusiveGroupStruct @group) where T : class, IEntityStruct
         {
             return QueryEntityViews<T>((int) group);
         }
 
-        public T QueryEntityView<T>(int id, ExclusiveGroup @group) where T : class, IEntityStruct
+        public T QueryEntityView<T>(int id, ExclusiveGroup.ExclusiveGroupStruct @group) where T : class, IEntityStruct
         {
-            return QueryEntityView<T>(new EGID(id, group));
+            return QueryEntityView<T>(new EGID(id, (int) @group));
         }
 
         public T[] QueryEntities<T>(int @group, out int count) where T : IEntityStruct
@@ -125,9 +131,9 @@ namespace Svelto.ECS.Internal
             return TryQueryEntityViewInGroupInternal(entityegid, out entityView);
         }
         
-        public bool TryQueryEntityView<T>(int id, ExclusiveGroup @group, out T entityView) where T : class, IEntityStruct
+        public bool TryQueryEntityView<T>(int id, ExclusiveGroup.ExclusiveGroupStruct @group, out T entityView) where T : class, IEntityStruct
         {
-            return TryQueryEntityViewInGroupInternal(new EGID(id, group), out entityView);
+            return TryQueryEntityViewInGroupInternal(new EGID(id, (int) @group), out entityView);
         }
         
         bool TryQueryEntityViewInGroupInternal<T>(EGID entityGID, out T entityView) where T:class, IEntityStruct
@@ -173,12 +179,11 @@ namespace Svelto.ECS.Internal
             return true;
         }
         
+        [Conditional("ENABLE_DEBUG_FUNC")]
         static void SafetyChecks<T>(TypeSafeDictionary<T> typeSafeDictionary, int count) where T : IEntityStruct
         {
-#if DEBUG            
             if (typeSafeDictionary.Count != count)
                 throw new EntitiesDBException("Entities cannot be swapped or removed during an iteration");
-#endif            
         }
 
         static ReadOnlyCollectionStruct<T> RetrieveEmptyEntityViewList<T>()

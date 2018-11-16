@@ -7,11 +7,6 @@ namespace Svelto.ECS
     {
         long _GID;
         
-        public long GID
-        {
-            get { return _GID; }
-        }
-        
         public int entityID
         {
             get { return (int) (_GID & 0xFFFFFFFF); }
@@ -29,7 +24,7 @@ namespace Svelto.ECS
         
         public EGID(int entityID, ExclusiveGroup.ExclusiveGroupStruct  groupID) : this()
         {
-            _GID = MAKE_GLOBAL_ID(entityID, (int) groupID);
+            _GID = MAKE_GLOBAL_ID(entityID, groupID);
         }
         
         static long MAKE_GLOBAL_ID(int entityId, int groupId)
@@ -40,6 +35,11 @@ namespace Svelto.ECS
         public static implicit operator int(EGID id)
         {
             return id.entityID;
+        }
+        
+        public static implicit operator long(EGID id)
+        {
+            return id._GID;
         }
 
         public bool Equals(long other)

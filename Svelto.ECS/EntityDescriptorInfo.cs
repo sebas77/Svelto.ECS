@@ -7,9 +7,6 @@ namespace Svelto.ECS
 
     public class EntityDescriptor : IEntityDescriptor
     {
-        private EntityDescriptor()
-        {}
-        
         protected EntityDescriptor(IEntityBuilder[] entityToBuild)
         {
             entitiesToBuild = entityToBuild;
@@ -20,6 +17,7 @@ namespace Svelto.ECS
 
     static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
-        public static readonly StaticEntityDescriptorInfo<TType> descriptor = new StaticEntityDescriptorInfo<TType>(new TType());
+        public static readonly StaticEntityDescriptorInfo<TType> descriptor 
+            = new StaticEntityDescriptorInfo<TType>(new TType());
     }
 }

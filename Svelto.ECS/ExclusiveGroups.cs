@@ -1,7 +1,6 @@
 ﻿﻿﻿using System;
- using System.Collections.Generic;
- using System.Runtime.InteropServices.WindowsRuntime;
-
+using System.Collections.Generic;
+ 
 namespace Svelto.ECS
 {
     /// <summary>
@@ -29,14 +28,14 @@ namespace Svelto.ECS
             _group = new ExclusiveGroupStruct(range);
         }
         
-        public static implicit operator ExclusiveGroupStruct (ExclusiveGroup group) // explicit byte to digit conversion operator
+        public static implicit operator ExclusiveGroupStruct (ExclusiveGroup group)
         {
             return group._group;
         }
         
-        public static explicit operator int (ExclusiveGroup group) // explicit byte to digit conversion operator
+        public static explicit operator int (ExclusiveGroup group) 
         {
-            return (int)group._group;
+            return @group._group;
         }
 
         public static ExclusiveGroupStruct operator + (ExclusiveGroup a, int b)
@@ -46,6 +45,7 @@ namespace Svelto.ECS
 
         readonly ExclusiveGroupStruct _group;
         
+        //I use this as parameter because it must not be possible to pass null Exclusive Groups.
         public struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>,
                                 IEqualityComparer<ExclusiveGroupStruct>
         {
@@ -100,12 +100,12 @@ namespace Svelto.ECS
                 _globalId += range;
             }
 
-            public static explicit operator int (ExclusiveGroupStruct groupStruct) // explicit byte to digit conversion operator
+            public static implicit operator int(ExclusiveGroupStruct groupStruct)
             {
                 return groupStruct._id;
             }
-
-            public static ExclusiveGroupStruct operator + (ExclusiveGroupStruct a, int b)
+            
+            public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, int b)
             {
                 var group = new ExclusiveGroupStruct();
 
