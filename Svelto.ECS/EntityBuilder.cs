@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-#if DEBUG && !PROFILER 
-using System.Reflection;
-#endif    
+using System.Diagnostics;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.Utilities;
+using System.Reflection;
+#if DEBUG && !PROFILER 
+#define _USE_IT
+#endif    
+
 
 namespace Svelto.ECS
 {
@@ -15,49 +18,49 @@ namespace Svelto.ECS
         {
             _initializer = defaultIt;
 
-#if DEBUG && !PROFILER
-            if (needsReflection == false && ENTITY_VIEW_TYPE != typeof(EntityInfoView) )
-            {
-                CheckFields(ENTITY_VIEW_TYPE);
-            }
-#endif
+            CheckFields(ENTITY_VIEW_TYPE);
+
             if (needsReflection == true)
             {
                 EntityView<T>.InitCache();
             }
         }
-#if DEBUG && !PROFILER
+
+        [Conditional("_USE_IT")]
         static void CheckFields(Type type)
         {
-            var fields = type.GetFields(BindingFlags.Public |
-                                        BindingFlags.Instance);
-
-            for (int i = fields.Length - 1; i >= 0; --i)
+            if (needsReflection == false && ENTITY_VIEW_TYPE != typeof(EntityInfoView))
             {
-                var field = fields[i];
+                var fields = type.GetFields(BindingFlags.Public |
+                                            BindingFlags.Instance);
 
-                var fieldFieldType = field.FieldType;
-                
-                SubCheckFields(fieldFieldType);
-            }
-
-            if (type.Assembly == Assembly.GetCallingAssembly() && type != EGIDType)
-            {
-                var methods = type.GetMethods(BindingFlags.Public |
-                                              BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-                var properties = type.GetProperties(BindingFlags.Public |
-                                                    BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-                if (methods.Length > properties.Length + 1)
-                    throw new EntityStructException(type);
-
-                for (int i = properties.Length - 1; i >= 0; --i)
+                for (int i = fields.Length - 1; i >= 0; --i)
                 {
-                    var propertyInfo = properties[i];
+                    var field = fields[i];
 
-                    var fieldFieldType = propertyInfo.PropertyType;
+                    var fieldFieldType = field.FieldType;
+
                     SubCheckFields(fieldFieldType);
+                }
+
+                if (type.Assembly == Assembly.GetCallingAssembly() && type != EGIDType)
+                {
+                    var methods = type.GetMethods(BindingFlags.Public   |
+                                                  BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                    var properties = type.GetProperties(BindingFlags.Public   |
+                                                        BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                    if (methods.Length > properties.Length + 1)
+                        throw new EntityStructException(type);
+
+                    for (int i = properties.Length - 1; i >= 0; --i)
+                    {
+                        var propertyInfo = properties[i];
+
+                        var fieldFieldType = propertyInfo.PropertyType;
+                        SubCheckFields(fieldFieldType);
+                    }
                 }
             }
         }
@@ -76,7 +79,7 @@ namespace Svelto.ECS
 
             throw new EntityStructException(fieldFieldType);
         }
-#endif        
+   
 
         public void BuildEntityAndAddToList(ref ITypeSafeDictionary dictionary, EGID entityID, object[] implementors)
         {

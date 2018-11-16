@@ -19,9 +19,8 @@ namespace Svelto.ECS
 
             public void RemoveEntity<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
             {
-#if DEBUG && !PROFILER
                 _weakReference.Target.CheckRemoveEntityID(new EGID(entityID, groupID), EntityDescriptorTemplate<T>.descriptor);
-#endif                
+                
                 _weakReference.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, groupID, -1, 
                                               EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
@@ -29,9 +28,8 @@ namespace Svelto.ECS
 
             public void RemoveEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) where T : IEntityDescriptor, new()
             {
-#if DEBUG && !PROFILER                
                 _weakReference.Target.CheckRemoveEntityID(new EGID(entityID, (int) groupID), EntityDescriptorTemplate<T>.descriptor);
-#endif                
+                
                 _weakReference.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, (int)groupID, -1, 
                                               EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
@@ -39,9 +37,8 @@ namespace Svelto.ECS
 
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
-#if DEBUG && !PROFILER                
                 _weakReference.Target.CheckRemoveEntityID(entityEGID, EntityDescriptorTemplate<T>.descriptor);
-#endif                
+
                 _weakReference.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID.entityID, entityEGID.groupID, 
                                               -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));

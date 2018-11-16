@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Svelto.ECS.Internal;
+
+#if DEBUG && !PROFILER
+#define _USE_IT
+#endif
 
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
+        [Conditional("_USE_IT")]
         void CheckRemoveEntityID(EGID entityID, IEntityDescriptor descriptorEntity)
         {
-#if DEBUG && !PROFILER
+
             Dictionary<Type, ITypeSafeDictionary> @group;
             var                                   descriptorEntitiesToBuild = descriptorEntity.entitiesToBuild;
             
@@ -27,12 +33,11 @@ namespace Svelto.ECS
                                                            .FastConcat(" groupid: ")
                                                            .FastConcat(entityID.groupID));
             }
-#endif            
         }
 
+        [Conditional("_USE_IT")]
         void CheckRemoveEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group, string name)
         {
-#if DEBUG && !PROFILER            
             ITypeSafeDictionary entities;
             if (@group.TryGetValue(entityType, out entities) == true)
             {
@@ -55,12 +60,11 @@ namespace Svelto.ECS
                                                            .FastConcat(" groupid: ")
                                                            .FastConcat(entityID.groupID));
             }
-#endif            
         }
-        
+
+        [Conditional("_USE_IT")]
         void CheckAddEntityID<T>(EGID entityID, T descriptorEntity) where T:IEntityDescriptor
         {
-#if DEBUG && !PROFILER            
             Dictionary<Type, ITypeSafeDictionary> @group;
             var                                   descriptorEntitiesToBuild = descriptorEntity.entitiesToBuild;
             
@@ -72,12 +76,11 @@ namespace Svelto.ECS
                     CheckAddEntityID(entityID, descriptorEntitiesToBuild[i].GetEntityType(), @group, descriptorEntity.ToString());
                 }
             }
-#endif            
         }
 
+        [Conditional("_USE_IT")]
         static void CheckAddEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group, string name)
         {
-#if DEBUG && !PROFILER            
             ITypeSafeDictionary entities;
             if (@group.TryGetValue(entityType, out entities))
             {
@@ -91,7 +94,6 @@ namespace Svelto.ECS
                                                                .FastConcat(entityID.groupID));
                 }
             }
-#endif            
         }
     }
 }
