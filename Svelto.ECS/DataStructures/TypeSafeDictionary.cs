@@ -39,17 +39,21 @@ namespace Svelto.ECS.Internal
         {
             int count;
             var buffer = (entities as TypeSafeDictionary<TValue>).GetValuesArray(out count);
-
-            try
+            
+            for (var i = 0; i < count; i++)
             {
-                for (var i = 0; i < count; i++)
+                int idEntityId = 0;
+                try
                 {
-                    Add(buffer[i].ID.entityID, ref buffer[i]);
+                    idEntityId = buffer[i].ID.entityID;
+                    
+                    Add(idEntityId, ref buffer[i]);
                 }
-            }
-            catch (Exception e)
-            {
-                throw new TypeSafeDictionaryException(e);
+                catch (Exception e)
+                {
+                    throw new TypeSafeDictionaryException("trying to add an EntityView with the same ID more than once Entity: ".
+                            FastConcat(typeof(TValue)).FastConcat("id ").FastConcat(idEntityId), e);
+                }
             }
         }
 
@@ -126,9 +130,7 @@ namespace Svelto.ECS.Internal
             TValue[] values = GetValuesArray(out count);
 
             for (int i = 0; i < count; i++)
-            {
                 RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i]);
-            }
         }
         
         public ITypeSafeDictionary Create()

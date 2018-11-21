@@ -75,7 +75,7 @@ namespace Svelto.ECS
         {
             var entityViewsToBuild = EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
             var count              = entityViewsToBuild.Length;
-
+            
             //reserve space in the database
             Dictionary<Type, ITypeSafeDictionary> @group;
             if (_groupEntityDB.TryGetValue(groupID, out group) == false)

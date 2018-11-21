@@ -90,6 +90,16 @@ namespace Svelto.ECS.Internal
             return false;
         }
 
+        public T[] QueryEntitiesAndIndex<T>(int id, ExclusiveGroup.ExclusiveGroupStruct @group, out uint index) where T : IEntityStruct
+        {
+            return QueryEntitiesAndIndex<T>(new EGID(id, group), out index);
+        }
+
+        public bool TryQueryEntitiesAndIndex<T>(int id, ExclusiveGroup.ExclusiveGroupStruct @group, out uint index, out T[] array) where T : IEntityStruct
+        {
+            return TryQueryEntitiesAndIndex<T>(new EGID(id, group), out index, out array);
+        }
+
         public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityStruct
         {
             T entityView;

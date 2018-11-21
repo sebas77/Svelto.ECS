@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if !DEBUG || PROFILER
+#define DISABLE_CHECKS
 using System.Diagnostics;
+#endif    
+using System.Reflection;
+using System;
+using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 using Svelto.Utilities;
-using System.Reflection;
-#if DEBUG && !PROFILER 
-#define _USE_IT
-#endif    
-
 
 namespace Svelto.ECS
 {
@@ -21,12 +20,12 @@ namespace Svelto.ECS
             CheckFields(ENTITY_VIEW_TYPE);
 
             if (needsReflection == true)
-            {
                 EntityView<T>.InitCache();
-            }
         }
 
-        [Conditional("_USE_IT")]
+#if DISABLE_CHECKS        
+        [Conditional("_CHECKS_DISABLED")]
+#endif        
         static void CheckFields(Type type)
         {
             if (needsReflection == false && ENTITY_VIEW_TYPE != typeof(EntityInfoView))

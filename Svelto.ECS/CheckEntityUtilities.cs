@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if !DEBUG || PROFILER
+#define DISABLE_CHECKS
 using System.Diagnostics;
-using Svelto.ECS.Internal;
-
-#if DEBUG && !PROFILER
-#define _USE_IT
 #endif
+using System;
+using System.Collections.Generic;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        [Conditional("_USE_IT")]
+#if DISABLE_CHECKS        
+        [Conditional("_CHECKS_DISABLED")]
+#endif        
         void CheckRemoveEntityID(EGID entityID, IEntityDescriptor descriptorEntity)
         {
 
@@ -27,7 +28,7 @@ namespace Svelto.ECS
             }
             else
             {
-                Svelto.Utilities.Console.LogError("Entity ".FastConcat(" with not found ID is about to be removed: ")
+                Utilities.Console.LogError("Entity ".FastConcat(" with not found ID is about to be removed: ")
                                                            .FastConcat(" id: ")
                                                            .FastConcat(entityID.entityID)
                                                            .FastConcat(" groupid: ")
@@ -35,7 +36,9 @@ namespace Svelto.ECS
             }
         }
 
-        [Conditional("_USE_IT")]
+#if DISABLE_CHECKS        
+        [Conditional("_CHECKS_DISABLED")]
+#endif        
         void CheckRemoveEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group, string name)
         {
             ITypeSafeDictionary entities;
@@ -43,7 +46,7 @@ namespace Svelto.ECS
             {
                 if (entities.Has(entityID.entityID) == false)
                 {
-                    Svelto.Utilities.Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
+                    Utilities.Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
                                                                .FastConcat(entityType)
                                                                .FastConcat(" id: ")
                                                                .FastConcat(entityID.entityID)
@@ -53,7 +56,7 @@ namespace Svelto.ECS
             }
             else
             {
-                Svelto.Utilities.Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
+                Utilities.Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
                                                            .FastConcat(entityType)
                                                            .FastConcat(" id: ")
                                                            .FastConcat(entityID.entityID)
@@ -62,7 +65,9 @@ namespace Svelto.ECS
             }
         }
 
-        [Conditional("_USE_IT")]
+#if DISABLE_CHECKS        
+        [Conditional("_CHECKS_DISABLED")]
+#endif        
         void CheckAddEntityID<T>(EGID entityID, T descriptorEntity) where T:IEntityDescriptor
         {
             Dictionary<Type, ITypeSafeDictionary> @group;
@@ -78,7 +83,9 @@ namespace Svelto.ECS
             }
         }
 
-        [Conditional("_USE_IT")]
+#if DISABLE_CHECKS        
+        [Conditional("_CHECKS_DISABLED")]
+#endif        
         static void CheckAddEntityID(EGID entityID, Type entityType, Dictionary<Type, ITypeSafeDictionary> @group, string name)
         {
             ITypeSafeDictionary entities;
@@ -86,7 +93,7 @@ namespace Svelto.ECS
             {
                 if (entities.Has(entityID.entityID) == true)
                 {
-                    Svelto.Utilities.Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
+                    Utilities.Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
                                                                .FastConcat(entityType)
                                                                .FastConcat(" id: ")
                                                                .FastConcat(entityID.entityID)

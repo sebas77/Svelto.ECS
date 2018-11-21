@@ -83,6 +83,8 @@ namespace Svelto.ECS
         /// <returns></returns>
         T[] QueryEntitiesAndIndex<T>(EGID entityGid, out uint index) where T : IEntityStruct;
         bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : IEntityStruct;
+        T[]  QueryEntitiesAndIndex<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index) where T : IEntityStruct;
+        bool TryQueryEntitiesAndIndex<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index, out T[] array) where T : IEntityStruct;
         /// <summary>
         /// ECS is meant to work on a set of Entities. Working on a single entity is sometime necessary, but using
         /// the following functions inside a loop would be a mistake as performance can be significantly impacted

@@ -37,7 +37,7 @@ namespace Svelto.ECS
             
             public void PreallocateEntitySpace<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, int size) where T : IEntityDescriptor, new()
             {
-                _weakEngine.Target.Preallocate<T>((int)groupStructId, size);
+                _weakEngine.Target.Preallocate<T>(groupStructId, size);
             }
         }
     }

@@ -17,69 +17,79 @@ namespace Svelto.ECS
     {
         void SubmitEntityViews()
         {
-            using (new PlatformProfiler("Svelto.ECS").Sample("Entities submit"))
+            using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
             {
                 if (_entitiesOperations.Count > 0)
                 {
-#if DEBUG && !PROFILER                        
-                    _entitiesOperationsDebug.Clear();
-#endif                    
-                    _transientEntitiesOperations.FastClear();
-                    _transientEntitiesOperations.AddRange(_entitiesOperations);
-                    _entitiesOperations.FastClear();
-                    var entitiesOperations = _transientEntitiesOperations.ToArrayFast();
-                    for (var i = 0; i < _transientEntitiesOperations.Count; i++)
+                    using (profiler.Sample("Remove and Swap"))
                     {
-                        try
+#if DEBUG && !PROFILER
+                        _entitiesOperationsDebug.Clear();
+#endif
+                        _transientEntitiesOperations.FastClear();
+                        _transientEntitiesOperations.AddRange(_entitiesOperations);
+                        _entitiesOperations.FastClear();
+                        var entitiesOperations = _transientEntitiesOperations.ToArrayFast();
+                        for (var i = 0; i < _transientEntitiesOperations.Count; i++)
                         {
-                            switch (entitiesOperations[i].type)
+                            try
                             {
-                                case EntitySubmitOperationType.Swap:
-                                    SwapEntityGroup(entitiesOperations[i].builders,
-                                                    entitiesOperations[i].entityDescriptor,    entitiesOperations[i].id,
-                                                    entitiesOperations[i].fromGroupID, entitiesOperations[i].toGroupID);
-                                    break;
-                                case EntitySubmitOperationType.Remove:
-                                    MoveEntity(entitiesOperations[i].builders,
-                                               new EGID(entitiesOperations[i].id, entitiesOperations[i].fromGroupID),
-                                               entitiesOperations[i].entityDescriptor);
-                                    break;
-                                case EntitySubmitOperationType.RemoveGroup:
-                                    RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
-                                    break;
+                                switch (entitiesOperations[i].type)
+                                {
+                                    case EntitySubmitOperationType.Swap:
+                                        SwapEntityGroup(entitiesOperations[i].builders,
+                                                        entitiesOperations[i].entityDescriptor,
+                                                        entitiesOperations[i].id,
+                                                        entitiesOperations[i].fromGroupID,
+                                                        entitiesOperations[i].toGroupID);
+                                        break;
+                                    case EntitySubmitOperationType.Remove:
+                                        MoveEntity(entitiesOperations[i].builders,
+                                                   new EGID(entitiesOperations[i].id,
+                                                            entitiesOperations[i].fromGroupID),
+                                                   entitiesOperations[i].entityDescriptor);
+                                        break;
+                                    case EntitySubmitOperationType.RemoveGroup:
+                                        RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
+                                        break;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+#if DEBUG && !PROFILER
+                                var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
+                                                                .FastConcat(" id: ")
+                                                                .FastConcat(entitiesOperations[i].id)
+                                                                .FastConcat(" from groupid: ")
+                                                                .FastConcat(entitiesOperations[i].fromGroupID)
+                                                                .FastConcat(" to groupid: ")
+                                                                .FastConcat(entitiesOperations[i].toGroupID);
+
+                                Console.LogError(e.Message.FastConcat(" ", str, " ", entitiesOperations[i].trace));
+#else
+                                Console.LogException(e);
+#endif
                             }
                         }
-                        catch (Exception e)
-                        {
-#if DEBUG && !PROFILER                        
-                            var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
-                                               .FastConcat(" id: ")
-                                               .FastConcat(entitiesOperations[i].id)
-                                               .FastConcat(" from groupid: ")
-                                               .FastConcat(entitiesOperations[i].fromGroupID)
-                                               .FastConcat(" to groupid: ")
-                                               .FastConcat(entitiesOperations[i].toGroupID);
-
-                            Console.LogError(e.Message.FastConcat(" ", str, " ", entitiesOperations[i].trace));
-#else
-                            Console.LogException(e);
-#endif
-                        }
                     }
+                    
                 }
-
+                
                 try
                 {
                     if (_groupedEntityToAdd.current.Count > 0)
                     {
-                        //use other as source from now on current will be use to write new entityViews
-                        _groupedEntityToAdd.Swap();
+                        using (profiler.Sample("Add"))
+                        {
+                            //use other as source from now on current will be use to write new entityViews
+                            _groupedEntityToAdd.Swap();
 
-                        //Note: if N entity of the same type are added on the same frame the Add callback is called N
-                        //times on the same frame. if the Add callback builds a new entity, that entity will not
-                        //be available in the database until the N callbacks are done solving it could be complicated as
-                        //callback and database update must be interleaved.
-                        AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
+                            //Note: if N entity of the same type are added on the same frame the Add callback is called N
+                            //times on the same frame. if the Add callback builds a new entity, that entity will not
+                            //be available in the database until the N callbacks are done solving it could be complicated as
+                            //callback and database update must be interleaved.
+                            AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
+                        }
                     }
                 }
                 catch (Exception e)

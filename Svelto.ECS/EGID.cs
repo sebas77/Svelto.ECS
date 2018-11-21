@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Svelto.ECS
 {
-    public struct EGID:IEquatable<long>,IEqualityComparer<long>
+    public struct EGID:IEquatable<long>,IEqualityComparer<long>,IComparable<long>
     {
-        long _GID;
+        readonly long _GID;
         
         public int entityID
         {
@@ -55,6 +55,11 @@ namespace Svelto.ECS
         public int GetHashCode(long obj)
         {
             return _GID.GetHashCode();
+        }
+
+        public int CompareTo(long other)
+        {
+            return _GID.CompareTo(other);
         }
     }
 }
