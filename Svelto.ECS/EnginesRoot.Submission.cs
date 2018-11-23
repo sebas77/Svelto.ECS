@@ -72,34 +72,33 @@ namespace Svelto.ECS
                             }
                         }
                     }
-                    
                 }
                 
-                try
+                if (_groupedEntityToAdd.current.Count > 0)
                 {
-                    if (_groupedEntityToAdd.current.Count > 0)
+                    using (profiler.Sample("Add"))
                     {
-                        using (profiler.Sample("Add"))
-                        {
-                            //use other as source from now on current will be use to write new entityViews
-                            _groupedEntityToAdd.Swap();
+                        //use other as source from now on current will be use to write new entityViews
+                        _groupedEntityToAdd.Swap();
 
+                        try
+                        {
                             //Note: if N entity of the same type are added on the same frame the Add callback is called N
                             //times on the same frame. if the Add callback builds a new entity, that entity will not
                             //be available in the database until the N callbacks are done solving it could be complicated as
                             //callback and database update must be interleaved.
                             AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
                         }
+                        catch (Exception e)
+                        {
+                            Console.LogException(e);
+                        }
+                        finally
+                        {
+                            //other can be cleared now, but let's avoid deleting the dictionary every time
+                            _groupedEntityToAdd.ClearOther();                    
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    Console.LogException(e);
-                }
-                finally
-                {
-                    //other can be cleared now, but let's avoid deleting the dictionary every time
-                    _groupedEntityToAdd.ClearOther();                    
                 }
             }
         }

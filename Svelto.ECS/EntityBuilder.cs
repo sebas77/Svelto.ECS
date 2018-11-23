@@ -91,17 +91,16 @@ namespace Svelto.ECS
             {
                 DBC.ECS.Check.Require(implementors != null, "Implementors not found while building an EntityView");
                 DBC.ECS.Check.Require(castedDic.ContainsKey(entityID.entityID) == false,
-                                      "building an entity with already used entity id! id".FastConcat(entityID).FastConcat(" ", DESCRIPTOR_NAME));
+                                      "building an entity with already used entity id! id".FastConcat(entityID).FastConcat(" ", ENTITY_VIEW_NAME));
 
-                T lentityView;
-                EntityView<T>.BuildEntityView(entityID, out lentityView);
+                T entityView;
+                EntityView<T>.BuildEntityView(entityID, out entityView);
 
-                this.FillEntityView(ref lentityView
+                this.FillEntityView(ref entityView
                                   , entityViewBlazingFastReflection
-                                  , implementors
-                                  , DESCRIPTOR_NAME);
+                                  , implementors);
                 
-                castedDic.Add(entityID.entityID, ref lentityView);
+                castedDic.Add(entityID.entityID, ref entityView);
             }
             else
             {
@@ -136,11 +135,11 @@ namespace Svelto.ECS
             get { return EntityView<T>.cachedFields; }
         }
         
-        static readonly Type ENTITY_VIEW_TYPE = typeof(T);
-        static readonly string DESCRIPTOR_NAME = ENTITY_VIEW_TYPE.ToString();
-        static readonly bool needsReflection = typeof(IEntityViewStruct).IsAssignableFrom(typeof(T));
-        static readonly T defaultIt = default(T);
-        static readonly Type EGIDType = typeof(Svelto.ECS.EGID);
+        static readonly Type   ENTITY_VIEW_TYPE = typeof(T);
+        static readonly string ENTITY_VIEW_NAME = ENTITY_VIEW_TYPE.ToString();
+        static readonly bool   needsReflection  = typeof(IEntityViewStruct).IsAssignableFrom(typeof(T));
+        static readonly T      defaultIt        = default(T);
+        static readonly Type   EGIDType         = typeof(EGID);
 
         internal T _initializer;
     }

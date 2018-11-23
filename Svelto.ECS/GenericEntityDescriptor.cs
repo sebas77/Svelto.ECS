@@ -37,7 +37,12 @@
     {
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>()};
+            _entityBuilders = new IEntityBuilder[]
+            {
+                new EntityBuilder<T>(),
+                new EntityBuilder<U>(),
+                new EntityBuilder<V>()
+            };
         }
 
         public IEntityBuilder[] entitiesToBuild
@@ -55,7 +60,13 @@
     {
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>()};
+            _entityBuilders = new IEntityBuilder[]
+            {
+                new EntityBuilder<T>(),
+                new EntityBuilder<U>(),
+                new EntityBuilder<V>(),
+                new EntityBuilder<W>()
+            };
         }
 
         public IEntityBuilder[] entitiesToBuild
@@ -74,7 +85,14 @@
     {
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>(), new EntityBuilder<X>()};
+            _entityBuilders = new IEntityBuilder[]
+            {
+                new EntityBuilder<T>(),
+                new EntityBuilder<U>(),
+                new EntityBuilder<V>(),
+                new EntityBuilder<W>(),
+                new EntityBuilder<X>()
+            };
         }
 
         public IEntityBuilder[] entitiesToBuild
@@ -94,7 +112,15 @@
     {
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>(), new EntityBuilder<V>(), new EntityBuilder<W>(), new EntityBuilder<X>(), new EntityBuilder<Y>()};
+            _entityBuilders = new IEntityBuilder[]
+            {
+                new EntityBuilder<T>(),
+                new EntityBuilder<U>(),
+                new EntityBuilder<V>(),
+                new EntityBuilder<W>(),
+                new EntityBuilder<X>(),
+                new EntityBuilder<Y>()
+            };
         }
 
         public IEntityBuilder[] entitiesToBuild

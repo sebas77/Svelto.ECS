@@ -61,10 +61,8 @@ namespace Svelto.ECS
             
             CheckAddEntityID(entityID, entityDescriptor);
 
-            var dic = EntityFactory.BuildGroupedEntities(entityID,
-                                                  _groupedEntityToAdd.current,
-                                                   descriptorEntitiesToBuild,
-                                                   implementors);
+            var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd.current,
+                                                         descriptorEntitiesToBuild, implementors);
             
             return new EntityStructInitializer(entityID, dic);
         }
@@ -86,13 +84,12 @@ namespace Svelto.ECS
             if (_groupedEntityToAdd.current.TryGetValue(groupID, out @groupBuffer) == false)
                 @groupBuffer = _groupedEntityToAdd.current[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
-            ITypeSafeDictionary dbList;
-
             for (var index = 0; index < count; index++)
             {
                 var entityViewBuilder = entityViewsToBuild[index];
                 var entityViewType    = entityViewBuilder.GetEntityType();
 
+                ITypeSafeDictionary dbList;
                 if (group.TryGetValue(entityViewType, out dbList) == false)
                     group[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
                 else

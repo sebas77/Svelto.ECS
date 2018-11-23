@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Svelto.DataStructures;
 using Svelto.ECS;
+using Svelto.ECS.Internal;
 using Svelto.Utilities;
 
 static class EntityViewUtility
@@ -9,8 +10,7 @@ static class EntityViewUtility
     public static void FillEntityView<T>(this IEntityBuilder entityBuilder
                                        , ref T entityView
                                        , FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection 
-                                       , object[] implementors
-                                       , string entityDescriptorName)
+                                       , object[] implementors)
     {
         int count;
 
@@ -35,10 +35,13 @@ static class EntityViewUtility
                 {
                     var componentType = interfaces[iindex];
 #if DEBUG && !PROFILER
-                    Tuple<object, int> implementorHolder;
+                    Tuple<object, int> implementorData;
 
-                    if (implementorsByType.TryGetValue(componentType, out implementorHolder))
-                        implementorHolder.numberOfImplementations++;
+                    if (implementorsByType.TryGetValue(componentType, out implementorData))
+                    {
+                        implementorData.numberOfImplementations++;
+                        implementorsByType[componentType] = implementorData;
+                    }
                     else
                         implementorsByType[componentType] = new Tuple<object, int>(implementor, 1);
 #else
@@ -49,7 +52,7 @@ static class EntityViewUtility
 #if DEBUG && !PROFILER
             else
             {
-                Svelto.Utilities.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat("Type ", entityDescriptorName, " entityView ", 
+                Svelto.Utilities.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityView ", 
                                                                       entityBuilder.GetEntityType().ToString()));
             }
 #endif
@@ -68,20 +71,17 @@ static class EntityViewUtility
 
             if (implementorsByType.TryGetValue(fieldType, out component) == false)
             {
-                var e = new Exception(NOT_FOUND_EXCEPTION + " Component Type: " + fieldType.Name +
-                                      " - EntityView: " + entityBuilder.GetEntityType().Name + 
-                                      " - EntityDescriptor " + entityDescriptorName);
+                var e = new ECSException(NOT_FOUND_EXCEPTION + " Component Type: " + fieldType.Name +
+                                      " - EntityView: " + entityBuilder.GetEntityType().Name);
 
                 throw e;
             }
 #if DEBUG && !PROFILER
             if (component.numberOfImplementations > 1)
-                Svelto.Utilities.Console.LogError(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
-                                                                        "Component Type: ", fieldType.Name,
-                                                                        " implementor: ",
-                                                                        component.implementorType.ToString()) +
-                                 " - EntityView: " +
-                                 entityBuilder.GetEntityType().Name + " - EntityDescriptor " + entityDescriptorName);
+                throw new ECSException(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
+                                 "Component Type: ", fieldType.Name, " implementor: ",
+                                 component.implementorType.ToString()) + " - EntityView: " +
+                                 entityBuilder.GetEntityType().Name);
 #endif
 #if DEBUG && !PROFILER
             fieldSetter.Value(ref entityView, component.implementorType);
@@ -94,7 +94,7 @@ static class EntityViewUtility
     }
     
     
-    //this is used to avoid newing a dictionary every time, but it's used locally only and it's clearead for each use
+    //this is used to avoid newing a dictionary every time, but it's used locally only and it's cleared for each use
 #if DEBUG && !PROFILER
     static readonly Dictionary<Type, Tuple<object, int>> implementorsByType =
         new Dictionary<Type, Tuple<object, int>>();
@@ -118,10 +118,12 @@ static class EntityViewUtility
     static readonly Dictionary<Type, Type[]> _cachedTypes = new Dictionary<Type, Type[]>();
  
     const string DUPLICATE_IMPLEMENTOR_ERROR =
-        "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is considered an error and MUST be fixed. ";
+        "<color=orange>Svelto.ECS</color> the same component is implemented with more than one implementor. This is " +
+        "considered an error and MUST be fixed. ";
 
     const string NULL_IMPLEMENTOR_ERROR =
-        "<color=orange>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid performance loss ";
+        "<color=orange>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid " +
+        "performance loss ";
 
     const string NOT_FOUND_EXCEPTION = "<color=orange>Svelto.ECS</color> Implementor not found for an EntityView. ";
 }
