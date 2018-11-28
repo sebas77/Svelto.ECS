@@ -19,9 +19,7 @@ namespace Svelto.ECS.Internal
                         return;
             }
 
-            throw new EntitiesDBException("Entity not found id: "
-                                         .FastConcat(entityGID.entityID).FastConcat(" groupID: ")
-                                         .FastConcat(entityGID.groupID));
+            throw new EntityNotFoundException(entityGID.entityID, entityGID.groupID, typeof(T));
         }
 
         public void ExecuteOnEntity<T>(EGID entityGID, EntityAction<T> action) where T : IEntityStruct
@@ -34,9 +32,7 @@ namespace Svelto.ECS.Internal
                         return;
             }
 
-            throw new EntitiesDBException("Entity not found id: "
-                                         .FastConcat(entityGID.entityID).FastConcat(" groupID: ")
-                                         .FastConcat(entityGID.groupID));
+            throw new EntityNotFoundException(entityGID.entityID, entityGID.groupID, typeof(T));
         }
 
         public void ExecuteOnEntity<T>(int id, int groupid, EntityAction<T> action) where T : IEntityStruct

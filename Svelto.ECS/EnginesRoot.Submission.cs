@@ -66,8 +66,18 @@ namespace Svelto.ECS
                                                                 .FastConcat(entitiesOperations[i].toGroupID);
 
                                 Console.LogError(e.Message.FastConcat(" ", str, " ", entitiesOperations[i].trace));
+
+                                throw;
 #else
-                                Console.LogException(e);
+                                var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
+                                                                .FastConcat(" id: ")
+                                                                .FastConcat(entitiesOperations[i].id)
+                                                                .FastConcat(" from groupid: ")
+                                                                .FastConcat(entitiesOperations[i].fromGroupID)
+                                                                .FastConcat(" to groupid: ")
+                                                                .FastConcat(entitiesOperations[i].toGroupID);
+
+                                Console.LogError(e.Message.FastConcat(" ", str));
 #endif
                             }
                         }
@@ -89,10 +99,12 @@ namespace Svelto.ECS
                             //callback and database update must be interleaved.
                             AddEntityViewsToTheDBAndSuitableEngines(_groupedEntityToAdd.other);
                         }
+#if !DEBUG
                         catch (Exception e)
                         {
                             Console.LogException(e);
                         }
+#endif
                         finally
                         {
                             //other can be cleared now, but let's avoid deleting the dictionary every time

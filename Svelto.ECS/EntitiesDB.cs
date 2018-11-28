@@ -57,7 +57,7 @@ namespace Svelto.ECS.Internal
             TypeSafeDictionary<T> typeSafeDictionary;
             
             if (QueryEntitySafeDictionary(groupID, out typeSafeDictionary) == false) 
-                throw new EntitiesDBException("Entity group not found type: ".FastConcat(typeof(T)).FastConcat(" groupID: ").FastConcat(groupID));
+                throw new EntityGroupNotFoundException(groupID, typeof(T));
 
             EGIDMapper<T> mapper;
             mapper.map = typeSafeDictionary;
@@ -79,7 +79,7 @@ namespace Svelto.ECS.Internal
             if ((array = QueryEntitiesAndIndexInternal<T>(entityGID, out index)) != null)
                 return array;
             
-            throw new EntitiesDBException("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID)); 
+            throw new EntityNotFoundException(entityGID.entityID, entityGID.groupID, typeof(T)); 
         }
         
         public bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : IEntityStruct
@@ -105,7 +105,7 @@ namespace Svelto.ECS.Internal
             T entityView;
 
             if (TryQueryEntityViewInGroupInternal(entityGID, out entityView) == false)
-                throw new EntitiesDBException("Entity not found id: ".FastConcat(entityGID.entityID).FastConcat(" groupID: ").FastConcat(entityGID.groupID));
+                throw new EntityNotFoundException(entityGID.entityID, entityGID.groupID, typeof(T));
 
             return entityView;
         }
@@ -193,7 +193,7 @@ namespace Svelto.ECS.Internal
         static void SafetyChecks<T>(TypeSafeDictionary<T> typeSafeDictionary, int count) where T : IEntityStruct
         {
             if (typeSafeDictionary.Count != count)
-                throw new EntitiesDBException("Entities cannot be swapped or removed during an iteration");
+                throw new ECSException("Entities cannot be swapped or removed during an iteration");
         }
 
         static ReadOnlyCollectionStruct<T> RetrieveEmptyEntityViewList<T>()

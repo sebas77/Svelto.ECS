@@ -100,7 +100,7 @@ namespace Svelto.ECS
                 baseType = baseType.GetBaseType();
             }
 
-            throw new ArgumentException("Not Supported Engine " + engine.ToString());
+            throw new ArgumentException("Not Supported Engine " + engine);
         }
 
         static void AddEngine<T>(T engine, Type[] entityViewTypes,

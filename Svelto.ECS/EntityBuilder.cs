@@ -28,8 +28,13 @@ namespace Svelto.ECS
 #endif        
         static void CheckFields(Type type)
         {
-            if (needsReflection == false && ENTITY_VIEW_TYPE != typeof(EntityInfoView))
+            if (ENTITY_VIEW_TYPE == typeof(EntityInfoView)) return;
+
+            if (needsReflection == false )
             {
+                if (type.IsClass)
+                    throw new ECSException("IEntityStructs must be structs");
+
                 var fields = type.GetFields(BindingFlags.Public |
                                             BindingFlags.Instance);
 
@@ -61,6 +66,14 @@ namespace Svelto.ECS
                         SubCheckFields(fieldFieldType);
                     }
                 }
+            }
+            else
+            {
+                var fields = type.GetFields(BindingFlags.Public |
+                                            BindingFlags.Instance);
+
+                if (fields.Length < 1)
+                    throw new ECSException("Invalid entity view struct detected");
             }
         }
 
