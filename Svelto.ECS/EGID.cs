@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Svelto.ECS
 {
-    public struct EGID:IEquatable<long>,IEqualityComparer<long>,IComparable<long>
+    public struct EGID:IEquatable<EGID>,IEqualityComparer<EGID>,IComparable<EGID>
     {
         readonly long _GID;
         
@@ -20,6 +20,16 @@ namespace Svelto.ECS
         internal EGID(int entityID, int groupID) : this()
         {
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
+        }
+
+        public static bool operator ==(EGID obj1, EGID obj2)
+        {
+            return obj1._GID == obj2._GID;
+        }
+        
+        public static bool operator !=(EGID obj1, EGID obj2)
+        {
+            return obj1._GID != obj2._GID;
         }
         
         public EGID(int entityID, ExclusiveGroup.ExclusiveGroupStruct  groupID) : this()
@@ -42,22 +52,22 @@ namespace Svelto.ECS
             return id._GID;
         }
 
-        public bool Equals(long other)
+        public bool Equals(EGID other)
         {
             return _GID == other;
         }
 
-        public bool Equals(long x, long y)
+        public bool Equals(EGID x, EGID y)
         {
             return x == y;
         }
 
-        public int GetHashCode(long obj)
+        public int GetHashCode(EGID obj)
         {
             return _GID.GetHashCode();
         }
 
-        public int CompareTo(long other)
+        public int CompareTo(EGID other)
         {
             return _GID.CompareTo(other);
         }

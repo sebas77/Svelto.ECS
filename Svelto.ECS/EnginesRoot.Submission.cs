@@ -70,7 +70,7 @@ namespace Svelto.ECS
                                                                 .FastConcat(entitiesOperations[i].toGroupID);
 
                                 Console.LogError(e.Message.FastConcat(" ", str, " ", entitiesOperations[i].trace));
-#if STRICT_ECS                    
+#if !RELAXED_ECS       
                                 throw;
 #endif    
 #else

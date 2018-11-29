@@ -82,7 +82,7 @@ namespace Svelto.ECS.Internal
         }
 
         void AddEntityViewToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
-                                    ref TValue                                                      entity)
+                                    ref TValue entity)
         {
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
             //get all the engines linked to TValue
@@ -106,10 +106,11 @@ namespace Svelto.ECS.Internal
             {
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
                 fasterValuesBuffer[valueIndex].ID = toEntityID;
-                toGroupCasted.Add(fromEntityGid.entityID, ref fasterValuesBuffer[valueIndex]);
+                toGroupCasted.Add(toEntityID.entityID, ref fasterValuesBuffer[valueIndex]);
                 
                 if (entityViewEnginesDB != null)
-                    AddEntityViewToEngines(entityViewEnginesDB, ref toGroupCasted.GetValuesArray(out count)[toGroupCasted.GetValueIndex(fromEntityGid.entityID)]);
+                    AddEntityViewToEngines(entityViewEnginesDB, ref toGroupCasted.GetValuesArray(out count)
+                                               [toGroupCasted.GetValueIndex(toEntityID.entityID)]);
             }
 
             Remove(fromEntityGid.entityID);

@@ -74,7 +74,7 @@ namespace Svelto.ECS
 
                 
                 if (fields.Length < 1)
-#if STRICT_ECS                    
+#if !RELAXED_ECS                    
                     throw new ECSException("Invalid entity view struct detected - EntityView:".FastConcat(typeof(T)));
 #else
                     Svelto.Utilities.Console.LogError("Invalid entity view struct detected - EntityView:".FastConcat(typeof(T)));

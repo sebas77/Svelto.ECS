@@ -129,7 +129,9 @@ namespace Svelto.ECS
             if (_groupEntityDB.TryGetValue(entityGID.groupID, out fromGroup) == false)
                 throw new ECSException("from group not found eid: ".FastConcat(entityGID.entityID).FastConcat(" group: ").FastConcat(entityGID.groupID));                
 
-            ITypeSafeDictionary entityInfoViewDic; EntityInfoView entityInfoView = default(EntityInfoView);
+            ITypeSafeDictionary entityInfoViewDic; 
+            
+            EntityInfoView entityInfoView = default(EntityInfoView);
             
             //Check if there is an EntityInfoView linked to this entity, if so it's a DynamicEntityDescriptor!
             bool correctEntityDescriptorFound = true;
@@ -226,8 +228,7 @@ namespace Svelto.ECS
             if (_groupEntityDB.TryGetValue(toEntityID.groupID, out toGroup) == false)
                 toGroup = _groupEntityDB[toEntityID.groupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
-            MoveEntity(builders, fromEntityID, originalEntityDescriptor, 
-                       toEntityID, toGroup);
+            MoveEntity(builders, fromEntityID, originalEntityDescriptor, toEntityID, toGroup);
         }
         
         readonly Type  _entityInfoView = typeof(EntityInfoView);

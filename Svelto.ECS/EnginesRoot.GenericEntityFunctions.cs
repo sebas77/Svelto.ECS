@@ -20,23 +20,13 @@ namespace Svelto.ECS
 
             public void RemoveEntity<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.CheckRemoveEntityID(new EGID(entityID, groupID), 
-                                                          EntityDescriptorTemplate<T>.descriptor);
-                
-                _weakReference.Target.QueueEntitySubmitOperation<T>(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, entityID, groupID, -1, 
-                                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+                RemoveEntity<T>(new EGID(entityID, groupID));
             }
 
             public void RemoveEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) where T : 
                 IEntityDescriptor, new()
             {
-                _weakReference.Target.CheckRemoveEntityID(new EGID(entityID, (int)groupID), 
-                                                          EntityDescriptorTemplate<T>.descriptor);
-                
-                _weakReference.Target.QueueEntitySubmitOperation<T>(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityID, entityID, groupID, -1, 
-                                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+                RemoveEntity<T>(new EGID(entityID, groupID));
             }
 
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
@@ -57,25 +47,19 @@ namespace Svelto.ECS
 
             public void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID)
             {
-                _weakReference.Target.QueueEntitySubmitOperation(
-                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, null));
+                RemoveGroupAndEntities((int)groupID);
             }
 
             public void SwapEntityGroup<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct fromGroupID, 
                                            ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.QueueEntitySubmitOperation<T>(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Swap, entityID, entityID, fromGroupID, toGroupID,
-                                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+                SwapEntityGroup<T>(new EGID(entityID, fromGroupID), toGroupID);
             }
 
             public void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct toGroupID) 
                 where T : IEntityDescriptor, new()
             {
-                _weakReference.Target.QueueEntitySubmitOperation<T>(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Swap,
-                                              id.entityID, id.entityID, id.groupID, toGroupID,
-                                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+                SwapEntityGroup<T>(id, new EGID(id.entityID, toGroupID));
             }
             
             public void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct toGroupID 
@@ -83,11 +67,8 @@ namespace Svelto.ECS
             {
                 if (id.groupID != mustBeFromGroup)
                     throw new ECSException("Entity is not coming from the expected group");
-                
-                _weakReference.Target.QueueEntitySubmitOperation<T>(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Swap,
-                        id.entityID, id.entityID, id.groupID, toGroupID,
-                        EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+
+                SwapEntityGroup<T>(id, toGroupID);
             }
             
             public void SwapEntityGroup<T>(EGID id, EGID toID) 
@@ -105,10 +86,7 @@ namespace Svelto.ECS
                 if (id.groupID != mustBeFromGroup)
                     throw new ECSException("Entity is not coming from the expected group");
                 
-                _weakReference.Target.QueueEntitySubmitOperation<T>(
-                      new EntitySubmitOperation(EntitySubmitOperationType.Swap,
-                              id.entityID, toID.entityID, id.groupID, toID.groupID,
-                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+                SwapEntityGroup<T>(id, toID);
             }
         }
         
