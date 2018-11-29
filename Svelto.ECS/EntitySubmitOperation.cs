@@ -6,7 +6,8 @@ namespace Svelto.ECS
     {
         public readonly EntitySubmitOperationType type;
         public readonly IEntityBuilder[] builders;
-        public readonly int id;
+        public readonly int ID;
+        public readonly int toID;
         public readonly int toGroupID;
         public readonly int fromGroupID;
         public readonly Type entityDescriptor;
@@ -16,6 +17,7 @@ namespace Svelto.ECS
 
         public EntitySubmitOperation(EntitySubmitOperationType operation,
                                      int                       entityId,
+                                     int                       toId,
                                      int                       fromGroupId,
                                      int                       toGroupId,
                                      IEntityBuilder[]          builders,
@@ -23,7 +25,8 @@ namespace Svelto.ECS
         {
             type = operation;
             this.builders = builders;
-            id = entityId;
+            ID = entityId;
+            toID = toId;
             
             toGroupID = toGroupId;
             fromGroupID = fromGroupId;

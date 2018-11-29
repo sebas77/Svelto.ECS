@@ -12,7 +12,7 @@ namespace Svelto.ECS.Internal
         void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                            entityViewEnginesDB);
 
-        void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, int toGroupID, ITypeSafeDictionary toGroup,
+        void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
                                                   Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                       entityViewEnginesDB);
         
@@ -91,7 +91,7 @@ namespace Svelto.ECS.Internal
                     (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).AddInternal(ref entity);
         }
 
-        public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, int toGroupID, ITypeSafeDictionary toGroup,
+        public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
                                                          Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
                                                              entityViewEnginesDB)
         {
@@ -105,7 +105,7 @@ namespace Svelto.ECS.Internal
             if (toGroup != null)
             {
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
-                fasterValuesBuffer[valueIndex].ID = new EGID(fromEntityGid.entityID, toGroupID);
+                fasterValuesBuffer[valueIndex].ID = toEntityID;
                 toGroupCasted.Add(fromEntityGid.entityID, ref fasterValuesBuffer[valueIndex]);
                 
                 if (entityViewEnginesDB != null)

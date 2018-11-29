@@ -33,7 +33,7 @@ namespace Svelto.ECS
             if (needsReflection == false )
             {
                 if (type.IsClass)
-                    throw new ECSException("IEntityStructs must be structs");
+                    throw new ECSException("IEntityStructs must be structs - EntityView:".FastConcat(typeof(T)));
 
                 var fields = type.GetFields(BindingFlags.Public |
                                             BindingFlags.Instance);
@@ -72,8 +72,13 @@ namespace Svelto.ECS
                 var fields = type.GetFields(BindingFlags.Public |
                                             BindingFlags.Instance);
 
+                
                 if (fields.Length < 1)
-                    throw new ECSException("Invalid entity view struct detected");
+#if STRICT_ECS                    
+                    throw new ECSException("Invalid entity view struct detected - EntityView:".FastConcat(typeof(T)));
+#else
+                    Svelto.Utilities.Console.LogError("Invalid entity view struct detected - EntityView:".FastConcat(typeof(T)));
+#endif    
             }
         }
 

@@ -39,15 +39,17 @@ namespace Svelto.ECS
                                     case EntitySubmitOperationType.Swap:
                                         SwapEntityGroup(entitiesOperations[i].builders,
                                                         entitiesOperations[i].entityDescriptor,
-                                                        entitiesOperations[i].id,
-                                                        entitiesOperations[i].fromGroupID,
-                                                        entitiesOperations[i].toGroupID);
+                                                        new EGID(entitiesOperations[i].ID,
+                                                                 entitiesOperations[i].fromGroupID),
+                                                        new EGID(
+                                                        entitiesOperations[i].toID,
+                                                        entitiesOperations[i].toGroupID));
                                         break;
                                     case EntitySubmitOperationType.Remove:
                                         MoveEntity(entitiesOperations[i].builders,
-                                                   new EGID(entitiesOperations[i].id,
+                                                   new EGID(entitiesOperations[i].ID,
                                                             entitiesOperations[i].fromGroupID),
-                                                   entitiesOperations[i].entityDescriptor);
+                                                   entitiesOperations[i].entityDescriptor, new EGID());
                                         break;
                                     case EntitySubmitOperationType.RemoveGroup:
                                         RemoveGroupAndEntitiesFromDB(entitiesOperations[i].fromGroupID);
@@ -59,19 +61,24 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER
                                 var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
                                                                 .FastConcat(" id: ")
-                                                                .FastConcat(entitiesOperations[i].id)
+                                                                .FastConcat(entitiesOperations[i].ID)
+                                                                .FastConcat(" to id: ")
+                                                                .FastConcat(entitiesOperations[i].toID)
                                                                 .FastConcat(" from groupid: ")
                                                                 .FastConcat(entitiesOperations[i].fromGroupID)
                                                                 .FastConcat(" to groupid: ")
                                                                 .FastConcat(entitiesOperations[i].toGroupID);
 
                                 Console.LogError(e.Message.FastConcat(" ", str, " ", entitiesOperations[i].trace));
-
+#if STRICT_ECS                    
                                 throw;
+#endif    
 #else
                                 var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
                                                                 .FastConcat(" id: ")
-                                                                .FastConcat(entitiesOperations[i].id)
+                                                                .FastConcat(entitiesOperations[i].ID)
+                                                                .FastConcat(" to id: ")
+                                                                .FastConcat(entitiesOperations[i].toID)
                                                                 .FastConcat(" from groupid: ")
                                                                 .FastConcat(entitiesOperations[i].fromGroupID)
                                                                 .FastConcat(" to groupid: ")

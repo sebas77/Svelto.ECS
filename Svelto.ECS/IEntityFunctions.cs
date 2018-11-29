@@ -1,5 +1,3 @@
-using Svelto.ECS.Internal;
-
 namespace Svelto.ECS
 {
     public interface IEntityFunctions
@@ -16,6 +14,9 @@ namespace Svelto.ECS
         
         void SwapEntityGroup<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct  fromGroupID, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
         void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new();
-        void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup, ExclusiveGroup.ExclusiveGroupStruct toGroupID) where T : IEntityDescriptor, new();
+        void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct toGroupID, ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup) where T : IEntityDescriptor, new();
+        
+        void SwapEntityGroup<T>(EGID id,       EGID toId) where T : IEntityDescriptor, new();
+        void SwapEntityGroup<T>(EGID id,       EGID toId, ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup) where T : IEntityDescriptor, new();
     }
 }
