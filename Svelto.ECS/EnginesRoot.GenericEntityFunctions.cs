@@ -103,7 +103,7 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER          
             entitySubmitOperation.trace = Environment.StackTrace;
             var egid = new EGID(entitySubmitOperation.ID, entitySubmitOperation.fromGroupID);
-            if (_entitiesOperationsDebug.ContainsKey(egid) == true)
+            if (_entitiesOperationsDebug.ContainsKey((long)egid) == true)
                 Utilities.Console.LogError("Only one entity operation per submission is allowed. Entity "
                                           .FastConcat(" with not found ID is about to be removed: ")
                                           .FastConcat(" id: ")
@@ -114,9 +114,9 @@ namespace Svelto.ECS
                                           .FastConcat(" entityType: ")
                                           .FastConcat(typeof(T).Name)
                                           .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
-                                                      " previous type: ",  _entitiesOperationsDebug[egid].ToString()));
+                                                      " previous type: ",  _entitiesOperationsDebug[(long)egid].ToString()));
             else
-                _entitiesOperationsDebug[egid] = entitySubmitOperation.type;
+                _entitiesOperationsDebug[(long)egid] = entitySubmitOperation.type;
 #endif            
             _entitiesOperations.AddRef(ref entitySubmitOperation);
         }

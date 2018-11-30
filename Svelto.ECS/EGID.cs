@@ -42,19 +42,19 @@ namespace Svelto.ECS
             return (long)groupId << 32 | ((long)(uint)entityId & 0xFFFFFFFF);
         }
 
-        public static implicit operator int(EGID id)
+        public static explicit operator int(EGID id)
         {
             return id.entityID;
         }
         
-        public static implicit operator long(EGID id)
+        public static explicit operator long(EGID id)
         {
             return id._GID;
         }
 
         public bool Equals(EGID other)
         {
-            return _GID == other;
+            return _GID == other._GID;
         }
 
         public bool Equals(EGID x, EGID y)
@@ -69,7 +69,7 @@ namespace Svelto.ECS
 
         public int CompareTo(EGID other)
         {
-            return _GID.CompareTo(other);
+            return _GID.CompareTo(other._GID);
         }
     }
 }
