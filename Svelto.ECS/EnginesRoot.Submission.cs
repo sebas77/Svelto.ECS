@@ -68,10 +68,10 @@ namespace Svelto.ECS
                                                                 .FastConcat(entitiesOperations[i].fromGroupID)
                                                                 .FastConcat(" to groupid: ")
                                                                 .FastConcat(entitiesOperations[i].toGroupID);
-
-                                Console.LogError(e.Message.FastConcat(" ", str, " ", entitiesOperations[i].trace));
-#if !RELAXED_ECS       
-                                throw;
+#if RELAXED_ECS
+                                Console.LogException(str.FastConcat(" ").FastConcat(entitiesOperations[i].trace), e);
+#else       
+                                throw new ECSException(str.FastConcat(" ").FastConcat(entitiesOperations[i].trace), e);
 #endif    
 #else
                                 var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
@@ -84,7 +84,7 @@ namespace Svelto.ECS
                                                                 .FastConcat(" to groupid: ")
                                                                 .FastConcat(entitiesOperations[i].toGroupID);
 
-                                Console.LogError(e.Message.FastConcat(" ", str));
+                                Console.LogException(str, e);
 #endif
                             }
                         }

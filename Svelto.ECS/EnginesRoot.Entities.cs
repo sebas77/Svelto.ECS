@@ -148,11 +148,20 @@ namespace Svelto.ECS
             //otherwise it's a normal static entity descriptor
             else
             {
+#if DEBUG && !PROFILER
                 if (correctEntityDescriptorFound == false)
+#if RELAXED_ECS                    
                     Utilities.Console.LogError(INVALID_DYNAMIC_DESCRIPTOR_ERROR.FastConcat(" ID ").FastConcat(entityGID.entityID)
                                                .FastConcat(" group ID ").FastConcat(entityGID.groupID).FastConcat(
                                                 " descriptor found: ", entityInfoView.type.Name, " descriptor Excepted ",
                                                 originalDescriptorType.Name));
+#else
+                    throw new ECSException(INVALID_DYNAMIC_DESCRIPTOR_ERROR.FastConcat(" ID ").FastConcat(entityGID.entityID)
+                                               .FastConcat(" group ID ").FastConcat(entityGID.groupID).FastConcat(
+                                                " descriptor found: ", entityInfoView.type.Name, " descriptor Excepted ",
+                                                originalDescriptorType.Name);
+#endif
+#endif                
                 
                 for (var i = 0; i < entityBuilders.Length; i++)
                     MoveEntityView(entityGID, toEntityGID, toGroup, fromGroup, entityBuilders[i].GetEntityType());

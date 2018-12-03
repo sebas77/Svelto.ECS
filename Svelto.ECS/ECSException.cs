@@ -6,5 +6,8 @@ namespace Svelto.ECS.Internal
     {
         public ECSException(string message):base(message)
         {}
+        
+        public ECSException(string message, Exception innerE):base(message, innerE)
+        {}
     }
 }

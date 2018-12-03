@@ -61,24 +61,36 @@ namespace Svelto.ECS
 #if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
             Profiler.EngineProfiler.AddEngine(engine);
 #endif
-            var viewEngine = engine as IHandleEntityViewEngineAbstracted;
-            
-            if (viewEngine != null)
-                CheckEntityViewsEngine(viewEngine);
-            
-            DBC.ECS.Check.Assert(_enginesSet.Contains(engine) == false, "The same engine has been added more than once "
+            DBC.ECS.Check.Require(_enginesSet.Contains(engine) == false,
+                                 "The same engine has been added more than once "
                                     .FastConcat(engine.ToString()));
-                
-            _enginesSet.Add(engine);
-            
-            if (engine is IDisposable)
-                _disposableEngines.Add(engine as IDisposable);
-            
-            var queryableEntityViewEngine = engine as IQueryingEntitiesEngine;
-            if (queryableEntityViewEngine != null)
+
+            try
             {
-                queryableEntityViewEngine.entitiesDB = _entitiesDB;
-                queryableEntityViewEngine.Ready();
+                var viewEngine = engine as IHandleEntityViewEngineAbstracted;
+
+                if (viewEngine != null)
+                    CheckEntityViewsEngine(viewEngine);
+
+                _enginesSet.Add(engine);
+
+                if (engine is IDisposable)
+                    _disposableEngines.Add(engine as IDisposable);
+
+                var queryableEntityViewEngine = engine as IQueryingEntitiesEngine;
+                if (queryableEntityViewEngine != null)
+                {
+                    queryableEntityViewEngine.entitiesDB = _entitiesDB;
+                    queryableEntityViewEngine.Ready();
+                }
+            }
+            catch (Exception e)
+            {
+#if !DEBUG                
+                throw new ECSException("Code crashed while adding engine ".FastConcat(engine.GetType()), e);
+#else
+                Utilities.Console.LogException("Code crashed while adding engine ".FastConcat(engine.GetType()), e);
+#endif                
             }
         }
        

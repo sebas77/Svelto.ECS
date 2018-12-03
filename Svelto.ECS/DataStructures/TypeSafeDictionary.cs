@@ -88,7 +88,17 @@ namespace Svelto.ECS.Internal
             //get all the engines linked to TValue
             if (entityViewEnginesDB.TryGetValue(_type, out entityViewsEngines))
                 for (int i = 0; i < entityViewsEngines.Count; i++)
-                    (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).AddInternal(ref entity);
+                {
+                    try
+                    {
+                        (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).AddInternal(ref entity);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ECSException("Code crashed inside Add callback ".
+                                FastConcat(typeof(TValue)).FastConcat("id ").FastConcat(entity.ID.entityID), e);
+                    }
+                }
         }
 
         public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
@@ -122,7 +132,15 @@ namespace Svelto.ECS.Internal
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
             if (entityViewEnginesDB.TryGetValue(_type, out entityViewsEngines))
                 for (int i = 0; i < entityViewsEngines.Count; i++)
-                    (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).RemoveInternal(ref entity);
+                    try
+                    {
+                        (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).RemoveInternal(ref entity);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ECSException("Code crashed inside Remove callback ".
+                                  FastConcat(typeof(TValue)).FastConcat("id ").FastConcat(entity.ID.entityID), e);
+                    }
         }
         
         public void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
