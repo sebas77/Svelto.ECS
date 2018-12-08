@@ -20,9 +20,9 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 
 **Framework articles:**
 
-* http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/ (shows what's changed compared to 2.5)
-* http://www.sebaslab.com/svelto-ecs-2-5-and-allocation-0-code/ (shows what's changed compared to 2.0)
-* http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed compared to 1.0)
+* http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/ (shows what's changed since 2.5)
+* http://www.sebaslab.com/svelto-ecs-2-5-and-allocation-0-code/ (shows what's changed since 2.0)
+* http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/ (shows what's changed since 1.0)
 * http://www.sebaslab.com/ecs-1-0/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-unity-survival-example/
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
