@@ -159,7 +159,7 @@ namespace Svelto.ECS
                     throw new ECSException(INVALID_DYNAMIC_DESCRIPTOR_ERROR.FastConcat(" ID ").FastConcat(entityGID.entityID)
                                                .FastConcat(" group ID ").FastConcat(entityGID.groupID).FastConcat(
                                                 " descriptor found: ", entityInfoView.type.Name, " descriptor Excepted ",
-                                                originalDescriptorType.Name);
+                                                originalDescriptorType.Name));
 #endif
 #endif                
                 
