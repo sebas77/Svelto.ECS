@@ -59,7 +59,8 @@ namespace Svelto.ECS
                             catch (Exception e)
                             {
 #if DEBUG && !PROFILER
-                                var str = "Entity Operation is ".FastConcat(entitiesOperations[i].type.ToString())
+                                var str = "Crash while executing Entity Operation"
+                                                                .FastConcat(entitiesOperations[i].type.ToString())
                                                                 .FastConcat(" id: ")
                                                                 .FastConcat(entitiesOperations[i].ID)
                                                                 .FastConcat(" to id: ")
@@ -69,7 +70,7 @@ namespace Svelto.ECS
                                                                 .FastConcat(" to groupid: ")
                                                                 .FastConcat(entitiesOperations[i].toGroupID);
 #if RELAXED_ECS
-                                Console.LogException(str.FastConcat(" ").FastConcat(entitiesOperations[i].trace), e);
+                                Console.LogException(str.FastConcat(" ", entitiesOperations[i].trace), e);
 #else       
                                 throw new ECSException(str.FastConcat(" ").FastConcat(entitiesOperations[i].trace), e);
 #endif    

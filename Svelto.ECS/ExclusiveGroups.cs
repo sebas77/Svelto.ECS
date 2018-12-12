@@ -93,7 +93,7 @@ namespace Svelto.ECS
             /// <summary>
             /// Use this constructor to reserve N groups
             /// </summary>
-            public ExclusiveGroupStruct(ushort range)
+            internal ExclusiveGroupStruct(ushort range)
             {
                 _id = (int) _globalId;
                 DBC.ECS.Check.Require(_globalId + range < ushort.MaxValue, "too many exclusive groups created");
