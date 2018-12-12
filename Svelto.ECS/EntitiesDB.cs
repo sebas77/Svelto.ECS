@@ -100,6 +100,16 @@ namespace Svelto.ECS.Internal
             return TryQueryEntitiesAndIndex<T>(new EGID(id, group), out index, out array);
         }
 
+        public T[] QueryEntitiesAndIndex<T>(int id, int @group, out uint index) where T : IEntityStruct
+        {
+            return QueryEntitiesAndIndex<T>(new EGID(id, group), out index);
+        }
+
+        public bool TryQueryEntitiesAndIndex<T>(int id, int @group, out uint index, out T[] array) where T : IEntityStruct
+        {
+            return TryQueryEntitiesAndIndex<T>(new EGID(id, group), out index, out array);
+        }
+
         public T QueryEntityView<T>(EGID entityGID) where T : class, IEntityStruct
         {
             T entityView;
@@ -118,10 +128,15 @@ namespace Svelto.ECS.Internal
             return casted != null && casted.ContainsKey(entityGID.entityID);
         }
 
-        public bool Exists (ExclusiveGroup.ExclusiveGroupStruct gid)
+        public bool Exists<T>(int id, int groupid) where T : IEntityStruct
         {
-            //search for the group 
-            return _groupEntityViewsDB.ContainsKey((int) @gid);
+            return Exists<T>(new EGID(id, groupid));
+        }
+
+        //search for the group 
+        public bool Exists(ExclusiveGroup.ExclusiveGroupStruct gid)
+        {
+            return _groupEntityViewsDB.ContainsKey(@gid);
         }
 
         public bool HasAny<T>(int @group) where T : IEntityStruct

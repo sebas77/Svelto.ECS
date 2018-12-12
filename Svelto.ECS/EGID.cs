@@ -17,11 +17,6 @@ namespace Svelto.ECS
             get { return (int) (_GID >> 32); }
         }
 
-        internal EGID(int entityID, int groupID) : this()
-        {
-            _GID = MAKE_GLOBAL_ID(entityID, groupID);
-        }
-
         public static bool operator ==(EGID obj1, EGID obj2)
         {
             return obj1._GID == obj2._GID;
@@ -32,7 +27,7 @@ namespace Svelto.ECS
             return obj1._GID != obj2._GID;
         }
         
-        public EGID(int entityID, ExclusiveGroup.ExclusiveGroupStruct  groupID) : this()
+        public EGID(int entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) : this()
         {
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
         }
@@ -70,6 +65,11 @@ namespace Svelto.ECS
         public int CompareTo(EGID other)
         {
             return _GID.CompareTo(other._GID);
+        }
+        
+        internal EGID(int entityID, int groupID) : this()
+        {
+            _GID = MAKE_GLOBAL_ID(entityID, groupID);
         }
     }
 }

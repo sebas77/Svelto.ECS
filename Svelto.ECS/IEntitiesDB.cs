@@ -85,6 +85,8 @@ namespace Svelto.ECS
         bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : IEntityStruct;
         T[]  QueryEntitiesAndIndex<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index) where T : IEntityStruct;
         bool TryQueryEntitiesAndIndex<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index, out T[] array) where T : IEntityStruct;
+        T[]  QueryEntitiesAndIndex<T>(int id, int group, out uint index) where T : IEntityStruct;
+        bool TryQueryEntitiesAndIndex<T>(int id, int group, out uint index, out T[] array) where T : IEntityStruct;
         /// <summary>
         /// ECS is meant to work on a set of Entities. Working on a single entity is sometime necessary, but using
         /// the following functions inside a loop would be a mistake as performance can be significantly impacted
@@ -95,13 +97,14 @@ namespace Svelto.ECS
         /// <param name="action"></param>
         /// <typeparam name="T"></typeparam>
         void ExecuteOnEntity<T>(EGID egid, EntityAction<T> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T>(int     id,   int          groupid, EntityAction<T>    action) where T : IEntityStruct;
+        void ExecuteOnEntity<T>(int id, int groupid, EntityAction<T> action) where T : IEntityStruct;
         void ExecuteOnEntity<T>(int id,  ExclusiveGroup.ExclusiveGroupStruct groupid, EntityAction<T> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T, W>(EGID egid, ref W        value,   EntityAction<T, W> action) where T : IEntityStruct;
-        void ExecuteOnEntity<T, W>(int  id,   int          groupid, ref W           value, EntityAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T, W>(EGID egid, ref W value, EntityAction<T, W> action) where T : IEntityStruct;
+        void ExecuteOnEntity<T, W>(int id,  int groupid, ref W value, EntityAction<T, W> action) where T : IEntityStruct;
         void ExecuteOnEntity<T, W>(int id,  ExclusiveGroup.ExclusiveGroupStruct groupid, ref W value, EntityAction<T, W> action) where T : IEntityStruct;
 
         bool Exists<T>(EGID egid) where T : IEntityStruct;
+        bool Exists<T>(int id, int groupid) where T : IEntityStruct;
         bool Exists (ExclusiveGroup.ExclusiveGroupStruct gid);
         
         bool HasAny<T>(int group) where T:IEntityStruct;

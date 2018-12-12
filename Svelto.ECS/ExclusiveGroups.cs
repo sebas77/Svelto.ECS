@@ -28,17 +28,17 @@ namespace Svelto.ECS
             _group = new ExclusiveGroupStruct(range);
         }
         
-        public static implicit operator ExclusiveGroupStruct (ExclusiveGroup group)
+        public static implicit operator ExclusiveGroupStruct(ExclusiveGroup group)
         {
             return group._group;
         }
         
-        public static explicit operator int (ExclusiveGroup group) 
+        public static explicit operator int(ExclusiveGroup group) 
         {
             return @group._group;
         }
 
-        public static ExclusiveGroupStruct operator + (ExclusiveGroup a, int b)
+        public static ExclusiveGroupStruct operator+(ExclusiveGroup a, int b)
         {
             return a._group + b;
         }
@@ -49,32 +49,32 @@ namespace Svelto.ECS
         public struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>,
                                 IEqualityComparer<ExclusiveGroupStruct>
         {
-            public static bool operator == (ExclusiveGroupStruct c1, ExclusiveGroupStruct c2)
+            public static bool operator ==(ExclusiveGroupStruct c1, ExclusiveGroupStruct c2)
             {
                 return c1.Equals(c2);
             }
 
-            public static bool operator != (ExclusiveGroupStruct c1, ExclusiveGroupStruct c2)
+            public static bool operator !=(ExclusiveGroupStruct c1, ExclusiveGroupStruct c2)
             {
                 return c1.Equals(c2) == false;
             }
 
-            public bool Equals (ExclusiveGroupStruct other)
+            public bool Equals(ExclusiveGroupStruct other)
             {
                 return other._id == _id;
             }
 
-            public int CompareTo (ExclusiveGroupStruct other)
+            public int CompareTo(ExclusiveGroupStruct other)
             {
                 return other._id.CompareTo(_id);
             }
 
-            public bool Equals (ExclusiveGroupStruct x, ExclusiveGroupStruct y)
+            public bool Equals(ExclusiveGroupStruct x, ExclusiveGroupStruct y)
             {
                 return x._id == y._id;
             }
 
-            public int GetHashCode (ExclusiveGroupStruct obj)
+            public int GetHashCode(ExclusiveGroupStruct obj)
             {
                 return _id.GetHashCode();
             }

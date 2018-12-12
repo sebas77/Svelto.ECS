@@ -22,7 +22,8 @@ namespace Svelto.ECS
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="size"></param>
-        void PreallocateEntitySpace<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, int size) where T : IEntityDescriptor, new();
+        void PreallocateEntitySpace<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, int size)
+            where T : IEntityDescriptor, new();
         
         /// <summary>
         ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity
@@ -38,8 +39,11 @@ namespace Svelto.ECS
         /// <param name="groupStructId"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        EntityStructInitializer BuildEntity<T>(int entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, object[] implementors) where T:IEntityDescriptor, new();
-        EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors) where T:IEntityDescriptor, new();
+        EntityStructInitializer BuildEntity<T>(int      entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
+                                               object[] implementors = null) 
+            where T : IEntityDescriptor, new();
+        EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors = null) 
+            where T:IEntityDescriptor, new();
         /// <summary>
         ///     When the type of the entity is not known (this is a special case!) an EntityDescriptorInfo
         ///     can be built in place of the generic parameter T.
@@ -48,7 +52,11 @@ namespace Svelto.ECS
         /// <param name="entityDescriptor"></param>
         /// <param name="implementors"></param>
         /// 
-        EntityStructInitializer BuildEntity<T>(int entityID,  ExclusiveGroup.ExclusiveGroupStruct groupStructId, T descriptorEntity, object[] implementors)  where T:IEntityDescriptor;
-        EntityStructInitializer BuildEntity<T>(EGID egid, T entityDescriptor, object[] implementors)  where T:IEntityDescriptor;
+        EntityStructInitializer BuildEntity<T>(int      entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
+                                               T        descriptorEntity,
+                                               object[] implementors = null)
+            where T : IEntityDescriptor;
+        EntityStructInitializer BuildEntity<T>(EGID egid, T entityDescriptor, object[] implementors = null)
+            where T : IEntityDescriptor;
     }
 }
