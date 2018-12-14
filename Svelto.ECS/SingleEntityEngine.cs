@@ -1,6 +1,8 @@
+using Svelto.ECS.Internal;
+
 namespace Svelto.ECS
 {
-    public abstract class SingleEntityEngine<T> : IHandleEntityStructEngine<T> where T : IEntityStruct
+    public abstract class SingleEntityEngine<T> : EngineInfo, IHandleEntityStructEngine<T> where T : IEntityStruct
     {
         public void AddInternal(ref T entityView)
         { Add(ref entityView); }

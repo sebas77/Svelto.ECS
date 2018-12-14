@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
-
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-using Svelto.ECS.Profiler;
-#endif
 
 namespace Svelto.ECS
 {

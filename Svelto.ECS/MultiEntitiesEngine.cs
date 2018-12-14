@@ -1,3 +1,5 @@
+using Svelto.ECS.Internal;
+
 namespace Svelto.ECS
 {
     public abstract class MultiEntitiesEngine<T, U> : SingleEntityEngine<T>, IHandleEntityStructEngine<U>
@@ -25,9 +27,8 @@ namespace Svelto.ECS
     }
 
     /// <summary>
-    ///     Please do not add more MultiEntityViewsEngine
-    ///     if you use more than 4 nodes, your engine has
-    ///     already too many responsabilities.
+    ///     Please do not add more MultiEntityViewsEngine if you use more than 4 nodes, your engine has
+    ///     already too many responsibilities.
     /// </summary>
     public abstract class MultiEntitiesEngine<T, U, V, W> : MultiEntitiesEngine<T, U, V>, IHandleEntityStructEngine<W>
         where W :  IEntityStruct where V :  IEntityStruct where U :  IEntityStruct where T : IEntityStruct

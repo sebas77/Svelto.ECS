@@ -6,27 +6,10 @@ using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
 using Svelto.WeakEvents;
 
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-using Svelto.ECS.Profiler;
-#endif
-
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR        
-        static EnginesRoot()
-        {
-
-/// <summary>
-/// I still need to find a good solution for this. Need to move somewhere else
-/// </summary>
-            UnityEngine.GameObject debugEngineObject = new UnityEngine.GameObject("Svelto.ECS.Profiler");
-            debugEngineObject.gameObject.AddComponent<EngineProfilerBehaviour>();
-            UnityEngine.GameObject.DontDestroyOnLoad(debugEngineObject);
-        }
-#endif    
-       
         /// <summary>
         /// Engines root contextualize your engines and entities. You don't need to limit yourself to one EngineRoot
         /// as multiple engines root could promote separation of scopes. The EntitySubmissionScheduler checks
@@ -58,9 +41,6 @@ namespace Svelto.ECS
 
         public void AddEngine(IEngine engine)
         {
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-            Profiler.EngineProfiler.AddEngine(engine);
-#endif
             DBC.ECS.Check.Require(_enginesSet.Contains(engine) == false,
                                  "The same engine has been added more than once "
                                     .FastConcat(engine.ToString()));

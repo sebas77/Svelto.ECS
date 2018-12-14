@@ -1,3 +1,5 @@
+using Svelto.ECS.Internal;
+
 namespace Svelto.ECS
 {
     public abstract class MultiEntityViewsEngine<T, U> : SingleEntityViewEngine<T>, IHandleEntityStructEngine<U>

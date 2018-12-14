@@ -1,9 +1,5 @@
 ﻿﻿using System;
- using Svelto.ECS.Internal;
-
-#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-using Svelto.ECS.Profiler;
-#endif
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {

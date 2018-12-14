@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
 
@@ -10,14 +11,15 @@ namespace Svelto.ECS.Internal
         ITypeSafeDictionary Create();
         
         void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
-                                           entityViewEnginesDB);
+                                           entityViewEnginesDB, PlatformProfiler profiler);
 
         void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
                                                   Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
-                                                      entityViewEnginesDB);
+                                                      entityViewEnginesDB, PlatformProfiler profiler);
         
         void FillWithIndexedEntities(ITypeSafeDictionary entities);
-        void AddEntitiesToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB);
+        void AddEntitiesToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
+                                  PlatformProfiler profiler);
         
         void AddCapacity(int size);
         
@@ -58,7 +60,8 @@ namespace Svelto.ECS.Internal
         }
 
         public void AddEntitiesToEngines(
-            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
+            Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
+            PlatformProfiler                                                profiler)
         {
             int      count;
             TValue[] values = GetValuesArray(out count);
@@ -67,7 +70,7 @@ namespace Svelto.ECS.Internal
             {
                 TValue entity = values[i];
 
-                AddEntityViewToEngines(entityViewEnginesDB, ref entity);
+                AddEntityViewToEngines(entityViewEnginesDB, ref entity, profiler);
             }
         }
 
@@ -82,7 +85,8 @@ namespace Svelto.ECS.Internal
         }
 
         void AddEntityViewToEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
-                                    ref TValue entity)
+                                    ref TValue                                                      entity,
+                                    PlatformProfiler                                                profiler)
         {
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
             //get all the engines linked to TValue
@@ -91,7 +95,10 @@ namespace Svelto.ECS.Internal
                 {
                     try
                     {
-                        (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).AddInternal(ref entity);
+                        using (profiler.Sample((entityViewsEngines[i] as EngineInfo).name))
+                        {
+                            (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).AddInternal(ref entity);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -103,14 +110,14 @@ namespace Svelto.ECS.Internal
 
         public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup,
                                                          Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>>
-                                                             entityViewEnginesDB)
+                                                             entityViewEnginesDB, PlatformProfiler profiler)
         {
             int count;
             var fasterValuesBuffer = GetValuesArray(out count);
             var valueIndex = GetValueIndex(fromEntityGid.entityID);
-
+            
             if (entityViewEnginesDB != null)
-                RemoveEntityViewFromEngines(entityViewEnginesDB, ref fasterValuesBuffer[valueIndex]);
+                RemoveEntityViewFromEngines(entityViewEnginesDB, ref fasterValuesBuffer[valueIndex], profiler);
 
             if (toGroup != null)
             {
@@ -120,21 +127,25 @@ namespace Svelto.ECS.Internal
                 
                 if (entityViewEnginesDB != null)
                     AddEntityViewToEngines(entityViewEnginesDB, ref toGroupCasted.GetValuesArray(out count)
-                                               [toGroupCasted.GetValueIndex(toEntityID.entityID)]);
+                                               [toGroupCasted.GetValueIndex(toEntityID.entityID)], profiler);
             }
 
             Remove(fromEntityGid.entityID);
         }
 
         static void RemoveEntityViewFromEngines
-            (Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity)
+        (Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, ref TValue entity,
+         PlatformProfiler                                                profiler)
         {
             FasterList<IHandleEntityViewEngineAbstracted> entityViewsEngines;
             if (entityViewEnginesDB.TryGetValue(_type, out entityViewsEngines))
                 for (int i = 0; i < entityViewsEngines.Count; i++)
                     try
                     {
-                        (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).RemoveInternal(ref entity);
+                        using (profiler.Sample((entityViewsEngines[i] as EngineInfo).name, _typeName))
+                        {
+                            (entityViewsEngines[i] as IHandleEntityStructEngine<TValue>).RemoveInternal(ref entity);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -143,13 +154,13 @@ namespace Svelto.ECS.Internal
                     }
         }
         
-        public void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB)
+        public void RemoveEntitiesFromEngines(Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB, PlatformProfiler profiler)
         {
             int count;
             TValue[] values = GetValuesArray(out count);
 
             for (int i = 0; i < count; i++)
-                RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i]);
+                RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i], profiler);
         }
         
         public ITypeSafeDictionary Create()
@@ -198,5 +209,10 @@ namespace Svelto.ECS.Internal
         }
         
         static readonly Type _type = typeof(TValue);
+        static readonly string _typeName
+#if ENABLE_PLATFORM_PROFILER            
+            = _type.Name
+#endif    
+            ;
     }
 }

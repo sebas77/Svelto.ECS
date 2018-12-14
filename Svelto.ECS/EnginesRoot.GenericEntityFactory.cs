@@ -1,8 +1,4 @@
-﻿﻿#if ENGINE_PROFILER_ENABLED && UNITY_EDITOR
-using Svelto.ECS.Profiler;
-#endif
-
-namespace Svelto.ECS
+﻿namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
