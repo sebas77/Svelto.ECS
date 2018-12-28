@@ -39,7 +39,7 @@ namespace Svelto.ECS
         /// <param name="groupStructId"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        EntityStructInitializer BuildEntity<T>(int      entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
+        EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
                                                object[] implementors = null) 
             where T : IEntityDescriptor, new();
         EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors = null) 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+#pragma warning disable 660,661
 
 namespace Svelto.ECS
 {

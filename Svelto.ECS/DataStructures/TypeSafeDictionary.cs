@@ -209,10 +209,6 @@ namespace Svelto.ECS.Internal
         }
         
         static readonly Type _type = typeof(TValue);
-        static readonly string _typeName
-#if ENABLE_PLATFORM_PROFILER            
-            = _type.Name
-#endif    
-            ;
+        static readonly string _typeName = _type.Name;
     }
 }

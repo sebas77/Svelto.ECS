@@ -15,9 +15,7 @@ namespace Svelto.ECS
 #endif
         static void CheckFields(Type type, bool needsReflection, bool isRoot)
         {
-            if (ENTITY_VIEW_TYPE == typeof(EntityInfoView)) return;
-
-            if (type == EGIDType || type == ExclusiveGroupStructType) return;
+            if (ENTITY_VIEW_TYPE == typeof(EntityInfoView) || type == EGIDType || type == ExclusiveGroupStructType) return;
 
             {
                 var methods = type.GetMethods(BindingFlags.Public   |
@@ -29,10 +27,10 @@ namespace Svelto.ECS
                 if (isRoot)
                 {
                     if (properties.Length > 1)
-                        ProcessError("EntityViews cannot have public methods or properties", type);
+                        ProcessError("Entity views cannot have public methods or properties", type);
                         
                     if (methods.Length > properties.Length + 1)
-                        ProcessError("EntityViews cannot have public methods or properties", type);
+                        ProcessError("Entity views cannot have public methods or properties", type);
                 }
                 else
                 {
@@ -47,7 +45,7 @@ namespace Svelto.ECS
             if (needsReflection == false)
             {
                 if (type.IsClass)
-                    throw new ECSException("IEntityStructs must be structs - EntityView: ".FastConcat(ENTITY_VIEW_TYPE));
+                    throw new ECSException("EntityStructs must be structs - entity view: ".FastConcat(ENTITY_VIEW_TYPE));
 
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
@@ -116,7 +114,6 @@ namespace Svelto.ECS
                                        " invalid field: ", type.ToString()));
 #endif
         }
-
         
         static readonly Type EGIDType                 = typeof(EGID);
         static readonly Type ExclusiveGroupStructType = typeof(ExclusiveGroup.ExclusiveGroupStruct);

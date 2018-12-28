@@ -16,8 +16,9 @@ namespace Svelto.ECS.Internal
         {
             name = GetType().FullName;
         }
-#endif  
+#else  
         internal string name;
+#endif    
     }
 }
 
