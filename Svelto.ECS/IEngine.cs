@@ -12,13 +12,12 @@ namespace Svelto.ECS.Internal
     public class EngineInfo
     {
 #if ENABLE_PLATFORM_PROFILER
-        public EngineInfo()
+        protected EngineInfo()
         {
             name = GetType().FullName;
         }
-#else  
-        internal string name;
 #endif    
+        internal readonly string name = string.Empty;
     }
 }
 

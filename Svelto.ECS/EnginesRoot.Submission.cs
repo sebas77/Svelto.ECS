@@ -158,7 +158,7 @@ namespace Svelto.ECS
                 {
                     using (profiler.Sample("Add entities to engines"))
                     {
-                        entityViewsPerType.Value.AddEntitiesToEngines(_entityEngines, profiler);
+                        entityViewsPerType.Value.AddEntitiesToEngines(_entityEngines, ref profiler);
                     }
                 }
             }

@@ -22,11 +22,12 @@ namespace Svelto.ECS
                     {
                         try
                         {
-                            entityList.Value.RemoveEntitiesFromEngines(_entityEngines, profiler);
+                            var platformProfiler = profiler;
+                            entityList.Value.RemoveEntitiesFromEngines(_entityEngines, ref platformProfiler);
                         }
                         catch (Exception e)
                         {
-                            Svelto.Utilities.Console.LogException(e);
+                            Utilities.Console.LogException(e);
                         }
                     }
 
@@ -37,7 +38,7 @@ namespace Svelto.ECS
                     }
                     catch (Exception e)
                     {
-                        Svelto.Utilities.Console.LogException(e);
+                        Utilities.Console.LogException(e);
                     }
             }
 
@@ -46,6 +47,8 @@ namespace Svelto.ECS
 
         ~EnginesRoot()
         {
+            Utilities.Console.LogWarning("Engines Root has been garbage collected, don't forget to call Dispose()!");
+            
             Dispose();
         }
 
@@ -210,7 +213,8 @@ namespace Svelto.ECS
             {
                 throw new EntityNotFoundException(entityGID.entityID, entityGID.groupID, entityType);                
             }
-            fromTypeSafeDictionary.MoveEntityFromDictionaryAndEngines(entityGID, toEntityGID, dictionaryOfEntities, _entityEngines, profiler);
+            fromTypeSafeDictionary.MoveEntityFromDictionaryAndEngines(entityGID, toEntityGID, dictionaryOfEntities, 
+                                                                      _entityEngines, ref profiler);
 
             if (fromTypeSafeDictionary.Count == 0) //clean up
             {
@@ -229,7 +233,8 @@ namespace Svelto.ECS
                 var dictionariesOfEntities = _groupEntityDB[groupID];
                 foreach (var dictionaryOfEntities in dictionariesOfEntities)
                 {
-                    dictionaryOfEntities.Value.RemoveEntitiesFromEngines(_entityEngines, profiler);
+                    var platformProfiler = profiler;
+                    dictionaryOfEntities.Value.RemoveEntitiesFromEngines(_entityEngines, ref platformProfiler);
                     var groupedGroupOfEntities = _groupsPerEntity[dictionaryOfEntities.Key];
                     groupedGroupOfEntities.Remove(groupID);
                 }
