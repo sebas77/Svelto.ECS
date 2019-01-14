@@ -62,14 +62,14 @@ namespace Svelto.ECS
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
                 if (fields.Length < 1)
-                    ProcessError("Entity View Structs must hold entity components interfaces", type);
+                    ProcessError("Entity View Structs must hold only entity components interfaces", type);
                 
                 for (int i = fields.Length - 1; i >= 0; --i)
                 {
                     var field = fields[i];
                     
                     if (field.FieldType.IsInterfaceEx() == false)
-                        ProcessError("Entity View Structs must hold entity components interfaces", type);
+                        ProcessError("Entity View Structs must hold only entity components interfaces", type);
                     
                     var properties = field.FieldType.GetProperties(BindingFlags.Public |
                                                         BindingFlags.Instance | BindingFlags.DeclaredOnly);
