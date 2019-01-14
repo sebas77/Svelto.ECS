@@ -100,7 +100,7 @@ namespace Svelto.ECS
             entitySubmitOperation.trace = Environment.StackTrace;
             var egid = new EGID(entitySubmitOperation.ID, entitySubmitOperation.fromGroupID);
             if (_entitiesOperationsDebug.ContainsKey((long)egid) == true)
-                Utilities.Console.LogError("Only one entity operation per submission is allowed. Entity "
+                Console.LogError("Only one entity operation per submission is allowed. Entity "
                                           .FastConcat(" with not found ID is about to be removed: ")
                                           .FastConcat(" id: ")
                                           .FastConcat(entitySubmitOperation.ID)

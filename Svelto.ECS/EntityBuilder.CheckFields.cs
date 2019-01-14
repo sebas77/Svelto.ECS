@@ -108,10 +108,6 @@ namespace Svelto.ECS
         {
 #if !RELAXED_ECS
             throw new EntityStructException(message, ENTITY_VIEW_TYPE, type);
-#else
-            Utilities.Console.LogError("Invalid entity view detected - EntityViews must handle only value types and have " +
-                                       "no public methods! EntityView ".FastConcat(ENTITY_VIEW_NAME).FastConcat( 
-                                       " invalid field: ", type.ToString()));
 #endif
         }
         

@@ -27,7 +27,7 @@ namespace Svelto.ECS
                         }
                         catch (Exception e)
                         {
-                            Utilities.Console.LogException(e);
+                            Console.LogException(e);
                         }
                     }
 
@@ -38,7 +38,7 @@ namespace Svelto.ECS
                     }
                     catch (Exception e)
                     {
-                        Utilities.Console.LogException(e);
+                        Console.LogException(e);
                     }
             }
 
@@ -47,7 +47,7 @@ namespace Svelto.ECS
 
         ~EnginesRoot()
         {
-            Utilities.Console.LogWarning("Engines Root has been garbage collected, don't forget to call Dispose()!");
+            Console.LogWarning("Engines Root has been garbage collected, don't forget to call Dispose()!");
             
             Dispose();
         }
@@ -158,16 +158,11 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER
                     if (correctEntityDescriptorFound == false)
 #if RELAXED_ECS
-                        Utilities.Console.LogError(INVALID_DYNAMIC_DESCRIPTOR_ERROR
+                        Console.LogError(INVALID_DYNAMIC_DESCRIPTOR_ERROR
                                                   .FastConcat(" ID ").FastConcat(entityGID.entityID)
                                                   .FastConcat(" group ID ").FastConcat(entityGID.groupID).FastConcat(
-                                                                                                                     " descriptor found: ",
-                                                                                                                     entityInfoView
-                                                                                                                        .type
-                                                                                                                        .Name,
-                                                                                                                     " descriptor Excepted ",
-                                                                                                                     originalDescriptorType
-                                                                                                                        .Name));
+                                                      " descriptor found: ", entityInfoView.type.Name,
+                                                      " descriptor Excepted ", originalDescriptorType.Name));
 #else
                     throw new ECSException(INVALID_DYNAMIC_DESCRIPTOR_ERROR.FastConcat(" ID ").FastConcat(entityGID.entityID)
                                                .FastConcat(" group ID ").FastConcat(entityGID.groupID).FastConcat(

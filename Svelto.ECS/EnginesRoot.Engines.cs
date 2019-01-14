@@ -69,7 +69,7 @@ namespace Svelto.ECS
 #if !DEBUG                
                 throw new ECSException("Code crashed while adding engine ".FastConcat(engine.GetType()), e);
 #else
-                Utilities.Console.LogException("Code crashed while adding engine ".FastConcat(engine.GetType()), e);
+                Console.LogException("Code crashed while adding engine ".FastConcat(engine.GetType()), e);
 #endif                
             }
         }

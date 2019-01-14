@@ -28,7 +28,7 @@ namespace Svelto.ECS
             }
             else
             {
-                Utilities.Console.LogError("Entity ".FastConcat(" with not found ID is about to be removed: ")
+                Console.LogError("Entity ".FastConcat(" with not found ID is about to be removed: ")
                                                            .FastConcat(" id: ")
                                                            .FastConcat(entityID.entityID)
                                                            .FastConcat(" groupid: ")
@@ -46,7 +46,7 @@ namespace Svelto.ECS
             {
                 if (entities.Has(entityID.entityID) == false)
                 {
-                    Utilities.Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
+                    Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
                                                                .FastConcat(entityType)
                                                                .FastConcat(" id: ")
                                                                .FastConcat(entityID.entityID)
@@ -56,7 +56,7 @@ namespace Svelto.ECS
             }
             else
             {
-                Utilities.Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
+                Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
                                                            .FastConcat(entityType)
                                                            .FastConcat(" id: ")
                                                            .FastConcat(entityID.entityID)
@@ -93,7 +93,7 @@ namespace Svelto.ECS
             {
                 if (entities.Has(entityID.entityID) == true)
                 {
-                    Utilities.Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
+                    Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
                                                                .FastConcat(entityType)
                                                                .FastConcat(" id: ")
                                                                .FastConcat(entityID.entityID)

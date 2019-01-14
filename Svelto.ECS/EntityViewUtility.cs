@@ -52,7 +52,7 @@ static class EntityViewUtility
 #if DEBUG && !PROFILER
             else
             {
-                Svelto.Utilities.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityView ", 
+                Svelto.Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityView ", 
                                                                       entityBuilder.GetEntityType().ToString()));
             }
 #endif

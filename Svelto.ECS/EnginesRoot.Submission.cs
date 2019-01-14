@@ -5,7 +5,7 @@ using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
-using Console = Svelto.Utilities.Console;
+using Console = Svelto.Console;
 
 namespace Svelto.ECS
 {
