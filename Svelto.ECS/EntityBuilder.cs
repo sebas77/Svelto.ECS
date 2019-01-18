@@ -34,9 +34,8 @@ namespace Svelto.ECS
                 T entityView;
                 EntityView<T>.BuildEntityView(entityID, out entityView);
 
-                this.FillEntityView(ref entityView
-                                  , entityViewBlazingFastReflection
-                                  , implementors);
+                this.FillEntityView(ref entityView, entityViewBlazingFastReflection, implementors, implementorsByType, 
+                                    cachedTypes);
                 
                 castedDic.Add(entityID.entityID, ref entityView);
             }
@@ -67,6 +66,15 @@ namespace Svelto.ECS
         {
             return ENTITY_VIEW_TYPE;
         }
+        
+#if DEBUG && !PROFILER
+        readonly Dictionary<Type, ECSTuple<object, int>> implementorsByType = new Dictionary<Type, ECSTuple<object, int>>();
+#else
+        readonly Dictionary<Type, object> implementorsByType = new Dictionary<Type, object>();
+#endif
+        
+        //this is used to avoid newing a dictionary every time, but it's used locally only and it's cleared for each use
+        readonly Dictionary<Type, Type[]> cachedTypes = new Dictionary<Type, Type[]>();
 
         static FasterList<KeyValuePair<Type, ActionCast<T>>> entityViewBlazingFastReflection
         {

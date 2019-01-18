@@ -5,7 +5,6 @@ using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 using Svelto.ECS.Schedulers;
-using Console = Svelto.Console;
 
 namespace Svelto.ECS
 {
@@ -13,7 +12,8 @@ namespace Svelto.ECS
     {
         void SubmitEntityViews()
         {
-            using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
+            var profiler = new PlatformProfiler();
+            using (profiler.StartNewSession("Svelto.ECS - Entities Submission"))
             {
                 if (_entitiesOperations.Count > 0)
                 {
