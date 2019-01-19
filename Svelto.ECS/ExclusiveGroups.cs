@@ -100,6 +100,11 @@ namespace Svelto.ECS
                 DBC.ECS.Check.Require(_globalId + range < ushort.MaxValue, "too many exclusive groups created");
                 _globalId += range;
             }
+            
+            internal ExclusiveGroupStruct(int groupID)
+            {
+                _id = groupID;
+            }
 
             public static implicit operator int(ExclusiveGroupStruct groupStruct)
             {

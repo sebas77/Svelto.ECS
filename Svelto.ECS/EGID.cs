@@ -13,9 +13,9 @@ namespace Svelto.ECS
             get { return (int) (_GID & 0xFFFFFFFF); }
         }
         
-        public int groupID
+        public ExclusiveGroup.ExclusiveGroupStruct groupID
         {
-            get { return (int) (_GID >> 32); }
+            get { return new ExclusiveGroup.ExclusiveGroupStruct((int) (_GID >> 32)); }
         }
 
         public static bool operator ==(EGID obj1, EGID obj2)
