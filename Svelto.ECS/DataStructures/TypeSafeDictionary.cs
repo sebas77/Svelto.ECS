@@ -54,7 +54,7 @@ namespace Svelto.ECS.Internal
                 catch (Exception e)
                 {
                     throw new TypeSafeDictionaryException("trying to add an EntityView with the same ID more than once Entity: ".
-                            FastConcat(typeof(TValue)).FastConcat("id ").FastConcat(idEntityId), e);
+                            FastConcat(typeof(TValue).ToString()).FastConcat("id ").FastConcat(idEntityId), e);
                 }
             }
         }
@@ -97,7 +97,7 @@ namespace Svelto.ECS.Internal
                     catch (Exception e)
                     {
                         throw new ECSException("Code crashed inside Add callback ".
-                                FastConcat(typeof(TValue)).FastConcat("id ").FastConcat(entity.ID.entityID), e);
+                                FastConcat(typeof(TValue).ToString()).FastConcat("id ").FastConcat(entity.ID.entityID), e);
                     }
                 }
         }
@@ -144,7 +144,7 @@ namespace Svelto.ECS.Internal
                     catch (Exception e)
                     {
                         throw new ECSException("Code crashed inside Remove callback ".
-                                  FastConcat(typeof(TValue)).FastConcat("id ").FastConcat(entity.ID.entityID), e);
+                                  FastConcat(typeof(TValue).ToString()).FastConcat("id ").FastConcat(entity.ID.entityID), e);
                     }
         }
         

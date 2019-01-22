@@ -47,7 +47,7 @@ namespace Svelto.ECS
                 if (entities.Has(entityID.entityID) == false)
                 {
                     Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
-                                                               .FastConcat(entityType)
+                                                               .FastConcat(entityType.ToString())
                                                                .FastConcat(" id: ")
                                                                .FastConcat(entityID.entityID)
                                                                .FastConcat(" groupid: ")
@@ -57,7 +57,7 @@ namespace Svelto.ECS
             else
             {
                 Console.LogError("Entity ".FastConcat(name, " with not found ID is about to be removed: ")
-                                                           .FastConcat(entityType)
+                                                           .FastConcat(entityType.ToString())
                                                            .FastConcat(" id: ")
                                                            .FastConcat(entityID.entityID)
                                                            .FastConcat(" groupid: ")
@@ -94,7 +94,7 @@ namespace Svelto.ECS
                 if (entities.Has(entityID.entityID) == true)
                 {
                     Console.LogError("Entity ".FastConcat(name, " with used ID is about to be built: ")
-                                                               .FastConcat(entityType)
+                                                               .FastConcat(entityType.ToString())
                                                                .FastConcat(" id: ")
                                                                .FastConcat(entityID.entityID)
                                                                .FastConcat(" groupid: ")

@@ -29,7 +29,7 @@ namespace Svelto.ECS
             {
                 DBC.ECS.Check.Require(implementors != null, "Implementors not found while building an EntityView");
                 DBC.ECS.Check.Require(castedDic.ContainsKey(entityID.entityID) == false,
-                                      "building an entity with already used entity id! id".FastConcat(entityID).FastConcat(" ", ENTITY_VIEW_NAME));
+                                      "building an entity with already used entity id! id".FastConcat((long)entityID).FastConcat(" ", ENTITY_VIEW_NAME));
 
                 T entityView;
                 EntityView<T>.BuildEntityView(entityID, out entityView);

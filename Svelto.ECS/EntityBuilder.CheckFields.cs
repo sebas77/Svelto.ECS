@@ -45,7 +45,7 @@ namespace Svelto.ECS
             if (needsReflection == false)
             {
                 if (type.IsClass)
-                    throw new ECSException("EntityStructs must be structs - entity view: ".FastConcat(ENTITY_VIEW_TYPE));
+                    throw new ECSException("EntityStructs must be structs - entity view: ".FastConcat(ENTITY_VIEW_TYPE.ToString()));
 
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
