@@ -28,8 +28,7 @@ namespace Svelto.ECS
             }
             else
             {
-                Console.LogError("Entity ".FastConcat(" with not found ID is about to be removed: ")
-                                                           .FastConcat(" id: ")
+                Console.LogError("Entity with not found ID is about to be removed: id: "
                                                            .FastConcat(entityID.entityID)
                                                            .FastConcat(" groupid: ")
                                                            .FastConcat(entityID.groupID));
