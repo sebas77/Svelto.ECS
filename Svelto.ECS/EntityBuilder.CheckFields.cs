@@ -4,7 +4,6 @@ using System.Diagnostics;
 #endif    
 using System;
 using System.Reflection;
-using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -15,7 +14,8 @@ namespace Svelto.ECS
 #endif
         static void CheckFields(Type type, bool needsReflection, bool isRoot)
         {
-            if (ENTITY_VIEW_TYPE == typeof(EntityInfoView) || type == EGIDType || type == ExclusiveGroupStructType) return;
+            if (ENTITY_VIEW_TYPE == ENTITYINFOVIEW_TYPE || type == EGIDType || type == ECLUSIVEGROUPSTRUCTTYPE) 
+                return;
 
             {
                 var methods = type.GetMethods(BindingFlags.Public   |
@@ -27,25 +27,25 @@ namespace Svelto.ECS
                 if (isRoot)
                 {
                     if (properties.Length > 1)
-                        ProcessError("Entity views cannot have public methods or properties", type);
+                        ProcessError("Entity views cannot have public methods or properties.", type);
                         
                     if (methods.Length > properties.Length + 1)
-                        ProcessError("Entity views cannot have public methods or properties", type);
+                        ProcessError("Entity views cannot have public methods or properties.", type);
                 }
                 else
                 {
                     if (properties.Length > 0)
-                        ProcessError("Entity components fields cannot have public methods or properties", type);
+                        ProcessError("Entity components fields cannot have public methods or properties.", type);
 
                     if (methods.Length > 0)
-                        ProcessError("Entity components fields cannot have public methods or properties", type);
+                        ProcessError("Entity components fields cannot have public methods or properties.", type);
                 }
             }
 
             if (needsReflection == false)
             {
                 if (type.IsClass)
-                    throw new ECSException("EntityStructs must be structs - entity view: ".FastConcat(ENTITY_VIEW_TYPE.ToString()));
+                    throw new EntityStructException("EntityStructs must be structs.", ENTITY_VIEW_TYPE, type);
 
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
@@ -62,14 +62,14 @@ namespace Svelto.ECS
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
                 if (fields.Length < 1)
-                    ProcessError("Entity View Structs must hold only entity components interfaces", type);
+                    ProcessError("Entity View Structs must hold only entity components interfaces.", type);
                 
                 for (int i = fields.Length - 1; i >= 0; --i)
                 {
                     var field = fields[i];
                     
                     if (field.FieldType.IsInterfaceEx() == false)
-                        ProcessError("Entity View Structs must hold only entity components interfaces", type);
+                        ProcessError("Entity View Structs must hold only entity components interfaces.", type);
                     
                     var properties = field.FieldType.GetProperties(BindingFlags.Public |
                                                         BindingFlags.Instance | BindingFlags.DeclaredOnly);
@@ -79,11 +79,13 @@ namespace Svelto.ECS
                         if (properties[j].PropertyType.IsGenericType == true)
                         {
                             var genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
-                            if (genericTypeDefinition == typeof(DispatchOnSet<>) ||
-                                genericTypeDefinition == typeof(DispatchOnChange<>)) continue;
+                            if (genericTypeDefinition == DISPATCHONSETTYPE ||
+                                genericTypeDefinition == DISPATCHONCHANGETYPE) continue;
                         }
-                        
-                        SubCheckFields(properties[j].PropertyType);
+
+                        var propertyType = properties[j].PropertyType;
+                        if (propertyType != STRINGTYPE)
+                            SubCheckFields(propertyType);
                     }
                 }
             }
@@ -93,7 +95,7 @@ namespace Svelto.ECS
         {
             if (fieldFieldType.IsPrimitive == true || fieldFieldType.IsValueType == true)
             {
-                if (fieldFieldType.IsValueType && !fieldFieldType.IsEnum && fieldFieldType.IsPrimitive == false)
+                if (fieldFieldType.IsValueType == true && !fieldFieldType.IsEnum && fieldFieldType.IsPrimitive == false)
                 {
                     CheckFields(fieldFieldType, false, false);
                 }
@@ -101,7 +103,8 @@ namespace Svelto.ECS
                 return;
             }
             
-            ProcessError("Entity Structs field and Entity View Struct components must hold value types", fieldFieldType);
+            ProcessError("Entity Structs field and Entity View Struct components must hold value types.", 
+                         fieldFieldType);
         }
         
         static void ProcessError(string message, Type type)
@@ -111,8 +114,11 @@ namespace Svelto.ECS
 #endif
         }
         
-        static readonly Type EGIDType                 = typeof(EGID);
-        static readonly Type ExclusiveGroupStructType = typeof(ExclusiveGroup.ExclusiveGroupStruct);
+        static readonly Type EGIDType                = typeof(EGID);
+        static readonly Type ECLUSIVEGROUPSTRUCTTYPE = typeof(ExclusiveGroup.ExclusiveGroupStruct);
+        static readonly Type DISPATCHONSETTYPE       = typeof(DispatchOnSet<>);
+        static readonly Type DISPATCHONCHANGETYPE    = typeof(DispatchOnChange<>);
+        static readonly Type STRINGTYPE              = typeof(String);
     }
     
     public class EntityStructException : Exception

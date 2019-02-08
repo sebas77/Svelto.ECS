@@ -1,3 +1,4 @@
+using System.Collections;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
@@ -109,6 +110,7 @@ namespace Svelto.ECS
         
         bool HasAny<T>(int group) where T:IEntityStruct;
         bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T:IEntityStruct;
+        IEnumerator IterateUntilEntityExists<T>(ExclusiveGroup group) where T:IEntityStruct;
     }
 
     public delegate void EntityAction<T, W>(ref T target, ref W       value);

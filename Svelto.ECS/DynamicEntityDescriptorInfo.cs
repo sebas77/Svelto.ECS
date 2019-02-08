@@ -30,12 +30,4 @@ namespace Svelto.ECS
 
         public IEntityBuilder[] entitiesToBuild { get; }
     }
-
-    public struct EntityInfoView : IEntityStruct
-    {
-        public EGID ID { get; set; }
-        public Type type { get; set; }
-
-        public IEntityBuilder[] entitiesToBuild;
-    }
 }

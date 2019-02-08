@@ -83,6 +83,7 @@ namespace Svelto.ECS
         
         static readonly Type   ENTITY_VIEW_TYPE = typeof(T);
         static readonly T      DEFAULT_IT       = default(T);
+        static readonly Type   ENTITYINFOVIEW_TYPE = typeof(EntityInfoView);
         static readonly bool   NEEDS_REFLECTION = typeof(IEntityViewStruct).IsAssignableFrom(typeof(T));
         static readonly string ENTITY_VIEW_NAME = ENTITY_VIEW_TYPE.ToString();
 

@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Svelto.DataStructures;
@@ -149,6 +150,11 @@ namespace Svelto.ECS.Internal
         public bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : IEntityStruct
         {
             return HasAny<T>((int) groupStruct);
+        }
+
+        public IEnumerator IterateUntilEntityExists<T>(ExclusiveGroup @group) where T : IEntityStruct
+        {
+            while (HasAny<T>(group) == false) yield return null;
         }
 
         public bool TryQueryEntityView<T>(EGID entityegid, out T entityView) where T : class, IEntityStruct
