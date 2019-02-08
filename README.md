@@ -30,6 +30,7 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 
 **Theory related articles (please read them to understand why I think ECS is great to write maintainable code):**
 
+* http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
