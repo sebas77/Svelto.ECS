@@ -37,16 +37,4 @@ namespace Svelto.ECS
             entityView = new T { ID = ID };
         }
     }
-
-    [Obsolete("You should only use IEntityViewStruct or IEntityStructs struct implementations now")]
-    public class EntityView : IEntityViewStruct
-    {
-        public EGID ID
-        {
-            get { return _ID; }
-            set { _ID = value; }
-        }
-
-        EGID _ID;
-    }
 }

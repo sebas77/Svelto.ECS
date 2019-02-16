@@ -14,8 +14,8 @@ namespace Svelto.ECS
 
             internal DoubleBufferedEntitiesToAdd()
             {
-                this.other = _entityViewsToAddBufferA;
-                this.current = _entityViewsToAddBufferB;
+                other = _entityViewsToAddBufferA;
+                current = _entityViewsToAddBufferB;
             }
 
             internal T other;

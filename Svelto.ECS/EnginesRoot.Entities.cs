@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
- using Svelto.Common;
- using Svelto.DataStructures.Experimental;
+using Svelto.Common;
+using Svelto.DataStructures.Experimental;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -53,7 +53,12 @@ namespace Svelto.ECS
         }
 
         ///--------------------------------------------
-
+        ///
+        public EntityStreams GenerateEntityStream()
+        {
+            return _entityStreams;
+        }
+        
         public IEntityFactory GenerateEntityFactory()
         {
             return new GenericEntityFactory(new DataStructures.WeakReference<EnginesRoot>(this));
@@ -94,14 +99,14 @@ namespace Svelto.ECS
             var count              = entityViewsToBuild.Length;
             
             //reserve space in the database
-            Dictionary<Type, ITypeSafeDictionary> @group;
+            Dictionary<Type, ITypeSafeDictionary> group;
             if (_groupEntityDB.TryGetValue(groupID, out group) == false)
                 group = _groupEntityDB[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
             //reserve space in building buffer
-            Dictionary<Type, ITypeSafeDictionary> @groupBuffer;
-            if (_groupedEntityToAdd.current.TryGetValue(groupID, out @groupBuffer) == false)
-                @groupBuffer = _groupedEntityToAdd.current[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
+            Dictionary<Type, ITypeSafeDictionary> groupBuffer;
+            if (_groupedEntityToAdd.current.TryGetValue(groupID, out groupBuffer) == false)
+                groupBuffer = _groupedEntityToAdd.current[groupID] = new Dictionary<Type, ITypeSafeDictionary>();
 
             for (var index = 0; index < count; index++)
             {
@@ -114,8 +119,8 @@ namespace Svelto.ECS
                 else
                     dbList.AddCapacity(size);
                 
-                if (@groupBuffer.TryGetValue(entityViewType, out dbList) == false)
-                    @groupBuffer[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
+                if (groupBuffer.TryGetValue(entityViewType, out dbList) == false)
+                    groupBuffer[entityViewType] = entityViewBuilder.Preallocate(ref dbList, size);
                 else
                     dbList.AddCapacity(size);
             }
@@ -138,14 +143,14 @@ namespace Svelto.ECS
                                           .FastConcat(entityGID.groupID));
 
                 ITypeSafeDictionary entityInfoViewDic;
-                EntityInfoView entityInfoView = default(EntityInfoView);
+                EntityInfoView entityInfoView = default;
 
                 //Check if there is an EntityInfoView linked to this entity, if so it's a DynamicEntityDescriptor!
                 bool correctEntityDescriptorFound = true;
-                if (fromGroup.TryGetValue(_entityInfoView, out entityInfoViewDic) == true
+                if (fromGroup.TryGetValue(_entityInfoView, out entityInfoViewDic)
                  && (entityInfoViewDic as TypeSafeDictionary<EntityInfoView>).TryGetValue
-                        (entityGID.entityID, out entityInfoView) == true &&
-                    (correctEntityDescriptorFound = entityInfoView.type == originalDescriptorType) == true)
+                        (entityGID.entityID, out entityInfoView) &&
+                    (correctEntityDescriptorFound = entityInfoView.type == originalDescriptorType))
                 {
                     var entitiesToMove = entityInfoView.entitiesToBuild;
 
@@ -254,6 +259,8 @@ namespace Svelto.ECS
 
             MoveEntity(builders, fromEntityID, originalEntityDescriptor, toEntityID, toGroup);
         }
+
+        readonly EntityStreams _entityStreams;
         
         readonly Type  _entityInfoView = typeof(EntityInfoView);
         const string INVALID_DYNAMIC_DESCRIPTOR_ERROR = "Found an entity requesting an invalid dynamic descriptor, this "   +

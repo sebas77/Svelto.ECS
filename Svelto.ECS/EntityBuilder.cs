@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+using Svelto.ECS.Hybrid;
 using Svelto.ECS.Internal;
 using Svelto.Utilities;
 

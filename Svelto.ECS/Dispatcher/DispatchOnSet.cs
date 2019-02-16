@@ -1,18 +1,30 @@
+using System;
 using Svelto.WeakEvents;
 
 namespace Svelto.ECS
 {
     public class DispatchOnSet<T> where T:struct
     {
+        static ExclusiveGroup OBSOLETE_GROUP = new ExclusiveGroup();
+        
         public DispatchOnSet(int senderID)
         {
-            _senderID    = senderID;
-            _subscribers = new WeakEvent<int, T>();
+            Console.LogWarningDebug("This method is obsolete and shouldn't be used anymore");
+            
+            _senderID    = new EGID(senderID, OBSOLETE_GROUP);
+            _subscribers = new WeakEvent<EGID, T>();
         }
 
+        public DispatchOnSet(EGID senderID)
+        {      
+            _subscribers = new WeakEvent<EGID, T>();
+            
+            _senderID = senderID;
+        }
+        
         public DispatchOnSet()
         {      
-            _subscribers = new WeakEvent<int, T>();
+            _subscribers = new WeakEvent<EGID, T>();
         }
         
         public T value
@@ -30,19 +42,19 @@ namespace Svelto.ECS
             }
         }
         
-        public void NotifyOnValueSet(System.Action<int, T> action)
+        public void NotifyOnValueSet(Action<EGID, T> action)
         {
             _subscribers += action;
         }
 
-        public void StopNotify(System.Action<int, T> action)
+        public void StopNotify(Action<EGID, T> action)
         {
             _subscribers -= action;
         }
 
-        protected T      _value;
-        readonly int _senderID;
+        protected T  _value;
+        readonly EGID _senderID;
 
-        WeakEvent<int, T> _subscribers;
+        WeakEvent<EGID, T> _subscribers;
     }
 }

@@ -25,6 +25,7 @@ namespace Svelto.ECS
                         _transientEntitiesOperations.FastClear();
                         _transientEntitiesOperations.AddRange(_entitiesOperations);
                         _entitiesOperations.FastClear();
+                        
                         var entitiesOperations = _transientEntitiesOperations.ToArrayFast();
                         for (var i = 0; i < _transientEntitiesOperations.Count; i++)
                         {
@@ -37,8 +38,7 @@ namespace Svelto.ECS
                                                         entitiesOperations[i].entityDescriptor,
                                                         new EGID(entitiesOperations[i].ID,
                                                                  entitiesOperations[i].fromGroupID),
-                                                        new EGID(
-                                                        entitiesOperations[i].toID,
+                                                        new EGID(entitiesOperations[i].toID,
                                                         entitiesOperations[i].toGroupID));
                                         break;
                                     case EntitySubmitOperationType.Remove:
@@ -164,12 +164,11 @@ namespace Svelto.ECS
             }
         }
 
-        readonly FasterList<EntitySubmitOperation> _entitiesOperations;
-        
         readonly DoubleBufferedEntitiesToAdd<FasterDictionary<int, Dictionary<Type, ITypeSafeDictionary>>>
             _groupedEntityToAdd;
 
-        readonly IEntitySubmissionScheduler                                   _scheduler;
-        readonly FasterList<EntitySubmitOperation>                            _transientEntitiesOperations;
+        readonly IEntitySubmissionScheduler        _scheduler;
+        readonly FasterList<EntitySubmitOperation> _transientEntitiesOperations;
+        readonly FasterList<EntitySubmitOperation> _entitiesOperations;
     }
 }

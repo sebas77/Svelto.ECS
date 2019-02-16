@@ -7,7 +7,8 @@ namespace Svelto.ECS
         public DispatchOnChange(int senderID) : base(senderID)
         { }
         
-        public DispatchOnChange() {}
+        public DispatchOnChange()
+        {}
 
         public new T value
         {

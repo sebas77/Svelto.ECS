@@ -24,6 +24,13 @@ namespace Svelto.ECS
             _group = ExclusiveGroupStruct.Generate();
         }
         
+        public ExclusiveGroup(string recognizeAs)
+        {
+            _group = ExclusiveGroupStruct.Generate();
+            
+            _serialisedGroups.Add(recognizeAs, _group);
+        }
+        
         public ExclusiveGroup(ushort range)
         {
             _group = new ExclusiveGroupStruct(range);
@@ -36,7 +43,7 @@ namespace Svelto.ECS
         
         public static explicit operator int(ExclusiveGroup group) 
         {
-            return @group._group;
+            return group._group;
         }
 
         public static ExclusiveGroupStruct operator+(ExclusiveGroup a, int b)
@@ -123,5 +130,16 @@ namespace Svelto.ECS
             int         _id;
             static uint _globalId;
         }
+
+        public static ExclusiveGroupStruct Search(string holderGroupName)
+        {
+            if (_serialisedGroups.ContainsKey(holderGroupName) == false)
+                throw new Exception("Serialized Group Not Found ".FastConcat(holderGroupName));
+            
+            return _serialisedGroups[holderGroupName];
+        }
+
+        static readonly Dictionary<string, ExclusiveGroupStruct> _serialisedGroups = new Dictionary<string, 
+            ExclusiveGroupStruct>(); 
     }
 }
