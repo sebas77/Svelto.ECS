@@ -36,7 +36,21 @@ namespace Svelto.ECS.Internal
         {
             return QueryEntityView<T>(new EGID(id, (int) group));
         }
+
+        public ref T QueryUniqueEntity<T>(int @group) where T : IEntityStruct
+        {
+            var entities = QueryEntities<T>(group, out var count);
+            
+            if (count != 1) throw new ECSException("Unique entities must be unique!".FastConcat(typeof(T).ToString()));
+            
+            return ref entities[0];
+        }
         
+        public ref T QueryUniqueEntity<T>(ExclusiveGroup.ExclusiveGroupStruct @group) where T : IEntityStruct
+        {
+            return ref QueryUniqueEntity<T>((int) @group);
+        }
+
         public ref T QueryEntity<T>(EGID entityGID) where T : IEntityStruct
         {
             T[]  array;

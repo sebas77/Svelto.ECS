@@ -8,6 +8,9 @@ namespace Svelto.ECS
         void RemoveEntity<T>(int entityID, int groupID) where T : IEntityDescriptor, new();
         void RemoveEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct  groupID) where T : IEntityDescriptor, new();
         void RemoveEntity<T>(EGID entityegid) where T : IEntityDescriptor, new();
+        
+        void RemoveEntities<T>(int groupID) where T : IEntityDescriptor, new();
+        void RemoveEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupID)  where T : IEntityDescriptor, new();
 
         void RemoveGroupAndEntities(int groupID);
         void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID);

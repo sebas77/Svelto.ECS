@@ -4,8 +4,6 @@
     {
         class GenericEntityFactory : IEntityFactory
         {
-            readonly DataStructures.WeakReference<EnginesRoot> _weakEngine;
-
             public GenericEntityFactory(DataStructures.WeakReference<EnginesRoot> weakReference)
             {
                 _weakEngine = weakReference;
@@ -35,6 +33,8 @@
             {
                 _weakEngine.Target.Preallocate<T>(groupStructId, size);
             }
+            
+            readonly DataStructures.WeakReference<EnginesRoot> _weakEngine;
         }
     }
 }

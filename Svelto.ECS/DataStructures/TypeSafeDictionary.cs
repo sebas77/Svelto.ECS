@@ -63,15 +63,14 @@ namespace Svelto.ECS.Internal
             Dictionary<Type, FasterList<IHandleEntityViewEngineAbstracted>> entityViewEnginesDB,
             ref PlatformProfiler profiler)
         {
-            int      count;
-            TValue[] values = GetValuesArray(out count);
-
+            var values = GetValuesArray(out var count);
+            
+            //pay attention: even if the entity is passed by ref, it won't be saved back in the database when this
+            //function is called from the building of an entity. This is by design. Entity structs must be initialized
+            //through the EntityInitializer method and not with an Add callback.
+            //however the struct can be modified during an add callback if this happens as consequence of a group swap
             for (int i = 0; i < count; i++)
-            {
-                TValue entity = values[i];
-
-                AddEntityViewToEngines(entityViewEnginesDB, ref entity, ref profiler);
-            }
+                AddEntityViewToEngines(entityViewEnginesDB, ref values[i], ref profiler);
         }
 
         public bool Has(int entityIdEntityId)

@@ -1,10 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
+    public interface IEntitiesStream
+    {
+        Consumer<T> GenerateConsumer<T>(int capacity) where T : unmanaged, IEntityStruct;
+        
+        void PublishEntity<T>(EGID id) where T : unmanaged, IEntityStruct;
+    }
+
     /// <summary>
     /// Do not use this class in place of a normal polling.
     /// I eventually realised than in ECS no form of communication other than polling entity components can exist.
@@ -16,14 +22,14 @@ namespace Svelto.ECS
     /// one only
     /// - you want to communicate between EnginesRoots  
     /// </summary>
-    public class EntityStreams
+    class EntitiesStream : IEntitiesStream
     {
-        public EntityStreams(IEntitiesDB entitiesDb)
+        public EntitiesStream(IEntitiesDB entitiesDb)
         {
             _entitiesDB = entitiesDb;
         }
 
-        public EntityStream<T>.Consumer GenerateConsumer<T>(int capacity) where T : unmanaged, IEntityStruct
+        public Consumer<T> GenerateConsumer<T>(int capacity) where T : unmanaged, IEntityStruct
         {
             if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
             
@@ -38,56 +44,62 @@ namespace Svelto.ECS
                 Console.LogWarning("No Consumers are waiting for this entity to change "
                                       .FastConcat(typeof(T).ToString()));
         }
-        
-        Dictionary<Type, ITypeSafeStream> _streams = new Dictionary<Type, ITypeSafeStream>();
-        IEntitiesDB                        _entitiesDB;
+
+        readonly Dictionary<Type, ITypeSafeStream> _streams = new Dictionary<Type, ITypeSafeStream>();
+        readonly IEntitiesDB                       _entitiesDB;
     }
 
     interface ITypeSafeStream
     {}
 
-    public class EntityStream<T>:ITypeSafeStream where T:unmanaged, IEntityStruct
+    class EntityStream<T>:ITypeSafeStream where T:unmanaged, IEntityStruct
     {
-        public class Consumer
-        {
-            public Consumer(int capacity)
-            {
-                _ringBuffer = new RingBuffer<T>(capacity);
-                _capacity = capacity;
-            }
-
-            public int Count => _ringBuffer.Count;
-
-            public void Enqueue(ref T entity)
-            {
-                if (_ringBuffer.Count >= _capacity)
-                    throw new Exception("EntityStream capacity has been saturated");
-                
-                _ringBuffer.Enqueue(ref entity);
-            }
-
-            readonly RingBuffer<T> _ringBuffer;
-            int _capacity;
-
-            public ref T Dequeue()
-            {
-                return ref _ringBuffer.Dequeue();
-            }
-        }
-        
         public void PublishEntity(ref T entity)
         {
             for (int i = 0; i < _buffers.Count; i++)
                 _buffers[i].Enqueue(ref entity);
         }
 
-        public Consumer GenerateConsumer(int capacity)
+        public Consumer<T> GenerateConsumer(int capacity)
         {
-            var consumer = new Consumer(capacity);
+            var consumer = new Consumer<T>(capacity);
             _buffers.Add(consumer);
             return consumer;
         }
 
-        readonly FasterList<Consumer> _buffers = new FasterList<Consumer>();
+        readonly FasterList<Consumer<T>> _buffers = new FasterList<Consumer<T>>();
+    }
+
+    public class Consumer<T> where T:unmanaged, IEntityStruct
+    {
+        public Consumer(int capacity)
+        {
+            _ringBuffer = new RingBuffer<T>(capacity);
+            _capacity = capacity;
+        }
+
+        public void Enqueue(ref T entity)
+        {
+            if (_ringBuffer.Count >= _capacity)
+                throw new Exception("EntityStream capacity has been saturated");
+                
+            _ringBuffer.Enqueue(ref entity);
+        }
+
+        public bool TryDequeue(ExclusiveGroup group, out T entity)
+        {
+            if (_ringBuffer.TryDequeue(out entity) == true)
+                return entity.ID.groupID == @group;
+
+            return false;
+        }
+        
+        public bool TryDequeue(out T entity) { return _ringBuffer.TryDequeue(out entity); }
+
+        public void Flush() { _ringBuffer.Reset(); }
+        
+        readonly RingBuffer<T> _ringBuffer;
+        readonly int           _capacity;
+        
     }
 }    

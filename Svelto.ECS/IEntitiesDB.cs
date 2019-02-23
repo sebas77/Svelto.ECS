@@ -15,6 +15,9 @@ namespace Svelto.ECS
         bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[]  array) where T : IEntityStruct;
         bool TryQueryEntitiesAndIndex<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index, out T[] array) where T : IEntityStruct;
         
+        ref T QueryUniqueEntity<T>(ExclusiveGroup.ExclusiveGroupStruct group) where T : IEntityStruct;
+        ref T QueryUniqueEntity<T>(int group) where T : IEntityStruct;
+        
         ref T  QueryEntity<T>(EGID    entityGid) where T : IEntityStruct;
         ref T  QueryEntity<T>(int id, ExclusiveGroup.ExclusiveGroupStruct group) where T : IEntityStruct;
         ref T  QueryEntity<T>(int id, int group) where T : IEntityStruct;
@@ -90,7 +93,7 @@ namespace Svelto.ECS
         bool Exists<T>(int id, int groupid) where T : IEntityStruct;
         bool Exists (ExclusiveGroup.ExclusiveGroupStruct gid);
         
-        bool     HasAny<T>(int group) where T:IEntityStruct;
+        bool HasAny<T>(int group) where T:IEntityStruct;
         bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T:IEntityStruct;
         
         int Count<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)  where T:IEntityStruct;

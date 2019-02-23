@@ -54,9 +54,9 @@ namespace Svelto.ECS
 
         ///--------------------------------------------
         ///
-        public EntityStreams GenerateEntityStream()
+        public IEntitiesStream GenerateEntityStream()
         {
-            return _entityStreams;
+            return new GenericEntitiesStream(new DataStructures.WeakReference<EnginesRoot>(this));
         }
         
         public IEntityFactory GenerateEntityFactory()
@@ -226,6 +226,23 @@ namespace Svelto.ECS
             }
         }
 
+        void RemoveGroupAndEntitiesFromDB(int groupID, Type entityDescriptor)
+        {
+          /*  var profiler = new PlatformProfiler();
+            using (profiler.StartNewSession("Remove Group Of Entities"))
+            {
+                FasterDictionary<int, ITypeSafeDictionary> @group;
+                if (_groupsPerEntity.TryGetValue(entityDescriptor, out group))
+                {
+                    if (group.TryGetValue())
+                    foreach (var entity in group)
+                    {
+                        MoveEntity(entity.);
+                    }                    
+                }
+            }*/
+        }
+
         void RemoveGroupAndEntitiesFromDB(int groupID)
         {
             var profiler = new PlatformProfiler();
@@ -260,7 +277,7 @@ namespace Svelto.ECS
             MoveEntity(builders, fromEntityID, originalEntityDescriptor, toEntityID, toGroup);
         }
 
-        readonly EntityStreams _entityStreams;
+        readonly EntitiesStream _entitiesStream;
         
         readonly Type  _entityInfoView = typeof(EntityInfoView);
         const string INVALID_DYNAMIC_DESCRIPTOR_ERROR = "Found an entity requesting an invalid dynamic descriptor, this "   +

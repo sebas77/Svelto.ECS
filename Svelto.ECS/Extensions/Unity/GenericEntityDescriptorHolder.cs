@@ -15,7 +15,9 @@ namespace Svelto.ECS.Unity
         public string groupName => _groupName;
 
         [SerializeField]
+#pragma warning disable 649        
         string _groupName;
+#pragma warning restore 649        
     }
 }
 #endif

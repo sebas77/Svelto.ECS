@@ -35,6 +35,21 @@ namespace Svelto.ECS
                                               -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
             }
 
+            public void RemoveEntities<T>(int groupID) where T : IEntityDescriptor, new()
+            {
+                throw new NotImplementedException();
+                //_weakReference.Target.QueueEntitySubmitOperation(
+//                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, typeof(T)));
+            }
+
+            public void RemoveEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupID)
+                where T : IEntityDescriptor, new()
+            {
+                throw new NotImplementedException();
+                //_weakReference.Target.QueueEntitySubmitOperation(
+                  //  new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, typeof(T)));
+            }
+
             public void RemoveGroupAndEntities(int groupID)
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
