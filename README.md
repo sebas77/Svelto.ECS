@@ -12,11 +12,24 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 * **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
 
-## Users Examples (software made by Svelto users)
+## Users Generated Content
 
 * **Gungi (Unity)**: https://github.com/grovemaster/Unity3D-Game-App
 
-## Articles
+_Please share your Svelto projects with me!_
+
+**Svelto users articles (note they may use an outdated version of Svelto):**
+
+* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
+* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
+
+_If you write an article about Svelto, please let me know, I will add it here!_
+
+**NED-Studio Svelto ECS inspector (WIP)**
+
+* https://github.com/NED-Studio/LGK.Inspector
+
+## Official Articles
 
 **Framework articles:**
 
@@ -41,13 +54,6 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
 
-**Svelto users articles (note they may use an outdated version of Svelto):**
-
-* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
-* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
-
-_If you write an article about Svelto, please let me know, I will add it here!_
-
 **The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
 * https://github.com/sebas77/Svelto.Tasks
@@ -60,9 +66,6 @@ _If you write an article about Svelto, please let me know, I will add it here!_
 
 * https://discord.gg/3qAdjDb 
 
-**NED-Studio Svelto ECS inspector (WIP)**
-
-* https://github.com/NED-Studio/LGK.Inspector
 
 ## How to clone
 
