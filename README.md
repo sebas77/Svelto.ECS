@@ -13,23 +13,6 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
 * **Unity Boids Simulation**: https://github.com/sebas77/Svelto.ECS.Examples.Boids (including article)
 
-## Users Generated Content
-
-* **Gungi (Unity)**: https://github.com/grovemaster/Unity3D-Game-App
-
-_Please share your Svelto projects with me!_
-
-**Svelto users articles (note they may use an outdated version of Svelto):**
-
-* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
-* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
-
-_If you write an article about Svelto, please let me know, I will add it here!_
-
-**NED-Studio Svelto ECS inspector (WIP)**
-
-* https://github.com/NED-Studio/LGK.Inspector
-
 ## Official Articles
 
 **Framework articles:**
@@ -58,6 +41,24 @@ Note: I included the IoC articles just to show how I shifted over the years from
 **The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
 
 * https://github.com/sebas77/Svelto.Tasks
+
+## Users Generated Content
+
+* **Gungi (Unity)**: https://github.com/grovemaster/Unity3D-Game-App
+
+_Please share your Svelto projects with me!_
+
+**Svelto users articles (note they may use an outdated version of Svelto):**
+
+* https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
+* https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
+
+_If you write an article about Svelto, please let me know, I will add it here!_
+
+**NED-Studio Svelto ECS inspector (WIP)**
+
+* https://github.com/NED-Studio/LGK.Inspector
+
 
 **Unity official forum thread:**
 
