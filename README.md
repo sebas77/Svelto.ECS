@@ -11,6 +11,7 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 
 * **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
+* **Unity Boids Simulation**: https://github.com/sebas77/Svelto.ECS.Examples.Boids (including article)
 
 ## Users Generated Content
 
