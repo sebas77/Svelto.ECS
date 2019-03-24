@@ -16,3 +16,4 @@ namespace Svelto.ECS.Components
         }
     }
 }
+#endif
