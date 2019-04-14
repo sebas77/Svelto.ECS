@@ -1,20 +1,17 @@
-using System.Collections.Generic;
+using System;
 
 namespace Svelto.ECS
 {
-    public class DispatchOnChange<T> : DispatchOnSet<T> where T:struct
+    public class DispatchOnChange<T> : DispatchOnSet<T> where T:struct, IEquatable<T>
     {
-        public DispatchOnChange(int senderID) : base(senderID)
+        public DispatchOnChange(EGID senderID) : base(senderID)
         { }
         
-        public DispatchOnChange()
-        {}
-
         public new T value
         {
             set
             {
-                if (EqualityComparer<T>.Default.Equals(value, _value) == false)
+                if (value.Equals(_value) == false)
                     base.value = value;
             }
 

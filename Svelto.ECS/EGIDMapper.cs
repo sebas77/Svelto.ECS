@@ -1,16 +1,16 @@
+using System.Runtime.CompilerServices;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public struct EGIDMapper<T> where T : IEntityStruct
+    public struct EGIDMapper<T> where T : struct, IEntityStruct
     {
         internal TypeSafeDictionary<T> map;
 
-        public ref T entity(EGID id)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T Entity(EGID id)
         {
-                int count;
-                var index = map.FindElementIndex(id.entityID); 
-                return ref map.GetValuesArray(out count)[index];
+            return ref map.FindElement(id.entityID);
         }
     }
 }

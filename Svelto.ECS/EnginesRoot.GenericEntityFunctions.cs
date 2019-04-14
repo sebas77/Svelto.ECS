@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        class GenericEntityFunctions : IEntityFunctions
+        sealed class GenericEntityFunctions : IEntityFunctions
         {
             readonly DataStructures.WeakReference<EnginesRoot> _weakReference;
 
@@ -14,90 +15,98 @@ namespace Svelto.ECS
                 _weakReference = weakReference;
             }
 
-            public void RemoveEntity<T>(int entityID, int groupID) where T : IEntityDescriptor, new()
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void RemoveEntity<T>(uint entityID, uint groupID) where T : IEntityDescriptor, new()
             {
                 RemoveEntity<T>(new EGID(entityID, groupID));
             }
 
-            public void RemoveEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) where T : 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void RemoveEntity<T>(uint entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) where T : 
                 IEntityDescriptor, new()
             {
                 RemoveEntity<T>(new EGID(entityID, groupID));
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
                 _weakReference.Target.CheckRemoveEntityID(entityEGID, EntityDescriptorTemplate<T>.descriptor);
 
                 _weakReference.Target.QueueEntitySubmitOperation<T>(
-                    new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID.entityID, entityEGID.entityID, 
-                                              entityEGID.groupID, 
-                                              -1, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+                    new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID, 
+                                              EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
             }
 
-            public void RemoveEntities<T>(int groupID) where T : IEntityDescriptor, new()
+            
+            public void RemoveEntities<T>(uint groupID) where T : IEntityDescriptor, new()
             {
                 throw new NotImplementedException();
-                //_weakReference.Target.QueueEntitySubmitOperation(
-//                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, typeof(T)));
             }
 
             public void RemoveEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupID)
                 where T : IEntityDescriptor, new()
             {
                 throw new NotImplementedException();
-                //_weakReference.Target.QueueEntitySubmitOperation(
-                  //  new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, typeof(T)));
             }
 
-            public void RemoveGroupAndEntities(int groupID)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void RemoveGroupAndEntities(uint groupID)
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
-                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, -1, -1, groupID, -1, null, null));
+                    new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, new EGID(), new EGID(0, groupID)));
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID)
             {
-                RemoveGroupAndEntities((int)groupID);
+                RemoveGroupAndEntities((uint)groupID);
             }
 
-            public void SwapEntityGroup<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct fromGroupID, 
-                                           ExclusiveGroup.ExclusiveGroupStruct  toGroupID) where T : IEntityDescriptor, new()
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void SwapEntityGroup<T>(uint entityID, ExclusiveGroup.ExclusiveGroupStruct fromGroupID, 
+                                           ExclusiveGroup.ExclusiveGroupStruct toGroupID)
+                where T : IEntityDescriptor, new()
             {
                 SwapEntityGroup<T>(new EGID(entityID, fromGroupID), toGroupID);
             }
 
-            public void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct toGroupID) 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroup.ExclusiveGroupStruct toGroupID) 
                 where T : IEntityDescriptor, new()
             {
-                SwapEntityGroup<T>(id, new EGID(id.entityID, toGroupID));
+                SwapEntityGroup<T>(fromID, new EGID(fromID.entityID, (uint)toGroupID));
             }
             
-            public void SwapEntityGroup<T>(EGID id, ExclusiveGroup.ExclusiveGroupStruct toGroupID 
-                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup) where T : IEntityDescriptor, new()
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroup.ExclusiveGroupStruct toGroupID 
+                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup)
+                where T : IEntityDescriptor, new()
             {
-                if (id.groupID != mustBeFromGroup)
+                if (fromID.groupID != mustBeFromGroup)
                     throw new ECSException("Entity is not coming from the expected group");
 
-                SwapEntityGroup<T>(id, toGroupID);
+                SwapEntityGroup<T>(fromID, toGroupID);
             }
             
-            public void SwapEntityGroup<T>(EGID id, EGID toID) 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void SwapEntityGroup<T>(EGID fromID, EGID toID) 
                 where T : IEntityDescriptor, new()
             {
                 _weakReference.Target.QueueEntitySubmitOperation<T>(
                      new EntitySubmitOperation(EntitySubmitOperationType.Swap,
-                            id.entityID, toID.entityID, id.groupID, toID.groupID,
-                            EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
+                            fromID, toID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild, typeof(T)));
             }
             
-            public void SwapEntityGroup<T>(EGID id, EGID toID
-                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup) where T : IEntityDescriptor, new()
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void SwapEntityGroup<T>(EGID fromID, EGID toID
+                                         , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup)
+                where T : IEntityDescriptor, new()
             {
-                if (id.groupID != mustBeFromGroup)
+                if (fromID.groupID != mustBeFromGroup)
                     throw new ECSException("Entity is not coming from the expected group");
                 
-                SwapEntityGroup<T>(id, toID);
+                SwapEntityGroup<T>(fromID, toID);
             }
         }
         
@@ -106,30 +115,28 @@ namespace Svelto.ECS
 #if DEBUG && !PROFILER          
             entitySubmitOperation.trace = Environment.StackTrace;
 #endif            
-            _entitiesOperations.AddRef(ref entitySubmitOperation);
+            _entitiesOperations.Add((ulong)entitySubmitOperation.fromID, ref entitySubmitOperation);
         }
 
         void QueueEntitySubmitOperation<T>(EntitySubmitOperation entitySubmitOperation) where T:IEntityDescriptor
         {
-#if DEBUG && !PROFILER          
+#if DEBUG && !PROFILER            
             entitySubmitOperation.trace = Environment.StackTrace;
-            var egid = new EGID(entitySubmitOperation.ID, entitySubmitOperation.fromGroupID);
-            if (_entitiesOperationsDebug.ContainsKey((long)egid) == true)
-                Console.LogError("Only one entity operation per submission is allowed. id: "
-                                          .FastConcat(entitySubmitOperation.ID)
-                                          .FastConcat(" groupid: ")
-                                          .FastConcat(entitySubmitOperation.fromGroupID)
-                                          .FastConcat(" entityType: ")
-                                          .FastConcat(typeof(T).Name)
-                                          .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
-                                                      " previous type: ",  _entitiesOperationsDebug[(long)egid].ToString()));
+            
+            if (_entitiesOperations.TryGetValue((ulong) entitySubmitOperation.fromID, out var entitySubmitedOperation) == true)
+            {
+                if (entitySubmitedOperation != entitySubmitOperation)
+                Console.LogError("Only one entity operation per submission is allowed".FastConcat(" entityViewType: ")
+                                    .FastConcat(typeof(T).Name)
+                                    .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
+                                                " from ID: ",  entitySubmitOperation.fromID.entityID.ToString())
+                                    .FastConcat(            " previous operation type: ",
+                                                _entitiesOperations[(ulong) entitySubmitOperation.fromID].type
+                                                   .ToString()));
+            }
             else
-                _entitiesOperationsDebug[(long)egid] = entitySubmitOperation.type;
 #endif            
-            _entitiesOperations.AddRef(ref entitySubmitOperation);
+            _entitiesOperations.Set((ulong)entitySubmitOperation.fromID, ref entitySubmitOperation);
         }
-#if DEBUG && !PROFILER        
-        readonly Svelto.DataStructures.Experimental.FasterDictionary<long, EntitySubmitOperationType> _entitiesOperationsDebug;
-#endif        
     }
 }

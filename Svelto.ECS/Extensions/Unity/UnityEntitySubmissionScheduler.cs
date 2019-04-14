@@ -30,13 +30,15 @@ namespace Svelto.ECS.Schedulers.Unity
             public WeakAction onTick;
         }
         
+        public UnityEntitySubmissionScheduler(string name = "ECSScheduler") { _name = name; }
+        
         public WeakAction onTick
         {
             set
             {
                 if (_scheduler == null)
                 {
-                    GameObject go = new GameObject("ECSScheduler");
+                    GameObject go = new GameObject(_name);
 
                     _scheduler = go.AddComponent<Scheduler>();
                 }
@@ -45,6 +47,7 @@ namespace Svelto.ECS.Schedulers.Unity
         }
 
         Scheduler _scheduler;
+        string _name;
     }
 }
 #endif

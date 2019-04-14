@@ -17,9 +17,9 @@ namespace Svelto.ECS
             Array.Copy(defaultEntities, 0, entitiesToBuild, 0, length);
             Array.Copy(extraEntities, 0, entitiesToBuild, length, extraEntities.Length);
 
-            var _builder = new EntityBuilder<EntityInfoView>
+            var _builder = new EntityBuilder<EntityStructInfoView>
             {
-                _initializer = new EntityInfoView 
+                _initializer = new EntityStructInfoView 
                 { 
                     entitiesToBuild = entitiesToBuild,
                     type = typeof(TType)

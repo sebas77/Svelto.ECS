@@ -38,12 +38,10 @@ namespace Svelto.ECS
                                            , Dictionary<Type, Type[]> cachedTypes
         )
         {
-            int count;
-
             //efficient way to collect the fields of every EntityViewType
             var setters =
                 FasterList<KeyValuePair<Type, ActionCast<T>>>
-                   .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out count);
+                   .NoVirt.ToArrayFast(entityViewBlazingFastReflection, out var count);
 
             for (var index = 0; index < implementors.Length; index++)
             {
@@ -53,17 +51,14 @@ namespace Svelto.ECS
                 {
                     var type = implementor.GetType();
 
-                    Type[] interfaces;
-                    if (cachedTypes.TryGetValue(type, out interfaces) == false)
+                    if (cachedTypes.TryGetValue(type, out var interfaces) == false)
                         interfaces = cachedTypes[type] = type.GetInterfacesEx();
 
                     for (var iindex = 0; iindex < interfaces.Length; iindex++)
                     {
                         var componentType = interfaces[iindex];
 #if DEBUG && !PROFILER
-                        ECSTuple<object, int> implementorData;
-
-                        if (implementorsByType.TryGetValue(componentType, out implementorData))
+                        if (implementorsByType.TryGetValue(componentType, out var implementorData))
                         {
                             implementorData.numberOfImplementations++;
                             implementorsByType[componentType] = implementorData;

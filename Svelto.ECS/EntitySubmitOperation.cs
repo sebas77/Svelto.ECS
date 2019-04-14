@@ -2,34 +2,48 @@
 
 namespace Svelto.ECS
 {
+#pragma warning disable 660,661
     struct EntitySubmitOperation
+#pragma warning restore 660,661
+        : IEquatable<EntitySubmitOperation>
     {
         public readonly EntitySubmitOperationType type;
         public readonly IEntityBuilder[]          builders;
-        public readonly int                       ID;
-        public readonly int                       toID;
-        public readonly int                       toGroupID;
-        public readonly int                       fromGroupID;
+        public readonly EGID                      fromID;
+        public readonly EGID                      toID;
         public readonly Type                      entityDescriptor;
 #if DEBUG && !PROFILER
         public string trace;
 #endif
 
-        public EntitySubmitOperation(
-            EntitySubmitOperationType operation, int entityId, int toId, int fromGroupId, int toGroupId,
-            IEntityBuilder[] builders, Type entityDescriptor)
+        public EntitySubmitOperation(EntitySubmitOperationType operation, EGID from, EGID to,
+                                     IEntityBuilder[]          builders         = null,
+                                     Type                      entityDescriptor = null)
         {
-            type = operation;
+            type          = operation;
             this.builders = builders;
-            ID = entityId;
-            toID = toId;
+            fromID            = from;
+            toID          = to;
 
-            toGroupID = toGroupId;
-            fromGroupID = fromGroupId;
             this.entityDescriptor = entityDescriptor;
 #if DEBUG && !PROFILER
             trace = string.Empty;
 #endif
+        }
+        
+        public static bool operator ==(EntitySubmitOperation obj1, EntitySubmitOperation obj2)
+        {
+            return obj1.Equals(obj2);
+        }
+        
+        public static bool operator !=(EntitySubmitOperation obj1, EntitySubmitOperation obj2)
+        {
+            return obj1.Equals(obj2) == false;
+        }
+
+        public bool Equals(EntitySubmitOperation other)
+        {
+            return type == other.type && fromID == other.fromID && toID == other.toID;
         }
     }
 
@@ -37,6 +51,6 @@ namespace Svelto.ECS
     {
         Swap,
         Remove,
-        RemoveGroup,
+        RemoveGroup
     }
 }

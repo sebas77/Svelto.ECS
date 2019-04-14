@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Svelto.ECS</AssemblyName>
-    <LangVersion>6</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseSharedCompilation>false</UseSharedCompilation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseSharedCompilation>false</UseSharedCompilation>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Extensions" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
+    <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Reflection.Emit.Lightweight">
-      <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.netcore.app\2.0.0\ref\netcoreapp2.0\System.Reflection.Emit.Lightweight.dll</HintPath>
-    </Reference>
+    <PackageReference Include="System.Memory" Version="4.5.2" />
   </ItemGroup>
 </Project>

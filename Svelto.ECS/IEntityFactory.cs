@@ -16,13 +16,14 @@ namespace Svelto.ECS
     /// </summary>
     public interface IEntityFactory
     {
-    /// <summary>
-        ///where performance is critical, you may wish to pre allocate the space needed
-        ///to store the entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="size"></param>
-        void PreallocateEntitySpace<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, int size)
+        ///  <summary>
+        /// where performance is critical, you may wish to pre allocate the space needed
+        /// to store the entities
+        ///  </summary>
+        ///  <typeparam name="T"></typeparam>
+        ///  <param name="groupStructId"></param>
+        ///  <param name="size"></param>
+        void PreallocateEntitySpace<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId, uint size)
             where T : IEntityDescriptor, new();
         
         /// <summary>
@@ -39,11 +40,25 @@ namespace Svelto.ECS
         /// <param name="groupStructId"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        EntityStructInitializer BuildEntity<T>(int entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
+        EntityStructInitializer BuildEntity<T>(uint entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
                                                object[] implementors = null) 
             where T : IEntityDescriptor, new();
         EntityStructInitializer BuildEntity<T>(EGID egid, object[] implementors = null) 
             where T:IEntityDescriptor, new();
+
+#if REAL_ID        
+        /// <summary>
+        /// BuildEntity version without specifying the entity ID. The complete EGID will be found inside
+        /// the EntityStructInitializer and/or the single entity components
+        /// </summary>
+        /// <param name="groupID"></param>
+        /// <param name="implementors"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        EntityStructInitializer BuildEntity<T>(ExclusiveGroup.ExclusiveGroupStruct groupID, object[] implementors = null)
+            where T : IEntityDescriptor, new();
+#endif
+        
         /// <summary>
         ///     When the type of the entity is not known (this is a special case!) an EntityDescriptorInfo
         ///     can be built in place of the generic parameter T.
@@ -52,7 +67,7 @@ namespace Svelto.ECS
         /// <param name="entityDescriptor"></param>
         /// <param name="implementors"></param>
         /// 
-        EntityStructInitializer BuildEntity<T>(int      entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
+        EntityStructInitializer BuildEntity<T>(uint      entityID, ExclusiveGroup.ExclusiveGroupStruct groupStructId,
                                                T        descriptorEntity,
                                                object[] implementors = null)
             where T : IEntityDescriptor;

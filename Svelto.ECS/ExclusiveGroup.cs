@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 #pragma warning disable 660,661
 
@@ -41,12 +41,12 @@ namespace Svelto.ECS
             return group._group;
         }
         
-        public static explicit operator int(ExclusiveGroup group) 
+        public static explicit operator uint(ExclusiveGroup group) 
         {
             return group._group;
         }
 
-        public static ExclusiveGroupStruct operator+(ExclusiveGroup a, int b)
+        public static ExclusiveGroupStruct operator+(ExclusiveGroup a, uint b)
         {
             return a._group + b;
         }
@@ -91,7 +91,7 @@ namespace Svelto.ECS
             {
                 ExclusiveGroupStruct groupStruct;
 
-                groupStruct._id = (int) _globalId;
+                groupStruct._id = _globalId;
                 DBC.ECS.Check.Require(_globalId + 1 < ushort.MaxValue, "too many exclusive groups created");
                 _globalId++;
 
@@ -103,22 +103,22 @@ namespace Svelto.ECS
             /// </summary>
             internal ExclusiveGroupStruct(ushort range)
             {
-                _id = (int) _globalId;
+                _id =  _globalId;
                 DBC.ECS.Check.Require(_globalId + range < ushort.MaxValue, "too many exclusive groups created");
                 _globalId += range;
             }
             
-            internal ExclusiveGroupStruct(int groupID)
+            internal ExclusiveGroupStruct(uint groupID)
             {
                 _id = groupID;
             }
 
-            public static implicit operator int(ExclusiveGroupStruct groupStruct)
+            public static implicit operator uint(ExclusiveGroupStruct groupStruct)
             {
                 return groupStruct._id;
             }
             
-            public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, int b)
+            public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, uint b)
             {
                 var group = new ExclusiveGroupStruct();
 
@@ -127,7 +127,7 @@ namespace Svelto.ECS
                 return group;
             }
 
-            int         _id;
+            uint         _id;
             static uint _globalId;
         }
 

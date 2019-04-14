@@ -1,10 +1,10 @@
 namespace Svelto.ECS.Components
 {
-    public struct EcsVector4
+    public struct ECSVector4
     {
         public float x, y, z, w;
 
-        public EcsVector4(float X, float Y, float Z, float W)
+        public ECSVector4(float X, float Y, float Z, float W)
         {
             x = X;
             y = Y;

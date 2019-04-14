@@ -5,26 +5,11 @@ namespace Svelto.ECS
 {
     public class DispatchOnSet<T> where T:struct
     {
-        static ExclusiveGroup OBSOLETE_GROUP = new ExclusiveGroup();
-        
-        public DispatchOnSet(int senderID)
-        {
-            Console.LogWarningDebug("This method is obsolete and shouldn't be used anymore");
-            
-            _senderID    = new EGID(senderID, OBSOLETE_GROUP);
-            _subscribers = new WeakEvent<EGID, T>();
-        }
-
         public DispatchOnSet(EGID senderID)
         {      
             _subscribers = new WeakEvent<EGID, T>();
             
             _senderID = senderID;
-        }
-        
-        public DispatchOnSet()
-        {      
-            _subscribers = new WeakEvent<EGID, T>();
         }
         
         public T value
@@ -36,15 +21,12 @@ namespace Svelto.ECS
                 _subscribers.Invoke(_senderID, value);
             }
 
-            get 
-            {
-                return _value;
-            }
+            get => _value;
         }
         
         public void NotifyOnValueSet(Action<EGID, T> action)
         {
-            _subscribers += action;
+            _subscribers += action;    
         }
 
         public void StopNotify(Action<EGID, T> action)
@@ -53,8 +35,32 @@ namespace Svelto.ECS
         }
 
         protected T  _value;
-        readonly EGID _senderID;
+        internal EGID _senderID;
 
         WeakEvent<EGID, T> _subscribers;
+    }
+
+    public static class DispatchExtensions
+    {
+        public static DispatchOnSet<T> Setup<T>(DispatchOnSet<T> dispatcher, EGID entity) where T : struct
+        {
+            if (dispatcher == null)
+                dispatcher = new DispatchOnSet<T>(entity);
+            else
+                dispatcher._senderID = entity;
+
+            return dispatcher;
+        }
+        
+        public static DispatchOnChange<T> Setup<T>(DispatchOnChange<T> dispatcher, EGID entity)
+            where T : struct, IEquatable<T>
+        {
+            if (dispatcher == null)
+                dispatcher = new DispatchOnChange<T>(entity);
+            else
+                dispatcher._senderID = entity;
+            
+            return dispatcher;
+        }
     }
 }

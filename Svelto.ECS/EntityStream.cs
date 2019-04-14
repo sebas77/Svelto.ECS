@@ -1,16 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public interface IEntitiesStream
-    {
-        Consumer<T> GenerateConsumer<T>(int capacity) where T : unmanaged, IEntityStruct;
-        
-        void PublishEntity<T>(EGID id) where T : unmanaged, IEntityStruct;
-    }
-
     /// <summary>
     /// Do not use this class in place of a normal polling.
     /// I eventually realised than in ECS no form of communication other than polling entity components can exist.
@@ -22,31 +16,25 @@ namespace Svelto.ECS
     /// one only
     /// - you want to communicate between EnginesRoots  
     /// </summary>
-    class EntitiesStream : IEntitiesStream
+    class EntitiesStream
     {
-        public EntitiesStream(IEntitiesDB entitiesDb)
-        {
-            _entitiesDB = entitiesDb;
-        }
-
-        public Consumer<T> GenerateConsumer<T>(int capacity) where T : unmanaged, IEntityStruct
+        internal Consumer<T> GenerateConsumer<T>(string name, int capacity) where T : unmanaged, IEntityStruct
         {
             if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
             
-            return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(capacity);
+            return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(name, capacity);
         }
 
-        public void PublishEntity<T>(EGID id) where T : unmanaged, IEntityStruct
+        internal void PublishEntity<T>(ref T entity) where T : unmanaged, IEntityStruct
         {
             if (_streams.TryGetValue(typeof(T), out var typeSafeStream)) 
-                (typeSafeStream as EntityStream<T>).PublishEntity(ref _entitiesDB.QueryEntity<T>(id));
+                (typeSafeStream as EntityStream<T>).PublishEntity(ref entity);
             else
                 Console.LogWarning("No Consumers are waiting for this entity to change "
                                       .FastConcat(typeof(T).ToString()));
         }
 
-        readonly Dictionary<Type, ITypeSafeStream> _streams = new Dictionary<Type, ITypeSafeStream>();
-        readonly IEntitiesDB                       _entitiesDB;
+        readonly ConcurrentDictionary<Type, ITypeSafeStream> _streams = new ConcurrentDictionary<Type, ITypeSafeStream>();
     }
 
     interface ITypeSafeStream
@@ -60,46 +48,61 @@ namespace Svelto.ECS
                 _buffers[i].Enqueue(ref entity);
         }
 
-        public Consumer<T> GenerateConsumer(int capacity)
+        public Consumer<T> GenerateConsumer(string name, int capacity)
         {
-            var consumer = new Consumer<T>(capacity);
+            var consumer = new Consumer<T>(name, capacity, this);
             _buffers.Add(consumer);
             return consumer;
         }
+        
+        public void RemoveConsumer(Consumer<T> consumer)
+        {
+            _buffers.UnorderedRemove(consumer); 
+        }
 
-        readonly FasterList<Consumer<T>> _buffers = new FasterList<Consumer<T>>();
+        readonly FasterListThreadSafe<Consumer<T>> _buffers = new FasterListThreadSafe<Consumer<T>>();
     }
 
-    public class Consumer<T> where T:unmanaged, IEntityStruct
+    public struct Consumer<T>: IDisposable where T:unmanaged, IEntityStruct
     {
-        public Consumer(int capacity)
+        internal Consumer(string name, int capacity, EntityStream<T> stream)
         {
             _ringBuffer = new RingBuffer<T>(capacity);
-            _capacity = capacity;
+            _name = name;
+            _stream = stream;
         }
 
-        public void Enqueue(ref T entity)
+        internal void Enqueue(ref T entity)
         {
-            if (_ringBuffer.Count >= _capacity)
-                throw new Exception("EntityStream capacity has been saturated");
-                
-            _ringBuffer.Enqueue(ref entity);
+            _ringBuffer.Enqueue(ref entity, _name);
         }
-
+        
+        /// <summary>
+        /// this can be better, I probably would need to get the group regardless if it supports EGID or not
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         public bool TryDequeue(ExclusiveGroup group, out T entity)
         {
-            if (_ringBuffer.TryDequeue(out entity) == true)
-                return entity.ID.groupID == @group;
+            if (_ringBuffer.TryDequeue(out entity, _name) == true)
+            {
+                if (EntityBuilder<T>.HAS_EGID)
+                    return (entity as INeedEGID).ID.groupID == @group;
+
+                return true;
+            }
 
             return false;
         }
-        
-        public bool TryDequeue(out T entity) { return _ringBuffer.TryDequeue(out entity); }
 
+        public bool TryDequeue(out T entity) { return _ringBuffer.TryDequeue(out entity, _name); }
         public void Flush() { _ringBuffer.Reset(); }
+        public void Dispose() { _stream.RemoveConsumer(this); }
         
-        readonly RingBuffer<T> _ringBuffer;
-        readonly int           _capacity;
-        
+        readonly RingBuffer<T>   _ringBuffer;
+        readonly EntityStream<T> _stream;
+        readonly string          _name;
+       
     }
 }    

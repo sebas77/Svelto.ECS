@@ -99,7 +99,7 @@ namespace Svelto.ECS
     /// </summary>
     public class Sequencer<S> where S: Sequencer<S>, new()
     {
-        protected void SetSequence(Steps steps)       
+        public void SetSequence(Steps steps)       
         {
             _steps = steps;
         }

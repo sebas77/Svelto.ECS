@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Svelto.ECS.Unity
 {
-    public class GenericEntityDescriptorHolder<T>: 
+    public abstract class GenericEntityDescriptorHolder<T>: 
         MonoBehaviour , IEntityDescriptorHolder
             where T: IEntityDescriptor, new()
     {
@@ -13,11 +13,12 @@ namespace Svelto.ECS.Unity
         }
 
         public string groupName => _groupName;
+        public ushort id => _id;
 
-        [SerializeField]
-#pragma warning disable 649        
-        string _groupName;
-#pragma warning restore 649        
+#pragma warning disable 649
+        [SerializeField] string _groupName;
+        [SerializeField] ushort _id = 0;
+#pragma warning restore 649
     }
 }
 #endif

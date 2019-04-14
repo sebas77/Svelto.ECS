@@ -6,7 +6,7 @@ using Svelto.Utilities;
 
 namespace Svelto.ECS
 {
-    static class EntityView<T> where T: IEntityStruct, new()
+    static class EntityView<T> where T: struct, IEntityStruct
     {
         internal static readonly FasterList<KeyValuePair<Type, ActionCast<T>>> cachedFields;
 
@@ -32,9 +32,9 @@ namespace Svelto.ECS
         internal static void InitCache()
         {}
         
-        internal static void BuildEntityView(EGID ID, out T entityView) 
+        internal static void BuildEntityView(out T entityView) 
         {
-            entityView = new T { ID = ID };
+            entityView = new T {};
         }
     }
 }
