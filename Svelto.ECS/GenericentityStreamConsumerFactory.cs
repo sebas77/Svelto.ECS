@@ -1,8 +1,8 @@
 namespace Svelto.ECS
 {
-    class GenericentityStreamConsumerFactory : IEntityStreamConsumerFactory
+    class GenericEntityStreamConsumerFactory : IEntityStreamConsumerFactory
     {
-        public GenericentityStreamConsumerFactory(DataStructures.WeakReference<EnginesRoot> weakReference)
+        public GenericEntityStreamConsumerFactory(DataStructures.WeakReference<EnginesRoot> weakReference)
         {
             _enginesRoot = weakReference;
         }

@@ -57,7 +57,7 @@ namespace Svelto.ECS
         ///
         public IEntityStreamConsumerFactory GenerateConsumerFactory()
         {
-            return new GenericentityStreamConsumerFactory(new DataStructures.WeakReference<EnginesRoot>(this));
+            return new GenericEntityStreamConsumerFactory(new DataStructures.WeakReference<EnginesRoot>(this));
         }
 
         public IEntityFactory GenerateEntityFactory()
