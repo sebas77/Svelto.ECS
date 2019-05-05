@@ -92,10 +92,9 @@ public static partial class ExtensionMethods
         float wz = rotation.w * z;
 
         return new ECSVector3((1F - (yy + zz)) * point.x + (xy - wz) * point.y + (xz + wy) * point.z,
-                              (xy + wz) * point.x + (1F - (xx + zz)) * point.y + (yz - wx) * point.z,
-                              (xz - wy) * point.x + (yz + wx) * point.y + (1F - (xx + yy)) * point.z);
+            (xy + wz) * point.x + (1F - (xx + zz)) * point.y + (yz - wx) * point.z,
+            (xz - wy) * point.x + (yz + wx) * point.y + (1F - (xx + yy)) * point.z);
     }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Swap(ref this ECSVector3 vector, ref ECSVector3 vectorS)
     {

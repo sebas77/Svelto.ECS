@@ -14,7 +14,6 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array) where T : struct, IEntityStruct;
-
         bool TryQueryEntitiesAndIndex
             <T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index, out T[] array)
             where T : struct, IEntityStruct;
@@ -29,7 +28,6 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T[] QueryEntitiesAndIndex<T>(EGID entityGid, out uint index) where T : struct, IEntityStruct;
-
         T[] QueryEntitiesAndIndex<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index)
             where T : struct, IEntityStruct;
 
@@ -49,7 +47,6 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         ref T QueryEntity<T>(EGID entityGid) where T : struct, IEntityStruct;
-
         ref T QueryEntity<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct;
 
         /// <summary>
@@ -62,13 +59,11 @@ namespace Svelto.ECS
         /// <returns></returns>
         T[] QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
             where T : struct, IEntityStruct;
-
         (T1[], T2[]) QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
             where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct;
-
         (T1[], T2[], T3[]) QueryEntities<T1, T2, T3>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
             where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct;
-
+        
         EntityCollection<T> QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
             where T : struct, IEntityStruct;
 

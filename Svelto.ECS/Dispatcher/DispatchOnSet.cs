@@ -18,10 +18,9 @@ namespace Svelto.ECS
             {
                 _value = value;
 
-                _subscribers.Invoke(_senderID, value);
+                if(_paused == false)
+                    _subscribers.Invoke(_senderID, value);
             }
-
-            get => _value;
         }
         
         public void NotifyOnValueSet(Action<EGID, T> action)
@@ -34,33 +33,13 @@ namespace Svelto.ECS
             _subscribers -= action;
         }
 
+        public void PauseNotify() { _paused = true; }
+        public void ResumeNotify() { _paused = false; }
+
         protected T  _value;
-        internal EGID _senderID;
+        readonly EGID _senderID;
 
         WeakEvent<EGID, T> _subscribers;
-    }
-
-    public static class DispatchExtensions
-    {
-        public static DispatchOnSet<T> Setup<T>(DispatchOnSet<T> dispatcher, EGID entity) where T : struct
-        {
-            if (dispatcher == null)
-                dispatcher = new DispatchOnSet<T>(entity);
-            else
-                dispatcher._senderID = entity;
-
-            return dispatcher;
-        }
-        
-        public static DispatchOnChange<T> Setup<T>(DispatchOnChange<T> dispatcher, EGID entity)
-            where T : struct, IEquatable<T>
-        {
-            if (dispatcher == null)
-                dispatcher = new DispatchOnChange<T>(entity);
-            else
-                dispatcher._senderID = entity;
-            
-            return dispatcher;
-        }
+        bool _paused;
     }
 }

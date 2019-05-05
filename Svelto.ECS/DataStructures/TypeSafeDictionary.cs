@@ -38,7 +38,7 @@ namespace Svelto.ECS.Internal
         static readonly string _typeName = _type.Name;
         static readonly bool HasEgid = typeof(INeedEGID).IsAssignableFrom(_type);
         
-        public TypeSafeDictionary(uint size) : base((uint) size) { }
+        public TypeSafeDictionary(uint size) : base(size) { }
         public TypeSafeDictionary() {}
         
         public void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId)
@@ -203,7 +203,7 @@ namespace Svelto.ECS.Internal
                     try
                     {
                         using (profiler.Sample(entityViewsEngines[i], _typeName))
-                            (entityViewsEngines[i] as IReactOnSwap<TValue>).MovedFrom(ref entity, previousGroup.Value);
+                            (entityViewsEngines[i] as IReactOnSwap<TValue>).MovedFrom(ref entity);
                     }
                     catch (Exception e)
                     {

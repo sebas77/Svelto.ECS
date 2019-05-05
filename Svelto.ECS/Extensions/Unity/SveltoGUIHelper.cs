@@ -5,10 +5,9 @@ namespace Svelto.ECS.Unity
 {
     public static class SveltoGUIHelper
     {
-        public static T CreateFromPrefab<T>(uint startIndex, Transform contextHolder, IEntityFactory factory, ExclusiveGroup group) where T : MonoBehaviour, IEntityDescriptorHolder
+        public static T CreateFromPrefab<T>(ref uint startIndex, Transform contextHolder, IEntityFactory factory, ExclusiveGroup group) where T : MonoBehaviour, IEntityDescriptorHolder
         {
             var holder = Create<T>(new EGID(startIndex++, group), contextHolder, factory);
-            
             var childs = contextHolder.GetComponentsInChildren<IEntityDescriptorHolder>(true);
         
             foreach (var child in childs)
@@ -16,7 +15,7 @@ namespace Svelto.ECS.Unity
                 if (child.GetType() != typeof(T))
                 {
                     var childImplementors = (child as MonoBehaviour).GetComponents<IImplementor>();
-                    InternalBuildAll(startIndex, child, factory, group, childImplementors);
+                    startIndex = InternalBuildAll(startIndex, child, factory, group, childImplementors);
                 }
             }
         
@@ -43,13 +42,13 @@ namespace Svelto.ECS.Unity
             {
                 var implementors = holder.GetComponents<IImplementor>();
 
-                InternalBuildAll(startIndex, holder, factory, group, implementors);
+                startIndex = InternalBuildAll(startIndex, holder, factory, group, implementors);
             }
 
             return startIndex;
         }
         
-        static void InternalBuildAll(uint startIndex, IEntityDescriptorHolder descriptorHolder, IEntityFactory factory, ExclusiveGroup group, IImplementor[] implementors)
+        static uint InternalBuildAll(uint startIndex, IEntityDescriptorHolder descriptorHolder, IEntityFactory factory, ExclusiveGroup group, IImplementor[] implementors)
         {
             ExclusiveGroup.ExclusiveGroupStruct realGroup = group;
                 
@@ -62,10 +61,12 @@ namespace Svelto.ECS.Unity
                 egid = new EGID(startIndex++, realGroup);
             else
                 egid = new EGID(holderId, realGroup);
-
+            
             var init = factory.BuildEntity(egid, descriptorHolder.GetDescriptor(), implementors);
                  
-            init.Init(new EntityHierarchyStruct(group));    
+            init.Init(new EntityHierarchyStruct(group));
+            
+            return startIndex;
         }
     }
 }  
