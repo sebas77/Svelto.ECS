@@ -44,11 +44,14 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 ## Users Generated Content
 
-* **Gungi (Unity)**: https://github.com/grovemaster/Unity3D-Game-App
+**User experiments:
+
+* https://github.com/grovemaster/Unity3D-Game-App
+* https://github.com/colonelsalt/ZombieDeathBoomECS
 
 _Please share your Svelto projects with me!_
 
-**Svelto users articles (note they may use an outdated version of Svelto):**
+**Users articles (note they may use an outdated version of Svelto):**
 
 * https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
 * https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
@@ -60,17 +63,13 @@ _If you write an article about Svelto, please let me know, I will add it here!_
 * https://github.com/sebas77/Svelto.ECS.Debugger (work just started)
 * https://github.com/NED-Studio/LGK.Inspector (probably not working anymore)
 
-**Unity official forum thread:**
-
-* https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
-
 **Official Chat**
 
 * https://discord.gg/3qAdjDb 
 
-## How to clone
+**Unity official forum thread (I don't update it anymore):**
 
-The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relavite repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
+* https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
 
 **Note: don't beat yourself up if you find Svelto.ECS hard to use at first. The framework is very light in features, but it forces the use of a new coding paradigm and shifting code paradigm is hard! I will try to clarify all the concepts writing more and more articles**
 
