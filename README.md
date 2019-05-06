@@ -55,10 +55,10 @@ _Please share your Svelto projects with me!_
 
 _If you write an article about Svelto, please let me know, I will add it here!_
 
-**NED-Studio Svelto ECS inspector (WIP)**
+**User made inspectors**
 
-* https://github.com/NED-Studio/LGK.Inspector
-
+* https://github.com/sebas77/Svelto.ECS.Debugger (work just started)
+* https://github.com/NED-Studio/LGK.Inspector (probably not working anymore)
 
 **Unity official forum thread:**
 
@@ -67,7 +67,6 @@ _If you write an article about Svelto, please let me know, I will add it here!_
 **Official Chat**
 
 * https://discord.gg/3qAdjDb 
-
 
 ## How to clone
 
