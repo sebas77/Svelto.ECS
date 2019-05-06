@@ -25,9 +25,8 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
 * http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
 
-**Theory related articles (please read them to understand why I think ECS is great to write maintainable code):**
+**Theory related articles (in order of publishing date):**
 
-* http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
@@ -35,6 +34,7 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
+* http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/
 
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
 
