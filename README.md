@@ -10,7 +10,6 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 ## Official Examples
 
 * **Mini Examples (Unity)**: https://github.com/sebas77/Svelto.MiniExamples (including articles)
-* **Survival Example (Unity)**: https://github.com/sebas77/Svelto-ECS-Example (including article)
 * **Vanilla Example (.Net Standard/.Net Core)**: https://github.com/sebas77/Svelto.ECS.Examples.Vanilla (including article)
 * **Unity Boids Simulation**: https://github.com/sebas77/Svelto.ECS.Examples.Boids (including article)
 
@@ -26,9 +25,8 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 * http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/
 * http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/
 
-**Theory related articles (please read them to understand why I think ECS is great to write maintainable code):**
+**Theory related articles (in order of publishing date):**
 
-* http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-1/
 * http://www.sebaslab.com/ioc-container-for-unity3d-part-2/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/
@@ -36,6 +34,7 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/
 * http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/
+* http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/
 
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
 
@@ -45,34 +44,32 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 ## Users Generated Content
 
-* **Gungi (Unity)**: https://github.com/grovemaster/Unity3D-Game-App
+**User experiments:
+
+* https://github.com/grovemaster/Unity3D-Game-App
+* https://github.com/colonelsalt/ZombieDeathBoomECS
 
 _Please share your Svelto projects with me!_
 
-**Svelto users articles (note they may use an outdated version of Svelto):**
+**Users articles (note they may use an outdated version of Svelto):**
 
 * https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
 * https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
 
 _If you write an article about Svelto, please let me know, I will add it here!_
 
-**NED-Studio Svelto ECS inspector (WIP)**
+**User made inspectors**
 
-* https://github.com/NED-Studio/LGK.Inspector
-
-
-**Unity official forum thread:**
-
-* https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
+* https://github.com/sebas77/Svelto.ECS.Debugger (work just started)
+* https://github.com/NED-Studio/LGK.Inspector (probably not working anymore)
 
 **Official Chat**
 
 * https://discord.gg/3qAdjDb 
 
+**Unity official forum thread (I don't update it anymore):**
 
-## How to clone
-
-The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relavite repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
+* https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/
 
 **Note: don't beat yourself up if you find Svelto.ECS hard to use at first. The framework is very light in features, but it forces the use of a new coding paradigm and shifting code paradigm is hard! I will try to clarify all the concepts writing more and more articles**
 
