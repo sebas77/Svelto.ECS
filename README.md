@@ -92,7 +92,6 @@ https://github.com/sebas77/Svelto.ECS/wiki/FAQ
 
 ## Svelto Framework is used to develop the following products(*):
 
-![Robocraft](https://i.ytimg.com/vi/JGr1Em2Ip-c/maxresdefault.jpg)
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
 ![Cardlife](https://i.ytimg.com/vi/q2jaUZjnNyg/maxresdefault.jpg)
 
