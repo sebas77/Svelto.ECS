@@ -44,7 +44,7 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 ## Users Generated Content
 
-**User experiments:
+**User experiments:**
 
 * https://github.com/grovemaster/Unity3D-Game-App
 * https://github.com/colonelsalt/ZombieDeathBoomECS
