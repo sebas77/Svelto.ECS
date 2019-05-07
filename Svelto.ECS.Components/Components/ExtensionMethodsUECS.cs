@@ -1,4 +1,6 @@
 #if UNITY_MATHEMATICS
+using System.Runtime.CompilerServices;
+using UnityEngine;
 using Svelto.ECS.Components;
 using Unity.Mathematics;
 
