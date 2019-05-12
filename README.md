@@ -45,21 +45,21 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 ## Users Generated Content
 
-**User experiments (may use old versions of Svelto) :**
+**User experiments (may use old versions of Svelto)**
 
 * https://github.com/grovemaster/Unity3D-Game-App
 * https://github.com/colonelsalt/ZombieDeathBoomECS
 
 _Please share your Svelto projects with me!_
 
-**Users articles (may use old versions of Svelto) :**
+**Users articles (may use old versions of Svelto)**
 
 * https://eagergames.wordpress.com/category/ecs/ (Dario Oliveri)
 * https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/ (Lee Stott)
 
 _If you write an article about Svelto, please let me know, I will add it here!_
 
-**User made inspectors (may use old versions of Svelto) **
+**User made inspectors (may use old versions of Svelto)**
 
 * https://github.com/sebas77/Svelto.ECS.Debugger (work just started)
 * https://github.com/NED-Studio/LGK.Inspector (probably not working anymore)
