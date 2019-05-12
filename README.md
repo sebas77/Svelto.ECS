@@ -87,10 +87,6 @@ It needs love and as far as I understood, anyone can edit it. Feel free to do so
 Hey thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, more we are, better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. 
 Svelto.ECS has all the features needed to make a game with the ECS pattern, but many tools are still missed: visual debugger and generic serialization to name a few. Other platforms other than Unity need a lot of love too, like Xenko, Godot and monogame. Porting to other languages, expecially c++, would be awesome! 
 
-## FAQ
-
-https://github.com/sebas77/Svelto.ECS/wiki/FAQ
-
 ## Svelto Framework is used to develop the following products(*):
 
 ![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg)
