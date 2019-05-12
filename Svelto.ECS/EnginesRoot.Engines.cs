@@ -47,10 +47,10 @@ namespace Svelto.ECS
             try
             {
                 if (engine is IReactOnAddAndRemove viewEngine)
-                    CheckEntityViewsEngine(viewEngine, _reactiveEnginesAddRemove);
+                    CheckEntityViewsEngine<IReactOnAddAndRemove>(viewEngine, _reactiveEnginesAddRemove);
                 
                 if (engine is IReactOnSwap viewEngineSwap)
-                    CheckEntityViewsEngine(viewEngineSwap, _reactiveEnginesSwap);
+                    CheckEntityViewsEngine<IReactOnSwap>(viewEngineSwap, _reactiveEnginesSwap);
 
                 _enginesSet.Add(engine);
 
@@ -73,13 +73,13 @@ namespace Svelto.ECS
             }
         }
        
-        void CheckEntityViewsEngine(IEngine engine, Dictionary<Type, FasterList<IEngine>> engines)
+        void CheckEntityViewsEngine<T>(IEngine engine, Dictionary<Type, FasterList<IEngine>> engines)
         {
             var interfaces = engine.GetType().GetInterfaces();
 
             foreach (var interf in interfaces)
             {
-                if (interf.IsGenericTypeEx() && typeof(IReactEngine).IsAssignableFrom(interf))
+                if (interf.IsGenericTypeEx() && typeof(T).IsAssignableFrom(interf))
                 {
                     var genericArguments = interf.GetGenericArgumentsEx();
 

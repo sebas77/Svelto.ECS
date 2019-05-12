@@ -56,7 +56,7 @@ namespace Svelto.ECS
                             }
                             catch (Exception e)
                             {
-                                var str = "Crash while executing Entity Operation"
+                                var str = "Crash while executing Entity Operation "
                                    .FastConcat(entitiesOperations[i].type.ToString());
 #if RELAXED_ECS && !PROFILER
                                 Console.LogException(str.FastConcat(" "

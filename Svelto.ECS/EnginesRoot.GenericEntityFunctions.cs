@@ -126,7 +126,7 @@ namespace Svelto.ECS
             if (_entitiesOperations.TryGetValue((ulong) entitySubmitOperation.fromID, out var entitySubmitedOperation) == true)
             {
                 if (entitySubmitedOperation != entitySubmitOperation)
-                Console.LogError("Only one entity operation per submission is allowed".FastConcat(" entityViewType: ")
+                    throw new ECSException("Only one entity operation per submission is allowed".FastConcat(" entityViewType: ")
                                     .FastConcat(typeof(T).Name)
                                     .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
                                                 " from ID: ",  entitySubmitOperation.fromID.entityID.ToString())
