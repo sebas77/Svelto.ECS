@@ -84,8 +84,8 @@ It needs love and as far as I understood, anyone can edit it. Feel free to do so
 
 ## I like the project, how can I help?
 
-Hey thanks a lot for considering this. You can help in two ways. First one is with the documentation, updating the wiki or writing your own articles. The second one is helping me coding new features.
-Svelto.ECS has all the features needed to make a game with the ECS pattern, but the design can very likely still improved and tweaked, but I hope I won't need to add any major features anymore or undergo any major refactoring (that happened already several times since I wrote this paragraph). I'd love to have some visual tools, at least for Unity, but that probably I won't have the time to develop them. What I have in mind is to use reflection or static analisis to analyze the code and visualize the engines, entities and maybe their relations. The Context are also designed to be able to be substituted with config files, so it would be theoretically possible to generate EnginesRoots, add Engines, inject Sequencers automatically instead to do it manually in the Composition Root. 
+Hey thanks a lot for considering this. You can help in several ways. The simples is to talk about Svelto.ECS and spread the word, more we are, better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. 
+Svelto.ECS has all the features needed to make a game with the ECS pattern, but many tools are still missed: Debug visualizer, configurable composition roots, serialization to name a few. Other platforms other than Unity need a lot of love too, like Xenko, Godot and monogame. Porting to other languages, expecially c++, would be awesome! 
 
 ## FAQ
 
