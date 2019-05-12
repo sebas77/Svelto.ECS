@@ -9,7 +9,7 @@ _Svelto.ECS wasn't born just from the needs of a large team, but also as result 
 
 ## Official Examples
 
-* **Mini Examples (Unity)**: https://github.com/sebas77/Svelto.MiniExamples (including articles)
+* **Mini Examples**: https://github.com/sebas77/Svelto.MiniExamples (including articles)
 * **Unity Boids Simulation**: https://github.com/sebas77/Svelto.ECS.Examples.Boids (including article)
 
 ## Official Articles
