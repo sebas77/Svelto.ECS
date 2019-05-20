@@ -13,15 +13,15 @@ namespace Svelto.ECS
             _count = count;
         }
 
-        public EntityIterator<T> GetEnumerator()
+        public EntityIterator GetEnumerator()
         {
-            return new EntityIterator<T>(_array, _count);
+            return new EntityIterator(_array, _count);
         }
 
         readonly T[] _array;
         readonly uint _count;
 
-        public struct EntityIterator<T> : IEnumerator<T>
+        public struct EntityIterator : IEnumerator<T>
         {
             public EntityIterator(T[] array, uint count) : this()
             {
@@ -45,9 +45,7 @@ namespace Svelto.ECS
             T IEnumerator<T>.Current => throw new NotImplementedException();
             object IEnumerator.Current => throw new NotImplementedException();
 
-            public void Dispose()
-            {
-            }
+            public void Dispose()  {}
 
             readonly T[] _array;
             readonly uint _count;
@@ -63,15 +61,15 @@ namespace Svelto.ECS
             _groups = groups;
         }
 
-        public EntityGroupsIterator<T> GetEnumerator()
+        public EntityGroupsIterator GetEnumerator()
         {
-            return new EntityGroupsIterator<T>(_db, _groups);
+            return new EntityGroupsIterator(_db, _groups);
         }
 
         readonly IEntitiesDB _db;
         readonly ExclusiveGroup[] _groups;
 
-        public struct EntityGroupsIterator<T> : IEnumerator<T> where T : struct, IEntityStruct
+        public struct EntityGroupsIterator : IEnumerator<T>
         {
             public EntityGroupsIterator(IEntitiesDB db, ExclusiveGroup[] groups) : this()
             {
@@ -124,17 +122,15 @@ namespace Svelto.ECS
             _groups = groups;
         }
 
-        public EntityGroupsIterator<T1, T2> GetEnumerator()
+        public EntityGroupsIterator GetEnumerator()
         {
-            return new EntityGroupsIterator<T1, T2>(_db, _groups);
+            return new EntityGroupsIterator(_db, _groups);
         }
 
         readonly IEntitiesDB _db;
         readonly ExclusiveGroup[] _groups;
 
-        public struct EntityGroupsIterator<T1, T2> : IEnumerator<EntityGroupsIterator<T1, T2>.ValueRef>
-            where T1 : struct, IEntityStruct
-            where T2 : struct, IEntityStruct
+        public struct EntityGroupsIterator : IEnumerator<EntityGroupsIterator.ValueRef>
         {
             public EntityGroupsIterator(IEntitiesDB db, ExclusiveGroup[] groups) : this()
             {
