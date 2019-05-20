@@ -194,7 +194,7 @@ namespace Svelto.ECS.Internal
             if (QueryEntitySafeDictionary(entityGID.groupID, out TypeSafeDictionary<T> safeDictionary) == false)
                 return null;
 
-            if (safeDictionary.TryFindElementIndex(entityGID.entityID, out index) == false)
+            if (safeDictionary.TryFindIndex(entityGID.entityID, out index) == false)
                 return null;
 
             return safeDictionary.GetValuesArray(out _);

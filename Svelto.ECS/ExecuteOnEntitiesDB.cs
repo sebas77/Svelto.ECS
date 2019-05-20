@@ -22,7 +22,7 @@ namespace Svelto.ECS.Internal
         }
 
         public void ExecuteOnAllEntities
-            <T, W>(ref W value, Action<T[], ExclusiveGroup.ExclusiveGroupStruct, uint, IEntitiesDB, W> action)
+            <T, W>(W value, Action<T[], ExclusiveGroup.ExclusiveGroupStruct, uint, IEntitiesDB, W> action)
             where T : struct, IEntityStruct
         {
             var type = typeof(T);

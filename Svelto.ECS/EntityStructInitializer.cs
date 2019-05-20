@@ -25,8 +25,8 @@ namespace Svelto.ECS
                     initializer = (T) needEgid;
                 }
 
-                if (dictionary.TryFindElementIndex(ID.entityID, out var findElementIndex))
-                    dictionary.GetValuesArray(out _)[findElementIndex] = initializer;
+                if (dictionary.TryFindIndex(ID.entityID, out var findElementIndex))
+                    dictionary.GetDirectValue(findElementIndex) = initializer;
             }
         }
         

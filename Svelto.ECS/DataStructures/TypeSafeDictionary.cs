@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
@@ -36,7 +36,7 @@ namespace Svelto.ECS.Internal
     {
         static readonly Type   _type     = typeof(TValue);
         static readonly string _typeName = _type.Name;
-        static readonly bool HasEgid = typeof(INeedEGID).IsAssignableFrom(_type);
+        static readonly bool   _hasEgid   = typeof(INeedEGID).IsAssignableFrom(_type);
         
         public TypeSafeDictionary(uint size) : base(size) { }
         public TypeSafeDictionary() {}
@@ -49,10 +49,11 @@ namespace Svelto.ECS.Internal
             {
                 try
                 {
-                    if (HasEgid)
+                    if (_hasEgid)
                     {
                         var needEgid = (INeedEGID)tuple.Value;
                         needEgid.ID = new EGID(tuple.Key, groupId);
+                        
                         Add(tuple.Key, (TValue) needEgid);
                     }
                     else
@@ -75,7 +76,7 @@ namespace Svelto.ECS.Internal
             {
                 var typeSafeDictionary = realDic as TypeSafeDictionary<TValue>;
                
-                AddEntityViewToEngines(entityViewEnginesDB, ref typeSafeDictionary.GetDirectValue(value.Key), null,
+                AddEntityViewToEngines(entityViewEnginesDB, ref typeSafeDictionary.GetValueByRef(value.Key), null,
                                        ref profiler);
             }
         }
@@ -103,7 +104,7 @@ namespace Svelto.ECS.Internal
                 /// 
                 
           //      entity.ID = EGID.UPDATE_REAL_ID_AND_GROUP(entity.ID, toEntityID.groupID, entityCount);
-                  if (HasEgid)
+                  if (_hasEgid)
                   {
                       var needEgid = (INeedEGID)entity;
                       needEgid.ID = toEntityID.Value;
@@ -217,18 +218,12 @@ namespace Svelto.ECS.Internal
         internal ref TValue FindElement(uint entityGidEntityId)
         {
 #if DEBUG && !PROFILER         
-            if (FindIndex(entityGidEntityId, out var findIndex) == false)
+            if (TryFindIndex(entityGidEntityId, out var findIndex) == false)
                 throw new Exception("Entity not found in this group ".FastConcat(typeof(TValue).ToString()));
 #else
-            FindIndex(entityGidEntityId, out var findIndex);
+            TryFindIndex(entityGidEntityId, out var findIndex);
 #endif
             return ref _values[findIndex];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool TryFindElementIndex(uint entityGidEntityId, out uint index)
-        {
-            return FindIndex(entityGidEntityId, out index);
         }
     }
 }

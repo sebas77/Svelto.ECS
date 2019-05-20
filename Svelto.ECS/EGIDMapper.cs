@@ -8,9 +8,21 @@ namespace Svelto.ECS
         internal TypeSafeDictionary<T> map;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Entity(EGID id)
+        public ref T Entity(uint entityID)
         {
-            return ref map.FindElement(id.entityID);
+            return ref map.FindElement(entityID);
+        }
+        
+        public bool TryQueryEntity(uint entityID, out T @value)
+        {
+            if (map.TryFindIndex(entityID, out var index))
+            {
+                @value = map.GetDirectValue(index);
+                return true;
+            }
+
+            @value = default;
+            return false;
         }
     }
 }

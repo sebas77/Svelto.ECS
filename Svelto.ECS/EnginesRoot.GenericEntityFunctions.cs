@@ -16,12 +16,6 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>(uint entityID, uint groupID) where T : IEntityDescriptor, new()
-            {
-                RemoveEntity<T>(new EGID(entityID, groupID));
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntity<T>(uint entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) where T : 
                 IEntityDescriptor, new()
             {
@@ -39,11 +33,6 @@ namespace Svelto.ECS
             }
 
             
-            public void RemoveEntities<T>(uint groupID) where T : IEntityDescriptor, new()
-            {
-                throw new NotImplementedException();
-            }
-
             public void RemoveEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupID)
                 where T : IEntityDescriptor, new()
             {
@@ -51,16 +40,11 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveGroupAndEntities(uint groupID)
+            public void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID)
             {
                 _weakReference.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, new EGID(), new EGID(0, groupID)));
-            }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID)
-            {
-                RemoveGroupAndEntities((uint)groupID);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
