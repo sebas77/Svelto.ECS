@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
- using Svelto.Common.Internal;
- using Svelto.DataStructures;
+using Svelto.DataStructures;
 using Svelto.DataStructures.Experimental;
 
 namespace Svelto.ECS.Internal
@@ -14,17 +13,15 @@ namespace Svelto.ECS.Internal
         ITypeSafeDictionary Create();
 
         void RemoveEntitiesFromEngines(
-            Dictionary<Type, FasterList<IEngine>> entityViewEnginesDB,
-            ref PlatformProfiler profiler);
+            Dictionary<Type, FasterList<IEngine>> entityViewEnginesDB, in PlatformProfiler profiler);
 
         void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
-            Dictionary<Type, FasterList<IEngine>> engines,
-            ref PlatformProfiler profiler);
+            Dictionary<Type, FasterList<IEngine>> engines, in PlatformProfiler profiler);
 
         void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId);
 
         void AddEntitiesToEngines(Dictionary<Type, FasterList<IEngine>> entityViewEnginesDb,
-            ITypeSafeDictionary realDic, ref PlatformProfiler profiler);
+            ITypeSafeDictionary realDic, in PlatformProfiler profiler);
 
         void SetCapacity(uint size);
         void Trim();
@@ -32,7 +29,8 @@ namespace Svelto.ECS.Internal
         bool Has(uint entityIdEntityId);
     }
 
-    class TypeSafeDictionary<TValue> : FasterDictionary<uint, TValue>, ITypeSafeDictionary where TValue : struct, IEntityStruct
+    class TypeSafeDictionary<TValue> : FasterDictionary<uint, TValue>,
+        ITypeSafeDictionary where TValue : struct, IEntityStruct
     {
         static readonly Type   _type     = typeof(TValue);
         static readonly string _typeName = _type.Name;
@@ -70,29 +68,28 @@ namespace Svelto.ECS.Internal
 
         public void AddEntitiesToEngines(
             Dictionary<Type, FasterList<IEngine>> entityViewEnginesDB,
-            ITypeSafeDictionary realDic, ref PlatformProfiler profiler)
+            ITypeSafeDictionary realDic, in PlatformProfiler profiler)
         {
             foreach (var value in this)
             {
                 var typeSafeDictionary = realDic as TypeSafeDictionary<TValue>;
                
                 AddEntityViewToEngines(entityViewEnginesDB, ref typeSafeDictionary.GetValueByRef(value.Key), null,
-                                       ref profiler);
+                    in profiler);
             }
         }
 
         public bool Has(uint entityIdEntityId) { return ContainsKey(entityIdEntityId); }
 
         public void MoveEntityFromDictionaryAndEngines(EGID fromEntityGid, EGID? toEntityID,
-            ITypeSafeDictionary toGroup,
-            Dictionary<Type, FasterList<IEngine>> engines,
-            ref PlatformProfiler profiler)
+            ITypeSafeDictionary toGroup, Dictionary<Type, FasterList<IEngine>> engines,
+            in PlatformProfiler profiler)
         {
             var valueIndex = GetValueIndex(fromEntityGid.entityID);
 
             if (toGroup != null)
             {
-                RemoveEntityViewFromEngines(engines, ref _values[valueIndex], fromEntityGid.groupID, ref profiler);
+                RemoveEntityViewFromEngines(engines, ref _values[valueIndex], fromEntityGid.groupID, in profiler);
                 
                 var toGroupCasted = toGroup as TypeSafeDictionary<TValue>;
                 ref var entity = ref _values[valueIndex];
@@ -114,10 +111,10 @@ namespace Svelto.ECS.Internal
                 var index = toGroupCasted.Add(fromEntityGid.entityID, ref entity);
 
                  AddEntityViewToEngines(engines, ref toGroupCasted._values[index], previousGroup,
-                                           ref profiler);
+                     in profiler);
             }
             else
-                RemoveEntityViewFromEngines(engines, ref _values[valueIndex], null, ref profiler);
+                RemoveEntityViewFromEngines(engines, ref _values[valueIndex], null, in profiler);
 
 
              Remove(fromEntityGid.entityID);
@@ -125,20 +122,20 @@ namespace Svelto.ECS.Internal
 
         public void RemoveEntitiesFromEngines(
             Dictionary<Type, FasterList<IEngine>> entityViewEnginesDB,
-            ref PlatformProfiler profiler)
+            in PlatformProfiler profiler)
         {
             var values = GetValuesArray(out var count);
 
             for (var i = 0; i < count; i++)
-                RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i], null, ref profiler);
+                RemoveEntityViewFromEngines(entityViewEnginesDB, ref values[i], null, in profiler);
         }
 
         public ITypeSafeDictionary Create() { return new TypeSafeDictionary<TValue>(); }
 
         void AddEntityViewToEngines(Dictionary<Type, FasterList<IEngine>> entityViewEnginesDB,
-                                    ref TValue                                                      entity,
-                                    ExclusiveGroup.ExclusiveGroupStruct?                            previousGroup,
-                                    ref PlatformProfiler                                            profiler)
+                                    ref TValue                             entity,
+                                    ExclusiveGroup.ExclusiveGroupStruct?   previousGroup,
+                                    in PlatformProfiler                   profiler)
         {
             //get all the engines linked to TValue
             if (!entityViewEnginesDB.TryGetValue(_type, out var entityViewsEngines)) return;
@@ -179,8 +176,7 @@ namespace Svelto.ECS.Internal
 
         static void RemoveEntityViewFromEngines(
             Dictionary<Type, FasterList<IEngine>> entityViewEnginesDB, ref TValue entity,
-            ExclusiveGroup.ExclusiveGroupStruct?                            previousGroup,
-            ref PlatformProfiler                                            profiler)
+            ExclusiveGroup.ExclusiveGroupStruct? previousGroup, in PlatformProfiler profiler)
         {
             if (!entityViewEnginesDB.TryGetValue(_type, out var entityViewsEngines)) return;
 

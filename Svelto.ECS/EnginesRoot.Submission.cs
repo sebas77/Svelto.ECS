@@ -14,8 +14,7 @@ namespace Svelto.ECS
         
         void SubmitEntityViews()
         {
-            var profiler = new PlatformProfiler();
-            using (profiler.StartNewSession("Svelto.ECS - Entities Submission"))
+            using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
             {
                 if (_entitiesOperations.Count > 0)
                 {
@@ -102,7 +101,7 @@ namespace Svelto.ECS
         }
 
         void AddEntityViewsToTheDBAndSuitableEngines(DoubleBufferedEntitiesToAdd dbgroupsOfEntitiesToSubmit,
-                                                     PlatformProfiler            profiler)
+            in PlatformProfiler profiler)
         {
             //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
             var groupsOfEntitiesToSubmit = dbgroupsOfEntitiesToSubmit.other;
@@ -148,7 +147,7 @@ namespace Svelto.ECS
                     {
                         var realDic = groupDB[entityViewsPerType.Key];
                             
-                        entityViewsPerType.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic, ref profiler);
+                        entityViewsPerType.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic, in profiler);
                     }
                 }
             }

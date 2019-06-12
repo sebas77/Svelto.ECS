@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -14,27 +15,27 @@ namespace Svelto.ECS
     /// just the current state
     /// - you want a thread-safe way to read entity states, which includes all the state changes and not the last
     /// one only
-    /// - you want to communicate between EnginesRoots  
+    /// - you want to communicate between EnginesRoots
     /// </summary>
     class EntitiesStream
     {
         internal Consumer<T> GenerateConsumer<T>(string name, int capacity) where T : unmanaged, IEntityStruct
         {
             if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
-            
+
             return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(name, capacity);
         }
 
         internal void PublishEntity<T>(ref T entity) where T : unmanaged, IEntityStruct
         {
-            if (_streams.TryGetValue(typeof(T), out var typeSafeStream)) 
+            if (_streams.TryGetValue(typeof(T), out var typeSafeStream))
                 (typeSafeStream as EntityStream<T>).PublishEntity(ref entity);
             else
-                Console.LogWarning("No Consumers are waiting for this entity to change "
-                                      .FastConcat(typeof(T).ToString()));
+                Console.LogWarningDebug("No Consumers are waiting for this entity to change ", typeof(T));
         }
 
-        readonly ConcurrentDictionary<Type, ITypeSafeStream> _streams = new ConcurrentDictionary<Type, ITypeSafeStream>();
+        readonly ConcurrentDictionary<Type, ITypeSafeStream> _streams =
+            new ConcurrentDictionary<Type, ITypeSafeStream>();
     }
 
     interface ITypeSafeStream
@@ -54,10 +55,10 @@ namespace Svelto.ECS
             _buffers.Add(consumer);
             return consumer;
         }
-        
+
         public void RemoveConsumer(Consumer<T> consumer)
         {
-            _buffers.UnorderedRemove(consumer); 
+            _buffers.UnorderedRemove(consumer);
         }
 
         readonly FasterListThreadSafe<Consumer<T>> _buffers = new FasterListThreadSafe<Consumer<T>>();
@@ -77,20 +78,15 @@ namespace Svelto.ECS
             _ringBuffer.Enqueue(ref entity, _name);
         }
         
-        /// <summary>
-        /// this can be better, I probably would need to get the group regardless if it supports EGID or not
-        /// </summary>
-        /// <param name="group"></param>
-        /// <param name="entity"></param>
-        /// <returns></returns>
         public bool TryDequeue(ExclusiveGroup group, out T entity)
         {
             if (_ringBuffer.TryDequeue(out entity, _name) == true)
             {
                 if (EntityBuilder<T>.HAS_EGID)
                     return (entity as INeedEGID).ID.groupID == @group;
-
-                return true;
+                
+                throw new ECSException(
+                    "When an exclusive group is defined, TryDeque must operate on an entity with EGID");
             }
 
             return false;
@@ -99,10 +95,10 @@ namespace Svelto.ECS
         public bool TryDequeue(out T entity) { return _ringBuffer.TryDequeue(out entity, _name); }
         public void Flush() { _ringBuffer.Reset(); }
         public void Dispose() { _stream.RemoveConsumer(this); }
-        
+
         readonly RingBuffer<T>   _ringBuffer;
         readonly EntityStream<T> _stream;
         readonly string          _name;
-       
+
     }
-}    
+}

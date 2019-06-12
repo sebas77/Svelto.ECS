@@ -2,6 +2,12 @@ using System;
 
 namespace Svelto.ECS
 {
+    /// <summary>
+    /// DynamicEntityDescriptor can be used to add entity views to an existing EntityDescriptor that act as flags,
+    /// at building time.
+    /// This method allocates, so it shouldn't be abused
+    /// </summary>
+    /// <typeparam name="TType"></typeparam>
     public struct DynamicEntityDescriptor<TType>:IEntityDescriptor where TType : IEntityDescriptor, new()
     {
         public DynamicEntityDescriptor(IEntityBuilder[] extraEntities)

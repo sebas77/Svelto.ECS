@@ -36,8 +36,6 @@ public static partial class ExtensionMethods
     public static void ProjectOnPlane(ref this float3 vector, in float3 planeNormal)
     {
         var num1 = math.dot(planeNormal,planeNormal);
-        if ((double) num1 < (double) Mathf.Epsilon)
-            return;
         var num2 = math.dot(vector,planeNormal) / num1;
         
         vector.x -= planeNormal.x * num2;
