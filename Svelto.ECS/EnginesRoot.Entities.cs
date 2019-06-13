@@ -293,6 +293,12 @@ namespace Svelto.ECS
             return _entitiesStream.GenerateConsumer<T>(name, capacity);
         }
 
+        
+        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup @group, string name, int capacity) where T : unmanaged, 
+            IEntityStruct
+        {
+            return _entitiesStream.GenerateConsumer<T>(@group, name, capacity);
+        }
         const string INVALID_DYNAMIC_DESCRIPTOR_ERROR =
             "Found an entity requesting an invalid dynamic descriptor, this " +
             "can happen only if you are building different entities with the " +

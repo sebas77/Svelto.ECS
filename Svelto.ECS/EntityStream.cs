@@ -25,6 +25,13 @@ namespace Svelto.ECS
 
             return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(name, capacity);
         }
+        
+        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup @group, string name, int capacity) where T : unmanaged, IEntityStruct
+        {
+            if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
+
+            return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer( @group, name, capacity);
+        }
 
         internal void PublishEntity<T>(ref T entity) where T : unmanaged, IEntityStruct
         {
@@ -45,32 +52,59 @@ namespace Svelto.ECS
     {
         public void PublishEntity(ref T entity)
         {
-            for (int i = 0; i < _buffers.Count; i++)
-                _buffers[i].Enqueue(ref entity);
+            for (int i = 0; i < _consumers.Count; i++)
+            {
+                if (_consumers[i]._hasGroup)
+                {
+                    if (EntityBuilder<T>.HAS_EGID && (entity as INeedEGID).ID.groupID == _consumers[i]._group)
+                    {
+                        _consumers[i].Enqueue(ref entity);
+                    }
+                }
+                else
+                    _consumers[i].Enqueue(ref entity);
+            }
         }
 
         public Consumer<T> GenerateConsumer(string name, int capacity)
         {
             var consumer = new Consumer<T>(name, capacity, this);
-            _buffers.Add(consumer);
+            
+            _consumers.Add(consumer);
+            
+            return consumer;
+        }
+        
+        public Consumer<T> GenerateConsumer(ExclusiveGroup @group, string name, int capacity)
+        {
+            var consumer = new Consumer<T>(group, name, capacity, this);
+            
+            _consumers.Add(consumer);
+            
             return consumer;
         }
 
         public void RemoveConsumer(Consumer<T> consumer)
         {
-            _buffers.UnorderedRemove(consumer);
+            _consumers.UnorderedRemove(consumer);
         }
 
-        readonly FasterListThreadSafe<Consumer<T>> _buffers = new FasterListThreadSafe<Consumer<T>>();
+        readonly FasterListThreadSafe<Consumer<T>> _consumers = new FasterListThreadSafe<Consumer<T>>();
     }
 
     public struct Consumer<T>: IDisposable where T:unmanaged, IEntityStruct
     {
-        internal Consumer(string name, int capacity, EntityStream<T> stream)
+        internal Consumer(string name, int capacity, EntityStream<T> stream): this()
         {
             _ringBuffer = new RingBuffer<T>(capacity);
             _name = name;
             _stream = stream;
+        }
+        
+        internal Consumer(ExclusiveGroup @group, string name, int capacity, EntityStream<T> stream):this(name, capacity, stream)
+        {
+            _group = group;
+            _hasGroup = true;
         }
 
         internal void Enqueue(ref T entity)
@@ -78,20 +112,6 @@ namespace Svelto.ECS
             _ringBuffer.Enqueue(ref entity, _name);
         }
         
-        public bool TryDequeue(ExclusiveGroup group, out T entity)
-        {
-            if (_ringBuffer.TryDequeue(out entity, _name) == true)
-            {
-                if (EntityBuilder<T>.HAS_EGID)
-                    return (entity as INeedEGID).ID.groupID == @group;
-                
-                throw new ECSException(
-                    "When an exclusive group is defined, TryDeque must operate on an entity with EGID");
-            }
-
-            return false;
-        }
-
         public bool TryDequeue(out T entity) { return _ringBuffer.TryDequeue(out entity, _name); }
         public void Flush() { _ringBuffer.Reset(); }
         public void Dispose() { _stream.RemoveConsumer(this); }
@@ -99,6 +119,7 @@ namespace Svelto.ECS
         readonly RingBuffer<T>   _ringBuffer;
         readonly EntityStream<T> _stream;
         readonly string          _name;
-
+        internal readonly ExclusiveGroup  _group;
+        internal readonly bool _hasGroup;
     }
 }
