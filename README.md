@@ -88,7 +88,8 @@ Hey thanks a lot for considering this. You can help in several ways. The simples
 
 ## Svelto Framework is used to develop the following products\(\*\):
 
-![Robocraft Infinity](https://news.xbox.com/en-us/wp-content/uploads/Robocraft_Hero-hero.jpg) ![Cardlife](https://i.ytimg.com/vi/q2jaUZjnNyg/maxresdefault.jpg)
+![Robocraft Infinity](https://robocraftgame.com/images/devblog/planadapteliminateoutnow.gif) ![Cardlife](https://i.ytimg.com/vi/q2jaUZjnNyg/maxresdefault.jpg)
+![RobocraftX](https://steamcdn-a.akamaihd.net/steam/apps/1078000/ss_9d12adf1808c371857dc504b6fb1450fb6167c15.1920x1080.jpg?t=1564142651)
 
 \*if you want your products made with Svelto here, just send me an email or whatever, I'll be super happy to add them.
 
