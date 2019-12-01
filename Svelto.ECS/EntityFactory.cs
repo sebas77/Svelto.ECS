@@ -1,71 +1,89 @@
 using System;
 using System.Collections.Generic;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS.Internal
 {
     static class EntityFactory
     {
-        internal static Dictionary<Type, ITypeSafeDictionary> BuildGroupedEntities(EGID egid,
-            EnginesRoot.DoubleBufferedEntitiesToAdd groupEntitiesToAdd, IEntityBuilder[] entitiesToBuild,
-            object[] implementors)
+        public static FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> BuildGroupedEntities(EGID egid,
+            EnginesRoot.DoubleBufferedEntitiesToAdd groupEntitiesToAdd,
+            IEntityBuilder[] entitiesToBuild,
+            IEnumerable<object> implementors)
         {
-            var @group = FetchEntityGroup(egid.groupID, groupEntitiesToAdd);
+            var group = FetchEntityGroup(egid.groupID, groupEntitiesToAdd);
 
             BuildEntitiesAndAddToGroup(egid, group, entitiesToBuild, implementors);
 
             return group;
         }
 
-        static Dictionary<Type, ITypeSafeDictionary> FetchEntityGroup(uint groupID,
+        static FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> FetchEntityGroup(uint groupID,
             EnginesRoot.DoubleBufferedEntitiesToAdd groupEntityViewsByType)
         {
-            if (groupEntityViewsByType.current.TryGetValue(groupID, out Dictionary<Type, ITypeSafeDictionary> @group) ==
-                false)
+            if (groupEntityViewsByType.current.TryGetValue(groupID, out var group) == false)
             {
-                @group = new Dictionary<Type, ITypeSafeDictionary>();
+                group = new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
                 
-                groupEntityViewsByType.current.Add(groupID, @group);
+                groupEntityViewsByType.current.Add(groupID, group);
             }
 
-            groupEntityViewsByType.currentEntitiesCreatedPerGroup.TryGetValue(groupID, out var value);
-            groupEntityViewsByType.currentEntitiesCreatedPerGroup[groupID] = value+1;
+            if (groupEntityViewsByType.currentEntitiesCreatedPerGroup.TryGetValue(groupID, out var value) == false)
+                groupEntityViewsByType.currentEntitiesCreatedPerGroup[groupID] = 0;
+            else
+                groupEntityViewsByType.currentEntitiesCreatedPerGroup[groupID] = value+1;
             
-            return @group;
+            return group;
         }
 
-        static void BuildEntitiesAndAddToGroup(EGID                                    entityID,
-                                               Dictionary<Type, ITypeSafeDictionary>   @group,
-                                               IEntityBuilder[]                        entitiesToBuild,
-                                               object[]                                implementors)
+        static void BuildEntitiesAndAddToGroup(EGID entityID,
+            FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group,
+            IEntityBuilder[] entityBuilders, IEnumerable<object> implementors)
         {
-            var count = entitiesToBuild.Length;
 #if DEBUG && !PROFILER
             HashSet<Type> types = new HashSet<Type>();
-            
+#endif
+            InternalBuild(entityID, group, entityBuilders, implementors
+#if DEBUG && !PROFILER
+                , types
+#endif
+            );
+        }
+
+        static void InternalBuild(EGID entityID, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group,
+            IEntityBuilder[] entityBuilders, IEnumerable<object> implementors
+#if DEBUG && !PROFILER
+            , HashSet<Type> types
+#endif
+        )
+        {
+            var count = entityBuilders.Length;
+#if DEBUG && !PROFILER
             for (var index = 0; index < count; ++index)
             {
-                var entityViewType = entitiesToBuild[index].GetEntityType();
+                var entityViewType = entityBuilders[index].GetEntityType();
                 if (types.Contains(entityViewType))
                 {
                     throw new ECSException("EntityBuilders must be unique inside an EntityDescriptor");
                 }
-                
+
                 types.Add(entityViewType);
             }
 #endif
             for (var index = 0; index < count; ++index)
             {
-                var entityViewBuilder = entitiesToBuild[index];
-                var entityViewType = entityViewBuilder.GetEntityType();
+                var entityStructBuilder = entityBuilders[index];
+                var entityViewType = entityStructBuilder.GetEntityType();
 
-                BuildEntity(entityID, @group, entityViewType, entityViewBuilder, implementors);
+                BuildEntity(entityID, group, entityViewType, entityStructBuilder, implementors);
             }
         }
 
-        static void BuildEntity(EGID entityID, Dictionary<Type, ITypeSafeDictionary> @group, Type entityViewType,
-            IEntityBuilder entityBuilder, object[] implementors)
+        static void BuildEntity(EGID entityID, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group,
+            Type entityViewType, IEntityBuilder entityBuilder, IEnumerable<object> implementors)
         {
-            var entityViewsPoolWillBeCreated = @group.TryGetValue(entityViewType, out var safeDictionary) == false;
+            var entityViewsPoolWillBeCreated =
+                group.TryGetValue(new RefWrapper<Type>(entityViewType), out var safeDictionary) == false;
 
             //passing the undefined entityViewsByType inside the entityViewBuilder will allow it to be created with the
             //correct type and casted back to the undefined list. that's how the list will be eventually of the target
@@ -73,7 +91,7 @@ namespace Svelto.ECS.Internal
             entityBuilder.BuildEntityAndAddToList(ref safeDictionary, entityID, implementors);
 
             if (entityViewsPoolWillBeCreated)
-                @group.Add(entityViewType, safeDictionary);
+                group.Add(new RefWrapper<Type>(entityViewType), safeDictionary);
         }
     }
 }

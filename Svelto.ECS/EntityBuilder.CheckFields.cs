@@ -1,108 +1,138 @@
 ﻿#if !DEBUG || PROFILER
 #define DISABLE_CHECKS
 using System.Diagnostics;
-#endif    
+#endif
 using System;
 using System.Reflection;
 
 namespace Svelto.ECS
 {
-    public static class EntityBuilderUtilities
+    internal static class EntityBuilderUtilities
     {
-#if DISABLE_CHECKS        
+        const string MSG = "Entity Structs field and Entity View Struct components must hold value types.";
+
+
+#if DISABLE_CHECKS
         [Conditional("_CHECKS_DISABLED")]
 #endif
-        public static void CheckFields(Type type, bool needsReflection)
+        public static void CheckFields(Type entityStructType, bool needsReflection)
         {
-            if (type == ENTITY_STRUCT_INFO_VIEW || type == EGIDType || type == ECLUSIVEGROUPSTRUCTTYPE) 
+            if (entityStructType == ENTITY_STRUCT_INFO_VIEW ||
+                entityStructType == EGIDType ||
+                entityStructType == EXCLUSIVEGROUPSTRUCTTYPE ||
+                entityStructType == SERIALIZABLE_ENTITY_STRUCT)
+            {
                 return;
+            }
 
             if (needsReflection == false)
             {
-                if (type.IsClass)
-                    throw new EntityStructException("EntityStructs must be structs.", ENTITY_VIEW_TYPE, type);
-
-                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-
-                for (int i = fields.Length - 1; i >= 0; --i)
+                if (entityStructType.IsClass)
                 {
-                    var field = fields[i];
-                    var fieldFieldType = field.FieldType;
-                    
-                    SubCheckFields(fieldFieldType);
+                    throw new EntityStructException("EntityStructs must be structs.", entityStructType);
+                }
+
+                FieldInfo[] fields = entityStructType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+                for (var i = fields.Length - 1; i >= 0; --i)
+                {
+                    FieldInfo fieldInfo = fields[i];
+                    Type fieldType = fieldInfo.FieldType;
+
+                    SubCheckFields(fieldType, entityStructType);
                 }
             }
             else
             {
-                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+                FieldInfo[] fields = entityStructType.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
                 if (fields.Length < 1)
-                    ProcessError("Entity View Structs must hold only entity components interfaces.", type);
-                
+                {
+                    ProcessError("Entity View Structs must hold only entity components interfaces.", entityStructType);
+                }
+
                 for (int i = fields.Length - 1; i >= 0; --i)
                 {
-                    var field = fields[i];
-                    
-                    if (field.FieldType.IsInterfaceEx() == false)
-                        ProcessError("Entity View Structs must hold only entity components interfaces.", type);
-                    
-                    var properties = field.FieldType.GetProperties(BindingFlags.Public |
-                                                        BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    FieldInfo fieldInfo = fields[i];
+
+                    if (fieldInfo.FieldType.IsInterfaceEx() == false)
+                    {
+                        ProcessError("Entity View Structs must hold only entity components interfaces.",
+                            entityStructType);
+                    }
+
+                    PropertyInfo[] properties = fieldInfo.FieldType.GetProperties(
+                        BindingFlags.Public |
+                        BindingFlags.Instance |
+                        BindingFlags.DeclaredOnly);
 
                     for (int j = properties.Length - 1; j >= 0; --j)
                     {
-                        if (properties[j].PropertyType.IsGenericType == true)
+                        if (properties[j].PropertyType.IsGenericType)
                         {
-                            var genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
+                            Type genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
                             if (genericTypeDefinition == DISPATCHONSETTYPE ||
-                                genericTypeDefinition == DISPATCHONCHANGETYPE) continue;
+                                genericTypeDefinition == DISPATCHONCHANGETYPE)
+                            {
+                                continue;
+                            }
                         }
 
-                        var propertyType = properties[j].PropertyType;
+                        Type propertyType = properties[j].PropertyType;
                         if (propertyType != STRINGTYPE)
-                            SubCheckFields(propertyType);
+                        {
+                            SubCheckFields(propertyType, entityStructType);
+                        }
                     }
                 }
             }
         }
 
-        static void SubCheckFields(Type fieldFieldType)
+        static void SubCheckFields(Type fieldType, Type entityStructType)
         {
-            if (fieldFieldType.IsPrimitive == true || fieldFieldType.IsValueType == true)
+            if (fieldType.IsPrimitive || fieldType.IsValueType)
             {
-                if (fieldFieldType.IsValueType == true && !fieldFieldType.IsEnum && fieldFieldType.IsPrimitive == false)
+                if (fieldType.IsValueType && !fieldType.IsEnum && fieldType.IsPrimitive == false)
                 {
-                    CheckFields(fieldFieldType, false);
+                    CheckFields(fieldType, false);
                 }
 
                 return;
             }
-            
-            ProcessError("Entity Structs field and Entity View Struct components must hold value types.", 
-                         fieldFieldType);
+
+            ProcessError(MSG, entityStructType, fieldType);
         }
-        
-        static void ProcessError(string message, Type type)
+
+        static void ProcessError(string message, Type entityViewType, Type fieldType = null)
         {
-#if !RELAXED_ECS
-            Type ENTITY_VIEW_TYPE = typeof(Type);
-            throw new EntityStructException(message, ENTITY_VIEW_TYPE, type);
-#endif
+            if (fieldType != null)
+            {
+                throw new EntityStructException(message, entityViewType, fieldType);
+            }
+
+            throw new EntityStructException(message, entityViewType);
         }
-        
-        static readonly Type EGIDType                = typeof(EGID);
-        static readonly Type ECLUSIVEGROUPSTRUCTTYPE = typeof(ExclusiveGroup.ExclusiveGroupStruct);
-        static readonly Type DISPATCHONSETTYPE       = typeof(DispatchOnSet<>);
-        static readonly Type DISPATCHONCHANGETYPE    = typeof(DispatchOnChange<>);
-        static readonly Type STRINGTYPE              = typeof(String);
-        static readonly Type ENTITY_VIEW_TYPE        = typeof(Type);
-        static readonly Type ENTITY_STRUCT_INFO_VIEW  = typeof(EntityStructInfoView);
+
+        static readonly Type DISPATCHONCHANGETYPE       = typeof(DispatchOnChange<>);
+        static readonly Type DISPATCHONSETTYPE          = typeof(DispatchOnSet<>);
+        static readonly Type EGIDType                   = typeof(EGID);
+        static readonly Type EXCLUSIVEGROUPSTRUCTTYPE   = typeof(ExclusiveGroup.ExclusiveGroupStruct);
+        static readonly Type SERIALIZABLE_ENTITY_STRUCT = typeof(SerializableEntityStruct);
+        static readonly Type STRINGTYPE                 = typeof(string);
+
+        internal static readonly Type ENTITY_STRUCT_INFO_VIEW = typeof(EntityStructInfoView);
     }
-    
+
     public class EntityStructException : Exception
     {
-        public EntityStructException(string message, Type entityViewType, Type type):
-            base(message.FastConcat(" entity view: ", entityViewType.ToString(), " field: ", type.ToString()))
-        {}
+        public EntityStructException(string message, Type entityViewType, Type type) :
+            base(message.FastConcat(" entity view: '", entityViewType.ToString(), "', field: '", type.ToString()))
+        {
+        }
+
+        public EntityStructException(string message, Type entityViewType) :
+            base(message.FastConcat(" entity view: ", entityViewType.ToString()))
+        {
+        }
     }
 }

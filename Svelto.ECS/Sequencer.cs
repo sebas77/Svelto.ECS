@@ -12,7 +12,7 @@ namespace Svelto.ECS
         {
             _steps = new Dictionary<IEngine, To>();
 
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
                 _steps.Add(values[i].from, values[i].to);
         }
     }
@@ -106,7 +106,7 @@ namespace Svelto.ECS
 
         public void Next<C>(IEngine engine, C condition, EGID id) where C:struct, IConvertible
         {
-            C branch = condition;
+            var branch = condition;
             var to = (_steps._steps[engine] as To<C>);
             
             var steps  = to._tos[branch];

@@ -2,7 +2,7 @@ using System;
 
 namespace Svelto.ECS
 {
-    public class DispatchOnChange<T> : DispatchOnSet<T> where T:struct, IEquatable<T>
+    public class DispatchOnChange<T> : DispatchOnSet<T> where T:IEquatable<T>
     {
         public DispatchOnChange(EGID senderID) : base(senderID)
         { }
@@ -15,10 +15,7 @@ namespace Svelto.ECS
                     base.value = value;
             }
 
-            get 
-            {
-                return _value;
-            }
+            get => _value;
         }
     }
 }

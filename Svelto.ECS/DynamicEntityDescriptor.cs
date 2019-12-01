@@ -1,4 +1,5 @@
 using System;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -8,32 +9,120 @@ namespace Svelto.ECS
     /// This method allocates, so it shouldn't be abused
     /// </summary>
     /// <typeparam name="TType"></typeparam>
-    public struct DynamicEntityDescriptor<TType>:IEntityDescriptor where TType : IEntityDescriptor, new()
+    public struct DynamicEntityDescriptor<TType> : IEntityDescriptor where TType : IEntityDescriptor, new()
     {
-        public DynamicEntityDescriptor(IEntityBuilder[] extraEntities)
+        internal DynamicEntityDescriptor(bool isExtendible) : this()
         {
-            DBC.ECS.Check.Require(extraEntities.Length > 0,
-                                  "don't use a DynamicEntityDescriptorInfo if you don't need to use extra EntityViews");
-
             var defaultEntities = EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild;
             var length = defaultEntities.Length;
 
-            entitiesToBuild = new IEntityBuilder[length + extraEntities.Length + 1];
+            _entitiesToBuild = new IEntityBuilder[length + 1];
 
-            Array.Copy(defaultEntities, 0, entitiesToBuild, 0, length);
-            Array.Copy(extraEntities, 0, entitiesToBuild, length, extraEntities.Length);
+            Array.Copy(defaultEntities, 0, _entitiesToBuild, 0, length);
 
-            var builder = new EntityBuilder<EntityStructInfoView>
-            {
-                _initializer = new EntityStructInfoView 
-                { 
-                    entitiesToBuild = entitiesToBuild,
-                    type = typeof(TType)
+            //assign it after otherwise the previous copy will overwrite the value in case the item
+            //is already present
+            _entitiesToBuild[length] = new EntityBuilder<EntityStructInfoView>
+            (
+                new EntityStructInfoView
+                {
+                    entitiesToBuild = _entitiesToBuild
                 }
-            };
-            entitiesToBuild[entitiesToBuild.Length - 1] = builder;
+            );
         }
 
-        public IEntityBuilder[] entitiesToBuild { get; }
+        public DynamicEntityDescriptor(IEntityBuilder[] extraEntityBuilders) : this()
+        {
+            var extraEntitiesLength = extraEntityBuilders.Length;
+
+            _entitiesToBuild = Construct(extraEntitiesLength, extraEntityBuilders,
+                EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild);
+        }
+
+        public DynamicEntityDescriptor(FasterList<IEntityBuilder> extraEntityBuilders) : this()
+        {
+            var extraEntities = extraEntityBuilders.ToArrayFast();
+            var extraEntitiesLength = extraEntityBuilders.Count;
+
+            _entitiesToBuild = Construct(extraEntitiesLength, extraEntities,
+                EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild);
+        }
+
+        public void ExtendWith<T>() where T : IEntityDescriptor, new()
+        {
+            var newEntitiesToBuild = EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
+
+            _entitiesToBuild = Construct(newEntitiesToBuild.Length, newEntitiesToBuild, _entitiesToBuild);
+        }
+        
+        public void ExtendWith(IEntityBuilder[] extraEntities)
+        {
+            _entitiesToBuild = Construct(extraEntities.Length, extraEntities, _entitiesToBuild);
+        }
+
+        static IEntityBuilder[] Construct(int extraEntitiesLength, IEntityBuilder[] extraEntities,
+            IEntityBuilder[] startingEntities)
+        {
+            IEntityBuilder[] localEntitiesToBuild;
+
+            if (extraEntitiesLength == 0)
+            {
+                localEntitiesToBuild = startingEntities;
+                return localEntitiesToBuild;
+            }
+
+            var defaultEntities = startingEntities;
+            var length = defaultEntities.Length;
+
+            var index = SetupSpecialEntityStruct(defaultEntities, out localEntitiesToBuild, extraEntitiesLength);
+
+            Array.Copy(extraEntities, 0, localEntitiesToBuild, length, extraEntitiesLength);
+
+            //assign it after otherwise the previous copy will overwrite the value in case the item
+            //is already present
+            localEntitiesToBuild[index] = new EntityBuilder<EntityStructInfoView>
+            (
+                new EntityStructInfoView
+                {
+                    entitiesToBuild = localEntitiesToBuild
+                }
+            );
+
+            return localEntitiesToBuild;
+        }
+
+        static int SetupSpecialEntityStruct(IEntityBuilder[] defaultEntities, out IEntityBuilder[] entitiesToBuild,
+            int extraLenght)
+        {
+            int length = defaultEntities.Length;
+            int index = -1;
+
+            for (var i = 0; i < length; i++)
+            {
+                //the special entity already exists
+                if (defaultEntities[i].GetEntityType() == EntityBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index == -1)
+            {
+                index = length + extraLenght;
+                entitiesToBuild = new IEntityBuilder[index + 1];
+            }
+            else
+                entitiesToBuild = new IEntityBuilder[length + extraLenght];
+
+            Array.Copy(defaultEntities, 0, entitiesToBuild, 0, length);
+
+            return index;
+        }
+
+
+        public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+
+        IEntityBuilder[] _entitiesToBuild;
     }
 }
