@@ -37,7 +37,7 @@ namespace Svelto.ECS.Serialization
         /// <param name="serializationType"></param>
         void DeserializeEntityStructs(ISerializationData serializationData,
             ISerializableEntityDescriptor entityDescriptor,
-            in EntityStructInitializer initializer, SerializationType serializationType);
+            ref EntityStructInitializer initializer, SerializationType serializationType);
 
         /// <summary>
         /// Contrary to the other Deserialize methods that assume that the entity exists, this method is used to deserialise

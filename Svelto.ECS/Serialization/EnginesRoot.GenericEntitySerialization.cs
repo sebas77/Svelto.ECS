@@ -65,7 +65,7 @@ namespace Svelto.ECS
                             ? entityDescriptor.entitiesToSerialize
                             : entityDescriptor.entitiesToBuild);
 
-                    DeserializeEntityStructs(serializationData, entityDescriptor, initializer, serializationType);
+                    DeserializeEntityStructs(serializationData, entityDescriptor, ref initializer, serializationType);
 
                     return initializer;
                 }
@@ -94,7 +94,7 @@ namespace Svelto.ECS
 
             public void DeserializeEntityStructs(ISerializationData serializationData,
                 ISerializableEntityDescriptor entityDescriptor,
-                in EntityStructInitializer initializer, SerializationType serializationType)
+                ref EntityStructInitializer initializer, SerializationType serializationType)
             {
                 foreach (var serializableEntityBuilder in entityDescriptor.entitiesToSerialize)
                 {

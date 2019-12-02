@@ -99,11 +99,11 @@ namespace Svelto.ECS.Serialization
             return (indexSerial, indexDynamic);
         }
         
-        public void CopySerializedEntityStructs(in EntityStructInitializer sourceInitializer, in EntityStructInitializer destinationInitializer)
+        public void CopySerializedEntityStructs(in EntityStructInitializer sourceInitializer, in EntityStructInitializer destinationInitializer, SerializationType serializationType)
         {
             foreach (ISerializableEntityBuilder e in entitiesToSerialize)
             {
-                e.CopySerializedEntityStructs(sourceInitializer, destinationInitializer);
+                e.CopySerializedEntityStructs(sourceInitializer, destinationInitializer, serializationType);
             }
         }
 

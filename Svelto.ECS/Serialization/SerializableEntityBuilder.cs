@@ -84,9 +84,10 @@ namespace Svelto.ECS.Serialization
         }
 
         public void CopySerializedEntityStructs(in EntityStructInitializer sourceInitializer,
-            in EntityStructInitializer destinationInitializer)
+            in EntityStructInitializer destinationInitializer, SerializationType serializationType)
         {
-            destinationInitializer.CopyFrom(sourceInitializer.Get<T>());
+            if ((_serializers[(int) serializationType] is DontSerialize<T>) == false)
+                destinationInitializer.CopyFrom(sourceInitializer.Get<T>());
         }
 
         readonly ISerializer<T>[] _serializers;

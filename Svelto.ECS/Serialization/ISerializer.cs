@@ -9,7 +9,7 @@ namespace Svelto.ECS.Serialization
     {
         bool Serialize(in T value, ISerializationData serializationData);
         bool Deserialize(ref T value, ISerializationData serializationData);
-
+        
         uint size { get; }
     }
 
