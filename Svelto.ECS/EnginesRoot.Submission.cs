@@ -88,8 +88,11 @@ namespace Svelto.ECS
                     }
                     finally
                     {
-                        //other can be cleared now, but let's avoid deleting the dictionary every time
-                        _groupedEntityToAdd.ClearOther();
+                        using (profiler.Sample("clear operates double buffering"))
+                        {
+                            //other can be cleared now, but let's avoid deleting the dictionary every time
+                            _groupedEntityToAdd.ClearOther();
+                        }
                     }
                 }
             }
@@ -97,33 +100,37 @@ namespace Svelto.ECS
 
         void AddEntityViewsToTheDBAndSuitableEngines(in PlatformProfiler profiler)
         {
-            //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
-            foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
+            using (profiler.Sample("Add entities to database"))
             {
-                var groupID = groupOfEntitiesToSubmit.Key;
-
-                //if the group doesn't exist in the current DB let's create it first
-                if (_groupEntityViewsDB.TryGetValue(groupID, out var groupDB) == false)
-                    groupDB = _groupEntityViewsDB[groupID] =
-                        new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
-
-                //add the entityViews in the group
-                foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
+                //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
+                foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
                 {
-                    var type = entityViewsToSubmit.Key;
-                    var typeSafeDictionary = entityViewsToSubmit.Value;
+                    var groupID = groupOfEntitiesToSubmit.Key;
 
-                    var wrapper = new RefWrapper<Type>(type);
-                    if (groupDB.TryGetValue(wrapper, out var dbDic) == false)
-                        dbDic = groupDB[wrapper] = typeSafeDictionary.Create();
+                    //if the group doesn't exist in the current DB let's create it first
+                    if (_groupEntityViewsDB.TryGetValue(groupID, out var groupDB) == false)
+                        groupDB = _groupEntityViewsDB[groupID] =
+                            new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
 
-                    //Fill the DB with the entity views generate this frame.
-                    dbDic.AddEntitiesFromDictionary(typeSafeDictionary, groupID);
+                    //add the entityViews in the group
+                    foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
+                    {
+                        var type = entityViewsToSubmit.Key;
+                        var typeSafeDictionary = entityViewsToSubmit.Value;
 
-                    if (_groupsPerEntity.TryGetValue(wrapper, out var groupedGroup) == false)
-                        groupedGroup = _groupsPerEntity[wrapper] = new FasterDictionary<uint, ITypeSafeDictionary>();
+                        var wrapper = new RefWrapper<Type>(type);
+                        if (groupDB.TryGetValue(wrapper, out var dbDic) == false)
+                            dbDic = groupDB[wrapper] = typeSafeDictionary.Create();
 
-                    groupedGroup[groupID] = dbDic;
+                        //Fill the DB with the entity views generate this frame.
+                        dbDic.AddEntitiesFromDictionary(typeSafeDictionary, groupID);
+
+                        if (_groupsPerEntity.TryGetValue(wrapper, out var groupedGroup) == false)
+                            groupedGroup = _groupsPerEntity[wrapper] =
+                                new FasterDictionary<uint, ITypeSafeDictionary>();
+
+                        groupedGroup[groupID] = dbDic;
+                    }
                 }
             }
 

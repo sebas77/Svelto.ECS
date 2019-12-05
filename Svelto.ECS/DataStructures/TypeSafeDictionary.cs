@@ -27,6 +27,7 @@ namespace Svelto.ECS.Internal
         void SetCapacity(uint size);
         void Trim();
         void Clear();
+        void FastClear();
         bool Has(uint entityIdEntityId);
     }
 
