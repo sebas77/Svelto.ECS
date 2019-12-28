@@ -95,7 +95,7 @@ namespace Svelto.ECS
             _consumers.UnorderedRemove(consumer);
         }
 
-        readonly ThreadSafeFasterList<Consumer<T>> _consumers = new ThreadSafeFasterList<Consumer<T>>();
+        readonly FasterListThreadSafe<Consumer<T>> _consumers = new FasterListThreadSafe<Consumer<T>>();
     }
 
     public struct Consumer<T> : IDisposable where T : unmanaged, IEntityStruct
