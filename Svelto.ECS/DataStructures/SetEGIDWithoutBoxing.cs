@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Svelto.ECS.Internal
 {
-    internal static class SetEGIDWithoutBoxing<T> where T : struct, IEntityStruct
+    static class SetEGIDWithoutBoxing<T> where T : struct, IEntityStruct
     {
         internal delegate void ActionCast(ref T target, EGID egid);
 
@@ -14,6 +14,7 @@ namespace Svelto.ECS.Internal
         {
             if (EntityBuilder<T>.HAS_EGID)
             {
+#if !ENABLE_IL2CPP                
                 Type myTypeA = typeof(T);
                 PropertyInfo myFieldInfo = myTypeA.GetProperty("ID");
 
@@ -25,6 +26,14 @@ namespace Svelto.ECS.Internal
                 var setter = Expression.Lambda<ActionCast>(assignExp, targetExp, valueExp).Compile();
 
                 return setter;
+#else        
+                return (ref T target, EGID value) =>
+                       {
+                           var needEgid = (target as INeedEGID);
+                           needEgid.ID = value;
+                           target      = (T) needEgid;
+                       };
+#endif
             }
 
             return null;

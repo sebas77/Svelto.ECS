@@ -15,7 +15,7 @@ namespace Svelto.ECS
 #if DISABLE_CHECKS
         [Conditional("_CHECKS_DISABLED")]
 #endif
-        public static void CheckFields(Type entityStructType, bool needsReflection)
+        public static void CheckFields(Type entityStructType, bool needsReflection, bool isStringAllowed = false)
         {
             if (entityStructType == ENTITY_STRUCT_INFO_VIEW ||
                 entityStructType == EGIDType ||
@@ -39,7 +39,7 @@ namespace Svelto.ECS
                     FieldInfo fieldInfo = fields[i];
                     Type fieldType = fieldInfo.FieldType;
 
-                    SubCheckFields(fieldType, entityStructType);
+                    SubCheckFields(fieldType, entityStructType, isStringAllowed);
                 }
             }
             else
@@ -62,9 +62,7 @@ namespace Svelto.ECS
                     }
 
                     PropertyInfo[] properties = fieldInfo.FieldType.GetProperties(
-                        BindingFlags.Public |
-                        BindingFlags.Instance |
-                        BindingFlags.DeclaredOnly);
+                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                     for (int j = properties.Length - 1; j >= 0; --j)
                     {
@@ -81,25 +79,27 @@ namespace Svelto.ECS
                         Type propertyType = properties[j].PropertyType;
                         if (propertyType != STRINGTYPE)
                         {
-                            SubCheckFields(propertyType, entityStructType);
+                            //for EntityViewStructs, component fields that are structs that hold strings
+                            //are allowed
+                            SubCheckFields(propertyType, entityStructType, isStringAllowed: true);
                         }
                     }
                 }
             }
         }
 
-        static void SubCheckFields(Type fieldType, Type entityStructType)
+        static void SubCheckFields(Type fieldType, Type entityStructType, bool isStringAllowed = false)
         {
-            if (fieldType.IsPrimitive || fieldType.IsValueType)
+            if (fieldType.IsPrimitive || fieldType.IsValueType || (isStringAllowed == true && fieldType == STRINGTYPE))
             {
                 if (fieldType.IsValueType && !fieldType.IsEnum && fieldType.IsPrimitive == false)
                 {
-                    CheckFields(fieldType, false);
+                    CheckFields(fieldType, false, isStringAllowed);
                 }
 
                 return;
             }
-
+            
             ProcessError(MSG, entityStructType, fieldType);
         }
 

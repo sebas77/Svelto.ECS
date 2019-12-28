@@ -41,6 +41,7 @@ namespace Svelto.ECS
 
                 _entitiesOperations.Clear();
                 _transientEntitiesOperations.Clear();
+                _scheduler.Dispose();
 #if DEBUG && !PROFILER
                 _idCheckers.Clear();
 #endif

@@ -8,7 +8,7 @@ namespace Svelto.ECS.Schedulers.Unity
 {
     //The EntitySubmissionScheduler has been introduced to make the entity views submission logic platform independent
     //You can customize the scheduler if you wish
-    public class UnityEntitySubmissionScheduler : IEntitySubmissionScheduler, IDisposable
+    public class UnityEntitySubmissionScheduler : IEntitySubmissionScheduler
     {
         class Scheduler : MonoBehaviour
         {
@@ -27,7 +27,7 @@ namespace Svelto.ECS.Schedulers.Unity
                 while (true)
                 {
                     yield return _wait;
-
+                    
                     onTick.Invoke();
                 }
             }
@@ -49,8 +49,12 @@ namespace Svelto.ECS.Schedulers.Unity
         {
             set
             {
-                if (_scheduler == null) _scheduler = new GameObject(_name).AddComponent<Scheduler>();
-                
+                if (_scheduler == null)
+                {
+                    _scheduler = new GameObject(_name).AddComponent<Scheduler>();
+                    GameObject.DontDestroyOnLoad(_scheduler.gameObject);
+                }
+
                 _scheduler.onTick = value;
             }
         }

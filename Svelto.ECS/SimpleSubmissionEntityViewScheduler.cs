@@ -17,5 +17,9 @@ namespace Svelto.ECS
         }
         
         EnginesRoot.EntitiesSubmitter _onTick;
+
+        public void Dispose()
+        {
+        }
     }
 }
