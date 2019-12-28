@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
@@ -15,33 +14,34 @@ namespace Svelto.ECS
     /// one only
     /// - you want to communicate between EnginesRoots
     /// </summary>
+    
     class EntitiesStream : IDisposable
     {
         internal Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, IEntityStruct
         {
-            if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
+            if (_streams.ContainsKey(TypeRefWrapper<T>.wrapper) == false) _streams[TypeRefWrapper<T>.wrapper] = new EntityStream<T>();
 
-            return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(name, capacity);
+            return (_streams[TypeRefWrapper<T>.wrapper] as EntityStream<T>).GenerateConsumer(name, capacity);
         }
 
         public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity)
             where T : unmanaged, IEntityStruct
         {
-            if (_streams.ContainsKey(typeof(T)) == false) _streams[typeof(T)] = new EntityStream<T>();
+            if (_streams.ContainsKey(TypeRefWrapper<T>.wrapper) == false) _streams[TypeRefWrapper<T>.wrapper] = new EntityStream<T>();
 
-            return (_streams[typeof(T)] as EntityStream<T>).GenerateConsumer(group, name, capacity);
+            return (_streams[TypeRefWrapper<T>.wrapper] as EntityStream<T>).GenerateConsumer(group, name, capacity);
         }
 
         internal void PublishEntity<T>(ref T entity, EGID egid) where T : unmanaged, IEntityStruct
         {
-            if (_streams.TryGetValue(typeof(T), out var typeSafeStream))
+            if (_streams.TryGetValue(TypeRefWrapper<T>.wrapper, out var typeSafeStream))
                 (typeSafeStream as EntityStream<T>).PublishEntity(ref entity, egid);
             else
                 Console.LogDebug("No Consumers are waiting for this entity to change ", typeof(T));
         }
 
-        readonly ConcurrentDictionary<Type, ITypeSafeStream> _streams =
-            new ConcurrentDictionary<Type, ITypeSafeStream>();
+        readonly ThreadSafeDictionary<RefWrapper<Type>, ITypeSafeStream> _streams =
+            new ThreadSafeDictionary<RefWrapper<Type>, ITypeSafeStream>();
 
         public void Dispose()
         {
@@ -95,24 +95,24 @@ namespace Svelto.ECS
             _consumers.UnorderedRemove(consumer);
         }
 
-        readonly FasterListThreadSafe<Consumer<T>> _consumers = new FasterListThreadSafe<Consumer<T>>();
+        readonly ThreadSafeFasterList<Consumer<T>> _consumers = new ThreadSafeFasterList<Consumer<T>>();
     }
 
     public struct Consumer<T> : IDisposable where T : unmanaged, IEntityStruct
     {
-        internal Consumer(string name, uint capacity, EntityStream<T> stream):this() 
+        internal Consumer(string name, uint capacity, EntityStream<T> stream):this()
         {
-#if DEBUG && !PROFILER            
+#if DEBUG && !PROFILER
             _name = name;
 #endif
-            _ringBuffer = new RingBuffer<ValueTuple<T, EGID>>((int) capacity, 
+            _ringBuffer = new RingBuffer<ValueTuple<T, EGID>>((int) capacity,
 #if DEBUG && !PROFILER
                 _name
 #else
                 string.Empty
 #endif
                 );
-            
+
             _stream = stream;
         }
 
@@ -133,7 +133,7 @@ namespace Svelto.ECS
             var tryDequeue = _ringBuffer.TryDequeue(out var values);
 
             entity = values.Item1;
-            
+
             return tryDequeue;
         }
 
@@ -143,7 +143,7 @@ namespace Svelto.ECS
 
             entity = values.Item1;
             id = values.Item2;
-            
+
             return tryDequeue;
         }
         public void Flush() { _ringBuffer.Reset(); }
@@ -152,11 +152,11 @@ namespace Svelto.ECS
 
         readonly          RingBuffer<ValueTuple<T, EGID>>   _ringBuffer;
         readonly          EntityStream<T> _stream;
-        
+
         internal readonly ExclusiveGroup  _group;
         internal readonly bool            _hasGroup;
-        
-#if DEBUG && !PROFILER        
+
+#if DEBUG && !PROFILER
         readonly string _name;
 #endif
     }
