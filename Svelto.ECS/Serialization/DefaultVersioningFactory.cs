@@ -12,7 +12,7 @@ namespace Svelto.ECS.Serialization
         {
             var initializer = _factory.BuildEntity<T>(egid, _implementors);
                 
-            entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, ref initializer, SerializationType.Storage);
+            entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, ref initializer, serializationType);
 
             return initializer;
         }
