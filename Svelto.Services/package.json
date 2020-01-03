@@ -1,0 +1,15 @@
+{
+  "displayName": "Svelto Services",
+  "category": "Svelto",
+  "description": "Svelto Services",
+  "dependencies": {
+    "com.sebaslab.svelto.common": "2.9.1"
+  },
+  "keywords": [
+    "svelto"
+  ],
+  "name": "com.sebaslab.svelto.services",
+  "unity": "2019.2",
+  "version": "2.9.1",
+  "type": "library"
+}
