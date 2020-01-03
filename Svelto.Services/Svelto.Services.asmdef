@@ -2,10 +2,8 @@
     "name": "Svelto.Services",
     "references": [
         "Svelto.Common",
-        "Svelto.Tasks",
-        "Utf8Json"
+        "Svelto.Tasks"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
