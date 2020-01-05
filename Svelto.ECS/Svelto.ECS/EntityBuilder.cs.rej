@@ -1,0 +1,8 @@
+diff a/Assets/Svelto/Svelto.ECS/EntityBuilder.cs b/Assets/Svelto/Svelto.ECS/EntityBuilder.cs	(rejected hunks)
+@@ -1,5 +1,6 @@
+ ﻿using System;
+ using System.Collections.Generic;
++using DBC.ECS;
+ using Svelto.DataStructures;
+ using Svelto.ECS.Hybrid;
+ using Svelto.ECS.Internal;
