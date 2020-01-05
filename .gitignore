@@ -1,4 +1,3 @@
-*.meta
 /obj
 /bin/Release/netstandard2.0
 /bin/Debug/netstandard2.0
