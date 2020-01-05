@@ -6,13 +6,17 @@ Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainab
 
 ## Why using Svelto.ECS with Unity?
 
-_Svelto.ECS wasn't born just from the needs of a large team, but also as result of years of reasoning behind software engineering applied to game development\(\*\). Compared to Unity.ECS the main goals and reasons for Svelto.ECS to exist are different enough to justify its on going development \(plus Svelto is platform agnostic, so it has been written with portability in mind\). Svelto.ECS hasn't been built just to develop faster code, it has been built to help develop better code. Performance gain is one of the benefits in using Svelto.ECS, as ECS in general is a great way to write cache-friendly code, but the main reasons why Svelto.ECS has been developed orbit around the shifting of paradigm from Object Oriented Programming, the consequent improvement of the code design and maintainability, the approachability by junior programmers that won't need to worry too much about the architecture and can focus on the solution of the problems thanks to the rigid directions that the framework gives. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be "junior coder proof"._
+_Svelto.ECS wasn't born just from the needs of a large team, but also as result of years of reasoning behind software engineering applied to game development\(\*\). Compared to Unity.ECS, the main goals and reasons for Svelto.ECS to exist are different enough to justify its on going development \(plus Svelto is platform agnostic, so it has been written with portability in mind\). Svelto.ECS hasn't been written just to develop faster code, it has been built to help develop better code. Performance gain is one of the benefits in using Svelto.ECS, as ECS in general is a great way to write cache-friendly code. However Svelto.ECS has been designed around the shift of paradigm from Object Oriented Programming and the consequent improvement of the code design and maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be "junior coder proof"._
 
 ## Official Examples
 
 * **Mini Examples**: [https://github.com/sebas77/Svelto.MiniExamples](https://github.com/sebas77/Svelto.MiniExamples) \(including articles\)
 * **Unity Boids Simulation**: [https://github.com/sebas77/Svelto.ECS.Examples.Boids](https://github.com/sebas77/Svelto.ECS.Examples.Boids) \(including article\)
 * **Unit Tests**: [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests)
+
+**Official Chat \(join to get help from me!\)**
+
+* [https://discord.gg/3qAdjDb](https://discord.gg/3qAdjDb) 
 
 ## Official Articles
 
@@ -45,36 +49,14 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 * [https://github.com/sebas77/Svelto.Tasks](https://github.com/sebas77/Svelto.Tasks)
 
-## Users Generated Content
-
-**User experiments \(may use old versions of Svelto and be quite outdated\)**
+## Users Generated Content \(may use old versions of Svelto and be quite outdated\)
 
 * [https://github.com/grovemaster/Unity3D-Game-App](https://github.com/grovemaster/Unity3D-Game-App)
 * [https://github.com/colonelsalt/ZombieDeathBoomECS](https://github.com/colonelsalt/ZombieDeathBoomECS)
-
-_Please share your Svelto projects with me!_
-
-**Users articles \(may use old versions of Svelto\)**
-
 * [https://eagergames.wordpress.com/category/ecs/](https://eagergames.wordpress.com/category/ecs/) \(Dario Oliveri\)
 * [https://blogs.msdn.microsoft.com/uk\_faculty\_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/](https://blogs.msdn.microsoft.com/uk_faculty_connection/2018/05/08/entity-component-system-in-unity-a-tutorial/) \(Lee Stott\)
-
-_If you write an article about Svelto, please let me know, I will add it here!_
-
-**User made inspectors \(may use old versions of Svelto\)**
-
 * [https://github.com/sebas77/Svelto.ECS.Debugger](https://github.com/sebas77/Svelto.ECS.Debugger) \(work just started\)
 * [https://github.com/NED-Studio/LGK.Inspector](https://github.com/NED-Studio/LGK.Inspector) \(probably not working anymore\)
-
-**Official Chat**
-
-* [https://discord.gg/3qAdjDb](https://discord.gg/3qAdjDb) 
-
-**Unity official forum thread \(I don't update it anymore\):**
-
-* [https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/](https://forum.unity.com/threads/open-source-svelto-ecs-lightweight-entity-component-system-for-c-and-unity.502163/)
-
-**Note: don't beat yourself up if you find Svelto.ECS hard to use at first. The framework is very light in features, but it forces the use of a new coding paradigm and shifting code paradigm is hard! I will try to clarify all the concepts writing more and more articles**
 
 ## In case of bugs
 
