@@ -1,5 +1,3 @@
-[![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
-
 # Svelto Entity Component System 2.9
 
 =====================================
@@ -10,7 +8,7 @@ Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainab
 
 _Svelto.ECS wasn't born just from the needs of a large team, but also as result of years of reasoning behind software engineering applied to game development\(\*\). Compared to Unity.ECS, the main goals and reasons for Svelto.ECS to exist are different enough to justify its on going development \(plus Svelto is platform agnostic, so it has been written with portability in mind\). Svelto.ECS hasn't been written just to develop faster code, it has been built to help develop better code. Performance gain is one of the benefits in using Svelto.ECS, as ECS in general is a great way to write cache-friendly code. However Svelto.ECS has been designed around the shift of paradigm from Object Oriented Programming and the consequent improvement of the code design and maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be "junior coder proof"._
 
-## Svelto is now distributed as Unity Package too
+## Svelto is now distributed as Unity Package too [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
 
 read this article for more information:http://www.sebaslab.com/distributing-svelto-through-openupm/
 
