@@ -10,13 +10,17 @@ Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainab
 
 _Svelto.ECS wasn't born just from the needs of a large team, but also as result of years of reasoning behind software engineering applied to game development\(\*\). Compared to Unity.ECS, the main goals and reasons for Svelto.ECS to exist are different enough to justify its on going development \(plus Svelto is platform agnostic, so it has been written with portability in mind\). Svelto.ECS hasn't been written just to develop faster code, it has been built to help develop better code. Performance gain is one of the benefits in using Svelto.ECS, as ECS in general is a great way to write cache-friendly code. However Svelto.ECS has been designed around the shift of paradigm from Object Oriented Programming and the consequent improvement of the code design and maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be "junior coder proof"._
 
+## Svelto is now distributed as Unity Package too
+
+read this article for more information:http://www.sebaslab.com/distributing-svelto-through-openupm/
+
 ## Official Examples
 
 ### * **Mini Examples**: [https://github.com/sebas77/Svelto.MiniExamples](https://github.com/sebas77/Svelto.MiniExamples) \(including articles\)
 * **Unity Boids Simulation**: [https://github.com/sebas77/Svelto.ECS.Examples.Boids](https://github.com/sebas77/Svelto.ECS.Examples.Boids) \(including article\)
 * **Unit Tests**: [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests)
 
-**Official Chat \(join to get help from me!\)**
+**Official Chat \(join to get help from me for free!\)**
 
 * [https://discord.gg/3qAdjDb](https://discord.gg/3qAdjDb) 
 
@@ -66,7 +70,7 @@ Best option is to fork and clone [https://github.com/sebas77/Svelto.ECS.Tests](h
 
 ## [The Github wiki page](https://github.com/sebas77/Svelto.ECS/wiki)
 
-It needs love and as far as I understood, anyone can edit it. Feel free to do so if you have a good understanding of Svelto!
+It needs love and as far as I understood, anyone can edit it. Feel free to do so if you have a good understanding of Svelto! I don't update old articles, while the wiki update is not consistent, so the only way to be sure you get it right is to join our Discord channel and ask questions.
 
 ## I like the project, how can I help?
 
