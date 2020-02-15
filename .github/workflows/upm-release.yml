@@ -1,4 +1,4 @@
-name: UPM Release
+name: Svelto.ECS UPM Release
 
 on:
   push:
