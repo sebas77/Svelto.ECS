@@ -1,0 +1,87 @@
+name: Svelto.ECS UPM Release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - version.json
+      - ".github/workflows/upm-release.yml"
+
+jobs:
+  build:
+    env:
+      PKG_ROOT: Svelto.ECS
+      VERSION_JSON: version.json
+      PKG_JSON: package.json
+      LICENSE: LICENSE
+      README: README.md
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: copy package to temp
+      run: |
+        mkdir temp
+        cp -r $PKG_ROOT temp
+        cp $VERSION_JSON temp
+        cp $PKG_JSON temp
+        cp $LICENSE temp
+        cp $README temp
+
+    - name: checkout upm branch
+      run: |
+        git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+        git checkout UPM
+
+    - name: get preparation tools
+      run: git clone https://github.com/Ujinjinjin/upm-preparator.git --branch v1.0.9 --single-branch
+
+    - name: bump package version
+      run: |
+        python3 upm-preparator/version_bumpinator.py "temp/version.json" "temp/package.json"
+        rm "temp/version.json"
+
+    - name: change project structure
+      run: python3 upm-preparator/structure_changinator.py "temp/${PKG_ROOT}"
+
+    - name: move package.json & LICENSE & README from temp to root
+      run: |
+        mv "temp/package.json" .
+        mv "temp/LICENSE" .
+        mv "temp/README.md" .
+
+    - name: generate meta files
+      run: python3 upm-preparator/meta_makinator.py
+
+    - name: remove preparation tools and temp
+      run: |
+        rm -rf upm-preparator
+        rm -rf temp
+
+    - name: config git data
+      run: |
+        git config --global user.email "noreply@github.com"
+        git config --global user.name "GitHub"
+
+    - name: commit, tag and push changes
+      run: |
+        git add -A
+        git commit -m "UPM package version ${PKG_VERSION}"
+        git push origin UPM
+        git tag $(echo $PKG_VERSION)
+        git push origin $(echo $PKG_VERSION)
+
+    - name: create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.PKG_VERSION }}
+        release_name: "UPM ${{ env.PKG_VERSION }}"
+        body: "-"
+        draft: false
+        prerelease: false
