@@ -37,7 +37,7 @@ jobs:
         git checkout UPM
 
     - name: get preparation tools
-      run: git clone https://github.com/Ujinjinjin/upm-preparator.git --branch v1.0.9 --single-branch
+      run: git clone https://github.com/Ujinjinjin/upm-preparator.git --branch v1.0.10 --single-branch
 
     - name: bump package version
       run: |
@@ -54,7 +54,7 @@ jobs:
         mv "temp/README.md" .
 
     - name: generate meta files
-      run: python3 upm-preparator/meta_makinator.py
+      run: python3 upm-preparator/meta_makinator.py "package.json"
 
     - name: remove preparation tools and temp
       run: |
