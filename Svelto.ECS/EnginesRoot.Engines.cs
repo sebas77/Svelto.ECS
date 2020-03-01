@@ -34,6 +34,7 @@ namespace Svelto.ECS
         public EnginesRoot(IEntitySubmissionScheduler entityViewScheduler)
         {
             _entitiesOperations = new FasterDictionary<ulong, EntitySubmitOperation>();
+            serializationDescriptorMap = new SerializationDescriptorMap();
             _reactiveEnginesAddRemove = new FasterDictionary<RefWrapper<Type>, FasterList<IEngine>>();
             _reactiveEnginesSwap = new FasterDictionary<RefWrapper<Type>, FasterList<IEngine>>();
             _enginesSet = new FasterList<IEngine>();

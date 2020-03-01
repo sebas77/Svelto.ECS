@@ -10,10 +10,7 @@ namespace Svelto.ECS
         sealed class SerializationDescriptorMap
         {
             /// <summary>
-            /// Here we want to register all the EntityDescriptors that need to be serialized for network play.
-            ///
-            /// Remember! This needs to in sync across different clients and server as the values are serialized across
-            /// the network also want this to not change so we can save to a DB
+            /// Use reflection to register all the ISerializableEntityDescriptor to be used for serialization
             /// </summary>
             internal SerializationDescriptorMap()
             {
@@ -25,8 +22,8 @@ namespace Svelto.ECS
                 {
                     foreach (Type type in GetTypesSafe(assembly))
                     {
-                        if (type != null && type.IsClass && type.GetConstructor(Type.EmptyTypes) != null &&
-                            typeof(ISerializableEntityDescriptor).IsAssignableFrom(type))
+                        if (type != null && type.IsClass && type.IsAbstract == false && type.BaseType != null && type.BaseType.IsGenericType &&
+                            type.BaseType.GetGenericTypeDefinition() == typeof(SerializableEntityDescriptor<>))
                         {
                             var descriptor = Activator.CreateInstance(type) as ISerializableEntityDescriptor;
 
@@ -91,7 +88,6 @@ namespace Svelto.ECS
                 _factories.Add(SerializationEntityDescriptorTemplate<Descriptor>.hash, deserializationFactory);
             }
 
-
             readonly Dictionary<uint, ISerializableEntityDescriptor> _descriptors;
             readonly Dictionary<uint, IDeserializationFactory> _factories;
         }
@@ -100,6 +96,6 @@ namespace Svelto.ECS
         /// The map of serializable entity hashes to the serializable entity builders (to know the entity structs
         /// to serialize)
         /// </summary>
-        SerializationDescriptorMap serializationDescriptorMap { get; } = new SerializationDescriptorMap();
+        SerializationDescriptorMap serializationDescriptorMap { get; }
     }
 }
