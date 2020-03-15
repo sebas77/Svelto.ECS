@@ -3,7 +3,7 @@
     "category": "Svelto",
     "description": "Svelto ECS C# Lightweight Data Oriented Entity Component System Framework",
     "dependencies": {
-      "com.sebaslab.svelto.common": "2.9.9"
+      "com.sebaslab.svelto.common": "2.9.10"
     },
     "keywords": [
       "svelto"
