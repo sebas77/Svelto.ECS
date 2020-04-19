@@ -3,8 +3,16 @@ using Svelto.ECS;
 
 public static class DefaultSerializerUtils
 {
-    public static unsafe void CopyToByteArray<T>(in T src, byte[] data, uint offsetDst) where T : unmanaged, IEntityStruct
+    public static unsafe void CopyToByteArray<T>(in T src, byte[] data, uint offsetDst) where T : unmanaged, IEntityComponent
     {
+#if DEBUG && !PROFILE_SVELTO
+        if (data.Length - offsetDst < sizeof(T))
+        {
+            throw new IndexOutOfRangeException(
+                $"Data out of bounds when copying struct {typeof(T).GetType().Name}. data.Length: {data.Length}, offsetDst: {offsetDst}");
+        }
+#endif
+
         fixed (void* dstPtr = data)
         {
             void* dstOffsetPtr;
@@ -21,9 +29,17 @@ public static class DefaultSerializerUtils
         }
     }
 
-    public static unsafe T CopyFromByteArray<T>(byte[] data, uint offsetSrc) where T : unmanaged, IEntityStruct
+    public static unsafe T CopyFromByteArray<T>(byte[] data, uint offsetSrc) where T : unmanaged, IEntityComponent
     {
-        T dst = new T();
+        T dst = default;
+
+#if DEBUG && !PROFILE_SVELTO
+        if (data.Length - offsetSrc < sizeof(T))
+        {
+            throw new IndexOutOfRangeException(
+                $"Data out of bounds when copying struct {dst.GetType().Name}. data.Length: {data.Length}, offsetSrc: {offsetSrc}");
+        }
+#endif
 
         void* dstPtr = &dst;
         fixed (void* srcPtr = data)

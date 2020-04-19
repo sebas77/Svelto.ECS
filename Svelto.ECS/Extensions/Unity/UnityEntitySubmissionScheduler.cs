@@ -1,6 +1,5 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
 using Object = UnityEngine.Object;
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -8,7 +7,7 @@ namespace Svelto.ECS.Schedulers.Unity
 {
     //The EntitySubmissionScheduler has been introduced to make the entity views submission logic platform independent
     //You can customize the scheduler if you wish
-    public class UnityEntitySubmissionScheduler : IEntitySubmissionScheduler
+    public class UnityEntitiesSubmissionScheduler : IEntitiesSubmissionScheduler
     {
         class Scheduler : MonoBehaviour
         {
@@ -33,16 +32,19 @@ namespace Svelto.ECS.Schedulers.Unity
             }
 
             readonly WaitForEndOfFrame _wait = new WaitForEndOfFrame();
-            readonly IEnumerator _coroutine;
+            readonly IEnumerator       _coroutine;
             
             public EnginesRoot.EntitiesSubmitter onTick;
         }
         
-        public UnityEntitySubmissionScheduler(string name = "ECSScheduler") { _name = name; }
+        public UnityEntitiesSubmissionScheduler(string name = "ECSScheduler") { _name = name; }
 
         public void Dispose()
         {
-            Object.Destroy(_scheduler.gameObject);
+            if (_scheduler != null && _scheduler.gameObject != null)
+            {
+                Object.Destroy(_scheduler.gameObject);
+            }
         }
         
         public EnginesRoot.EntitiesSubmitter onTick
@@ -59,7 +61,7 @@ namespace Svelto.ECS.Schedulers.Unity
             }
         }
 
-        Scheduler _scheduler;
+        Scheduler       _scheduler;
         readonly string _name;
     }
 }

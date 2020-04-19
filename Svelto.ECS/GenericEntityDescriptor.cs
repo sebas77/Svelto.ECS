@@ -1,104 +1,104 @@
 ﻿namespace Svelto.ECS
 {
-    public abstract class GenericEntityDescriptor<T> : IEntityDescriptor where T : struct,  IEntityStruct
+    public abstract class GenericEntityDescriptor<T> : IEntityDescriptor where T : struct,  IEntityComponent
     {
-        static readonly IEntityBuilder[] _entityBuilders;
-        static GenericEntityDescriptor() { _entityBuilders = new IEntityBuilder[] {new EntityBuilder<T>()}; }
+        static readonly IComponentBuilder[] _entityBuilders;
+        static GenericEntityDescriptor() { _entityBuilders = new IComponentBuilder[] {new ComponentBuilder<T>()}; }
 
-        public IEntityBuilder[] entitiesToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _entityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor
-        where T : struct,  IEntityStruct where U : struct,  IEntityStruct
+        where T : struct,  IEntityComponent where U : struct,  IEntityComponent
     {
-        static readonly IEntityBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _entityBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[] {new EntityBuilder<T>(), new EntityBuilder<U>()};
+            _entityBuilders = new IComponentBuilder[] {new ComponentBuilder<T>(), new ComponentBuilder<U>()};
         }
 
-        public IEntityBuilder[] entitiesToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _entityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor
-        where T : struct,  IEntityStruct where U : struct,  IEntityStruct where V : struct,  IEntityStruct
+        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
     {
-        static readonly IEntityBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _entityBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[]
+            _entityBuilders = new IComponentBuilder[]
             {
-                new EntityBuilder<T>(),
-                new EntityBuilder<U>(),
-                new EntityBuilder<V>()
+                new ComponentBuilder<T>(),
+                new ComponentBuilder<U>(),
+                new ComponentBuilder<V>()
             };
         }
 
-        public IEntityBuilder[] entitiesToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _entityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor
-        where T : struct,  IEntityStruct where U : struct,  IEntityStruct where V : struct,  IEntityStruct
-        where W : struct,  IEntityStruct
+        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
+        where W : struct,  IEntityComponent
     {
-        static readonly IEntityBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _entityBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[]
+            _entityBuilders = new IComponentBuilder[]
             {
-                new EntityBuilder<T>(),
-                new EntityBuilder<U>(),
-                new EntityBuilder<V>(),
-                new EntityBuilder<W>()
+                new ComponentBuilder<T>(),
+                new ComponentBuilder<U>(),
+                new ComponentBuilder<V>(),
+                new ComponentBuilder<W>()
             };
         }
 
-        public IEntityBuilder[] entitiesToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _entityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor
-        where T : struct,  IEntityStruct where U : struct,  IEntityStruct where V : struct,  IEntityStruct
-        where W : struct,  IEntityStruct where X : struct,  IEntityStruct
+        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
+        where W : struct,  IEntityComponent where X : struct,  IEntityComponent
     {
-        static readonly IEntityBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _entityBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[]
+            _entityBuilders = new IComponentBuilder[]
             {
-                new EntityBuilder<T>(),
-                new EntityBuilder<U>(),
-                new EntityBuilder<V>(),
-                new EntityBuilder<W>(),
-                new EntityBuilder<X>()
+                new ComponentBuilder<T>(),
+                new ComponentBuilder<U>(),
+                new ComponentBuilder<V>(),
+                new ComponentBuilder<W>(),
+                new ComponentBuilder<X>()
             };
         }
 
-        public IEntityBuilder[] entitiesToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _entityBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor
-        where T : struct,  IEntityStruct where U : struct,  IEntityStruct where V : struct,  IEntityStruct
-        where W : struct,  IEntityStruct where X : struct,  IEntityStruct where Y : struct,  IEntityStruct
+        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
+        where W : struct,  IEntityComponent where X : struct,  IEntityComponent where Y : struct,  IEntityComponent
     {
-        static readonly IEntityBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _entityBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IEntityBuilder[]
+            _entityBuilders = new IComponentBuilder[]
             {
-                new EntityBuilder<T>(),
-                new EntityBuilder<U>(),
-                new EntityBuilder<V>(),
-                new EntityBuilder<W>(),
-                new EntityBuilder<X>(),
-                new EntityBuilder<Y>()
+                new ComponentBuilder<T>(),
+                new ComponentBuilder<U>(),
+                new ComponentBuilder<V>(),
+                new ComponentBuilder<W>(),
+                new ComponentBuilder<X>(),
+                new ComponentBuilder<Y>()
             };
         }
 
-        public IEntityBuilder[] entitiesToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _entityBuilders;
     }
 }

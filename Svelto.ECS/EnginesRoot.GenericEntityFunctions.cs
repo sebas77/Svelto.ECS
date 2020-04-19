@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -10,15 +10,15 @@ namespace Svelto.ECS
         /// todo: EnginesRoot was a weakreference to give the change to inject
         /// entityfunctions from other engines root. It probably should be reverted
         /// </summary>
-        sealed class GenericEntityFunctions : IEntityFunctions
+        class GenericEntityFunctions : IEntityFunctions
         {
             internal GenericEntityFunctions(EnginesRoot weakReference)
             {
-                _enginesRoot = new WeakReference<EnginesRoot>(weakReference);
+                _enginesRoot = new Svelto.DataStructures.WeakReference<EnginesRoot>(weakReference);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveEntity<T>(uint entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) where T :
+            public void RemoveEntity<T>(uint entityID, ExclusiveGroupStruct groupID) where T :
                 IEntityDescriptor, new()
             {
                 RemoveEntity<T>(new EGID(entityID, groupID));
@@ -31,11 +31,23 @@ namespace Svelto.ECS
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
-                        EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
+                        EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void RemoveAllEntities<T>(ExclusiveGroupStruct group) where T : IEntityDescriptor, new()
+            {
+                throw new NotImplementedException();
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void RemoveAllEntities<T>() where T : IEntityDescriptor, new()
+            {
+                throw new NotImplementedException();
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RemoveGroupAndEntities(ExclusiveGroup.ExclusiveGroupStruct groupID)
+            public void RemoveGroupAndEntities(ExclusiveGroupStruct groupID)
             {
                 _enginesRoot.Target.RemoveGroupID(groupID);
 
@@ -44,23 +56,32 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SwapEntityGroup<T>(uint entityID, ExclusiveGroup.ExclusiveGroupStruct fromGroupID,
-                ExclusiveGroup.ExclusiveGroupStruct toGroupID)
+            public void SwapEntitiesInGroup<T>(ExclusiveGroupStruct fromGroupID, ExclusiveGroupStruct toGroupID)
+            {
+                throw new NotImplementedException("can't run this until I add the checks!");
+                
+                _enginesRoot.Target.QueueEntitySubmitOperation(
+                    new EntitySubmitOperation(EntitySubmitOperationType.SwapGroup, new EGID(0, fromGroupID),
+                        new EGID(0, toGroupID)));
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void SwapEntityGroup<T>(uint entityID, ExclusiveGroupStruct fromGroupID, ExclusiveGroupStruct toGroupID)
                 where T : IEntityDescriptor, new()
             {
                 SwapEntityGroup<T>(new EGID(entityID, fromGroupID), toGroupID);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroup.ExclusiveGroupStruct toGroupID)
+            public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroupStruct toGroupID)
                 where T : IEntityDescriptor, new()
             {
                 SwapEntityGroup<T>(fromID, new EGID(fromID.entityID, (uint) toGroupID));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroup.ExclusiveGroupStruct toGroupID
-                , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup)
+            public void SwapEntityGroup<T>(EGID fromID, ExclusiveGroupStruct toGroupID
+                , ExclusiveGroupStruct mustBeFromGroup)
                 where T : IEntityDescriptor, new()
             {
                 if (fromID.groupID != mustBeFromGroup)
@@ -71,7 +92,7 @@ namespace Svelto.ECS
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntityGroup<T>(EGID fromID, EGID toID
-                , ExclusiveGroup.ExclusiveGroupStruct mustBeFromGroup)
+                , ExclusiveGroupStruct mustBeFromGroup)
                 where T : IEntityDescriptor, new()
             {
                 if (fromID.groupID != mustBeFromGroup)
@@ -79,6 +100,18 @@ namespace Svelto.ECS
 
                 SwapEntityGroup<T>(fromID, toID);
             }
+
+#if UNITY_ECS
+            public NativeEntityRemove ToNativeRemove<T>() where T : IEntityDescriptor, new()
+            {
+                return _enginesRoot.Target.ProvideNativeEntityRemoveQueue<T>();
+            }
+            
+            public NativeEntitySwap ToNativeSwap<T>() where T : IEntityDescriptor, new()
+            {
+                return _enginesRoot.Target.ProvideNativeEntitySwapQueue<T>();
+            }
+#endif            
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SwapEntityGroup<T>(EGID fromID, EGID toID)
@@ -89,17 +122,17 @@ namespace Svelto.ECS
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap,
-                        fromID, toID, EntityDescriptorTemplate<T>.descriptor.entitiesToBuild));
+                        fromID, toID, EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
             }
-            
+
             //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
 //engines of other enginesRoot
-            readonly WeakReference<EnginesRoot> _enginesRoot;
+            readonly Svelto.DataStructures.WeakReference<EnginesRoot> _enginesRoot;
         }
 
         void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)
         {
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
             entitySubmitOperation.trace = new StackFrame(1, true);
 #endif
             _entitiesOperations.Add((ulong) entitySubmitOperation.fromID, entitySubmitOperation);
@@ -107,14 +140,14 @@ namespace Svelto.ECS
 
         void QueueEntitySubmitOperation<T>(EntitySubmitOperation entitySubmitOperation) where T : IEntityDescriptor
         {
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
             entitySubmitOperation.trace = new StackFrame(1, true);
 
             if (_entitiesOperations.TryGetValue((ulong) entitySubmitOperation.fromID, out var entitySubmitedOperation))
             {
                 if (entitySubmitedOperation != entitySubmitOperation)
                     throw new ECSException("Only one entity operation per submission is allowed"
-                        .FastConcat(" entityViewType: ")
+                        .FastConcat(" entityComponentType: ")
                         .FastConcat(typeof(T).Name)
                         .FastConcat(" submission type ", entitySubmitOperation.type.ToString(),
                             " from ID: ", entitySubmitOperation.fromID.entityID.ToString())

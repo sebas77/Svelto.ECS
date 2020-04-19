@@ -22,12 +22,12 @@ namespace Svelto.ECS.Experimental
         {
             _resources.Add(resource);
 
-            return (uint)_resources.Count;
+            return (uint)_resources.count;
         }
 
         public static T FromECS(uint id)
         {
-            if (id - 1 < _resources.Count)
+            if (id - 1 < _resources.count)
                 return _resources[(int) id - 1];
             
             return default;

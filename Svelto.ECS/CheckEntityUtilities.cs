@@ -1,4 +1,4 @@
-﻿#if DEBUG && !PROFILER
+﻿#if DEBUG && !PROFILE_SVELTO
 using System.Collections.Generic;
 using Svelto.DataStructures;
 #else
@@ -7,9 +7,13 @@ using System.Diagnostics;
 
 namespace Svelto.ECS
 {
+    /// <summary>
+    /// Note: this check doesn't catch the case when an add and remove is done on the same entity before the next
+    /// submission. Two operations on the same entity are not allowed between submissions.
+    /// </summary>
     public partial class EnginesRoot
     {
-#if DEBUG && !PROFILER        
+#if DEBUG && !PROFILE_SVELTO        
         void CheckRemoveEntityID(EGID egid)
         {
      //       Console.LogError("<color=orange>removed</color>".FastConcat(egid.ToString()));
@@ -48,14 +52,14 @@ namespace Svelto.ECS
                         .FastConcat("' id: '")
                         .FastConcat(egid.entityID)
                         .FastConcat("' groupid: '")
-                        .FastConcat(egid.groupID)
+                        .FastConcat(egid.groupID) 
                         .FastConcat("'"));
             }
-
+            
             hash.Add(egid.entityID);
         }
         
-        void RemoveGroupID(ExclusiveGroup.ExclusiveGroupStruct groupID)
+        void RemoveGroupID(ExclusiveGroupStruct groupID)
         {
             _idCheckers.Remove(groupID);
         }
@@ -73,7 +77,7 @@ namespace Svelto.ECS
         }
         
         [Conditional("_CHECKS_DISABLED")]
-        void RemoveGroupID(ExclusiveGroup.ExclusiveGroupStruct groupID)
+        void RemoveGroupID(ExclusiveGroupStruct groupID)
         {
         }
 #endif

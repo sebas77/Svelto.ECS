@@ -1,7 +1,7 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
 using UnityEngine;
 
-namespace Svelto.ECS.Unity
+namespace Svelto.ECS.Extensions.Unity
 {
     public abstract class GenericEntityDescriptorHolder<T>: 
         MonoBehaviour , IEntityDescriptorHolder

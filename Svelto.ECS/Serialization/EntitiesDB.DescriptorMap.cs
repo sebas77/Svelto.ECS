@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Svelto.Common;
 using Svelto.ECS.Serialization;
 
 namespace Svelto.ECS
@@ -10,28 +11,40 @@ namespace Svelto.ECS
         sealed class SerializationDescriptorMap
         {
             /// <summary>
-            /// Use reflection to register all the ISerializableEntityDescriptor to be used for serialization
+            /// Here we want to register all the EntityDescriptors that need to be serialized for network play.
+            ///
+            /// Remember! This needs to in sync across different clients and server as the values are serialized across
+            /// the network also want this to not change so we can save to a DB
             /// </summary>
             internal SerializationDescriptorMap()
             {
                 _descriptors = new Dictionary<uint, ISerializableEntityDescriptor>();
                 _factories = new Dictionary<uint, IDeserializationFactory>();
 
-                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                foreach (Assembly assembly in assemblies)
+                using (new StandardProfiler("Assemblies Scan"))
                 {
-                    foreach (Type type in GetTypesSafe(assembly))
-                    {
-                        if (type != null && type.IsClass && type.IsAbstract == false && type.BaseType != null && type.BaseType.IsGenericType &&
-                            type.BaseType.GetGenericTypeDefinition() == typeof(SerializableEntityDescriptor<>))
-                        {
-                            var descriptor = Activator.CreateInstance(type) as ISerializableEntityDescriptor;
+                    Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                //    Assembly executingAssembly = Assembly.GetExecutingAssembly();
 
-                            RegisterEntityDescriptor(descriptor);
+                    foreach (Assembly assembly in assemblies)
+                    {
+                   //     if (assembly.GetReferencedAssemblies().Contains(executingAssembly.GetName()))
+                        {
+                            foreach (Type type in GetTypesSafe(assembly))
+                            {
+                                if (type != null && type.IsClass && type.IsAbstract == false && type.BaseType != null
+                                 && type.BaseType.IsGenericType && type.BaseType.GetGenericTypeDefinition()
+                                 == typeof(SerializableEntityDescriptor<>))
+                                {
+                                    var descriptor = Activator.CreateInstance(type) as ISerializableEntityDescriptor;
+
+                                    RegisterEntityDescriptor(descriptor);
+                                }
+                            }
                         }
                     }
                 }
-            }
+            } 
 
             static IEnumerable<Type> GetTypesSafe(Assembly assembly)
             {
@@ -56,7 +69,7 @@ namespace Svelto.ECS
 
                 uint descriptorHash = descriptor.hash;
 
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
                 if (_descriptors.ContainsKey(descriptorHash))
                 {
                     throw new Exception($"Hash Collision of '{descriptor.GetType()}' against " +
@@ -69,7 +82,7 @@ namespace Svelto.ECS
 
             public ISerializableEntityDescriptor GetDescriptorFromHash(uint descriptorID)
             {
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
                 DBC.ECS.Check.Require(_descriptors.ContainsKey(descriptorID),
                     $"Could not find descriptor with ID '{descriptorID}'!");
 #endif
@@ -87,6 +100,7 @@ namespace Svelto.ECS
             {
                 _factories.Add(SerializationEntityDescriptorTemplate<Descriptor>.hash, deserializationFactory);
             }
+
 
             readonly Dictionary<uint, ISerializableEntityDescriptor> _descriptors;
             readonly Dictionary<uint, IDeserializationFactory> _factories;

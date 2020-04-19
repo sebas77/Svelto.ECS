@@ -9,12 +9,14 @@ namespace Svelto.ECS
             _enginesRoot = new WeakReference<EnginesRoot>(weakReference);
         }
 
-        public Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, IEntityStruct
+        public Consumer<T> GenerateConsumer<T>(string name, uint capacity)
+            where T : unmanaged, IEntityComponent
         {
             return _enginesRoot.Target.GenerateConsumer<T>(name, capacity);
         }
 
-        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity) where T : unmanaged, IEntityStruct
+        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity)
+            where T : unmanaged, IEntityComponent
         {
             return _enginesRoot.Target.GenerateConsumer<T>(group, name, capacity);
         }
@@ -23,11 +25,12 @@ namespace Svelto.ECS
 //engines of other enginesRoot
         readonly WeakReference<EnginesRoot> _enginesRoot;
     }
-    
+
     public interface IEntityStreamConsumerFactory
     {
-        Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, IEntityStruct;
-        Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity) 
-            where T : unmanaged, IEntityStruct;
+        Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, IEntityComponent;
+
+        Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity)
+            where T : unmanaged, IEntityComponent;
     }
 }

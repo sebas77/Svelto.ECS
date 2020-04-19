@@ -1,6 +1,6 @@
 namespace Svelto.ECS
 {
-    internal struct SerializableEntityStruct : IEntityStruct, INeedEGID
+    struct SerializableEntityComponent : IEntityComponent, INeedEGID
     {
         public uint descriptorHash;
 

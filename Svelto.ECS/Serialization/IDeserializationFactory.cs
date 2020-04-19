@@ -2,8 +2,8 @@ namespace Svelto.ECS.Serialization
 {
     public interface IDeserializationFactory
     {
-        EntityStructInitializer BuildDeserializedEntity(EGID egid, ISerializationData serializationData,
-            ISerializableEntityDescriptor entityDescriptor, SerializationType serializationType,
+        EntityComponentInitializer BuildDeserializedEntity(EGID egid, ISerializationData serializationData,
+            ISerializableEntityDescriptor entityDescriptor, int serializationType,
             IEntitySerialization entitySerialization);
     }
 }

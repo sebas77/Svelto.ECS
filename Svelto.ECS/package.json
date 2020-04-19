@@ -1,0 +1,15 @@
+{
+  "displayName": "Svelto ECS",
+  "category": "Svelto",
+  "description": "Svelto ECS C# Lightweight Data Oriented Entity Component System Framework",
+  "dependencies": {
+    "com.sebaslab.svelto.common": "2.9.4"
+  },
+  "keywords": [
+    "svelto"
+  ],
+  "name": "com.sebaslab.svelto.ecs",
+  "unity": "2019.2",
+  "version": "2.9.5",
+  "type": "library"
+} 

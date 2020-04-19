@@ -26,18 +26,18 @@ namespace Svelto.ECS
             public void ClearOther()
             {
                 //do not clear the groups created so far, they will be reused, unless they are too many!
-                var otherCount = other.Count;
+                var otherCount = other.count;
                 if (otherCount > MaximumNumberOfItemsPerFrameBeforeToClear)
                 {
                     otherEntitiesCreatedPerGroup.FastClear();
                     other.FastClear();
                     return;
                 }
-                var otherValuesArray = other.valuesArray;
+                var otherValuesArray = other.unsafeValues;
                 for (int i = 0; i < otherCount; ++i)
                 {
-                    var safeDictionariesCount = otherValuesArray[i].Count;
-                    var safeDictionaries = otherValuesArray[i].valuesArray;
+                    var safeDictionariesCount = otherValuesArray[i].count;
+                    var safeDictionaries = otherValuesArray[i].unsafeValues;
                     //do not remove the dictionaries of entities per type created so far, they will be reused
                     if (safeDictionariesCount <= MaximumNumberOfItemsPerFrameBeforeToClear)
                     {
@@ -56,18 +56,25 @@ namespace Svelto.ECS
                 otherEntitiesCreatedPerGroup.FastClear();
             }
 
+            /// <summary>
+            /// To avoid extra allocation, I don't clear the dictionaries, so I need an extra data structure
+            /// to keep count of the number of entities submitted this frame
+            /// </summary>
             internal FasterDictionary<uint, uint> currentEntitiesCreatedPerGroup;
             internal FasterDictionary<uint, uint> otherEntitiesCreatedPerGroup;
 
+            //Before I tried for the third time to use a SparseSet instead of FasterDictionary, remember that
+            //while group indices are sequential, they may not be used in a sequential order. Sparaset needs
+            //entities to be created sequentially (the index cannot be managed externally)
             internal FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> current;
             internal FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> other;
 
             readonly FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>
-                _entityViewsToAddBufferA =
+                _entityComponentsToAddBufferA =
                     new FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>();
 
             readonly FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>
-                _entityViewsToAddBufferB =
+                _entityComponentsToAddBufferB =
                     new FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>();
 
             readonly FasterDictionary<uint, uint> _entitiesCreatedPerGroupA = new FasterDictionary<uint, uint>();
@@ -78,8 +85,8 @@ namespace Svelto.ECS
                 currentEntitiesCreatedPerGroup = _entitiesCreatedPerGroupA;
                 otherEntitiesCreatedPerGroup = _entitiesCreatedPerGroupB;
 
-                current = _entityViewsToAddBufferA;
-                other = _entityViewsToAddBufferB;
+                current = _entityComponentsToAddBufferA;
+                other = _entityComponentsToAddBufferB;
             }
         }
     }

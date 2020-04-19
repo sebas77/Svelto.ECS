@@ -13,57 +13,57 @@ namespace Svelto.ECS
     {
         internal DynamicEntityDescriptor(bool isExtendible) : this()
         {
-            var defaultEntities = EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild;
+            var defaultEntities = EntityDescriptorTemplate<TType>.descriptor.componentsToBuild;
             var length = defaultEntities.Length;
 
-            _entitiesToBuild = new IEntityBuilder[length + 1];
+            ComponentsToBuild = new IComponentBuilder[length + 1];
 
-            Array.Copy(defaultEntities, 0, _entitiesToBuild, 0, length);
+            Array.Copy(defaultEntities, 0, ComponentsToBuild, 0, length);
 
             //assign it after otherwise the previous copy will overwrite the value in case the item
             //is already present
-            _entitiesToBuild[length] = new EntityBuilder<EntityStructInfoView>
+            ComponentsToBuild[length] = new ComponentBuilder<EntityInfoComponentView>
             (
-                new EntityStructInfoView
+                new EntityInfoComponentView
                 {
-                    entitiesToBuild = _entitiesToBuild
+                    componentsToBuild = ComponentsToBuild
                 }
             );
         }
 
-        public DynamicEntityDescriptor(IEntityBuilder[] extraEntityBuilders) : this()
+        public DynamicEntityDescriptor(IComponentBuilder[] extraEntityBuilders) : this()
         {
             var extraEntitiesLength = extraEntityBuilders.Length;
 
-            _entitiesToBuild = Construct(extraEntitiesLength, extraEntityBuilders,
-                EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild);
+            ComponentsToBuild = Construct(extraEntitiesLength, extraEntityBuilders,
+                EntityDescriptorTemplate<TType>.descriptor.componentsToBuild);
         }
 
-        public DynamicEntityDescriptor(FasterList<IEntityBuilder> extraEntityBuilders) : this()
+        public DynamicEntityDescriptor(FasterList<IComponentBuilder> extraEntityBuilders) : this()
         {
-            var extraEntities = extraEntityBuilders.ToArrayFast();
-            var extraEntitiesLength = extraEntityBuilders.Count;
+            var extraEntities = extraEntityBuilders.ToArrayFast(out _);
+            var extraEntitiesLength = extraEntityBuilders.count;
 
-            _entitiesToBuild = Construct(extraEntitiesLength, extraEntities,
-                EntityDescriptorTemplate<TType>.descriptor.entitiesToBuild);
+            ComponentsToBuild = Construct((int) extraEntitiesLength, extraEntities,
+                EntityDescriptorTemplate<TType>.descriptor.componentsToBuild);
         }
 
         public void ExtendWith<T>() where T : IEntityDescriptor, new()
         {
-            var newEntitiesToBuild = EntityDescriptorTemplate<T>.descriptor.entitiesToBuild;
+            var newEntitiesToBuild = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
 
-            _entitiesToBuild = Construct(newEntitiesToBuild.Length, newEntitiesToBuild, _entitiesToBuild);
+            ComponentsToBuild = Construct(newEntitiesToBuild.Length, newEntitiesToBuild, ComponentsToBuild);
         }
         
-        public void ExtendWith(IEntityBuilder[] extraEntities)
+        public void ExtendWith(IComponentBuilder[] extraEntities)
         {
-            _entitiesToBuild = Construct(extraEntities.Length, extraEntities, _entitiesToBuild);
+            ComponentsToBuild = Construct(extraEntities.Length, extraEntities, ComponentsToBuild);
         }
 
-        static IEntityBuilder[] Construct(int extraEntitiesLength, IEntityBuilder[] extraEntities,
-            IEntityBuilder[] startingEntities)
+        static IComponentBuilder[] Construct(int extraEntitiesLength, IComponentBuilder[] extraEntities,
+            IComponentBuilder[] startingEntities)
         {
-            IEntityBuilder[] localEntitiesToBuild;
+            IComponentBuilder[] localEntitiesToBuild;
 
             if (extraEntitiesLength == 0)
             {
@@ -74,24 +74,24 @@ namespace Svelto.ECS
             var defaultEntities = startingEntities;
             var length = defaultEntities.Length;
 
-            var index = SetupSpecialEntityStruct(defaultEntities, out localEntitiesToBuild, extraEntitiesLength);
+            var index = SetupSpecialEntityComponent(defaultEntities, out localEntitiesToBuild, extraEntitiesLength);
 
             Array.Copy(extraEntities, 0, localEntitiesToBuild, length, extraEntitiesLength);
 
             //assign it after otherwise the previous copy will overwrite the value in case the item
             //is already present
-            localEntitiesToBuild[index] = new EntityBuilder<EntityStructInfoView>
+            localEntitiesToBuild[index] = new ComponentBuilder<EntityInfoComponentView>
             (
-                new EntityStructInfoView
+                new EntityInfoComponentView
                 {
-                    entitiesToBuild = localEntitiesToBuild
+                    componentsToBuild = localEntitiesToBuild
                 }
             );
 
             return localEntitiesToBuild;
         }
 
-        static int SetupSpecialEntityStruct(IEntityBuilder[] defaultEntities, out IEntityBuilder[] entitiesToBuild,
+        static int SetupSpecialEntityComponent(IComponentBuilder[] defaultEntities, out IComponentBuilder[] componentsToBuild,
             int extraLenght)
         {
             int length = defaultEntities.Length;
@@ -100,7 +100,7 @@ namespace Svelto.ECS
             for (var i = 0; i < length; i++)
             {
                 //the special entity already exists
-                if (defaultEntities[i].GetEntityType() == EntityBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
+                if (defaultEntities[i].GetEntityComponentType() == EntityBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
                 {
                     index = i;
                     break;
@@ -110,19 +110,19 @@ namespace Svelto.ECS
             if (index == -1)
             {
                 index = length + extraLenght;
-                entitiesToBuild = new IEntityBuilder[index + 1];
+                componentsToBuild = new IComponentBuilder[index + 1];
             }
             else
-                entitiesToBuild = new IEntityBuilder[length + extraLenght];
+                componentsToBuild = new IComponentBuilder[length + extraLenght];
 
-            Array.Copy(defaultEntities, 0, entitiesToBuild, 0, length);
+            Array.Copy(defaultEntities, 0, componentsToBuild, 0, length);
 
             return index;
         }
 
 
-        public IEntityBuilder[] entitiesToBuild => _entitiesToBuild;
+        public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
 
-        IEntityBuilder[] _entitiesToBuild;
+        IComponentBuilder[] ComponentsToBuild;
     }
 }

@@ -4,7 +4,7 @@ namespace Svelto.ECS.Internal
 {
     class EntityGroupNotFoundException : Exception
     {
-        public EntityGroupNotFoundException(uint groupId, Type type)
+        public EntityGroupNotFoundException(Type type)
             : base("entity group not found ".FastConcat(type.ToString()))
         {
         }
