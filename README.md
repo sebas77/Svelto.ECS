@@ -1,4 +1,4 @@
-# Svelto Entity Component System 2.9
+# Svelto Entity Component System 3.0 BETA
 
 =====================================
 
