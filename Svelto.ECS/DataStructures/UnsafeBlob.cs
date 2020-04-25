@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Svelto.ECS.DataStructures
 {
@@ -12,6 +13,7 @@ namespace Svelto.ECS.DataStructures
 
     /// <summary>
     /// Note: this must work inside burst, so it must follow burst restrictions
+    /// Note: All the svelto native structures 
     /// </summary>
     struct UnsafeBlob : IDisposable
     {
@@ -31,7 +33,7 @@ namespace Svelto.ECS.DataStructures
 #endif        
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Write<T>(in T item) where T : struct
+        internal void Write<T>(in T item) where T : unmanaged
         {
             unsafe
             {
@@ -42,33 +44,38 @@ namespace Svelto.ECS.DataStructures
                 if (space - (int)structSize < 0)
                     throw new Exception("no writing authorized");
 #endif
-                var head = _writeIndex % capacity;
+                var writeHead = _writeIndex % capacity;
 
-                if (head + structSize <= capacity)
+                if (writeHead + structSize <= capacity)
                 {
-                    Unsafe.Write(ptr + head, item);
+                    Unsafe.Write(_ptr + writeHead, item);
                 }
                 else
                 //copy with wrap, will start to copy and wrap for the reminder
                 {
-                    var byteCountToEnd = capacity - head; 
-                    //need a copy to be sure that the GC won't move the data around
-                    T copyItem = item; 
-                    void* asPointer = Unsafe.AsPointer(ref copyItem);
-                    MemoryUtilities.MemCpy((IntPtr) (ptr + head), (IntPtr) asPointer, byteCountToEnd);
-                    var restCount = structSize - byteCountToEnd;
-                    //todo: check the difference between unaligned and standard
-                    MemoryUtilities.MemCpy((IntPtr) ptr, (IntPtr) ((byte *)asPointer + byteCountToEnd), restCount);
+                    var byteCountToEnd = capacity - writeHead;
+
+                    fixed (T* readFrom = &item)
+                    {
+                        //read and copy the first portion of Item until the end of the stream
+                        Unsafe.CopyBlock(_ptr + writeHead, readFrom, byteCountToEnd);
+
+                        var restCount = structSize - byteCountToEnd;
+
+                        //read and copy the remainder
+                        var @from = (byte*) readFrom;
+                        Unsafe.CopyBlock(_ptr, @from + byteCountToEnd, restCount);
+                    }
                 }
 
-                uint paddedStructSize = (uint) Align4(structSize);
+                uint paddedStructSize = Align4(structSize);
                 
                 _writeIndex += paddedStructSize;
             }
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void WriteUnaligned<T>(in T item) where T : struct
+        internal void WriteUnaligned<T>(in T item) where T : unmanaged
         {
             unsafe
             {
@@ -82,15 +89,18 @@ namespace Svelto.ECS.DataStructures
                 var pointer = _writeIndex % capacity;
 
                 if (pointer + structSize <= capacity)
-                    Unsafe.Write(ptr + pointer, item);
+                    Unsafe.Write(_ptr + pointer, item);
                 else
                 {
                     var byteCount = capacity - pointer;
-                    T copyItem = item;
-                    var asPointer = Unsafe.AsPointer(ref copyItem);
-                    Unsafe.CopyBlock(ptr + pointer, asPointer, byteCount);
-                    var restCount = structSize - byteCount;
-                    Unsafe.CopyBlock(ptr, (byte *)asPointer + byteCount, restCount);
+                    fixed (T* readFrom = &item)
+                    {
+                        Unsafe.CopyBlockUnaligned(_ptr + pointer, readFrom, byteCount);
+
+                        var    restCount = structSize - byteCount;
+                        var @from = (byte*) readFrom;
+                        Unsafe.CopyBlockUnaligned(_ptr, @from + byteCount, restCount);
+                    }
                 }
 
                 _writeIndex += structSize;
@@ -98,7 +108,7 @@ namespace Svelto.ECS.DataStructures
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T Read<T>() where T : struct
+        internal T Read<T>() where T : unmanaged
         {
             unsafe
             {
@@ -111,7 +121,7 @@ namespace Svelto.ECS.DataStructures
                     throw new Exception("unexpected read");
 #endif
                 var head = _readIndex % capacity;
-                uint paddedStructSize = (uint) Align4(structSize);
+                uint paddedStructSize = Align4(structSize);
                 _readIndex += paddedStructSize;
 
                 if (_readIndex == _writeIndex)
@@ -125,20 +135,18 @@ namespace Svelto.ECS.DataStructures
 
                 if (head + paddedStructSize <= capacity)
                 {
-                    return Unsafe.Read<T>(ptr + head);
+                    return Unsafe.Read<T>(_ptr + head);
                 }
-                else
-                {
-                    T item = default;
-                    var byteCountToEnd = capacity - head;
-                    var asPointer = Unsafe.AsPointer(ref item);
-                    //todo: check the difference between unaligned and standard
-                    MemoryUtilities.MemCpy((IntPtr) asPointer, (IntPtr) (ptr + head), byteCountToEnd);
-                    var restCount = structSize - byteCountToEnd;
-                    MemoryUtilities.MemCpy((IntPtr) ((byte *)asPointer + byteCountToEnd), (IntPtr) ptr, restCount);
 
-                    return item;
-                }
+                T   item           = default;
+                T* destination = &item;
+                var byteCountToEnd = capacity - head;
+                Unsafe.CopyBlock(destination, _ptr + head, byteCountToEnd);
+
+                var restCount = structSize - byteCountToEnd;
+                Unsafe.CopyBlock((byte*) destination + byteCountToEnd, ptr, restCount);
+
+                return item;
             }
         }
         
@@ -149,18 +157,18 @@ namespace Svelto.ECS.DataStructures
             {
                 var sizeOf = (uint) MemoryUtilities.SizeOf<T>();
                 
-                T*  buffer = (T *)(byte*) (ptr + _writeIndex);
+                T*  buffer = (T *)(_ptr + _writeIndex);
 #if DEBUG && !PROFILE_SVELTO
                 if (_writeIndex > capacity) throw new Exception($"can't reserve if the writeIndex wrapped around the capacity, writeIndex {_writeIndex} capacity {capacity}");
                 if (_writeIndex + sizeOf > capacity) throw new Exception("out of bound reserving");
 #endif                
-                index = new UnsafeArrayIndex()
+                index = new UnsafeArrayIndex
                 {
                     capacity = capacity
                   , index    = _writeIndex
                 };
 
-                var align4 = (uint) Align4(sizeOf);
+                var align4 = Align4(sizeOf);
                 _writeIndex += align4;
             
                 return ref buffer[0];
@@ -176,14 +184,14 @@ namespace Svelto.ECS.DataStructures
                 var size = MemoryUtilities.SizeOf<T>();
                 if (index.index + size > capacity) throw new Exception($"out of bound access, index {index.index} size {size} capacity {capacity}");
 #endif                
-                T* buffer = (T*) (byte*)(ptr + index.index);
+                T* buffer = (T*) (_ptr + index.index);
             
                 return ref buffer[0];
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Realloc(uint alignOf, uint newCapacity)
+        internal void Realloc<T>(uint newCapacity) where T : unmanaged
         {
             unsafe
             {
@@ -197,7 +205,7 @@ namespace Svelto.ECS.DataStructures
 #endif                
                 if (newCapacity > 0)
                 {
-                    newPointer = (byte*) MemoryUtilities.Alloc(newCapacity, alignOf, allocator);
+                    newPointer = (byte*) MemoryUtilities.Alloc<T>(newCapacity, allocator);
                     if (size > 0)
                     {
                         var readerHead = _readIndex % capacity;
@@ -206,7 +214,8 @@ namespace Svelto.ECS.DataStructures
                         if (readerHead < writerHead)
                         {
                             //copy to the new pointer, from th reader position
-                            MemoryUtilities.MemCpy((IntPtr) newPointer, (IntPtr) (ptr + readerHead), _writeIndex - _readIndex);
+                            uint currentSize = _writeIndex - _readIndex;
+                            Unsafe.CopyBlock(newPointer, _ptr + readerHead, currentSize);
                         }
                         //the assumption is that if size > 0 (so readerPointer and writerPointer are not the same)
                         //writerHead wrapped and reached readerHead. so I have to copy from readerHead to the end
@@ -214,15 +223,15 @@ namespace Svelto.ECS.DataStructures
                         else
                         {
                             var byteCountToEnd = capacity - readerHead;
-                            
-                            MemoryUtilities.MemCpy((IntPtr) newPointer, (IntPtr) (ptr + readerHead), byteCountToEnd);
-                            MemoryUtilities.MemCpy((IntPtr) (newPointer + byteCountToEnd), (IntPtr) ptr, writerHead);
+
+                            Unsafe.CopyBlock(newPointer, _ptr + readerHead, byteCountToEnd);
+                            Unsafe.CopyBlock(newPointer + byteCountToEnd, _ptr, writerHead);
                         }
                     }
                 }
 
-                if (ptr != null)
-                    MemoryUtilities.Free((IntPtr) ptr, allocator);
+                if (_ptr != null)
+                    MemoryUtilities.Free((IntPtr) _ptr, allocator);
 
                 _writeIndex = size;
                 _readIndex  = 0;
@@ -237,8 +246,8 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-                if (ptr != null)
-                    MemoryUtilities.Free((IntPtr) ptr, allocator);
+                if (_ptr != null)
+                    MemoryUtilities.Free((IntPtr) _ptr, allocator);
 
                 _ptr = null;
                 _writeIndex = 0;
@@ -259,7 +268,7 @@ namespace Svelto.ECS.DataStructures
         }
         
 #if UNITY_ECS
-        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+        [NativeDisableUnsafePtrRestriction]
 #endif
         unsafe byte* _ptr;
         uint _writeIndex, _readIndex;

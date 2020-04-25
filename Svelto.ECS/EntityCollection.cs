@@ -10,7 +10,7 @@ namespace Svelto.ECS
     {
         public EntityCollection(T[] array, uint count) : this()
         {
-            _buffer.Set(array);
+            _buffer.Set(array, count);
             _count = count;
         }
 
@@ -35,13 +35,12 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NB<NT> ToNativeBuffer<NT>() where NT : unmanaged, T
         {
-            return new NB<NT>(Unsafe.As<NT[]>(_buffer.ToManagedArray()), _count);
+            return new NB<NT>(_buffer.Pin(), _count, _buffer.capacity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public MB<T> ToBuffer(out uint count)
+        public MB<T> ToBuffer()
         {
-            count = _count;
             return _buffer;
         }
 
@@ -120,7 +119,7 @@ namespace Svelto.ECS
         public BT<MB<T1>, MB<T2>> ToBuffers()
         {
             var bufferTuple = new BT<MB<T1>, MB<T2>>
-                (_array1.ToBuffer(out _), _array2.ToBuffer(out _), count);
+                (_array1.ToBuffer(), _array2.ToBuffer(), count);
             return bufferTuple;
         }
 
@@ -213,7 +212,7 @@ namespace Svelto.ECS
         public BT<MB<T1>, MB<T2>, MB<T3>> ToBuffers()
         {
             var bufferTuple = new BT<MB<T1>, MB<T2>, MB<T3>>
-                (_array1.ToBuffer(out _), _array2.ToBuffer(out _), _array3.ToBuffer(out _), count);
+                (_array1.ToBuffer(), _array2.ToBuffer(), _array3.ToBuffer(), count);
             return bufferTuple;
         }
 

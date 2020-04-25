@@ -1,17 +1,29 @@
+using System;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public struct NativeAllGroupsEnumerable<T1> where T1 : unmanaged, IEntityComponent
+    public readonly struct NativeAllGroupsEnumerable<T1> where T1 : unmanaged, IEntityComponent
     {
         public NativeAllGroupsEnumerable(EntitiesDB db)
         {
             _db = db;
         }
-
+        
         public struct NativeGroupsIterator
         {
+            public struct CurrentGroup: IDisposable
+            {
+                public NB<T1> buffer;
+                public ExclusiveGroupStruct group;
+
+                public void Dispose()
+                {
+                    buffer.Dispose();
+                }
+            }
+            
             public NativeGroupsIterator(EntitiesDB db) : this()
             {
                 _db = db.FindGroups<T1>().GetEnumerator();
@@ -28,8 +40,9 @@ namespace Svelto.ECS
                     
                     if (typeSafeDictionary.Count == 0) continue;
                     
-                    _array = new EntityCollection<T1>(typeSafeDictionary.GetValuesArray(out var count), count)
+                    _array.buffer = new EntityCollection<T1>(typeSafeDictionary.GetValuesArray(out var count), count)
                         .ToNativeBuffer<T1>();
+                    _array.@group = new ExclusiveGroupStruct(group.Key);
 
                     return true;
                 }
@@ -41,11 +54,10 @@ namespace Svelto.ECS
             {
             }
 
-            public NB<T1> Current => _array;
+            public CurrentGroup Current => _array;
 
-            readonly FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db;
-
-            NB<T1> _array;
+            FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db;
+            CurrentGroup _array;
         }
 
         public NativeGroupsIterator GetEnumerator()
@@ -101,7 +113,7 @@ namespace Svelto.ECS
 
             public BT<NB<T1>, NB<T2>> Current => _array;
 
-            readonly FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db;
+            FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db;
 
             BT<NB<T1>, NB<T2>> _array;
         }

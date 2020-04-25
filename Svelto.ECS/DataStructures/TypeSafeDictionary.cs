@@ -42,9 +42,12 @@ namespace Svelto.ECS.Internal
                 }
                 catch (Exception e)
                 {
-                    throw new
-                        TypeSafeDictionaryException("trying to add an EntityComponent with the same ID more than once Entity: ".FastConcat(typeof(TValue).ToString()).FastConcat(", group ").FastConcat(groupId).FastConcat(", id ").FastConcat(tuple.Key),
-                                                    e);
+                    Svelto.Console.LogException(e, 
+                        "trying to add an EntityComponent with the same ID more than once Entity: "
+                           .FastConcat(typeof(TValue).ToString()).FastConcat(", group ").FastConcat(groupId)
+                           .FastConcat(", id ").FastConcat(tuple.Key));
+
+                    throw;
                 }
             }
         }

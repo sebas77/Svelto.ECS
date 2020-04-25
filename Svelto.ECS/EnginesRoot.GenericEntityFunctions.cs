@@ -60,9 +60,11 @@ namespace Svelto.ECS
             {
                 throw new NotImplementedException("can't run this until I add the checks!");
                 
+#pragma warning disable 162
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.SwapGroup, new EGID(0, fromGroupID),
                         new EGID(0, toGroupID)));
+#pragma warning restore 162
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -6,16 +6,16 @@ namespace Svelto.ECS
 {
     public readonly struct NativeEGIDMapper<T>:IDisposable where T : unmanaged, IEntityComponent
     {
-        readonly NativeFasterDictionaryStruct<uint, T> map;
+        readonly NativeFasterDictionary<uint, T> map;
         public ExclusiveGroupStruct groupID { get; }
 
-        public NativeEGIDMapper(ExclusiveGroupStruct groupStructId, NativeFasterDictionaryStruct<uint, T> toNative):this()
+        public NativeEGIDMapper(ExclusiveGroupStruct groupStructId, NativeFasterDictionary<uint, T> toNative):this()
         {
             groupID = groupStructId;
             map = toNative;
         }
 
-        public uint Count => map.Count;
+        public uint Count => map.count;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Entity(uint entityID)
@@ -48,7 +48,7 @@ namespace Svelto.ECS
         {
             if (map.TryFindIndex(entityID, out index))
             {
-                return new NB<T>(map.unsafeValues, map.Count);
+                return new NB<T>(map.unsafeValues, map.count, map.capacity);
             }
 
             throw new ECSException("Entity not found");
@@ -58,7 +58,7 @@ namespace Svelto.ECS
         {
             if (map.TryFindIndex(entityID, out index))
             {
-                array =  new NB<T>(map.unsafeValues, map.Count);
+                array =  new NB<T>(map.unsafeValues, map.count, map.capacity);
                 return true;
             }
 
@@ -73,7 +73,7 @@ namespace Svelto.ECS
 
         public bool Exists(uint idEntityId)
         {
-            return map.Count > 0 && map.TryFindIndex(idEntityId, out _);
+            return map.count > 0 && map.TryFindIndex(idEntityId, out _);
         }
     }
 }

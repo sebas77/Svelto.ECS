@@ -73,9 +73,7 @@ namespace Svelto.ECS.DataStructures
             unsafe
             {
                 var sizeOf = MemoryUtilities.SizeOf<UnsafeBlob>();
-                var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf
-                                                                 , (uint) MemoryUtilities.AlignOf<UnsafeBlob>()
-                                                                 , allocator);
+                var listData = (UnsafeBlob*) MemoryUtilities.Alloc<UnsafeBlob>((uint) sizeOf, allocator);
 
                 //clear to nullify the pointers
                 MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
@@ -92,9 +90,7 @@ namespace Svelto.ECS.DataStructures
             unsafe
             {
                 var sizeOf = MemoryUtilities.SizeOf<UnsafeBlob>();
-                var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf
-                                                                 , (uint) MemoryUtilities.AlignOf<UnsafeBlob>()
-                                                                 , allocator);
+                var listData = (UnsafeBlob*) MemoryUtilities.Alloc<UnsafeBlob>((uint) sizeOf, allocator);
 
                 //clear to nullify the pointers
                 MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
@@ -127,14 +123,14 @@ namespace Svelto.ECS.DataStructures
 #endif
                 var sizeOf = MemoryUtilities.SizeOf<T>();
                 if (_queue->space - sizeOf < 0)
-                    _queue->Realloc((uint) MemoryUtilities.AlignOf<int>(), (uint) ((_queue->capacity + sizeOf) * 1.5f));
+                    _queue->Realloc<int>((uint) ((_queue->capacity + sizeOf) * 1.5f));
 
                 return ref _queue->Reserve<T>(out index);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Enqueue<T>(in T item) where T : struct
+        public void Enqueue<T>(in T item) where T : unmanaged
         {
             unsafe
             {
@@ -144,7 +140,7 @@ namespace Svelto.ECS.DataStructures
 #endif
                 var sizeOf = MemoryUtilities.SizeOf<T>();
                 if (_queue->space - sizeOf < 0)
-                    _queue->Realloc((uint) MemoryUtilities.AlignOf<int>(), (uint) ((_queue->capacity + sizeOf) * 1.5f));
+                    _queue->Realloc<int>((uint) ((_queue->capacity + sizeOf) * 1.5f));
 
                 _queue->Write(item);
             }
@@ -163,7 +159,7 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
-        public T Dequeue<T>() where T : struct
+        public T Dequeue<T>() where T : unmanaged
         {
             unsafe
             {

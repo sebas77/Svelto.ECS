@@ -9,7 +9,7 @@ namespace Svelto.ECS.DataStructures.Unity
     /// A collection of <see cref="NativeBag"/> intended to allow one buffer per thread.
     /// from: https://github.com/jeffvella/UnityEcsEvents/blob/develop/Runtime/MultiAppendBuffer.cs
     /// </summary>
-    public unsafe struct AtomicRingBuffers:IDisposable
+    public unsafe struct AtomicNativeBags:IDisposable
     {
         public const int DefaultThreadIndex = -1;
         public const int MinThreadIndex = DefaultThreadIndex;
@@ -24,7 +24,7 @@ namespace Svelto.ECS.DataStructures.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvalidThreadIndex(int index) => index < MinThreadIndex || index > _threadsCount;
 
-        public AtomicRingBuffers(Common.Allocator allocator, uint threadsCount)
+        public AtomicNativeBags(Common.Allocator allocator, uint threadsCount)
         {
             Allocator = allocator;
             _threadsCount = threadsCount;
@@ -33,7 +33,7 @@ namespace Svelto.ECS.DataStructures.Unity
             var bufferCount = _threadsCount;
             var allocationSize = bufferSize * bufferCount;
 
-            var ptr = (byte*)MemoryUtilities.Alloc((uint) allocationSize, (uint) MemoryUtilities.AlignOf<int>(), allocator);
+            var ptr = (byte*)MemoryUtilities.Alloc<int>((uint) allocationSize, allocator);
             MemoryUtilities.MemClear((IntPtr) ptr, (uint) allocationSize);
 
             for (int i = 0; i < bufferCount; i++)

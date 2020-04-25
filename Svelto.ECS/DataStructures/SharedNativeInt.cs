@@ -11,7 +11,7 @@ namespace Svelto.ECS.DataStructures
 #endif
         unsafe int* data;
 
-        public static implicit operator SharedNativeInt(int t)
+        public static SharedNativeInt Create(int t)
         {
             unsafe
             {
@@ -23,7 +23,7 @@ namespace Svelto.ECS.DataStructures
             }
         }
         
-        public static explicit operator int(SharedNativeInt t)
+        public static implicit operator int(SharedNativeInt t)
         {
             unsafe
             {
@@ -40,27 +40,38 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-                if (data != null)
-                {
-                    Marshal.FreeHGlobal((IntPtr) data);
-                    data = null;
-                }
+#if DEBUG && !PROFILE_SVELTO
+                if (data == null)
+                    throw new Exception("disposing already disposed data");
+#endif
+                Marshal.FreeHGlobal((IntPtr) data);
+                data = null;
             }
         }
 
-        public void Decrement()
+        public int Decrement()
         {
             unsafe
             {
-                Interlocked.Decrement(ref *data);
+#if DEBUG && !PROFILE_SVELTO
+                if (data == null)
+                    throw new Exception("null-access");
+#endif            
+                
+                return Interlocked.Decrement(ref *data);
             }
         }
         
-        public void Increment()
+        public int Increment()
         {
             unsafe
             {
-                Interlocked.Increment(ref *data);
+#if DEBUG && !PROFILE_SVELTO
+                if (data == null)
+                    throw new Exception("null-access");
+#endif            
+                
+                return Interlocked.Increment(ref *data);
             }
         }
     }

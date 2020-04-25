@@ -2,7 +2,7 @@ using System;
 
 namespace Svelto.ECS.Internal
 {
-    public delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, IEntityComponent;
+    delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, IEntityComponent;
 
     static class SetEGIDWithoutBoxing<T> where T : struct, IEntityComponent
     {

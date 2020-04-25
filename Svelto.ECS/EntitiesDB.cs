@@ -291,6 +291,16 @@ namespace Svelto.ECS
                 }
         }
 
+        public QueryGroups CreateQueryGroup<T>() where T : IEntityComponent
+        {
+            return new QueryGroups(FindGroups<T>());
+        }
+
+        public bool FoundInGroups<T1>() where T1 : IEntityComponent
+        {
+            return _groupsPerEntity.ContainsKey(TypeRefWrapper<T1>.wrapper);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         T[] QueryEntitiesAndIndexInternal<T>(EGID entityGID, out uint index) where T : struct, IEntityComponent
         {
@@ -344,12 +354,16 @@ namespace Svelto.ECS
         {
             internal static readonly T[] emptyArray = new T[0];
         }
-        
-        internal FasterDictionary<uint, ITypeSafeDictionary> FindGroups<T1>() where T1 : unmanaged, IEntityComponent
+
+        internal FasterDictionary<uint, ITypeSafeDictionary> FindGroups<T1>() where T1 : IEntityComponent
         {
+            if (_groupsPerEntity.ContainsKey(TypeRefWrapper<T1>.wrapper) == false)
+                return _emptyDictionary;
+            
             return _groupsPerEntity[TypeRefWrapper<T1>.wrapper];
         }
-        
+
+        readonly FasterDictionary<uint, ITypeSafeDictionary> _emptyDictionary = new FasterDictionary<uint, ITypeSafeDictionary>(); 
         readonly EntitiesStream _entityStream;
 
         //grouped set of entity views, this is the standard way to handle entity views entity views are grouped per

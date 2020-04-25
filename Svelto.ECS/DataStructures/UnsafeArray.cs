@@ -7,8 +7,10 @@ namespace Svelto.ECS.DataStructures
     struct UnsafeArray : IDisposable
     {
         internal unsafe byte* ptr => _ptr;
+
         //expressed in bytes
-        internal uint capacity { get; private set; }
+        internal uint capacity => _capacity;
+
         //expressed in bytes
         internal uint count => _writeIndex;
         //expressed in bytes
@@ -42,7 +44,7 @@ namespace Svelto.ECS.DataStructures
                 uint writeIndex = (uint) (index * sizeOf);
                 
 #if DEBUG && !PROFILE_SVELTO                
-                if (capacity < writeIndex + sizeOf)
+                if (_capacity < writeIndex + sizeOf)
                     throw new Exception("no writing authorized");
 #endif                 
                 T* buffer = (T*) ptr;
@@ -71,27 +73,27 @@ namespace Svelto.ECS.DataStructures
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Realloc(uint alignOf, uint newCapacity)
+        internal void Realloc<T>(uint newCapacity) where T : unmanaged
         {
             unsafe
             {
                 byte* newPointer = null;
 #if DEBUG && !PROFILE_SVELTO            
-                if (capacity > 0 && newCapacity <= capacity)
+                if (_capacity > 0 && newCapacity <= _capacity)
                     throw new Exception("new capacity must be bigger than current");
 #endif                
                 if (newCapacity >= 0)
                 {
-                    newPointer = (byte*) MemoryUtilities.Alloc(newCapacity, alignOf, allocator);
+                    newPointer = (byte*) MemoryUtilities.Alloc<T>(newCapacity, allocator);
                     if (count > 0)
-                        MemoryUtilities.MemCpy((IntPtr) newPointer, (IntPtr) ptr, count);
+                        Unsafe.CopyBlock(newPointer, ptr, count);
                 }
 
                 if (ptr != null)
                     MemoryUtilities.Free((IntPtr) ptr, allocator);
 
                 _ptr     = newPointer;
-                capacity = newCapacity;
+                _capacity = newCapacity;
             }
         }
 
@@ -105,7 +107,7 @@ namespace Svelto.ECS.DataStructures
 
                 _ptr        = null;
                 _writeIndex = 0;
-                capacity    = 0;
+                _capacity = 0;
             }
         }
 
@@ -120,5 +122,6 @@ namespace Svelto.ECS.DataStructures
 #endif
         unsafe byte* _ptr;
         uint _writeIndex;
+        uint _capacity;
     }
 }

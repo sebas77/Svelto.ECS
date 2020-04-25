@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
@@ -9,7 +9,14 @@ namespace Svelto.ECS
                                                                                   ExclusiveGroupStruct[] groups)
             where T1 : unmanaged, IEntityComponent where T2 : unmanaged, IEntityComponent
         {
-            return new NativeGroupsEnumerable<T1, T2>(db, groups);
+            return new NativeGroupsEnumerable<T1, T2>(db, groups, (uint)groups.Length);
+        }
+        
+        public static NativeGroupsEnumerable<T1, T2> NativeGroupsIterator<T1, T2>(this EntitiesDB db,
+                                                                                  FasterList<ExclusiveGroupStruct> groups)
+            where T1 : unmanaged, IEntityComponent where T2 : unmanaged, IEntityComponent
+        {
+            return new NativeGroupsEnumerable<T1, T2>(db, groups, groups.count);
         }
 
         public static NativeGroupsEnumerable<T1, T2, T3> NativeGroupsIterator
