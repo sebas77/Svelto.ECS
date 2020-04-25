@@ -1,4 +1,4 @@
-# Svelto Entity Component System 2.9
+# Svelto Entity Component System 3.0 BETA
 
 =====================================
 
@@ -75,7 +75,7 @@ It needs love and as far as I understood, anyone can edit it. Feel free to do so
 
 ## I like the project, how can I help?
 
-Hey thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, more we are, better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: A visual debugger and more unit tests are needed. Other platforms other than Unity could get some love too: Xenko, Godot and monogame. Porting to other languages, expecially c++, would be awesome!
+Hey thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, more we are, better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: A visual debugger and more unit tests are needed. Other platforms other than Unity could get some love too: Xenko, Godot and monogame. Porting to other languages, expecially c++, would be awesome! Please check the lane dedicated to the community tasks list here: https://github.com/sebas77/Svelto.ECS/projects/1 and let me know if you want to take something on!
 
 ## Svelto Framework is used to develop the following products\(\*\):
 
