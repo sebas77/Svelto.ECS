@@ -43,25 +43,25 @@ namespace Svelto.ECS
 
                 uint descriptorHash = serializableEntityHeader.descriptorHash;
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
-                var factory = serializationDescriptorMap.GetSerializationFactory(descriptorHash);
+                IDeserializationFactory factory = serializationDescriptorMap.GetSerializationFactory(descriptorHash);
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                //default factory
-                //todo: we have a default factory, why don't we always register that instead?
-                if (factory == null)
-                {
-                    var initializer = _enginesRoot.BuildEntity(egid,
-                        _enginesRoot._isDeserializationOnly ? entityDescriptor.entitiesToSerialize
-                            : entityDescriptor.componentsToBuild);
-
-                    DeserializeEntityComponents(serializationData, entityDescriptor, ref initializer, serializationType);
-
-                    return initializer;
-                }
+                // //default factory
+                // //todo: we have a default factory, why don't we always register that instead?
+                // if (factory == null)
+                // {
+                //     var initializer = _enginesRoot.BuildEntity(egid,
+                //         _enginesRoot._isDeserializationOnly ? entityDescriptor.entitiesToSerialize
+                //             : entityDescriptor.componentsToBuild, entityDescriptor.realType);
+                //
+                //     DeserializeEntityComponents(serializationData, entityDescriptor, ref initializer, serializationType);
+                //
+                //     return initializer;
+                // }
 
                 //custom factory
                 return factory.BuildDeserializedEntity(egid, serializationData, entityDescriptor, serializationType,
-                    this);
+                    this, this._enginesRoot.GenerateEntityFactory(), _enginesRoot._isDeserializationOnly);
             }
 
             public void DeserializeEntity(ISerializationData serializationData, int serializationType)
@@ -120,14 +120,11 @@ namespace Svelto.ECS
                 uint descriptorHash = serializableEntityComponent.descriptorHash;
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                var entitySubmitOperation = new EntitySubmitOperation(
-                    EntitySubmitOperationType.Swap,
-                    localEgid,
-                    toEgid,
-                    entityDescriptor.componentsToBuild);
+                var entitySubmitOperation = new EntitySubmitOperation(EntitySubmitOperationType.Swap,
+                                                localEgid, toEgid, entityDescriptor.componentsToBuild);
 
-                _enginesRoot.CheckRemoveEntityID(localEgid);
-                _enginesRoot.CheckAddEntityID(toEgid);
+                _enginesRoot.CheckRemoveEntityID(localEgid, entityDescriptor.realType);
+                _enginesRoot.CheckAddEntityID(toEgid, entityDescriptor.realType);
 
                 _enginesRoot.QueueEntitySubmitOperation(entitySubmitOperation);
             }
@@ -141,7 +138,7 @@ namespace Svelto.ECS
                 SerializationDescriptorMap serializationDescriptorMap = _enginesRoot.serializationDescriptorMap;
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                _enginesRoot.CheckRemoveEntityID(egid);
+                _enginesRoot.CheckRemoveEntityID(egid, entityDescriptor.realType);
 
                 var entitySubmitOperation = new EntitySubmitOperation(
                     EntitySubmitOperationType.Remove,

@@ -10,8 +10,8 @@ namespace Svelto.ECS
         {
             var iterationsPerBatch = totalIterations / processorCount;
 
-            if (iterationsPerBatch < 16)
-                return 16;
+            if (iterationsPerBatch < 32)
+                return 32;
             
             return (int) iterationsPerBatch;
         }

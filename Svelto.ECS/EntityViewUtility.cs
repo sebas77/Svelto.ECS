@@ -48,38 +48,42 @@ namespace Svelto.ECS
                     entityComponentBlazingFastReflection, out var count);
 
             //todo this should happen once per T, not once per Build<T>
-            foreach (var implementor in implementors)
+            if (implementors != null)
             {
-                if (implementor != null)
+                foreach (var implementor in implementors)
                 {
-                    var type = implementor.GetType();
-
-                    if (cachedTypeInterfaces.TryGetValue(type, out var interfaces) == false)
-                        interfaces = cachedTypeInterfaces[type] = type.GetInterfacesEx();
-
-                    for (var iindex = 0; iindex < interfaces.Length; iindex++)
+                    if (implementor != null)
                     {
-                        var componentType = interfaces[iindex];
-#if DEBUG && !PROFILE_SVELTO
-                        if (implementorsByType.TryGetValue(componentType, out var implementorData))
+                        var type = implementor.GetType();
+
+                        if (cachedTypeInterfaces.TryGetValue(type, out var interfaces) == false)
+                            interfaces = cachedTypeInterfaces[type] = type.GetInterfacesEx();
+
+                        for (var iindex = 0; iindex < interfaces.Length; iindex++)
                         {
-                            implementorData.numberOfImplementations++;
-                            implementorsByType[componentType] = implementorData;
-                        }
-                        else
-                            implementorsByType[componentType] = new ECSTuple<object, int>(implementor, 1);
+                            var componentType = interfaces[iindex];
+#if DEBUG && !PROFILE_SVELTO
+                            if (implementorsByType.TryGetValue(componentType, out var implementorData))
+                            {
+                                implementorData.numberOfImplementations++;
+                                implementorsByType[componentType] = implementorData;
+                            }
+                            else
+                                implementorsByType[componentType] = new ECSTuple<object, int>(implementor, 1);
 #else
                         implementorsByType[componentType] = implementor;
 #endif
+                        }
                     }
-                }
 #if DEBUG && !PROFILE_SVELTO
-                else
-                {
-                    Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent ",
-                            componentBuilder.GetEntityComponentType().ToString()));
-                }
+                    else
+                    {
+                        Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent "
+                                                                    , componentBuilder
+                                                                     .GetEntityComponentType().ToString()));
+                    }
 #endif
+                }
             }
 
             for (var i = 0; i < count; i++)

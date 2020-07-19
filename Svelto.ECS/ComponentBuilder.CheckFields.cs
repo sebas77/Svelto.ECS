@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Svelto.ECS
 {
-    internal static class EntityBuilderUtilities
+    internal static class ComponentBuilderUtilities
     {
         const string MSG = "Entity Structs field and Entity View Struct components must hold value types.";
 
@@ -48,16 +48,16 @@ namespace Svelto.ECS
 
                 if (fields.Length < 1)
                 {
-                    ProcessError("Entity View Structs must hold only entity components interfaces.", entityComponentType);
+                    ProcessError("No valid fields found in Entity View Struct", entityComponentType);
                 }
 
                 for (int i = fields.Length - 1; i >= 0; --i)
                 {
                     FieldInfo fieldInfo = fields[i];
 
-                    if (fieldInfo.FieldType.IsInterfaceEx() == false)
+                    if (fieldInfo.FieldType.IsInterfaceEx() == false && fieldInfo.FieldType.IsValueTypeEx() == false)
                     {
-                        ProcessError("Entity View Structs must hold only entity components interfaces.",
+                        ProcessError("Entity View Structs must hold only public interfaces or value type fields.",
                             entityComponentType);
                     }
 
@@ -120,7 +120,7 @@ namespace Svelto.ECS
         static readonly Type SERIALIZABLE_ENTITY_STRUCT = typeof(SerializableEntityComponent);
         static readonly Type STRINGTYPE                 = typeof(string);
 
-        internal static readonly Type ENTITY_STRUCT_INFO_VIEW = typeof(EntityInfoComponentView);
+        internal static readonly Type ENTITY_STRUCT_INFO_VIEW = typeof(EntityInfoViewComponent);
     }
 
     public class EntityComponentException : Exception

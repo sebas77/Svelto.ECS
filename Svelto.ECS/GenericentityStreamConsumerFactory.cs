@@ -15,7 +15,7 @@ namespace Svelto.ECS
             return _enginesRoot.Target.GenerateConsumer<T>(name, capacity);
         }
 
-        public Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity)
+        public Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name, uint capacity)
             where T : unmanaged, IEntityComponent
         {
             return _enginesRoot.Target.GenerateConsumer<T>(group, name, capacity);
@@ -30,7 +30,7 @@ namespace Svelto.ECS
     {
         Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, IEntityComponent;
 
-        Consumer<T> GenerateConsumer<T>(ExclusiveGroup group, string name, uint capacity)
+        Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name, uint capacity)
             where T : unmanaged, IEntityComponent;
     }
 }

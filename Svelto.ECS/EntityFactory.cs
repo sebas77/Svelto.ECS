@@ -37,16 +37,16 @@ namespace Svelto.ECS.Internal
 
         static void BuildEntitiesAndAddToGroup(EGID entityID,
             FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group,
-            IComponentBuilder[] entityBuilders, IEnumerable<object> implementors)
+            IComponentBuilder[] componentBuilders, IEnumerable<object> implementors)
         {
+            var count = componentBuilders.Length;
+
 #if DEBUG && !PROFILE_SVELTO
             HashSet<Type> types = new HashSet<Type>();
-#endif
-            var count = entityBuilders.Length;
-#if DEBUG && !PROFILE_SVELTO
+
             for (var index = 0; index < count; ++index)
             {
-                var entityComponentType = entityBuilders[index].GetEntityComponentType();
+                var entityComponentType = componentBuilders[index].GetEntityComponentType();
                 if (types.Contains(entityComponentType))
                 {
                     throw new ECSException("EntityBuilders must be unique inside an EntityDescriptor");
@@ -57,7 +57,7 @@ namespace Svelto.ECS.Internal
 #endif
             for (var index = 0; index < count; ++index)
             {
-                var entityComponentBuilder = entityBuilders[index];
+                var entityComponentBuilder = componentBuilders[index];
                 var entityComponentType      = entityComponentBuilder.GetEntityComponentType();
 
                 BuildEntity(entityID, @group, entityComponentType, entityComponentBuilder, implementors);

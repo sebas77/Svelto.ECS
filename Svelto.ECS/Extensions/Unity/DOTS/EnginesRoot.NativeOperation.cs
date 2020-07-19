@@ -1,7 +1,7 @@
-#if UNITY_ECS
+#if UNITY_BURST
+using System;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.ECS.DataStructures;
 using Svelto.ECS.DataStructures.Unity;
 using Unity.Jobs.LowLevel.Unsafe;
 
@@ -19,30 +19,30 @@ namespace Svelto.ECS
         readonly AtomicNativeBags _swapOperationQueue =
             new AtomicNativeBags(Common.Allocator.Persistent, JobsUtility.MaxJobThreadCount + 1);
 
-        NativeEntityRemove ProvideNativeEntityRemoveQueue<T>() where T : IEntityDescriptor, new()
+        NativeEntityRemove ProvideNativeEntityRemoveQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             //todo I maybe able to provide a  _nativeSwap.SwapEntity<entityDescriptor> 
             _nativeRemoveOperations.Add(
-                new NativeOperationRemove(EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+                new NativeOperationRemove(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type, memberName));
 
             return new NativeEntityRemove(_removeOperationQueue, _nativeRemoveOperations.count - 1);
         }
         
-        NativeEntitySwap ProvideNativeEntitySwapQueue<T>() where T : IEntityDescriptor, new()
+        NativeEntitySwap ProvideNativeEntitySwapQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             _nativeSwapOperations.Add(
-                new NativeOperationSwap(EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+                new NativeOperationSwap(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type, memberName));
 
             return new NativeEntitySwap(_swapOperationQueue, _nativeSwapOperations.count - 1);
         }
 
-        NativeEntityFactory ProvideNativeEntityFactoryQueue<T>() where T : IEntityDescriptor, new()
+        NativeEntityFactory ProvideNativeEntityFactoryQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
             //todo: remove operation array and store entity descriptor hash in the return value
             _nativeAddOperations.Add(
-                new NativeOperationBuild(EntityDescriptorTemplate<T>.descriptor.componentsToBuild));
+                new NativeOperationBuild(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type));
 
             return new NativeEntityFactory(_addOperationQueue, _nativeAddOperations.count - 1);
         }
@@ -59,10 +59,10 @@ namespace Svelto.ECS
                     {
                         var componentsIndex = buffer.Dequeue<uint>();
                         var entityEGID = buffer.Dequeue<EGID>();
-                        CheckRemoveEntityID(entityEGID); 
+                        CheckRemoveEntityID(entityEGID, _nativeRemoveOperations[componentsIndex].type); 
                         QueueEntitySubmitOperation(new EntitySubmitOperation(
                                                        EntitySubmitOperationType.Remove, entityEGID, entityEGID
-                                                     , _nativeRemoveOperations[componentsIndex].entityComponents));
+                                                     , _nativeRemoveOperations[componentsIndex].components));
                     }
                 }
 
@@ -75,12 +75,12 @@ namespace Svelto.ECS
                         var     componentsIndex = buffer.Dequeue<uint>();
                         var entityEGID      = buffer.Dequeue<DoubleEGID>();
                         
-                        CheckRemoveEntityID(entityEGID.@from);
-                        CheckAddEntityID(entityEGID.to); 
+                        CheckRemoveEntityID(entityEGID.@from, _nativeSwapOperations[componentsIndex].type, _nativeSwapOperations[componentsIndex].caller );
+                        CheckAddEntityID(entityEGID.to, _nativeSwapOperations[componentsIndex].type, _nativeSwapOperations[componentsIndex].caller); 
                         
                         QueueEntitySubmitOperation(new EntitySubmitOperation(
                                                        EntitySubmitOperationType.Swap, entityEGID.@from, entityEGID.to
-                                                     , _nativeSwapOperations[componentsIndex].entityComponents));
+                                                     , _nativeSwapOperations[componentsIndex].components));
                     }
                 }
             }
@@ -98,8 +98,9 @@ namespace Svelto.ECS
                         var componentCounts = buffer.Dequeue<uint>();
                         
                         EntityComponentInitializer init =
-                            BuildEntity(egid, _nativeAddOperations[componentsIndex].components);
+                            BuildEntity(egid, _nativeAddOperations[componentsIndex].components, _nativeAddOperations[componentsIndex].type);
 
+                        //only called if Init is called on the initialized (there is something to init)
                         while (componentCounts > 0)
                         {
                             componentCounts--;
@@ -140,125 +141,43 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly struct NativeEntityRemove
-    {
-        readonly AtomicNativeBags _removeQueue;
-        readonly uint              _indexRemove;
-
-        internal NativeEntityRemove(AtomicNativeBags EGIDsToRemove, uint indexRemove)
-        {
-            _removeQueue = EGIDsToRemove;
-            _indexRemove = indexRemove;
-        }
-
-        public void RemoveEntity(EGID egid, int threadIndex)
-        {
-            var simpleNativeBag = _removeQueue.GetBuffer(threadIndex);
-            
-            simpleNativeBag.Enqueue(_indexRemove);
-            simpleNativeBag.Enqueue(egid);
-        }
-    }
-    
-    public readonly struct NativeEntitySwap
-    {
-        readonly AtomicNativeBags _swapQueue;
-        readonly uint              _indexSwap;
-
-        internal NativeEntitySwap(AtomicNativeBags EGIDsToSwap, uint indexSwap)
-        {
-            _swapQueue   = EGIDsToSwap;
-            _indexSwap   = indexSwap;
-        }
-
-        public void SwapEntity(EGID from, EGID to, int threadIndex)
-        {
-            var simpleNativeBag = _swapQueue.GetBuffer(threadIndex);
-            simpleNativeBag.Enqueue(_indexSwap);
-            simpleNativeBag.Enqueue(new DoubleEGID(from, to));
-        }
-
-        public void SwapEntity(EGID from, ExclusiveGroupStruct to, int threadIndex)
-        {
-            var simpleNativeBag = _swapQueue.GetBuffer(threadIndex);
-            simpleNativeBag.Enqueue(_indexSwap);
-            simpleNativeBag.Enqueue(new DoubleEGID(from, new EGID(from.entityID, to)));
-        }
-    }
-
-    public readonly struct NativeEntityFactory
-    {
-        readonly AtomicNativeBags _addOperationQueue;
-        readonly uint              _index;
-
-        internal NativeEntityFactory(AtomicNativeBags addOperationQueue, uint index)
-        {
-            _index             = index;
-            _addOperationQueue = addOperationQueue;
-        }
-
-        public NativeEntityComponentInitializer BuildEntity
-            (uint eindex, ExclusiveGroupStruct buildGroup, int threadIndex)
-        {
-            NativeBag unsafeBuffer = _addOperationQueue.GetBuffer(threadIndex + 1);
-
-            unsafeBuffer.Enqueue(_index);
-            unsafeBuffer.Enqueue(new EGID(eindex, buildGroup));
-            unsafeBuffer.ReserveEnqueue<uint>(out var index) = 0;
-
-            return new NativeEntityComponentInitializer(unsafeBuffer, index);
-        }
-    }
-
-    public readonly ref struct NativeEntityComponentInitializer
-    {
-        readonly NativeBag  _unsafeBuffer;
-        readonly UnsafeArrayIndex _index;
-
-        public NativeEntityComponentInitializer(in NativeBag unsafeBuffer, UnsafeArrayIndex index)
-        {
-            _unsafeBuffer = unsafeBuffer;
-            _index        = index;
-        }
-
-        public void Init<T>(in T component) where T : unmanaged, IEntityComponent
-        {
-            uint id = EntityComponentID<T>.ID.Data;
-
-            _unsafeBuffer.AccessReserved<uint>(_index)++;
-
-            _unsafeBuffer.Enqueue(id);
-            _unsafeBuffer.Enqueue(component);
-        }
-    }
-
-    struct NativeOperationBuild
+    readonly struct NativeOperationBuild
     {
         internal readonly IComponentBuilder[] components;
+        internal readonly Type type;
 
-        public NativeOperationBuild(IComponentBuilder[] descriptorEntityComponentsToBuild)
+        public NativeOperationBuild(IComponentBuilder[] descriptorComponentsToBuild, Type entityType)
         {
-            components = descriptorEntityComponentsToBuild;
+            type = entityType;
+            components = descriptorComponentsToBuild;
         }
     }
 
     readonly struct NativeOperationRemove
     {
-        internal readonly IComponentBuilder[] entityComponents;
-
-        public NativeOperationRemove(IComponentBuilder[] descriptorEntitiesToBuild)
+        internal readonly IComponentBuilder[] components;
+        internal readonly Type type;
+        internal readonly string caller;
+        
+        public NativeOperationRemove(IComponentBuilder[] descriptorComponentsToRemove, Type entityType, string caller)
         {
-            entityComponents = descriptorEntitiesToBuild;
+            this.caller = caller;
+            components = descriptorComponentsToRemove;
+            type = entityType;
         }
     }
 
     readonly struct NativeOperationSwap
     {
-        internal readonly IComponentBuilder[] entityComponents;
+        internal readonly IComponentBuilder[] components;
+        internal readonly Type type;
+        internal readonly string caller;
 
-        public NativeOperationSwap(IComponentBuilder[] descriptorEntitiesToBuild)
+        public NativeOperationSwap(IComponentBuilder[] descriptorComponentsToSwap, Type entityType, string caller)
         {
-            entityComponents = descriptorEntitiesToBuild;
+            this.caller = caller;
+            components = descriptorComponentsToSwap;
+            type = entityType;
         }
     }
 }

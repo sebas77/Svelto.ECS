@@ -10,6 +10,6 @@ namespace Svelto.ECS.Serialization
             _name = name;
         }
         
-        internal string _name;
+        internal readonly string _name;
     }
 }

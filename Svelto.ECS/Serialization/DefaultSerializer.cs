@@ -9,9 +9,12 @@ namespace Svelto.ECS.Serialization
             var _type = typeof(T);
 
             foreach (var field in _type.GetFields())
-                if (field.FieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) &&
+            {
+                var fieldFieldType = field.FieldType;
+                if (fieldFieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) &&
                     field.IsPrivate == false)
-                    throw new ECSException("field cannot be serialised ".FastConcat(_type.FullName));
+                    throw new ECSException($"field cannot be serialised {fieldFieldType} in {_type.FullName}");
+            }
 
             if (_type.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
                 throw new ECSException("serializable entity struct must be property less ".FastConcat(_type.FullName));

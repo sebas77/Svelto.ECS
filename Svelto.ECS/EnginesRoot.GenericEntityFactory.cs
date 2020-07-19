@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using Svelto.DataStructures;
-using Svelto.ECS.Internal;
+﻿using System;
+using System.Collections.Generic;
+using Svelto.Common;
 
 namespace Svelto.ECS
 {
@@ -10,7 +10,7 @@ namespace Svelto.ECS
         {
             public GenericEntityFactory(EnginesRoot weakReference)
             {
-                _enginesRoot = new WeakReference<EnginesRoot>(weakReference);
+                _enginesRoot = new Svelto.DataStructures.WeakReference<EnginesRoot>(weakReference);
             }
 
             public EntityComponentInitializer BuildEntity<T>
@@ -19,26 +19,25 @@ namespace Svelto.ECS
             {
                 return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId)
                                                      , EntityDescriptorTemplate<T>.descriptor.componentsToBuild
-                                                     , implementors);
+                                                     , TypeCache<T>.type, implementors);
             }
 
             public EntityComponentInitializer BuildEntity<T>(EGID egid, IEnumerable<object> implementors = null)
                 where T : IEntityDescriptor, new()
             {
                 return _enginesRoot.Target.BuildEntity(
-                    egid, EntityDescriptorTemplate<T>.descriptor.componentsToBuild
-                  , implementors);
+                    egid, EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type, implementors);
             }
 
             public EntityComponentInitializer BuildEntity<T>
                 (EGID egid, T entityDescriptor, IEnumerable<object> implementors) where T : IEntityDescriptor
             {
-                return _enginesRoot.Target.BuildEntity(egid, entityDescriptor.componentsToBuild, implementors);
+                return _enginesRoot.Target.BuildEntity(egid, entityDescriptor.componentsToBuild, TypeCache<T>.type, implementors);
             }
-#if UNITY_ECS
-            public NativeEntityFactory ToNative<T>(Unity.Collections.Allocator allocator) where T : IEntityDescriptor, new()
+#if UNITY_BURST
+            public NativeEntityFactory ToNative<T>(string memberName) where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.ProvideNativeEntityFactoryQueue<T>();
+                return _enginesRoot.Target.ProvideNativeEntityFactoryQueue<T>(memberName);
             }
 #endif            
             public EntityComponentInitializer BuildEntity<T>
@@ -46,7 +45,7 @@ namespace Svelto.ECS
                 where T : IEntityDescriptor
             {
                 return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId)
-                                                     , descriptorEntity.componentsToBuild, implementors);
+                                                     , descriptorEntity.componentsToBuild, TypeCache<T>.type, implementors);
             }
 
             public void PreallocateEntitySpace<T>(ExclusiveGroupStruct groupStructId, uint size)
@@ -54,10 +53,15 @@ namespace Svelto.ECS
             {
                 _enginesRoot.Target.Preallocate<T>(groupStructId, size);
             }
+            
+            public EntityComponentInitializer BuildEntity(EGID egid, IComponentBuilder[] componentsToBuild, Type type, IEnumerable<object> implementors = null)
+            {
+                return _enginesRoot.Target.BuildEntity(egid, componentsToBuild, type, implementors);
+            }
 
             //enginesRoot is a weakreference because GenericEntityStreamConsumerFactory can be injected inside
             //engines of other enginesRoot
-            readonly WeakReference<EnginesRoot> _enginesRoot;
+            readonly Svelto.DataStructures.WeakReference<EnginesRoot> _enginesRoot;
         }
     }
 }

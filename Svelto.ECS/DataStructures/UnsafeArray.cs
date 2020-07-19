@@ -9,12 +9,13 @@ namespace Svelto.ECS.DataStructures
         internal unsafe byte* ptr => _ptr;
 
         //expressed in bytes
-        internal uint capacity => _capacity;
+        internal int capacity => (int) _capacity;
 
         //expressed in bytes
-        internal uint count => _writeIndex;
+        internal int count => (int) _writeIndex;
+
         //expressed in bytes
-        internal uint space => capacity - count;
+        internal int space => capacity - count;
 
         /// <summary>
         /// </summary>
@@ -26,37 +27,36 @@ namespace Svelto.ECS.DataStructures
 #endif        
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Get<T>(uint index) where T : unmanaged
+        public ref T Get<T>(uint index) where T : struct
         {
             unsafe
             {
-                T* buffer = (T*) ptr;
-                return ref buffer[index];
+                return ref Unsafe.AsRef<T>(Unsafe.Add<T>(ptr, (int) index));
             }
         }    
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set<T>(uint index, in T value) where T : unmanaged
+        public void Set<T>(uint index, in T value) where T : struct
         {
             unsafe
             {
-                int sizeOf = MemoryUtilities.SizeOf<T>();
+                uint sizeOf = (uint) MemoryUtilities.SizeOf<T>();
                 uint writeIndex = (uint) (index * sizeOf);
                 
 #if DEBUG && !PROFILE_SVELTO                
                 if (_capacity < writeIndex + sizeOf)
                     throw new Exception("no writing authorized");
-#endif                 
-                T* buffer = (T*) ptr;
-                buffer[index] = value;
+#endif
+                Unsafe.AsRef<T>(Unsafe.Add<T>(_ptr, (int) index)) = value;
 
                 if (_writeIndex <  writeIndex + sizeOf)
                     _writeIndex = (uint) (writeIndex + sizeOf);
             }
         }
         
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add<T>(in T value) where T : unmanaged
+        public void Add<T>(in T value) where T : struct
         {
             unsafe
             {
@@ -73,7 +73,15 @@ namespace Svelto.ECS.DataStructures
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Realloc<T>(uint newCapacity) where T : unmanaged
+        public void Pop<T>() where T : struct
+        {
+            var structSize = MemoryUtilities.SizeOf<T>();
+                
+            _writeIndex -= (uint)structSize;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void Realloc(uint newCapacity)
         {
             unsafe
             {
@@ -84,9 +92,9 @@ namespace Svelto.ECS.DataStructures
 #endif                
                 if (newCapacity >= 0)
                 {
-                    newPointer = (byte*) MemoryUtilities.Alloc<T>(newCapacity, allocator);
+                    newPointer = (byte*) MemoryUtilities.Alloc(newCapacity, allocator);
                     if (count > 0)
-                        Unsafe.CopyBlock(newPointer, ptr, count);
+                        Unsafe.CopyBlock(newPointer, ptr, (uint) count);
                 }
 
                 if (ptr != null)
@@ -117,10 +125,17 @@ namespace Svelto.ECS.DataStructures
             _writeIndex = 0;
         }
         
-#if UNITY_ECS
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetCountTo(uint count)
+        {
+            _writeIndex = count;
+        }
+        
+#if UNITY_COLLECTIONS
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe byte* _ptr;
+        
         uint _writeIndex;
         uint _capacity;
     }

@@ -1,82 +1,95 @@
 using System;
-using Svelto.ECS.Internal;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public static class GroupCompound<G1, G2, G3>
+    public abstract class GroupCompound<G1, G2, G3>
         where G1 : GroupTag<G1> where G2 : GroupTag<G2> where G3 : GroupTag<G3>
     {
-        public static readonly ExclusiveGroupStruct[] Groups;
+        static readonly FasterList<ExclusiveGroupStruct> _Groups;
+        
+        public static FasterReadOnlyList<ExclusiveGroupStruct> Groups => new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         static GroupCompound()
         {
-            if ((Groups = GroupCompound<G3, G1, G2>.Groups) == null)
-            if ((Groups = GroupCompound<G2, G3, G1>.Groups) == null)
-            if ((Groups = GroupCompound<G3, G2, G1>.Groups) == null)
-            if ((Groups = GroupCompound<G1, G3, G2>.Groups) == null)
-            if ((Groups = GroupCompound<G2, G1, G3>.Groups) == null)
+            if ((_Groups = GroupCompound<G3, G1, G2>._Groups) == null)
+            if ((_Groups = GroupCompound<G2, G3, G1>._Groups) == null)
+            if ((_Groups = GroupCompound<G3, G2, G1>._Groups) == null)
+            if ((_Groups = GroupCompound<G1, G3, G2>._Groups) == null)
+            if ((_Groups = GroupCompound<G2, G1, G3>._Groups) == null)
             {
-                Groups = new ExclusiveGroupStruct[1];
+                _Groups = new FasterList<ExclusiveGroupStruct>(1);
 
                 var Group = new ExclusiveGroup();
-                Groups[0] = Group;
-                    
-                Console.LogDebug("<color=orange>".FastConcat(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "-").FastConcat(typeof(G3).ToString(), "- Initialized ", Groups[0].ToString()), "</color>"));
+                _Groups.Add(Group);
                     
                 GroupCompound<G1, G2>.Add(Group); //<G1/G2> and <G2/G1> must share the same array
                 GroupCompound<G1, G3>.Add(Group);
                 GroupCompound<G2, G3>.Add(Group);
-                    
+                
+                //This is done here to be sure that the group is added once per group tag
+                //(if done inside the previous group compound it would be added multiple times)
                 GroupTag<G1>.Add(Group);
                 GroupTag<G2>.Add(Group);
                 GroupTag<G3>.Add(Group);
+                
+#if DEBUG
+                GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}";
+#endif 
             }
-            else
-                Console.LogDebug(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "-").FastConcat(typeof(G3).ToString(), "-", Groups[0].ToString()));
+        }
+        
+        public static void Add(ExclusiveGroupStruct @group)
+        {
+            for (int i = 0; i < _Groups.count; ++i)
+                if (_Groups[i] == group)
+                    throw new Exception("temporary must be transformed in unit test");
+            
+            _Groups.Add(group);
+            
+          //  GroupCompound<G1, G2, G3>._Groups = _Groups;
         }
 
-        public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(Groups[0]);
+        public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(_Groups[0]);
     }
 
-    public static class GroupCompound<G1, G2> where G1 : GroupTag<G1> where G2 : GroupTag<G2>
+    public abstract class GroupCompound<G1, G2> where G1 : GroupTag<G1> where G2 : GroupTag<G2>
     {
-        public static ExclusiveGroupStruct[] Groups; 
+        static FasterList<ExclusiveGroupStruct> _Groups; 
+        public static FasterReadOnlyList<ExclusiveGroupStruct> Groups => new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         static GroupCompound()
         {
-            Groups = GroupCompound<G2, G1>.Groups;
+            _Groups = GroupCompound<G2, G1>._Groups;
             
-            if (Groups == null)
+            if (_Groups == null)
             {
-                Groups = new ExclusiveGroupStruct[1];
+                _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 var Group = new ExclusiveGroup();
-                Groups[0] = Group;
+                _Groups.Add(Group);
                 
-                Console.LogDebug("<color=orange>".FastConcat(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "- initialized ", Groups[0].ToString()), "</color>"));
-
                 //every abstract group preemptively adds this group, it may or may not be empty in future
                 GroupTag<G1>.Add(Group);
                 GroupTag<G2>.Add(Group);
+                
+#if DEBUG        
+                GroupMap.idToName[(uint) Group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}";
+#endif 
             }
-            else
-                Console.LogDebug(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "-", Groups[0].ToString()));
         } 
 
-        public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(Groups[0]);
+        public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(_Groups[0]);
 
         public static void Add(ExclusiveGroupStruct @group)
         {
-            for (int i = 0; i < Groups.Length; ++i)
-                if (Groups[i] == group)
+            for (int i = 0; i < _Groups.count; ++i)
+                if (_Groups[i] == group)
                     throw new Exception("temporary must be transformed in unit test");
-
-            Array.Resize(ref Groups, Groups.Length + 1);
-
-            Groups[Groups.Length - 1] = group;
             
-            GroupCompound<G2, G1>.Groups = Groups;
+            _Groups.Add(group);
             
-            Console.LogDebug(typeof(G1).ToString().FastConcat("-", typeof(G2).ToString(), "- Add ", group.ToString()));
+            //unit test this to check if it's necessary
+          //  GroupCompound<G2, G1>._Groups = _Groups;
         }
     }
 
@@ -86,27 +99,28 @@ namespace Svelto.ECS
     //groups with the same adjective, a group tag needs to hold all the groups sharing it.
     public abstract class GroupTag<T> where T : GroupTag<T>
     {
-        public static ExclusiveGroupStruct[] Groups = new ExclusiveGroupStruct[1];
+        static FasterList<ExclusiveGroupStruct> _Groups = new FasterList<ExclusiveGroupStruct>(1);
+        
+        public static FasterReadOnlyList<ExclusiveGroupStruct> Groups => new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         static GroupTag()
         {
-            Groups[0] = new ExclusiveGroup();
-            
-            Console.LogDebug(typeof(T).ToString() + "-" + Groups[0].ToString());
+            _Groups.Add(new ExclusiveGroup());
         }
 
         //Each time a new combination of group tags is found a new group is added.
-        internal static void Add(ExclusiveGroup @group)
+        internal static void Add(ExclusiveGroupStruct @group)
         {
-            for (int i = 0; i < Groups.Length; ++i)
-                if (Groups[i] == group)
+            for (int i = 0; i < _Groups.count; ++i)
+                if (_Groups[i] == group)
                     throw new Exception("temporary must be transformed in unit test");
 
-            Array.Resize(ref Groups, Groups.Length + 1);
-
-            Groups[Groups.Length - 1] = group;
-            
-            Console.LogDebug(typeof(T).ToString().FastConcat("- Add ", group.ToString()));
+            _Groups.Add(group);
+#if DEBUG                    
+            GroupMap.idToName[(uint) group] = $"Compound: {typeof(T).Name}";
+#endif            
         }
+
+        public static ExclusiveGroupStruct BuildGroup => new ExclusiveGroupStruct(_Groups[0]);
     }
 }

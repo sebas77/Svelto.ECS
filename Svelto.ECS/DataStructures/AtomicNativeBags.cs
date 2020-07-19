@@ -12,13 +12,13 @@ namespace Svelto.ECS.DataStructures.Unity
     public unsafe struct AtomicNativeBags:IDisposable
     {
         public const int DefaultThreadIndex = -1;
-        public const int MinThreadIndex = DefaultThreadIndex;
+        const int MinThreadIndex = DefaultThreadIndex;
 
-#if UNITY_ECS        
+#if UNITY_COLLECTIONS        
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
-        NativeBag* _data;
-        public readonly Allocator Allocator;
+        readonly NativeBag* _data;
+        readonly Allocator _allocator;
         readonly uint _threadsCount;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -26,20 +26,20 @@ namespace Svelto.ECS.DataStructures.Unity
 
         public AtomicNativeBags(Common.Allocator allocator, uint threadsCount)
         {
-            Allocator = allocator;
+            _allocator = allocator;
             _threadsCount = threadsCount;
 
             var bufferSize = MemoryUtilities.SizeOf<NativeBag>();
             var bufferCount = _threadsCount;
             var allocationSize = bufferSize * bufferCount;
 
-            var ptr = (byte*)MemoryUtilities.Alloc<int>((uint) allocationSize, allocator);
+            var ptr = (byte*)MemoryUtilities.Alloc((uint) allocationSize, allocator);
             MemoryUtilities.MemClear((IntPtr) ptr, (uint) allocationSize);
 
             for (int i = 0; i < bufferCount; i++)
             {
                 var bufferPtr = (NativeBag*)(ptr + bufferSize * i);
-                var buffer = new NativeBag((uint) i, allocator);
+                var buffer = new NativeBag(allocator);
                 MemoryUtilities.CopyStructureToPtr(ref buffer, (IntPtr) bufferPtr);
             }
 
@@ -60,7 +60,7 @@ namespace Svelto.ECS.DataStructures.Unity
             {
                 GetBuffer(i).Dispose();
             }
-            MemoryUtilities.Free((IntPtr) _data, Allocator);
+            MemoryUtilities.Free((IntPtr) _data, _allocator);
         }
 
         public void Clear()

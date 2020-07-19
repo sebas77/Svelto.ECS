@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+ using System.Runtime.CompilerServices;
+using Svelto.Common;
 
 namespace Svelto.ECS
 {
@@ -27,7 +27,8 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RemoveEntity<T>(EGID entityEGID) where T : IEntityDescriptor, new()
             {
-                _enginesRoot.Target.CheckRemoveEntityID(entityEGID);
+                DBC.ECS.Check.Require(entityEGID.groupID != 0, "invalid group detected");
+                _enginesRoot.Target.CheckRemoveEntityID(entityEGID, TypeCache<T>.type);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Remove, entityEGID, entityEGID,
@@ -50,6 +51,7 @@ namespace Svelto.ECS
             public void RemoveGroupAndEntities(ExclusiveGroupStruct groupID)
             {
                 _enginesRoot.Target.RemoveGroupID(groupID);
+                DBC.ECS.Check.Require(groupID != 0, "invalid group detected");
 
                 _enginesRoot.Target.QueueEntitySubmitOperation(
                     new EntitySubmitOperation(EntitySubmitOperationType.RemoveGroup, new EGID(0, groupID), new EGID()));
@@ -103,15 +105,15 @@ namespace Svelto.ECS
                 SwapEntityGroup<T>(fromID, toID);
             }
 
-#if UNITY_ECS
-            public NativeEntityRemove ToNativeRemove<T>() where T : IEntityDescriptor, new()
+#if UNITY_BURST
+            public NativeEntityRemove ToNativeRemove<T>(string memberName) where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.ProvideNativeEntityRemoveQueue<T>();
+                return _enginesRoot.Target.ProvideNativeEntityRemoveQueue<T>(memberName);
             }
             
-            public NativeEntitySwap ToNativeSwap<T>() where T : IEntityDescriptor, new()
+            public NativeEntitySwap ToNativeSwap<T>(string memberName) where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.ProvideNativeEntitySwapQueue<T>();
+                return _enginesRoot.Target.ProvideNativeEntitySwapQueue<T>(memberName);
             }
 #endif            
 
@@ -119,8 +121,11 @@ namespace Svelto.ECS
             public void SwapEntityGroup<T>(EGID fromID, EGID toID)
                 where T : IEntityDescriptor, new()
             {
-                _enginesRoot.Target.CheckRemoveEntityID(fromID);
-                _enginesRoot.Target.CheckAddEntityID(toID);
+                DBC.ECS.Check.Require(fromID.groupID != 0, "invalid group detected");
+                DBC.ECS.Check.Require(toID.groupID != 0, "invalid group detected");
+                
+                _enginesRoot.Target.CheckRemoveEntityID(fromID, TypeCache<T>.type);
+                _enginesRoot.Target.CheckAddEntityID(toID, TypeCache<T>.type);
 
                 _enginesRoot.Target.QueueEntitySubmitOperation<T>(
                     new EntitySubmitOperation(EntitySubmitOperationType.Swap,
@@ -135,7 +140,7 @@ namespace Svelto.ECS
         void QueueEntitySubmitOperation(EntitySubmitOperation entitySubmitOperation)
         {
 #if DEBUG && !PROFILE_SVELTO
-            entitySubmitOperation.trace = new StackFrame(1, true);
+            entitySubmitOperation.trace = new System.Diagnostics.StackFrame(1, true);
 #endif
             _entitiesOperations.Add((ulong) entitySubmitOperation.fromID, entitySubmitOperation);
         }
@@ -143,7 +148,7 @@ namespace Svelto.ECS
         void QueueEntitySubmitOperation<T>(EntitySubmitOperation entitySubmitOperation) where T : IEntityDescriptor
         {
 #if DEBUG && !PROFILE_SVELTO
-            entitySubmitOperation.trace = new StackFrame(1, true);
+            entitySubmitOperation.trace = new System.Diagnostics.StackFrame(1, true);
 
             if (_entitiesOperations.TryGetValue((ulong) entitySubmitOperation.fromID, out var entitySubmitedOperation))
             {

@@ -29,10 +29,9 @@ namespace Svelto.ECS
 
         void SingleSubmission(in PlatformProfiler profiler)
         {
-#if UNITY_ECS            
+#if UNITY_BURST          
             NativeOperationSubmission(profiler);
 #endif
-            
             if (_entitiesOperations.Count > 0)
             {
                 using (profiler.Sample("Remove and Swap operations"))
@@ -66,16 +65,19 @@ namespace Svelto.ECS
                                     break;
                             }
                         }
-                        catch (Exception e)
+                        catch
                         {
                             var str = "Crash while executing Entity Operation "
                                 .FastConcat(entitiesOperations[i].type.ToString());
-
-                            throw new ECSException(str.FastConcat(" ")
+                            
+                            
+                            Svelto.Console.LogError(str.FastConcat(" ")
 #if DEBUG && !PROFILE_SVELTO
-                                    .FastConcat(entitiesOperations[i].trace.ToString())
+                                                      .FastConcat(entitiesOperations[i].trace.ToString())
 #endif
-                                , e);
+                                                 );
+
+                            throw;
                         }
                     }
                 }
@@ -112,7 +114,7 @@ namespace Svelto.ECS
                 {
                     var groupID = groupOfEntitiesToSubmit.Key;
                     
-                    FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> groupDB = GetOrCreateGroup(groupID);
+                    FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> groupDB = GetOrCreateGroup(groupID, profiler);
 
                     //add the entityComponents in the group
                     foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
@@ -124,13 +126,13 @@ namespace Svelto.ECS
                         ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
                             targetTypeSafeDictionary);
 
-                        //Fill the DB with the entity views generate this frame.
+                        //Fill the DB with the entity components generate this frame.
                         dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, groupID);
                     }
                 }
             }
 
-            //then submit everything in the engines, so that the DB is up to date with all the entity views and struct
+            //then submit everything in the engines, so that the DB is up to date with all the entity components
             //created by the entity built
             using (profiler.Sample("Add entities to engines"))
             {

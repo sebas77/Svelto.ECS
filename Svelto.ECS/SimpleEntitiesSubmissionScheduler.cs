@@ -7,13 +7,16 @@ namespace Svelto.ECS
     {
         public void SubmitEntities()
         {
-            _onTick.Invoke();
+            if (paused == false)
+                _onTick.Invoke();
         }
         
         EnginesRoot.EntitiesSubmitter IEntitiesSubmissionScheduler.onTick
         {
             set => _onTick = value;
         }
+        
+        public bool paused { get; set; }
 
         public void Dispose() { }
 

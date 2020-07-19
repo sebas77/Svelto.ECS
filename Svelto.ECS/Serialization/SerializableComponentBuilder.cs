@@ -14,7 +14,7 @@ namespace Svelto.ECS.Serialization
     public class SerializableComponentBuilder<T> : ComponentBuilder<T>, ISerializableComponentBuilder
         where T : unmanaged, IEntityComponent
     {
-        public static readonly uint SIZE = UnsafeUtils.SizeOf<T>();
+        public static readonly uint SIZE = (uint) MemoryUtilities.SizeOf<T>();
         
           public void Serialize
         (uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
@@ -28,8 +28,7 @@ namespace Svelto.ECS.Serialization
                 throw new ECSException("Entity Serialization failed");
             }
 
-            var   values = safeDictionary.unsafeValues;
-            ref T val    = ref values[(int) index];
+            ref T val    = ref safeDictionary.GetDirectValueByRef(index);
 
             serializationData.dataPos = (uint) serializationData.data.count;
 
@@ -50,8 +49,7 @@ namespace Svelto.ECS.Serialization
                 throw new ECSException("Entity Deserialization failed");
             }
 
-            var   values = safeDictionary.unsafeValues;
-            ref T val    = ref values[(int) index];
+            ref T val    = ref safeDictionary.GetDirectValueByRef(index);
 
             componentSerializer.DeserializeSafe(ref val, serializationData);
         }

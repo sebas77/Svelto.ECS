@@ -1,32 +1,37 @@
-using System;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public readonly struct NativeAllGroupsEnumerable<T1> where T1 : unmanaged, IEntityComponent
+    /// <summary>
+    /// ToDo it would be interesting to have a version of this dedicated to unmanaged, IEntityComponent
+    /// that can be burstifiable 
+    /// </summary>
+    /// <typeparam name="T1"></typeparam>
+    public readonly struct AllGroupsEnumerable<T1> where T1 : struct, IEntityComponent
     {
-        public NativeAllGroupsEnumerable(EntitiesDB db)
+        public ref struct GroupCollection
+        {
+            internal EntityCollection<T1> collection;
+            internal ExclusiveGroupStruct group;
+
+            public void Deconstruct(out EntityCollection<T1> collection, out ExclusiveGroupStruct group)
+            {
+                collection = this.collection;
+                group = this.@group;
+            }
+        }
+        
+        public AllGroupsEnumerable(EntitiesDB db)
         {
             _db = db;
         }
         
-        public struct NativeGroupsIterator
+        public ref struct GroupsIterator
         {
-            public struct CurrentGroup: IDisposable
+            public GroupsIterator(EntitiesDB db) : this()
             {
-                public NB<T1> buffer;
-                public ExclusiveGroupStruct group;
-
-                public void Dispose()
-                {
-                    buffer.Dispose();
-                }
-            }
-            
-            public NativeGroupsIterator(EntitiesDB db) : this()
-            {
-                _db = db.FindGroups<T1>().GetEnumerator();
+                _db = db.FindGroups_INTERNAL<T1>().GetEnumerator();
             }
 
             public bool MoveNext()
@@ -35,13 +40,11 @@ namespace Svelto.ECS
                 while (_db.MoveNext() == true)
                 {
                     FasterDictionary<uint, ITypeSafeDictionary>.KeyValuePairFast group = _db.Current;
-
                     ITypeSafeDictionary<T1> typeSafeDictionary = @group.Value as ITypeSafeDictionary<T1>;
                     
-                    if (typeSafeDictionary.Count == 0) continue;
-                    
-                    _array.buffer = new EntityCollection<T1>(typeSafeDictionary.GetValuesArray(out var count), count)
-                        .ToNativeBuffer<T1>();
+                    if (typeSafeDictionary.count == 0) continue;
+
+                    _array.collection = new EntityCollection<T1>(typeSafeDictionary.GetValues(out var count), count);
                     _array.@group = new ExclusiveGroupStruct(group.Key);
 
                     return true;
@@ -50,19 +53,15 @@ namespace Svelto.ECS
                 return false;
             }
 
-            public void Reset()
-            {
-            }
+            public GroupCollection Current => _array;
 
-            public CurrentGroup Current => _array;
-
-            FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db;
-            CurrentGroup _array;
+            FasterDictionary<uint, ITypeSafeDictionary>.FasterDictionaryKeyValueEnumerator _db; 
+            GroupCollection _array;
         }
 
-        public NativeGroupsIterator GetEnumerator()
+        public GroupsIterator GetEnumerator()
         {
-            return new NativeGroupsIterator(_db);
+            return new GroupsIterator(_db);
         }
 
         readonly EntitiesDB       _db;
@@ -99,7 +98,7 @@ namespace Svelto.ECS
                     if (typeSafeDictionary1.Count == 0) continue;
                     
                     _array = new BT<NB<T1>, NB<T2>>()(new EntityCollection<T1>(typeSafeDictionary1.GetValuesArray(out var count), count)
-                       .ToNativeBuffer<T1>();
+                       .ToBuffer();
 
                     return true;
                 }

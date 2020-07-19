@@ -1,27 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Svelto.ECS.Internal;
+using System.Runtime.CompilerServices;
 
 #pragma warning disable 660,661
 
 namespace Svelto.ECS
 {
-    /// <summary>
-    /// still experimental alternative to ExclusiveGroup, use this like:
-    /// use this like:
-    /// public class TriggersGroup : ExclusiveGroup<TriggersGroup> {}
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class NamedExclusiveGroup<T>
-    {
-        public static ExclusiveGroup Group = new ExclusiveGroup();
-        public static string         name  = typeof(T).FullName;
-
-//        protected NamedExclusiveGroup() { }
-  //      protected NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)  {}
-    //    protected NamedExclusiveGroup(ushort range) : base(range) {}
-    }
-
     /// <summary>
     /// Exclusive Groups guarantee that the GroupID is unique.
     ///

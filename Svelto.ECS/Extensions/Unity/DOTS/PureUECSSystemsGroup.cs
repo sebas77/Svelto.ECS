@@ -21,6 +21,8 @@ namespace Svelto.ECS.Extensions.Unity
             return _jobHandle;
         }
 
+        public string name => nameof(PureUECSSystemsGroup);
+
         readonly World _world;
     }
 }

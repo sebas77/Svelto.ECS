@@ -26,6 +26,7 @@ namespace Svelto.ECS
                     Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 //    Assembly executingAssembly = Assembly.GetExecutingAssembly();
 
+                    Type d1 = typeof(DefaultVersioningFactory<>);
                     foreach (Assembly assembly in assemblies)
                     {
                    //     if (assembly.GetReferencedAssemblies().Contains(executingAssembly.GetName()))
@@ -38,7 +39,7 @@ namespace Svelto.ECS
                                 {
                                     var descriptor = Activator.CreateInstance(type) as ISerializableEntityDescriptor;
 
-                                    RegisterEntityDescriptor(descriptor);
+                                    RegisterEntityDescriptor(descriptor, type, d1);
                                 }
                             }
                         }
@@ -60,7 +61,7 @@ namespace Svelto.ECS
                 }
             }
 
-            void RegisterEntityDescriptor(ISerializableEntityDescriptor descriptor)
+            void RegisterEntityDescriptor(ISerializableEntityDescriptor descriptor, Type type, Type d1)
             {
                 if (descriptor == null)
                 {
@@ -78,6 +79,10 @@ namespace Svelto.ECS
 #endif
 
                 _descriptors[descriptorHash] = descriptor;
+                Type[] typeArgs = {type};
+                var makeGenericType = d1.MakeGenericType(typeArgs);
+                var instance = Activator.CreateInstance(makeGenericType);
+                _factories.Add(descriptorHash,  instance as IDeserializationFactory);
             }
 
             public ISerializableEntityDescriptor GetDescriptorFromHash(uint descriptorID)
@@ -92,13 +97,13 @@ namespace Svelto.ECS
 
             public IDeserializationFactory GetSerializationFactory(uint descriptorID)
             {
-                return _factories.TryGetValue(descriptorID, out var factory) ? factory : null;
+                return _factories[descriptorID];
             }
 
             public void RegisterSerializationFactory<Descriptor>(IDeserializationFactory deserializationFactory)
                 where Descriptor : ISerializableEntityDescriptor, new()
             {
-                _factories.Add(SerializationEntityDescriptorTemplate<Descriptor>.hash, deserializationFactory);
+                _factories[SerializationEntityDescriptorTemplate<Descriptor>.hash] = deserializationFactory;
             }
 
 

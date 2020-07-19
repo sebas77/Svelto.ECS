@@ -2,33 +2,33 @@
 {
     public abstract class GenericEntityDescriptor<T> : IEntityDescriptor where T : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _entityBuilders;
-        static GenericEntityDescriptor() { _entityBuilders = new IComponentBuilder[] {new ComponentBuilder<T>()}; }
+        static readonly IComponentBuilder[] _componentBuilders;
+        static GenericEntityDescriptor() { _componentBuilders = new IComponentBuilder[] {new ComponentBuilder<T>()}; }
 
-        public IComponentBuilder[] componentsToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _componentBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor
         where T : struct,  IEntityComponent where U : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _componentBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IComponentBuilder[] {new ComponentBuilder<T>(), new ComponentBuilder<U>()};
+            _componentBuilders = new IComponentBuilder[] {new ComponentBuilder<T>(), new ComponentBuilder<U>()};
         }
 
-        public IComponentBuilder[] componentsToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _componentBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor
         where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _componentBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IComponentBuilder[]
+            _componentBuilders = new IComponentBuilder[]
             {
                 new ComponentBuilder<T>(),
                 new ComponentBuilder<U>(),
@@ -36,18 +36,18 @@
             };
         }
 
-        public IComponentBuilder[] componentsToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _componentBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor
         where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
         where W : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _componentBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IComponentBuilder[]
+            _componentBuilders = new IComponentBuilder[]
             {
                 new ComponentBuilder<T>(),
                 new ComponentBuilder<U>(),
@@ -56,18 +56,18 @@
             };
         }
 
-        public IComponentBuilder[] componentsToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _componentBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor
         where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
         where W : struct,  IEntityComponent where X : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _componentBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IComponentBuilder[]
+            _componentBuilders = new IComponentBuilder[]
             {
                 new ComponentBuilder<T>(),
                 new ComponentBuilder<U>(),
@@ -77,18 +77,18 @@
             };
         }
 
-        public IComponentBuilder[] componentsToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _componentBuilders;
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor
         where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
         where W : struct,  IEntityComponent where X : struct,  IEntityComponent where Y : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _entityBuilders;
+        static readonly IComponentBuilder[] _componentBuilders;
 
         static GenericEntityDescriptor()
         {
-            _entityBuilders = new IComponentBuilder[]
+            _componentBuilders = new IComponentBuilder[]
             {
                 new ComponentBuilder<T>(),
                 new ComponentBuilder<U>(),
@@ -99,6 +99,6 @@
             };
         }
 
-        public IComponentBuilder[] componentsToBuild => _entityBuilders;
+        public IComponentBuilder[] componentsToBuild => _componentBuilders;
     }
 }

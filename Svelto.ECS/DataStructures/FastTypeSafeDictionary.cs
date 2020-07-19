@@ -264,11 +264,6 @@ namespace Svelto.ECS.Internal
             get => _implementation.unsafeValues;
         }
 
-        public object GenerateSentinel()
-        {
-            throw new NotImplementedException();
-        }
-
         public SetDictionary<TValue> implementation => _implementation;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

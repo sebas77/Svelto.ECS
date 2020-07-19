@@ -1,77 +1,85 @@
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public static class EntityDBExtensions
     {
-        public static NativeGroupsEnumerable<T1, T2> NativeGroupsIterator<T1, T2>(this EntitiesDB db,
-                                                                                  ExclusiveGroupStruct[] groups)
-            where T1 : unmanaged, IEntityComponent where T2 : unmanaged, IEntityComponent
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static AllGroupsEnumerable<T1> QueryEntities<T1>(this EntitiesDB db)
+            where T1 :struct, IEntityComponent
         {
-            return new NativeGroupsEnumerable<T1, T2>(db, groups, (uint)groups.Length);
+            return new AllGroupsEnumerable<T1>(db);
         }
-        
-        public static NativeGroupsEnumerable<T1, T2> NativeGroupsIterator<T1, T2>(this EntitiesDB db,
-                                                                                  FasterList<ExclusiveGroupStruct> groups)
-            where T1 : unmanaged, IEntityComponent where T2 : unmanaged, IEntityComponent
-        {
-            return new NativeGroupsEnumerable<T1, T2>(db, groups, groups.count);
-        }
+       
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static NB<T> QueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, EGID entityGID, out uint index) where T : unmanaged, IEntityComponent
+       {
+           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(entityGID, out index, out NB<T> array) == true)
+               return array;
 
-        public static NativeGroupsEnumerable<T1, T2, T3> NativeGroupsIterator
-            <T1, T2, T3>(this EntitiesDB db, ExclusiveGroupStruct[] groups)
-            where T1 : unmanaged, IEntityComponent where T2 : unmanaged, IEntityComponent
-            where T3 : unmanaged, IEntityComponent
-        {
-            return new NativeGroupsEnumerable<T1, T2, T3>(db, groups);
-        }
-        
-        public static NativeGroupsEnumerable<T1, T2, T3, T4> NativeGroupsIterator
-            <T1, T2, T3, T4>(this EntitiesDB db, ExclusiveGroupStruct[] groups)
-            where T1 : unmanaged, IEntityComponent where T2 : unmanaged, IEntityComponent
-            where T3 : unmanaged, IEntityComponent where T4 : unmanaged, IEntityComponent
-        {
-            return new NativeGroupsEnumerable<T1, T2, T3, T4>(db, groups);
-        }
-        
-        public static NativeGroupsEnumerable<T1> NativeGroupsIterator<T1>(this EntitiesDB db, ExclusiveGroupStruct[] groups)
-            where T1 : unmanaged, IEntityComponent
-        {
-            return new NativeGroupsEnumerable<T1>(db, groups);
-        }
+           throw new EntityNotFoundException(entityGID, typeof(T));
+       }
+       
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static NB<T> QueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, uint id, ExclusiveGroupStruct group, out uint index) where T : unmanaged, IEntityComponent
+       {
+           EGID entityGID = new EGID(id, group);
+           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(entityGID, out index, out NB<T> array) == true)
+               return array;
 
-        public static NativeAllGroupsEnumerable<T1> NativeGroupsIterator<T1>(this EntitiesDB db)
-            where T1 : unmanaged, IEntityComponent
-        {
-            return new NativeAllGroupsEnumerable<T1>(db);
-        }
-#if TO_BE_FINISHED       
-        public static NativeAllGroupsEnumerable<T1, T2> NativeGroupsIterator<T1, T2>(this EntitiesDB db)
-            where T1 : unmanaged, IEntityComponent where T2 : unmanaged, IEntityComponent
-        {
-            return new NativeAllGroupsEnumerable<T1, T2>(db);
-        }
-#endif
-        public static NB<T> NativeEntitiesBuffer<T>(this EntitiesDB db, ExclusiveGroupStruct @group)
-            where T : unmanaged, IEntityComponent
-        {
-            return db.QueryEntities<T>(group).ToNativeBuffer<T>();
-        }
+           throw new EntityNotFoundException(entityGID, typeof(T));
+       }
+
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static bool TryQueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, EGID entityGID, out uint index, out NB<T> array)
+           where T : unmanaged, IEntityComponent
+       {
+           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(entityGID, out index, out array) == true)
+               return true;
+
+           return false;
+       }
+       
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static bool TryQueryEntitiesAndIndex<T>(this EntitiesDB entitiesDb, uint id, ExclusiveGroupStruct group, out uint index, out NB<T> array)
+           where T : unmanaged, IEntityComponent
+       {
+           if (entitiesDb.QueryEntitiesAndIndexInternal<T>(new EGID(id, group), out index, out array) == true)
+               return true;
+
+           return false;
+       }
         
-        public static BT<NB<T1>, NB<T2>> NativeEntitiesBuffer<T1, T2>(this EntitiesDB db, ExclusiveGroupStruct @group)
-            where T1 : unmanaged, IEntityComponent
-            where T2 : unmanaged, IEntityComponent
-        {
-            return db.QueryEntities<T1, T2>(group).ToNativeBuffers<T1, T2>();
-        }
-        
-        public static BT<NB<T1>, NB<T2>, NB<T3>> NativeEntitiesBuffer<T1, T2, T3>(this EntitiesDB db, ExclusiveGroupStruct @group)
-            where T1 : unmanaged, IEntityComponent
-            where T2 : unmanaged, IEntityComponent
-            where T3 : unmanaged, IEntityComponent
-        {
-            return db.QueryEntities<T1, T2, T3>(group).ToNativeBuffers<T1, T2, T3>();
-        }
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       static bool QueryEntitiesAndIndexInternal<T>(this EntitiesDB entitiesDb, EGID entityGID, out uint index, out NB<T> buffer) where T : unmanaged, IEntityComponent
+       {
+           index = 0;
+           buffer = default;
+           if (entitiesDb.SafeQueryEntityDictionary<T>(entityGID.groupID, out var safeDictionary) == false)
+               return false;
+
+           if (safeDictionary.TryFindIndex(entityGID.entityID, out index) == false)
+               return false;
+            
+           buffer = (NB<T>) (safeDictionary as ITypeSafeDictionary<T>).GetValues(out _);
+
+           return true;
+       }
+       
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static ref T QueryEntity<T>(this EntitiesDB entitiesDb, EGID entityGID) where T : unmanaged, IEntityComponent
+       {
+           var array = entitiesDb.QueryEntitiesAndIndex<T>(entityGID, out var index);
+           
+           return ref array[(int) index];
+       }
+
+       [MethodImpl(MethodImplOptions.AggressiveInlining)]
+       public static ref T QueryEntity<T>(this EntitiesDB entitiesDb, uint id, ExclusiveGroupStruct group) where T : unmanaged, IEntityComponent
+       {
+           return ref entitiesDb.QueryEntity<T>(new EGID(id, group));
+       }
     }
 }

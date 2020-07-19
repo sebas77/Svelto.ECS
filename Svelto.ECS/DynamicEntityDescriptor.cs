@@ -4,7 +4,7 @@ using Svelto.DataStructures;
 namespace Svelto.ECS
 {
     /// <summary>
-    /// DynamicEntityDescriptor can be used to add entity views to an existing EntityDescriptor that act as flags,
+    /// DynamicEntityDescriptor can be used to add entity components to an existing EntityDescriptor that act as flags,
     /// at building time.
     /// This method allocates, so it shouldn't be abused
     /// </summary>
@@ -22,9 +22,9 @@ namespace Svelto.ECS
 
             //assign it after otherwise the previous copy will overwrite the value in case the item
             //is already present
-            ComponentsToBuild[length] = new ComponentBuilder<EntityInfoComponentView>
+            ComponentsToBuild[length] = new ComponentBuilder<EntityInfoViewComponent>
             (
-                new EntityInfoComponentView
+                new EntityInfoViewComponent
                 {
                     componentsToBuild = ComponentsToBuild
                 }
@@ -80,9 +80,9 @@ namespace Svelto.ECS
 
             //assign it after otherwise the previous copy will overwrite the value in case the item
             //is already present
-            localEntitiesToBuild[index] = new ComponentBuilder<EntityInfoComponentView>
+            localEntitiesToBuild[index] = new ComponentBuilder<EntityInfoViewComponent>
             (
-                new EntityInfoComponentView
+                new EntityInfoViewComponent
                 {
                     componentsToBuild = localEntitiesToBuild
                 }
@@ -100,7 +100,7 @@ namespace Svelto.ECS
             for (var i = 0; i < length; i++)
             {
                 //the special entity already exists
-                if (defaultEntities[i].GetEntityComponentType() == EntityBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
+                if (defaultEntities[i].GetEntityComponentType() == ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
                 {
                     index = i;
                     break;

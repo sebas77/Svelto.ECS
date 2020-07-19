@@ -1,5 +1,3 @@
-using System;
-
 namespace Svelto.ECS.Serialization {
     public static class SerializerExt
     {
@@ -15,7 +13,7 @@ namespace Svelto.ECS.Serialization {
             // size == 0 is a special case when we don't know the size in advance
             if (componentSerializer.size != 0 && serializationData.dataPos != posBefore + componentSerializer.size)
             {
-                throw new IndexOutOfRangeException(
+                throw new System.IndexOutOfRangeException(
                     $"Size mismatch when serializing {typeof(T).FullName} using {componentSerializer.GetType().FullName}, "
                   + $"expected offset {posBefore + componentSerializer.size}, got {serializationData.dataPos}");
             }
@@ -34,7 +32,7 @@ namespace Svelto.ECS.Serialization {
 #if DEBUG && !PROFILE_SVELTO
             if (componentSerializer.size != 0 && serializationData.dataPos != posBefore + componentSerializer.size)
             {
-                throw new IndexOutOfRangeException(
+                throw new System.IndexOutOfRangeException(
                     $"Size mismatch when deserializing {typeof(T).FullName} using {componentSerializer.GetType().FullName}, "
                   + $"expected offset {posBefore + componentSerializer.size}, got {serializationData.dataPos}");
             }

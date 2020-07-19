@@ -25,11 +25,13 @@ namespace Svelto.ECS.Serialization
                 {
                     if (myAttributes[j] is PartialSerializerFieldAttribute)
                     {
-                        if (myMembers[i].FieldType == typeof(EGID))
-                            throw new ECSException("EGID fields cannot be serialised ".FastConcat(myType.FullName));
+                        var fieldType = myMembers[i].FieldType;
+                        if (fieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) &&
+                            myMembers[i].IsPrivate == false)
+                                throw new ECSException($"field cannot be serialised {fieldType} in {myType.FullName}");
 
                         var offset = Marshal.OffsetOf<T>(myMembers[i].Name);
-                        var sizeOf = (uint)Marshal.SizeOf(myMembers[i].FieldType);
+                        var sizeOf = (uint)Marshal.SizeOf(fieldType);
                         offsets.Add(((uint) offset.ToInt32(), sizeOf));
                         totalSize += sizeOf;
                     }

@@ -5,26 +5,70 @@ using Svelto.Common;
 
 namespace Svelto.ECS.Extensions.Unity
 {
-    public abstract class SortedJobifedEnginesGroup<Interface, SequenceOrder>
+    /// <summary>
+    /// Note sorted jobs run in serial
+    /// </summary>
+    /// <typeparam name="Interface"></typeparam>
+    /// <typeparam name="SequenceOrder"></typeparam>
+    public abstract class SortedJobifedEnginesGroup<Interface, SequenceOrder> : IJobifiedGroupEngine
         where SequenceOrder : struct, ISequenceOrder where Interface : class, IJobifiedEngine
     {
-        protected SortedJobifedEnginesGroup(FasterReadOnlyList<Interface> engines)
+        protected SortedJobifedEnginesGroup(FasterList<Interface> engines)
         {
+            _name = "SortedJobifedEnginesGroup - "+this.GetType().Name;
             _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
         }
 
-        public JobHandle Execute(JobHandle combinedHandles)
+        public JobHandle Execute(JobHandle inputHandles)
         {
-            var fasterReadOnlyList = _instancedSequence.items;
-            for (var index = 0; index < fasterReadOnlyList.Count; index++)
+            var sequenceItems = _instancedSequence.items;
+            JobHandle combinedHandles = inputHandles;
+            using (var profiler = new PlatformProfiler(_name))
             {
-                var engine = fasterReadOnlyList[index];
-                combinedHandles = JobHandle.CombineDependencies(combinedHandles, engine.Execute(combinedHandles));
+                for (var index = 0; index < sequenceItems.count; index++)
+                {
+                    var engine = sequenceItems[index];
+                    using (profiler.Sample(engine.name)) combinedHandles = JobHandle.CombineDependencies(combinedHandles, engine.Execute(combinedHandles));
+                }
+            }
+
+            return combinedHandles; 
+        }
+
+        public string name => _name;
+        
+        readonly string _name;
+        readonly Sequence<Interface, SequenceOrder> _instancedSequence;
+    } 
+    
+    public abstract class SortedJobifedEnginesGroup<Interface, Parameter, SequenceOrder>: IJobifiedGroupEngine<Parameter>
+        where SequenceOrder : struct, ISequenceOrder where Interface : class, IJobifiedEngine<Parameter>
+    {
+        protected SortedJobifedEnginesGroup(FasterList<Interface> engines)
+        {
+            _name = "SortedJobifedEnginesGroup - "+this.GetType().Name;
+            _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
+        }
+
+        public JobHandle Execute(JobHandle combinedHandles, ref Parameter param)
+        {
+            var sequenceItems = _instancedSequence.items;
+            using (var profiler = new PlatformProfiler(_name))
+            {
+                for (var index = 0; index < sequenceItems.count; index++)
+                {
+                    var engine = sequenceItems[index];
+                    using (profiler.Sample(engine.name)) combinedHandles =
+                        JobHandle.CombineDependencies(combinedHandles, engine.Execute(combinedHandles, ref param));
+                }
             }
 
             return combinedHandles;
         }
 
+        public string name => _name;
+        
+        readonly string _name;
         readonly Sequence<Interface, SequenceOrder> _instancedSequence;
     }
 }

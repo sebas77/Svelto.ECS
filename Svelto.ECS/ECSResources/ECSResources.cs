@@ -9,6 +9,10 @@ namespace Svelto.ECS.Experimental
         public static implicit operator T(ECSResources<T> ecsString) { return ResourcesECSDB<T>.FromECS(ecsString.id); }
     }
     
+    /// <summary>
+    /// To do. Or we reuse the ID or we need to clear this
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     static class ResourcesECSDB<T>
     {
         static readonly FasterList<T> _resources = new FasterList<T>();

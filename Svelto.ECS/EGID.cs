@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 
 namespace Svelto.ECS
 {
-    //todo: add debug map
     [Serialization.DoNotSerialize]
     [Serializable]
     [StructLayout(LayoutKind.Explicit)]
@@ -75,7 +74,7 @@ namespace Svelto.ECS
 
         public override string ToString()
         {
-            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(groupID);
+            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(groupID.ToName());
         }
     }
 }

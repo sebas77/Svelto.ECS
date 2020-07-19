@@ -12,6 +12,8 @@ namespace Svelto.ECS
             _ID = id;
         }
 
+        public EGID EGID => _ID;
+
         public void Init<T>(T initializer) where T : struct, IEntityComponent
         {
             if (_group.TryGetValue(new RefWrapper<Type>(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
@@ -23,7 +25,7 @@ namespace Svelto.ECS
                 SetEGIDWithoutBoxing<T>.SetIDWithoutBoxing(ref initializer, _ID);
 
             if (dictionary.TryFindIndex(_ID.entityID, out var findElementIndex))
-                dictionary.unsafeValues[findElementIndex] = initializer;
+                dictionary.GetDirectValueByRef(findElementIndex) = initializer;
         }
 
         public ref T GetOrCreate<T>() where T : struct, IEntityComponent
