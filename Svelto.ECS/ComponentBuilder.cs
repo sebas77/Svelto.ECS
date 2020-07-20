@@ -76,7 +76,7 @@ namespace Svelto.ECS
             IS_ENTITY_VIEW_COMPONENT = typeof(IEntityViewComponent).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
             HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
             ENTITY_COMPONENT_NAME = ENTITY_COMPONENT_TYPE.ToString();
-            var IS_UNMANAGED = ENTITY_COMPONENT_TYPE.IsUnmanaged();
+            var IS_UNMANAGED = ENTITY_COMPONENT_TYPE.IsUnmanagedEx();
 
             if (IS_UNMANAGED)
                 EntityComponentIDMap.Register<T>(new Filler<T>());
@@ -89,7 +89,7 @@ namespace Svelto.ECS
                 EntityViewComponentCache.InitCache();
             else
             {
-                if (ENTITY_COMPONENT_TYPE != ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW &&  ENTITY_COMPONENT_TYPE.IsUnmanaged() == false)
+                if (ENTITY_COMPONENT_TYPE != ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW &&  ENTITY_COMPONENT_TYPE.IsUnmanagedEx() == false)
                     throw new Exception($"Entity Component check failed, unexpected struct type (must be unmanaged) {ENTITY_COMPONENT_TYPE}");
             }
         }

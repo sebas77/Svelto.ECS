@@ -23,7 +23,7 @@ namespace Svelto.ECS
     {
         static Filler()
         {
-            DBC.ECS.Check.Require(UnmanagedTypeExtensions.IsUnmanaged<T>() == true, "invalid type used");
+            DBC.ECS.Check.Require(UnmanagedTypeExtensions.IsUnmanagedEx<T>() == true, "invalid type used");
         }
 
         //it's an internal interface

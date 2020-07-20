@@ -13,7 +13,7 @@ namespace Svelto.ECS.Internal
         static readonly bool   _hasEgid    = typeof(INeedEGID).IsAssignableFrom(_type);
 
         internal static readonly bool _isUmanaged =
-            _type.IsUnmanaged() && (typeof(IEntityViewComponent).IsAssignableFrom(_type) == false);
+            _type.IsUnmanagedEx() && (typeof(IEntityViewComponent).IsAssignableFrom(_type) == false);
 
         internal SveltoDictionary<uint, TValue, NativeStrategy<FasterDictionaryNode<uint>>, ManagedStrategy<TValue>> implMgd;
         internal SveltoDictionary<uint, TValue, NativeStrategy<FasterDictionaryNode<uint>>, NativeStrategy<TValue>> implUnmgd;
