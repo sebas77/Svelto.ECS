@@ -68,13 +68,21 @@ namespace Svelto.ECS
             buffer = ec._managedBuffer;
             count  = (int) ec.count;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BT<MB<T1>> ToBuffer<T1>(in this EntityCollection<T1> ec) where T1 : struct, IEntityViewComponent
         {
             return new BT<MB<T1>>(ec._managedBuffer, ec.count);
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct<T1, T2>(in this EntityCollection<T1, T2> ec, out MB<T1> buffer1, out MB<T2> buffer2, out int count) where T1 : struct, IEntityViewComponent
+                                                                                                                                           where T2 : struct, IEntityViewComponent
+        {
+            buffer1 = ec.Item1._managedBuffer;
+            buffer2 = ec.Item2._managedBuffer;
+            count = (int) ec.count;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (MB<T1> buffer1, MB<T2> buffer2, uint count) ToBuffers<T1, T2>
@@ -82,6 +90,17 @@ namespace Svelto.ECS
             where T2 : struct, IEntityViewComponent where T1 : struct, IEntityViewComponent
         {
             return (ec.Item1._managedBuffer, ec.Item2._managedBuffer, ec.count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct<T1, T2, T3>(in this EntityCollection<T1, T2, T3> ec, out MB<T1> buffer1, out MB<T2> buffer2, out MB<T3> buffer3, out int count) where T1 : struct, IEntityViewComponent
+                                                                                                                                                                       where T2 : struct, IEntityViewComponent
+                                                                                                                                                                       where T3 : struct, IEntityViewComponent
+        {
+            buffer1 = ec.Item1._managedBuffer;
+            buffer2 = ec.Item2._managedBuffer;
+            buffer3 = ec.Item3._managedBuffer;
+            count = (int) ec.count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
