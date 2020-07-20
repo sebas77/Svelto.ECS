@@ -94,8 +94,8 @@ namespace Svelto.ECS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct<T1, T2, T3>(in this EntityCollection<T1, T2, T3> ec, out MB<T1> buffer1, out MB<T2> buffer2, out MB<T3> buffer3, out int count) where T1 : struct, IEntityViewComponent
-                                                                                                                                                                   where T2 : struct, IEntityViewComponent
-                                                                                                                                                                   where T3 : struct, IEntityViewComponent
+                                                                                                                                                                       where T2 : struct, IEntityViewComponent
+                                                                                                                                                                       where T3 : struct, IEntityViewComponent
         {
             buffer1 = ec.Item1._managedBuffer;
             buffer2 = ec.Item2._managedBuffer;
