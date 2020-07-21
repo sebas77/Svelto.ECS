@@ -128,7 +128,7 @@ namespace Svelto.ECS.Internal
                     if (_hasEgid)
                         SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref entity, toEntityID);
 
-                    toGroupCasted.Add(fromEntityGid.entityID, entity);
+                    toGroupCasted.Add(toEntityID.entityID, entity);
                 }
             }
             else
@@ -144,7 +144,7 @@ namespace Svelto.ECS.Internal
                     if (_hasEgid)
                         SetEGIDWithoutBoxing<TValue>.SetIDWithoutBoxing(ref entity, toEntityID);
 
-                    toGroupCasted.Add(fromEntityGid.entityID, entity);
+                    toGroupCasted.Add(toEntityID.entityID, entity);
                 }
             }
         }
