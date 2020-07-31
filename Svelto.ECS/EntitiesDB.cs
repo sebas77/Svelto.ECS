@@ -188,6 +188,20 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Exists<T>(uint id, LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T : struct, IEntityComponent
+        {
+            for (int i = 0; i < groups.count; i++)
+            {
+                if (Exists<T>(id, groups[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ExistsAndIsNotEmpty(ExclusiveGroupStruct gid)
         {
             if (_groupEntityComponentsDB.TryGetValue(
