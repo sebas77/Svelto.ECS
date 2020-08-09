@@ -339,6 +339,6 @@ namespace Svelto.ECS
         //may change in future as it could be expanded to support queries
         readonly FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>> _groupsPerEntity;
 
-        IEntityLocatorMap _entityLocatorMap;
+        readonly IEntityLocatorMap _entityLocatorMap;
     }
 }
