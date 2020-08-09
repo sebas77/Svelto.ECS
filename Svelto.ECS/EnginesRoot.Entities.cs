@@ -26,6 +26,7 @@ namespace Svelto.ECS
         {
             CheckAddEntityID(entityID, implementorType);
             Check.Require(entityID.groupID != 0, "invalid group detected");
+            CreateLocator(entityID);
 
             var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd, componentsToBuild
                                                        , implementors);
@@ -69,6 +70,16 @@ namespace Svelto.ECS
             using (var sampler = new PlatformProfiler("Move Entity From Engines"))
             {
                 var fromGroup = GetGroup(fromEntityGID.groupID);
+
+                // Update the egid to unique id maps.
+                if (toEntityGID.HasValue)
+                {
+                    UpdateLocator(fromEntityGID, toEntityGID.Value);
+                }
+                else
+                {
+                    RemoveLocator(fromEntityGID);
+                }
 
                 //Check if there is an EntityInfoView linked to this entity, if so it's a DynamicEntityDescriptor!
                 if (fromGroup.TryGetValue(new RefWrapper<Type>(ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
@@ -192,6 +203,8 @@ namespace Svelto.ECS
                 FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> fromGroup = GetGroup(fromIdGroupId);
                 FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> toGroup = GetOrCreateGroup(toGroupId, profiler);
 
+                UpdateAllGroupLocators(fromIdGroupId, toGroupId);
+
                 foreach (FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>.KeyValuePairFast dictionaryOfEntities
                     in fromGroup)
                 {
@@ -272,6 +285,8 @@ namespace Svelto.ECS
         {
             FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> dictionariesOfEntities =
                 _groupEntityComponentsDB[groupID];
+
+            RemoveAllGroupLocators(groupID);
 
             foreach (FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>.KeyValuePairFast dictionaryOfEntities in dictionariesOfEntities)
             {

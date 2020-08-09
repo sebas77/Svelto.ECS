@@ -16,11 +16,25 @@ namespace Svelto.ECS
         internal EntitiesDB
         (FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> groupEntityComponentsDB
        , FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>> groupsPerEntity
-       , EntitiesStream entityStream)
+       , EntitiesStream entityStream
+       , IEntityLocatorMap entityLocatorMap)
         {
             _groupEntityComponentsDB = groupEntityComponentsDB;
             _groupsPerEntity         = groupsPerEntity;
             _entityStream            = entityStream;
+            _entityLocatorMap        = entityLocatorMap;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public EGID GetEGID(EntityLocator entityLocator)
+        {
+            return _entityLocatorMap.GetEGID(entityLocator);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public EntityLocator GetLocator(EGID egid)
+        {
+            return _entityLocatorMap.GetLocator(egid);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,7 +89,7 @@ namespace Svelto.ECS
                                       .FastConcat("'. Entity 2: ' count: ".FastConcat(T2entities.count)
                                                                           .FastConcat(" ", typeof(T2).ToString())
                                                                           .FastConcat("' group: ", groupStruct.ToName())));
-#endif                                                                          
+#endif
 
             return new EntityCollection<T1, T2>(T1entities, T2entities);
         }
@@ -96,16 +110,16 @@ namespace Svelto.ECS
                                               .FastConcat(T2entities.count)
                                               .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString()))
                                               .FastConcat(" count: ").FastConcat(T3entities.count)));
-#endif            
+#endif
 
             return new EntityCollection<T1, T2, T3>(T1entities, T2entities, T3entities);
         }
-        
+
         public int IterateOverGroupsAndCount<T>
             (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T : struct, IEntityComponent
         {
             int count = 0;
-            
+
             for (int i = 0; i < groups.count; i++)
             {
                 count += Count<T>(groups[i]);
@@ -154,7 +168,7 @@ namespace Svelto.ECS
 
             return (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryQueryMappedEntities<T>
             (ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper) where T : struct, IEntityComponent
@@ -210,7 +224,7 @@ namespace Svelto.ECS
         {
             if (SafeQueryEntityDictionary<T>(groupStruct, out var typeSafeDictionary) == false)
                 return 0;
-            
+
             return (int) typeSafeDictionary.count;
         }
 
@@ -324,5 +338,7 @@ namespace Svelto.ECS
         //needed to be able to track in which groups a specific entity type can be found.
         //may change in future as it could be expanded to support queries
         readonly FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>> _groupsPerEntity;
+
+        IEntityLocatorMap _entityLocatorMap;
     }
 }

@@ -50,9 +50,11 @@ namespace Svelto.ECS
                 new FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>();
             _groupsPerEntity    = new FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
+            _entityLocatorMap = new FasterList<EntityLocatorMapElement>();
+            _egidToLocatorMap = new FasterDictionary<uint, FasterDictionary<uint, EntityLocator>>();
 
             _entitiesStream = new EntitiesStream();
-            _entitiesDB     = new EntitiesDB(_groupEntityComponentsDB, _groupsPerEntity, _entitiesStream);
+            _entitiesDB     = new EntitiesDB(_groupEntityComponentsDB, _groupsPerEntity, _entitiesStream, new EntityLocatorMap(this));
 
             scheduler        = entitiesComponentScheduler;
             scheduler.onTick = new EntitiesSubmitter(this);
@@ -88,7 +90,7 @@ namespace Svelto.ECS
                         Svelto.Console.LogException(e);
                     }
                 }
-                
+
                 foreach (FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>.
                     KeyValuePairFast groups in _groupEntityComponentsDB)
                 {
@@ -104,7 +106,7 @@ namespace Svelto.ECS
                             Svelto.Console.LogException(e);
                         }
                 }
-                
+
                 foreach (FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>>.
                     KeyValuePairFast groups in _groupEntityComponentsDB)
                 {
@@ -129,7 +131,7 @@ namespace Svelto.ECS
 #endif
                 _groupedEntityToAdd.Dispose();
                 _entitiesStream.Dispose();
-                
+
                 scheduler.Dispose();
             }
 
