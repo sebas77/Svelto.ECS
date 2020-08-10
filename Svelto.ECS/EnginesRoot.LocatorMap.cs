@@ -68,18 +68,39 @@ namespace Svelto.ECS
         {
             var locator = GetAndRemoveLocator(from);
 
+#if DEBUG && !PROFILE_SVELTO
+            if (locator.Equals(EntityLocator.Invalid))
+            {
+                throw new ECSException("Unable to update locator from egid: "
+                    .FastConcat(from.ToString(), "to egid: ")
+                    .FastConcat(to.ToString(), ". Locator was not found")
+                );
+            }
+#endif
+
             _entityLocatorMap[locator.uniqueID].egid = to;
 
-            if (_egidToLocatorMap.TryGetValue(to.groupID, out var toGroupMap))
+            if (_egidToLocatorMap.TryGetValue(to.groupID, out var groupMap) == false)
             {
-                toGroupMap[to.entityID] = locator;
+                groupMap = new FasterDictionary<uint, EntityLocator>();
+                _egidToLocatorMap[to.groupID] = groupMap;
             }
+            groupMap[to.entityID] = locator;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void RemoveLocator(EGID egid)
         {
             var locator = GetAndRemoveLocator(egid);
+
+#if DEBUG && !PROFILE_SVELTO
+            if (locator.Equals(EntityLocator.Invalid))
+            {
+                throw new ECSException("Unable to remove locator for egid: "
+                    .FastConcat(egid.ToString(), ". Locator was not found")
+                );
+            }
+#endif
 
             // Check if this is the first recycled element.
             if (_lastEntityId == _entityLocatorMap.count)
