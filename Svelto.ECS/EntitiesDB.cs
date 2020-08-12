@@ -26,9 +26,9 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EGID GetEGID(EntityLocator entityLocator)
+        public bool FindEGID(EntityLocator entityLocator, out EGID egid)
         {
-            return _entityLocatorMap.GetEGID(entityLocator);
+            return _entityLocatorMap.TryGetEGID(entityLocator, out egid);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

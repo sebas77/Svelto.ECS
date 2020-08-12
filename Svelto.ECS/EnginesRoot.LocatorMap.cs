@@ -21,9 +21,9 @@ namespace Svelto.ECS
                 return _enginesRoot.Target.GetLocator(egid);
             }
 
-            public EGID GetEGID(EntityLocator locator)
+            public bool TryGetEGID(EntityLocator locator, out EGID egid)
             {
-                return _enginesRoot.Target.FindEGID(locator);
+                return _enginesRoot.Target.TryGetEGID(locator, out egid);
             }
 
             WeakReference<EnginesRoot> _enginesRoot;
@@ -190,26 +190,20 @@ namespace Svelto.ECS
             return EntityLocator.Invalid;
         }
 
-        EGID FindEGID(EntityLocator locator)
+        bool TryGetEGID(EntityLocator locator, out EGID egid)
         {
-#if DEBUG && !PROFILE_SVELTO
-            if (locator.uniqueID >= _entityLocatorMap.count)
-            {
-                throw new ECSException("EntityLocator is out of bounds.");
-            }
-#endif
+            egid = new EGID();
+            if (locator == EntityLocator.Invalid) return false;
             // Make sure we are querying for the current version of the locator.
             // Otherwise the locator is pointing to a removed entity.
             if (_entityLocatorMap[locator.uniqueID].version == locator.version)
             {
-                return _entityLocatorMap[locator.uniqueID].egid;
+                egid = _entityLocatorMap[locator.uniqueID].egid;
+                return true;
             }
             else
             {
-#if DEBUG && !PROFILE_SVELTO
-                throw new ECSException("Attempting to find EGID with outdated entityLocator");
-#endif
-                return new EGID();
+                return false;
             }
         }
 

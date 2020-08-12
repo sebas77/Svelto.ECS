@@ -4,6 +4,6 @@
     {
         EntityLocator GetLocator(EGID egid);
 
-        EGID GetEGID(EntityLocator locator);
+        bool TryGetEGID(EntityLocator locator, out EGID egid);
     }
 }
