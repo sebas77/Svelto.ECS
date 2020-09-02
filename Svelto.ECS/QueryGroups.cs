@@ -65,6 +65,49 @@ namespace Svelto.ECS.Experimental
 
             return new QueryResult(group);
         }
+
+        public QueryResult WithEntity<T>(EntitiesDB entitiesDB, uint entityId)
+            where T : struct, IEntityComponent
+        {
+            var group = groups.Value.reference;
+            var groupsCount = group.count;
+
+            var found = false;
+            for (var i = 0; i < groupsCount; i++)
+            {
+                if (found || entitiesDB.Exists<T>(entityId, group[i]) == false)
+                {
+                    group.UnorderedRemoveAt(i);
+                    i--;
+                    groupsCount--;
+                }
+                else
+                {
+                    found = true;
+                }
+            }
+
+            return new QueryResult(group);
+        }
+
+        public QueryResult WithAny<T>(EntitiesDB entitiesDB)
+            where T : struct, IEntityComponent
+        {
+            var group = groups.Value.reference;
+            var groupsCount = group.count;
+
+            for (var i = 0; i < groupsCount; i++)
+            {
+                if (entitiesDB.Count<T>(group[i]) == 0)
+                {
+                    group.UnorderedRemoveAt(i);
+                    i--;
+                    groupsCount--;
+                }
+            }
+
+            return new QueryResult(group);
+        }
    }
 
     public readonly ref struct QueryResult
