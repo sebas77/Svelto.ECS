@@ -3,8 +3,7 @@ using UnityEngine;
 
 namespace Svelto.ECS.Extensions.Unity
 {
-    public abstract class GenericEntityDescriptorHolder<T>: 
-        MonoBehaviour , IEntityDescriptorHolder
+    public abstract class GenericEntityDescriptorHolder<T>: MonoBehaviour , IEntityDescriptorHolder
             where T: IEntityDescriptor, new()
     {
         public IEntityDescriptor GetDescriptor()
@@ -12,6 +11,11 @@ namespace Svelto.ECS.Extensions.Unity
             return EntityDescriptorTemplate<T>.descriptor;
         }
 
+        public T GetRealDescriptor()
+        {
+            return EntityDescriptorTemplate<T>.realDescriptor;
+        }
+        
         public string groupName => _groupName;
         public ushort id => _id;
 

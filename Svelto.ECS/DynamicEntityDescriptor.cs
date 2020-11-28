@@ -9,7 +9,7 @@ namespace Svelto.ECS
     /// This method allocates, so it shouldn't be abused
     /// </summary>
     /// <typeparam name="TType"></typeparam>
-    public struct DynamicEntityDescriptor<TType> : IEntityDescriptor where TType : IEntityDescriptor, new()
+    public struct DynamicEntityDescriptor<TType> : IDynamicEntityDescriptor where TType : IEntityDescriptor, new()
     {
         internal DynamicEntityDescriptor(bool isExtendible) : this()
         {
@@ -22,9 +22,9 @@ namespace Svelto.ECS
 
             //assign it after otherwise the previous copy will overwrite the value in case the item
             //is already present
-            ComponentsToBuild[length] = new ComponentBuilder<EntityInfoViewComponent>
+            ComponentsToBuild[length] = new ComponentBuilder<EntityInfoComponent>
             (
-                new EntityInfoViewComponent
+                new EntityInfoComponent
                 {
                     componentsToBuild = ComponentsToBuild
                 }
@@ -72,17 +72,16 @@ namespace Svelto.ECS
             }
 
             var defaultEntities = startingEntities;
-            var length = defaultEntities.Length;
+            
+            var index = SetupEntityInfoComponent(defaultEntities, out localEntitiesToBuild, extraEntitiesLength);
 
-            var index = SetupSpecialEntityComponent(defaultEntities, out localEntitiesToBuild, extraEntitiesLength);
-
-            Array.Copy(extraEntities, 0, localEntitiesToBuild, length, extraEntitiesLength);
+            Array.Copy(extraEntities, 0, localEntitiesToBuild, defaultEntities.Length, extraEntitiesLength);
 
             //assign it after otherwise the previous copy will overwrite the value in case the item
             //is already present
-            localEntitiesToBuild[index] = new ComponentBuilder<EntityInfoViewComponent>
+            localEntitiesToBuild[index] = new ComponentBuilder<EntityInfoComponent>
             (
-                new EntityInfoViewComponent
+                new EntityInfoComponent
                 {
                     componentsToBuild = localEntitiesToBuild
                 }
@@ -91,7 +90,7 @@ namespace Svelto.ECS
             return localEntitiesToBuild;
         }
 
-        static int SetupSpecialEntityComponent(IComponentBuilder[] defaultEntities, out IComponentBuilder[] componentsToBuild,
+        static int SetupEntityInfoComponent(IComponentBuilder[] defaultEntities, out IComponentBuilder[] componentsToBuild,
             int extraLenght)
         {
             int length = defaultEntities.Length;
@@ -100,7 +99,7 @@ namespace Svelto.ECS
             for (var i = 0; i < length; i++)
             {
                 //the special entity already exists
-                if (defaultEntities[i].GetEntityComponentType() == ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
+                if (defaultEntities[i].GetEntityComponentType() == ComponentBuilderUtilities.ENTITY_INFO_COMPONENT)
                 {
                     index = i;
                     break;
@@ -119,7 +118,6 @@ namespace Svelto.ECS
 
             return index;
         }
-
 
         public IComponentBuilder[] componentsToBuild => ComponentsToBuild;
 

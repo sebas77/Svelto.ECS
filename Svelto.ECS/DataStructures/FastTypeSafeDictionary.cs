@@ -61,7 +61,7 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        public void AddEntitiesToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDB,
+        public void AddEntitiesToEngines(FasterDictionary<RefWrapperType, FasterList<IEngine>> entityComponentEnginesDB,
                                          ITypeSafeDictionary                                     realDic,
                                          ExclusiveGroupStruct                                    @group,
                                          in PlatformProfiler                                     profiler)
@@ -75,7 +75,7 @@ namespace Svelto.ECS.Internal
         }
 
         public void RemoveEntitiesFromEngines(
-            FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDB, in PlatformProfiler profiler,
+            FasterDictionary<RefWrapperType, FasterList<IEngine>> entityComponentEnginesDB, in PlatformProfiler profiler,
             ExclusiveGroupStruct @group)
         {
             foreach (var value in _implementation)
@@ -105,7 +105,7 @@ namespace Svelto.ECS.Internal
         public void Clear() { _implementation.Clear(); }
 
         public void MoveEntityFromEngines(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
-                                          FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines,
+                                          FasterDictionary<RefWrapperType, FasterList<IEngine>> engines,
                                           in PlatformProfiler profiler)
         {
             var valueIndex = _implementation.GetIndex(fromEntityGid.entityID);
@@ -139,14 +139,14 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ITypeSafeDictionary Create() { return new FastTypeSafeDictionary<TValue>(); }
 
-        void AddEntityComponentToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDB,
+        void AddEntityComponentToEngines(FasterDictionary<RefWrapperType, FasterList<IEngine>> entityComponentEnginesDB,
                                     ref TValue                                              entity,
                                     ExclusiveGroupStruct?                                   previousGroup,
                                     in PlatformProfiler                                     profiler,
                                     EGID                                                    egid)
         {
             //get all the engines linked to TValue
-            if (!entityComponentEnginesDB.TryGetValue(new RefWrapper<Type>(_type), out var entityComponentsEngines)) return;
+            if (!entityComponentEnginesDB.TryGetValue(new RefWrapperType(_type), out var entityComponentsEngines)) return;
 
             if (previousGroup == null)
             {
@@ -184,13 +184,13 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        static void RemoveEntityComponentFromEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> @group,
+        static void RemoveEntityComponentFromEngines(FasterDictionary<RefWrapperType, FasterList<IEngine>> @group,
                                                 ref TValue                                              entity,
                                                 ExclusiveGroupStruct?                                   previousGroup,
                                                 in PlatformProfiler                                     profiler,
                                                 EGID                                                    egid)
         {
-            if (!@group.TryGetValue(new RefWrapper<Type>(_type), out var entityComponentsEngines)) return;
+            if (!@group.TryGetValue(new RefWrapperType(_type), out var entityComponentsEngines)) return;
 
             if (previousGroup == null)
             {

@@ -17,16 +17,19 @@ namespace Svelto.ECS.Internal
 
     public interface ITypeSafeDictionary:IDisposable
     {
-        uint count { get; }
+        uint                count { get; }
         ITypeSafeDictionary Create();
 
-        void AddEntitiesToEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDb,
-            ITypeSafeDictionary realDic, ExclusiveGroupStruct @group, in PlatformProfiler profiler);
-        void RemoveEntitiesFromEngines(FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> entityComponentEnginesDB,
+        //todo: there is something wrong in the design of the execute callback methods. Something to cleanup
+        void ExecuteEnginesAddOrSwapCallbacks(FasterDictionary<RefWrapperType, FasterList<IReactEngine>> entityComponentEnginesDb,
+            ITypeSafeDictionary realDic, ExclusiveGroupStruct? fromGroup, ExclusiveGroupStruct toGroup, in PlatformProfiler profiler);
+        void ExecuteEnginesSwapOrRemoveCallbacks(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
+                                                 FasterDictionary<RefWrapperType, FasterList<IReactEngine>> engines, in PlatformProfiler profiler);
+        void ExecuteEnginesRemoveCallbacks(FasterDictionary<RefWrapperType, FasterList<IReactEngine>> entityComponentEnginesDB,
             in PlatformProfiler profiler, ExclusiveGroupStruct @group);
+        
         void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId);
-        void MoveEntityFromEngines(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
-            FasterDictionary<RefWrapper<Type>, FasterList<IEngine>> engines, in PlatformProfiler profiler);
+        
         void AddEntityToDictionary(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup);
         void RemoveEntityFromDictionary(EGID fromEntityGid);
 
@@ -38,5 +41,7 @@ namespace Svelto.ECS.Internal
         bool ContainsKey(uint egidEntityId);
         uint GetIndex(uint valueEntityId);
         bool TryFindIndex(uint entityGidEntityId, out uint index);
+
+        void KeysEvaluator(System.Action<uint> action);
     }
 }

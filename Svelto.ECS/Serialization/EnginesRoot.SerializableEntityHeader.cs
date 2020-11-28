@@ -2,7 +2,7 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        struct SerializableEntityHeader
+        readonly struct SerializableEntityHeader
         {
             public readonly uint descriptorHash;
             public readonly byte entityComponentsCount;

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using Svelto.Common;
 
@@ -14,7 +14,7 @@ namespace Svelto.ECS
             }
 
             public EntityComponentInitializer BuildEntity<T>
-                (uint entityID, ExclusiveGroupStruct groupStructId, IEnumerable<object> implementors = null)
+                (uint entityID, BuildGroup groupStructId, IEnumerable<object> implementors = null)
                 where T : IEntityDescriptor, new()
             {
                 return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId)
@@ -34,14 +34,14 @@ namespace Svelto.ECS
             {
                 return _enginesRoot.Target.BuildEntity(egid, entityDescriptor.componentsToBuild, TypeCache<T>.type, implementors);
             }
-#if UNITY_BURST
+#if UNITY_NATIVE
             public NativeEntityFactory ToNative<T>(string memberName) where T : IEntityDescriptor, new()
             {
                 return _enginesRoot.Target.ProvideNativeEntityFactoryQueue<T>(memberName);
             }
 #endif            
             public EntityComponentInitializer BuildEntity<T>
-                (uint entityID, ExclusiveGroupStruct groupStructId, T descriptorEntity, IEnumerable<object> implementors)
+                (uint entityID, BuildGroup groupStructId, T descriptorEntity, IEnumerable<object> implementors)
                 where T : IEntityDescriptor
             {
                 return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId)

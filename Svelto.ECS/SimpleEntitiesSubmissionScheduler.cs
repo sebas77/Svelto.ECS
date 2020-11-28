@@ -1,24 +1,29 @@
 ﻿using Svelto.ECS.Schedulers;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Schedulers
 {
     //This scheduler shouldn't be used in production and it's meant to be used for Unit Tests only
-    public class SimpleEntitiesSubmissionScheduler : IEntitiesSubmissionScheduler
+    public sealed class SimpleEntitiesSubmissionScheduler : ISimpleEntitiesSubmissionScheduler
     {
-        public void SubmitEntities()
+        public override void SubmitEntities()
         {
             if (paused == false)
                 _onTick.Invoke();
         }
-        
-        EnginesRoot.EntitiesSubmitter IEntitiesSubmissionScheduler.onTick
-        {
-            set => _onTick = value;
-        }
-        
-        public bool paused { get; set; }
 
-        public void Dispose() { }
+        protected internal override EnginesRoot.EntitiesSubmitter onTick
+        {
+            set
+            {
+                DBC.ECS.Check.Require(_onTick.IsUnused , "a scheduler can be exclusively used by one enginesRoot only");
+                
+                _onTick = value;
+            }
+        }
+
+        public override bool paused { get; set; }
+
+        public override void Dispose() { }
 
         EnginesRoot.EntitiesSubmitter _onTick;
     }

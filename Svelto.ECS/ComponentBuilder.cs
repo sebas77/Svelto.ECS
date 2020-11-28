@@ -30,6 +30,7 @@ namespace Svelto.ECS
             var castedDic = dictionary as ITypeSafeDictionary<T>;
 
             T entityComponent = default;
+            
             if (IS_ENTITY_VIEW_COMPONENT)
             {
                 DBC.ECS.Check.Require(castedDic.ContainsKey(egid.entityID) == false,
@@ -89,7 +90,7 @@ namespace Svelto.ECS
                 EntityViewComponentCache.InitCache();
             else
             {
-                if (ENTITY_COMPONENT_TYPE != ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW &&  ENTITY_COMPONENT_TYPE.IsUnmanagedEx() == false)
+                if (ENTITY_COMPONENT_TYPE != ComponentBuilderUtilities.ENTITY_INFO_COMPONENT &&  ENTITY_COMPONENT_TYPE.IsUnmanagedEx() == false)
                     throw new Exception($"Entity Component check failed, unexpected struct type (must be unmanaged) {ENTITY_COMPONENT_TYPE}");
             }
         }
@@ -104,7 +105,12 @@ namespace Svelto.ECS
         static readonly          T      DEFAULT_IT;
         static readonly          string ENTITY_COMPONENT_NAME;
         
-
+        /// <summary>
+        /// Note: this static class will hold forever the references of the entities implementors. These references
+        /// are not even cleared when the engines root is destroyed, as they are static references.
+        /// It must be seen as an application-wide cache system. Honestly, I am not sure if this may cause leaking
+        /// issues in some kind of applications. To remember. 
+        /// </summary>
         static class EntityViewComponentCache
         {
             internal static readonly FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> cachedFields;
