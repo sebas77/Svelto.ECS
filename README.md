@@ -46,7 +46,7 @@ read this article for more information:http://www.sebaslab.com/distributing-svel
 * [http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/)
 * [http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/](http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/)
 
-** practice articles **
+**Practical articles**
 
 * [Svelto.ECS Internals: How to avoid boxing when using structs with reflection](https://www.sebaslab.com/casting-a-struct-into-an-interface-inside-a-generic-method-without-boxing/)
 * [Svelto ECS 3.0 Internals: profiling the Entity Collection](https://www.sebaslab.com/svelto-ecs-3-0-internals-the-entity-collection/)
