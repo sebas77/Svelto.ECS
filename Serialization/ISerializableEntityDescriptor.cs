@@ -1,10 +1,11 @@
+using System;
+
 namespace Svelto.ECS.Serialization
 {
-    public interface ISerializableEntityDescriptor : IEntityDescriptor
+    public interface ISerializableEntityDescriptor : IDynamicEntityDescriptor
     {
-        uint                         hash                { get; }
-        ISerializableEntityBuilder[] entitiesToSerialize { get; }
-        
-        void CopySerializedEntityStructs(in EntityStructInitializer sourceInitializer, in EntityStructInitializer destinationInitializer, SerializationType serializationType);
+        uint                            hash                { get; }
+        ISerializableComponentBuilder[] entitiesToSerialize { get; }
+        Type                            realType            { get; }
     }
 }

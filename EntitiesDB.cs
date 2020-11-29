@@ -1,254 +1,263 @@
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
 #define ENABLE_DEBUG_FUNC
 #endif
 
 using System;
 using System.Runtime.CompilerServices;
+using Svelto.Common;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
-namespace Svelto.ECS.Internal
+namespace Svelto.ECS
 {
-    partial class EntitiesDB : IEntitiesDB
+    public partial class EntitiesDB
     {
-        internal EntitiesDB(
-            FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> groupEntityViewsDB,
-            FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>> groupsPerEntity,
-            EntitiesStream entityStream)
+        internal EntitiesDB(EnginesRoot enginesRoot)
         {
-            _groupEntityViewsDB = groupEntityViewsDB;
-            _groupsPerEntity = groupsPerEntity;
-            _entityStream = entityStream;
+            _enginesRoot = enginesRoot;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T QueryUniqueEntity<T>(ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct
+        EntityCollection<T> InternalQueryEntities<T>(FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType)
+            where T : struct, IEntityComponent
         {
-            var entities = QueryEntities<T>(group, out var count);
-
-            if (count == 0)
-                throw new ECSException("Unique entity not found '".FastConcat(typeof(T).ToString()).FastConcat("'"));
-            if (count != 1)
-                throw new ECSException("Unique entities must be unique! '".FastConcat(typeof(T).ToString())
-                    .FastConcat("'"));
-            return ref entities[0];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T QueryEntity<T>(EGID entityGID) where T : struct, IEntityStruct
-        {
-            T[] array;
-            if ((array = QueryEntitiesAndIndexInternal<T>(entityGID, out var index)) != null)
-                return ref array[index];
-
-            throw new EntityNotFoundException(entityGID, typeof(T));
-        }
-
-        public ref T QueryEntity<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct
-        {
-            return ref QueryEntity<T>(new EGID(id, group));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
-            where T : struct, IEntityStruct
-        {
-            uint group = groupStruct;
-            count = 0;
-            if (SafeQueryEntityDictionary(group, out TypeSafeDictionary<T> typeSafeDictionary) == false)
-                return RetrieveEmptyEntityViewArray<T>();
-
-            return typeSafeDictionary.GetValuesArray(out count);
-        }
-
-        public EntityCollection<T> QueryEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
-            where T : struct, IEntityStruct
-        {
-            return new EntityCollection<T>(QueryEntities<T>(groupStruct, out var count), count);
-        }
-
-        public EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
-            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
-        {
-            return new EntityCollection<T1, T2>(QueryEntities<T1, T2>(groupStruct, out var count), count);
-        }
-
-        public EntityCollection<T1, T2, T3> QueryEntities<T1, T2, T3>(ExclusiveGroup.ExclusiveGroupStruct groupStruct)
-            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct
-        {
-            return new EntityCollection<T1, T2, T3>(QueryEntities<T1, T2, T3>(groupStruct, out var count), count);
-        }
-
-        public EntityCollections<T> QueryEntities<T>(ExclusiveGroup[] groups) where T : struct, IEntityStruct
-        {
-            return new EntityCollections<T>(this, groups);
-        }
-
-        public EntityCollections<T1, T2> QueryEntities<T1, T2>(ExclusiveGroup[] groups)
-            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
-        {
-            return new EntityCollections<T1, T2>(this, groups);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public (T1[], T2[]) QueryEntities<T1, T2>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
-            where T1 : struct, IEntityStruct
-            where T2 : struct, IEntityStruct
-        {
-            var T1entities = QueryEntities<T1>(groupStruct, out var countCheck);
-            var T2entities = QueryEntities<T2>(groupStruct, out count);
-
-            if (count != countCheck)
+            uint       count = 0;
+            IBuffer<T> buffer;
+            if (SafeQueryEntityDictionary<T>(out var typeSafeDictionary, entitiesInGroupPerType) == false)
+                buffer = RetrieveEmptyEntityComponentArray<T>();
+            else
             {
-                throw new ECSException("Entity views count do not match in group. Entity 1: ' count: "
-                    .FastConcat(countCheck)
-                    .FastConcat(typeof(T1).ToString())
-                    .FastConcat("'. Entity 2: ' count: ".FastConcat(count)
-                        .FastConcat(typeof(T2).ToString())
-                        .FastConcat("'")));
+                var safeDictionary = (typeSafeDictionary as ITypeSafeDictionary<T>);
+                buffer = safeDictionary.GetValues(out count);
             }
 
-            return (T1entities, T2entities);
+            return new EntityCollection<T>(buffer, count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public (T1[], T2[], T3[]) QueryEntities
-            <T1, T2, T3>(ExclusiveGroup.ExclusiveGroupStruct groupStruct, out uint count)
-            where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct where T3 : struct, IEntityStruct
+        /// <summary>
+        /// The QueryEntities<T> follows the rule that entities could always be iterated regardless if they
+        /// are 0, 1 or N. In case of 0 it returns an empty array. This allows to use the same for iteration
+        /// regardless the number of entities built.
+        /// </summary>
+        /// <param name="groupStructId"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public EntityCollection<T> QueryEntities<T>(ExclusiveGroupStruct groupStructId)
+            where T : struct, IEntityComponent
         {
-            var T1entities = QueryEntities<T1>(groupStruct, out var countCheck1);
-            var T2entities = QueryEntities<T2>(groupStruct, out var countCheck2);
-            var T3entities = QueryEntities<T3>(groupStruct, out count);
+            if (groupEntityComponentsDB.TryGetValue(groupStructId, out var entitiesInGroupPerType) == false)
+            {
+                var buffer = RetrieveEmptyEntityComponentArray<T>();
+                return new EntityCollection<T>(buffer, 0);
+            }
 
-            if (count != countCheck1 || count != countCheck2)
-                throw new ECSException("Entity views count do not match in group. Entity 1: "
-                    .FastConcat(typeof(T1).ToString()).FastConcat(" count: ").FastConcat(countCheck1).FastConcat(
-                        " Entity 2: ".FastConcat(typeof(T2).ToString())
-                            .FastConcat(" count: ").FastConcat(countCheck2)
-                            .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString())).FastConcat(" count: ")
-                            .FastConcat(count)));
-
-            return (T1entities, T2entities, T3entities);
+            return InternalQueryEntities<T>(entitiesInGroupPerType);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId)
-            where T : struct, IEntityStruct
+        public EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroupStruct groupStruct)
+            where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
         {
-            if (SafeQueryEntityDictionary(groupStructId, out TypeSafeDictionary<T> typeSafeDictionary) == false)
-                throw new EntityGroupNotFoundException(groupStructId, typeof(T));
+            if (groupEntityComponentsDB.TryGetValue(groupStruct, out var entitiesInGroupPerType) == false)
+            {
+                return new EntityCollection<T1, T2>(new EntityCollection<T1>(RetrieveEmptyEntityComponentArray<T1>(), 0),
+                    new EntityCollection<T2>(RetrieveEmptyEntityComponentArray<T2>(), 0));
+            }
+            
+            var T1entities = InternalQueryEntities<T1>(entitiesInGroupPerType);
+            var T2entities = InternalQueryEntities<T2>(entitiesInGroupPerType);
+#if DEBUG && !PROFILE_SVELTO
+            if (T1entities.count != T2entities.count)
+                throw new ECSException("Entity components count do not match in group. Entity 1: ' count: "
+                   .FastConcat(T1entities.count).FastConcat(" ", typeof(T1).ToString())
+                   .FastConcat("'. Entity 2: ' count: ".FastConcat(T2entities.count)
+                       .FastConcat(" ", typeof(T2).ToString())
+                       .FastConcat("' group: ", groupStruct.ToName())));
+#endif
 
-            EGIDMapper<T> mapper;
-            mapper.map = typeSafeDictionary;
+            return new EntityCollection<T1, T2>(T1entities, T2entities);
+        }
 
-            return mapper;
+        public EntityCollection<T1, T2, T3> QueryEntities<T1, T2, T3>(ExclusiveGroupStruct groupStruct)
+            where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent
+        {
+            if (groupEntityComponentsDB.TryGetValue(groupStruct, out var entitiesInGroupPerType) == false)
+            {
+                return new EntityCollection<T1, T2, T3>(
+                    new EntityCollection<T1>(RetrieveEmptyEntityComponentArray<T1>(), 0),
+                    new EntityCollection<T2>(RetrieveEmptyEntityComponentArray<T2>(), 0),
+                    new EntityCollection<T3>(RetrieveEmptyEntityComponentArray<T3>(), 0));
+            }
+            
+            var T1entities = InternalQueryEntities<T1>(entitiesInGroupPerType);
+            var T2entities = InternalQueryEntities<T2>(entitiesInGroupPerType);
+            var T3entities = InternalQueryEntities<T3>(entitiesInGroupPerType);
+#if DEBUG && !PROFILE_SVELTO
+            if (T1entities.count != T2entities.count || T2entities.count != T3entities.count)
+                throw new ECSException("Entity components count do not match in group. Entity 1: "
+                   .FastConcat(typeof(T1).ToString()).FastConcat(" count: ")
+                   .FastConcat(T1entities.count).FastConcat(
+                        " Entity 2: "
+                           .FastConcat(typeof(T2).ToString()).FastConcat(" count: ")
+                           .FastConcat(T2entities.count)
+                           .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString()))
+                           .FastConcat(" count: ").FastConcat(T3entities.count)));
+#endif
+
+            return new EntityCollection<T1, T2, T3>(T1entities, T2entities, T3entities);
+        }
+        
+        public EntityCollection<T1, T2, T3, T4> QueryEntities<T1, T2, T3, T4>(ExclusiveGroupStruct groupStruct)
+            where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent where T4 : struct, IEntityComponent
+        {
+            if (groupEntityComponentsDB.TryGetValue(groupStruct, out var entitiesInGroupPerType) == false)
+            {
+                return new EntityCollection<T1, T2, T3, T4>(
+                    new EntityCollection<T1>(RetrieveEmptyEntityComponentArray<T1>(), 0),
+                    new EntityCollection<T2>(RetrieveEmptyEntityComponentArray<T2>(), 0),
+                    new EntityCollection<T3>(RetrieveEmptyEntityComponentArray<T3>(), 0),
+                    new EntityCollection<T4>(RetrieveEmptyEntityComponentArray<T4>(), 0));
+            }
+            
+            var T1entities = InternalQueryEntities<T1>(entitiesInGroupPerType);
+            var T2entities = InternalQueryEntities<T2>(entitiesInGroupPerType);
+            var T3entities = InternalQueryEntities<T3>(entitiesInGroupPerType);
+            var T4entities = InternalQueryEntities<T4>(entitiesInGroupPerType);
+#if DEBUG && !PROFILE_SVELTO
+            if (T1entities.count != T2entities.count || T2entities.count != T3entities.count)
+                throw new ECSException("Entity components count do not match in group. Entity 1: "
+                   .FastConcat(typeof(T1).ToString()).FastConcat(" count: ")
+                   .FastConcat(T1entities.count).FastConcat(
+                        " Entity 2: "
+                           .FastConcat(typeof(T2).ToString()).FastConcat(" count: ")
+                           .FastConcat(T2entities.count)
+                           .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString()))
+                           .FastConcat(" count: ").FastConcat(T3entities.count)));
+#endif
+
+            return new EntityCollection<T1, T2, T3, T4>(T1entities, T2entities, T3entities, T4entities);
+        }
+
+        public GroupsEnumerable<T> QueryEntities<T>
+            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T : struct, IEntityComponent
+        {
+            return new GroupsEnumerable<T>(this, groups);
+        }
+
+        public GroupsEnumerable<T1, T2> QueryEntities<T1, T2>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
+            where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
+        {
+            return new GroupsEnumerable<T1, T2>(this, groups);
+        }
+
+        public GroupsEnumerable<T1, T2, T3> QueryEntities<T1, T2, T3>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
+            where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent where T3 : struct, IEntityComponent
+        {
+            return new GroupsEnumerable<T1, T2, T3>(this, groups);
+        }
+
+        public GroupsEnumerable<T1, T2, T3, T4> QueryEntities<T1, T2, T3, T4>
+            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
+            where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
+            where T3 : struct, IEntityComponent where T4 : struct, IEntityComponent
+        {
+            return new GroupsEnumerable<T1, T2, T3, T4>(this, groups);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryQueryMappedEntities<T>(ExclusiveGroup.ExclusiveGroupStruct groupStructId,
-            out EGIDMapper<T> mapper)
-            where T : struct, IEntityStruct
+        public EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroupStruct groupStructId)
+            where T : struct, IEntityComponent
+        {
+            if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
+                throw new EntityGroupNotFoundException(typeof(T) , groupStructId.ToName());
+
+            return (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryQueryMappedEntities<T>
+            (ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper) where T : struct, IEntityComponent
         {
             mapper = default;
-            if (SafeQueryEntityDictionary(groupStructId, out TypeSafeDictionary<T> typeSafeDictionary) == false)
+            if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false
+             || typeSafeDictionary.count == 0)
                 return false;
 
-            mapper.map = typeSafeDictionary;
+            mapper = (typeSafeDictionary as ITypeSafeDictionary<T>).ToEGIDMapper(groupStructId);
 
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] QueryEntitiesAndIndex<T>(EGID entityGID, out uint index) where T : struct, IEntityStruct
+        public bool Exists<T>(EGID entityGID) where T : struct, IEntityComponent
         {
-            T[] array;
-            if ((array = QueryEntitiesAndIndexInternal<T>(entityGID, out index)) != null)
-                return array;
-
-            throw new EntityNotFoundException(entityGID, typeof(T));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryQueryEntitiesAndIndex<T>(EGID entityGid, out uint index, out T[] array)
-            where T : struct, IEntityStruct
-        {
-            if ((array = QueryEntitiesAndIndexInternal<T>(entityGid, out index)) != null)
-                return true;
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] QueryEntitiesAndIndex<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index)
-            where T : struct, IEntityStruct
-        {
-            return QueryEntitiesAndIndex<T>(new EGID(id, group), out index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryQueryEntitiesAndIndex<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group, out uint index,
-            out T[] array) where T : struct, IEntityStruct
-        {
-            return TryQueryEntitiesAndIndex(new EGID(id, group), out index, out array);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Exists<T>(EGID entityGID) where T : struct, IEntityStruct
-        {
-            if (SafeQueryEntityDictionary(entityGID.groupID, out TypeSafeDictionary<T> casted) == false) return false;
+            if (SafeQueryEntityDictionary<T>(entityGID.groupID, out var casted) == false)
+                return false;
 
             return casted != null && casted.ContainsKey(entityGID.entityID);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Exists<T>(uint id, ExclusiveGroup.ExclusiveGroupStruct group) where T : struct, IEntityStruct
+        public bool Exists<T>(uint id, ExclusiveGroupStruct group) where T : struct, IEntityComponent
         {
-            if (SafeQueryEntityDictionary(group, out TypeSafeDictionary<T> casted) == false) return false;
+            if (SafeQueryEntityDictionary<T>(group, out var casted) == false)
+                return false;
 
             return casted != null && casted.ContainsKey(id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Exists(ExclusiveGroup.ExclusiveGroupStruct gid)
+        public bool ExistsAndIsNotEmpty(ExclusiveGroupStruct gid)
         {
-            return _groupEntityViewsDB.ContainsKey(gid);
+            if (groupEntityComponentsDB.TryGetValue(
+                gid, out FasterDictionary<RefWrapperType, ITypeSafeDictionary> group) == true)
+            {
+                return group.count > 0;
+            }
+
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool HasAny<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : struct, IEntityStruct
+        public bool HasAny<T>(ExclusiveGroupStruct groupStruct) where T : struct, IEntityComponent
         {
-            QueryEntities<T>(groupStruct, out var count);
-            return count > 0;
+            return Count<T>(groupStruct) > 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint Count<T>(ExclusiveGroup.ExclusiveGroupStruct groupStruct) where T : struct, IEntityStruct
+        public int Count<T>(ExclusiveGroupStruct groupStruct) where T : struct, IEntityComponent
         {
-            QueryEntities<T>(groupStruct, out var count);
-            return count;
+            if (SafeQueryEntityDictionary<T>(groupStruct, out var typeSafeDictionary) == false)
+                return 0;
+
+            return (int) typeSafeDictionary.count;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PublishEntityChange<T>(EGID egid) where T : unmanaged, IEntityStruct
+        public bool FoundInGroups<T1>() where T1 : IEntityComponent
         {
-            _entityStream.PublishEntity(ref QueryEntity<T>(egid), egid);
+            return groupsPerEntity.ContainsKey(TypeRefWrapper<T1>.wrapper);
         }
 
+        public bool IsDisposing => _enginesRoot._isDisposing;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        T[] QueryEntitiesAndIndexInternal<T>(EGID entityGID, out uint index) where T : struct, IEntityStruct
+        internal bool SafeQueryEntityDictionary<T>(out ITypeSafeDictionary typeSafeDictionary,
+            FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType)
+            where T : IEntityComponent
         {
-            index = 0;
-            if (SafeQueryEntityDictionary(entityGID.groupID, out TypeSafeDictionary<T> safeDictionary) == false)
-                return null;
+            if (entitiesInGroupPerType.TryGetValue(new RefWrapperType(TypeCache<T>.type), out var safeDictionary) == false)
+            {
+                typeSafeDictionary = default;
+                return false;
+            }
 
-            if (safeDictionary.TryFindIndex(entityGID.entityID, out index) == false)
-                return null;
+            //return the indexes entities if they exist
+            typeSafeDictionary = safeDictionary;
 
-            return safeDictionary.GetValuesArray(out _);
+            return true;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool SafeQueryEntityDictionary<T>(uint group, out TypeSafeDictionary<T> typeSafeDictionary)
-            where T : struct, IEntityStruct
+        internal bool SafeQueryEntityDictionary<T>(ExclusiveGroupStruct group, out ITypeSafeDictionary typeSafeDictionary)
+            where T : IEntityComponent
         {
             if (UnsafeQueryEntityDictionary(group, TypeCache<T>.type, out var safeDictionary) == false)
             {
@@ -257,45 +266,101 @@ namespace Svelto.ECS.Internal
             }
 
             //return the indexes entities if they exist
-            typeSafeDictionary = safeDictionary as TypeSafeDictionary<T>;
+            typeSafeDictionary = safeDictionary;
 
             return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool UnsafeQueryEntityDictionary(uint group, Type type, out ITypeSafeDictionary typeSafeDictionary)
+        internal bool UnsafeQueryEntityDictionary(ExclusiveGroupStruct group, Type type, out ITypeSafeDictionary typeSafeDictionary)
         {
             //search for the group
-            if (_groupEntityViewsDB.TryGetValue(group, out var entitiesInGroupPerType) == false)
+            if (groupEntityComponentsDB.TryGetValue(group, out var entitiesInGroupPerType) == false)
             {
                 typeSafeDictionary = null;
                 return false;
             }
 
             //search for the indexed entities in the group
-            return entitiesInGroupPerType.TryGetValue(new RefWrapper<Type>(type), out typeSafeDictionary);
+            return entitiesInGroupPerType.TryGetValue(new RefWrapperType(type), out typeSafeDictionary);
+        }
+
+        internal bool FindIndex(uint entityID, ExclusiveGroupStruct @group, Type type, out uint index)
+        {
+            EGID entityGID = new EGID(entityID, @group);
+
+            index = default;
+            
+            if (UnsafeQueryEntityDictionary(@group, type, out var safeDictionary) == false)
+                return false;
+
+            if (safeDictionary.TryFindIndex(entityGID.entityID, out index) == false)
+                return false;
+
+            return true;
+        }
+
+        internal uint GetIndex(uint entityID, ExclusiveGroupStruct @group, Type type)
+        {
+            EGID entityGID = new EGID(entityID, @group);
+            
+            if (UnsafeQueryEntityDictionary(@group, type, out var safeDictionary) == false)
+            {
+                throw new EntityNotFoundException(entityGID, type);
+            }
+
+            if (safeDictionary.TryFindIndex(entityGID.entityID, out var index) == false)
+                throw new EntityNotFoundException(entityGID, type);
+
+            return index;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static T[] RetrieveEmptyEntityViewArray<T>()
+        static IBuffer<T> RetrieveEmptyEntityComponentArray<T>() where T : struct, IEntityComponent
         {
             return EmptyList<T>.emptyArray;
         }
 
-        //grouped set of entity views, this is the standard way to handle entity views entity views are grouped per
-        //group, then indexable per type, then indexable per EGID. however the TypeSafeDictionary can return an array of
-        //values directly, that can be iterated over, so that is possible to iterate over all the entity views of
-        //a specific type inside a specific group.
-        readonly FasterDictionary<uint, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>> _groupEntityViewsDB;
-
-        //needed to be able to iterate over all the entities of the same type regardless the group
-        //may change in future
-        readonly FasterDictionary<RefWrapper<Type>, FasterDictionary<uint, ITypeSafeDictionary>> _groupsPerEntity;
-        readonly EntitiesStream                                                                  _entityStream;
-
-        static class EmptyList<T>
+        static class EmptyList<T> where T : struct, IEntityComponent
         {
-            internal static readonly T[] emptyArray = new T[0];
+            internal static readonly IBuffer<T> emptyArray;
+
+            static EmptyList()
+            {
+                if (ComponentBuilder<T>.IS_ENTITY_VIEW_COMPONENT)
+                {
+                    MB<T> b = default;
+
+                    emptyArray = b;
+                }
+                else
+                {
+                    NB<T> b = default;
+
+                    emptyArray = b;
+                }
+            }
         }
+
+        static readonly FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary> _emptyDictionary =
+            new FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>();
+
+        readonly EnginesRoot _enginesRoot;
+
+        EntitiesStreams _entityStream => _enginesRoot._entityStreams;
+
+        //grouped set of entity components, this is the standard way to handle entity components are grouped per
+        //group, then indexable per type, then indexable per EGID. however the TypeSafeDictionary can return an array of
+        //values directly, that can be iterated over, so that is possible to iterate over all the entity components of
+        //a specific type inside a specific group.
+FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+            groupEntityComponentsDB => _enginesRoot._groupEntityComponentsDB;
+
+//for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are
+//found indexed by group id. TypeSafeDictionary are never created, they instead point to the ones hold
+//by _groupEntityComponentsDB
+//                        <EntityComponentType                            <groupID  <entityID, EntityComponent>>>  
+        FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> groupsPerEntity =>
+            _enginesRoot._groupsPerEntity;
     }
 }

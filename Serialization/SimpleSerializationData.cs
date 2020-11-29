@@ -31,7 +31,7 @@ namespace Svelto.ECS
             dataPos = 0;
         }
 
-        public void BeginNextEntityStruct()
+        public void BeginNextEntityComponent()
         {}
     }
 }

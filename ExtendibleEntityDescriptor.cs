@@ -8,7 +8,7 @@ namespace Svelto.ECS
     /// to swap and remove specialized entities from abstract engines
     /// </summary>
     /// <typeparam name="TType"></typeparam>
-    public class ExtendibleEntityDescriptor<TType> : IEntityDescriptor where TType : IEntityDescriptor, new()
+    public class ExtendibleEntityDescriptor<TType> : IDynamicEntityDescriptor where TType : IEntityDescriptor, new()
     {
         static ExtendibleEntityDescriptor()
         {
@@ -17,7 +17,7 @@ namespace Svelto.ECS
                     $"SerializableEntityDescriptors cannot be used as base entity descriptor: {typeof(TType)}");
         }
 
-        public ExtendibleEntityDescriptor(IEntityBuilder[] extraEntities)
+        public ExtendibleEntityDescriptor(IComponentBuilder[] extraEntities)
         {
             _dynamicDescriptor = new DynamicEntityDescriptor<TType>(extraEntities);
         }
@@ -34,14 +34,14 @@ namespace Svelto.ECS
             return this;
         }
 
-        public ExtendibleEntityDescriptor<TType> ExtendWith(IEntityBuilder[] extraEntities)
+        public ExtendibleEntityDescriptor<TType> ExtendWith(IComponentBuilder[] extraEntities)
         {
             _dynamicDescriptor.ExtendWith(extraEntities);
 
             return this;
         }
 
-        public IEntityBuilder[] entitiesToBuild => _dynamicDescriptor.entitiesToBuild;
+        public IComponentBuilder[] componentsToBuild => _dynamicDescriptor.componentsToBuild;
 
         DynamicEntityDescriptor<TType> _dynamicDescriptor;
     }

@@ -1,326 +1,221 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public struct EntityCollection<T>
+    public readonly ref struct EntityCollection<T> where T : struct, IEntityComponent
     {
-        public EntityCollection(T[] array, uint count)
+        static readonly bool IsUnmanaged = TypeSafeDictionary<T>.IsUnmanaged; 
+        
+        public EntityCollection(IBuffer<T> buffer, uint count):this()
         {
-            _array = array;
-            _count = count;
+            if (IsUnmanaged)
+                _nativedBuffer = (NB<T>) buffer;
+            else
+                _managedBuffer = (MB<T>) buffer;
+            
+            _count  = count;
         }
 
-        public EntityIterator GetEnumerator()
-        {
-            return new EntityIterator(_array, _count);
-        }
+        public uint count => _count;
 
-        readonly T[] _array;
+        internal readonly MB<T> _managedBuffer;
+        internal readonly NB<T> _nativedBuffer;
+
         readonly uint _count;
-
-        public struct EntityIterator : IEnumerator<T>
-        {
-            public EntityIterator(T[] array, uint count) : this()
-            {
-                _array = array;
-                _count = count;
-                _index = -1;
-            }
-
-            public bool MoveNext()
-            {
-                return ++_index < _count;
-            }
-
-            public void Reset()
-            {
-                _index = -1;
-            }
-
-            public ref T Current => ref _array[_index];
-
-            T IEnumerator<T>.Current => throw new NotImplementedException();
-            object IEnumerator.Current => throw new NotImplementedException();
-
-            public void Dispose()  {}
-
-            readonly T[] _array;
-            readonly uint _count;
-            int _index;
-        }
     }
-    
-    public struct EntityCollection<T1, T2>
+
+    public readonly ref struct EntityCollection<T1, T2> where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
     {
-        public EntityCollection(in (T1[], T2[]) array, uint count)
+        internal EntityCollection(in EntityCollection<T1> array1, in EntityCollection<T2> array2)
         {
-            _array = array;
-            _count = count;
+            _array1 = array1;
+            _array2 = array2;
         }
 
-        public EntityIterator GetEnumerator()
+        public uint count => _array1.count;
+
+        internal EntityCollection<T2> buffer2
         {
-            return new EntityIterator(_array, _count);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array2;
         }
 
-        readonly (T1[], T2[])  _array;
-        readonly uint _count;
-
-        public struct EntityIterator : IEnumerator<ValueRef<T1, T2>>
+        internal EntityCollection<T1> buffer1
         {
-            public EntityIterator((T1[], T2[]) array, uint count) : this()
-            {
-                _array = array;
-                _count = count;
-                _index = -1;
-            }
-
-            public bool MoveNext()
-            {
-                return ++_index < _count;
-            }
-
-            public void Reset()
-            {
-                _index = -1;
-            }
-
-            public ValueRef<T1, T2> Current => new ValueRef<T1, T2>(_array, (uint) _index);
-
-            ValueRef<T1, T2> IEnumerator<ValueRef<T1, T2>>. Current => throw new NotImplementedException();
-            object IEnumerator.Current => throw new NotImplementedException();
-
-            public void Dispose()  {}
-
-            readonly (T1[], T2[])  _array;
-            readonly uint _count;
-            int           _index;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array1;
         }
+
+        readonly EntityCollection<T1> _array1;
+        readonly EntityCollection<T2> _array2;
     }
-    
-    public struct EntityCollection<T1, T2, T3>
+
+    public readonly ref struct EntityCollection<T1, T2, T3> where T3 : struct, IEntityComponent
+                                                            where T2 : struct, IEntityComponent
+                                                            where T1 : struct, IEntityComponent
     {
-        public EntityCollection(in (T1[], T2[], T3[]) array, uint count)
+        internal EntityCollection
+            (in EntityCollection<T1> array1, in EntityCollection<T2> array2, in EntityCollection<T3> array3)
         {
-            _array = array;
-            _count = count;
+            _array1 = array1;
+            _array2 = array2;
+            _array3 = array3;
         }
 
-        public EntityIterator GetEnumerator()
+        internal EntityCollection<T1> buffer1
         {
-            return new EntityIterator(_array, _count);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array1;
         }
 
-        readonly (T1[], T2[], T3[]) _array;
-        readonly uint         _count;
-
-        public struct EntityIterator : IEnumerator<ValueRef<T1, T2, T3>>
+        internal EntityCollection<T2> buffer2
         {
-            public EntityIterator((T1[], T2[], T3[]) array, uint count) : this()
-            {
-                _array = array;
-                _count = count;
-                _index = -1;
-            }
-
-            public bool MoveNext()
-            {
-                return ++_index < _count;
-            }
-
-            public void Reset()
-            {
-                _index = -1;
-            }
-
-            public ValueRef<T1, T2, T3> Current => new ValueRef<T1, T2, T3>(_array, (uint) _index);
-
-            ValueRef<T1, T2, T3> IEnumerator<ValueRef<T1, T2, T3>>.Current => throw new NotImplementedException();
-            object IEnumerator.                                    Current => throw new NotImplementedException();
-
-            public void Dispose()  {}
-
-            readonly (T1[], T2[], T3[]) _array;
-            readonly uint               _count;
-            int                         _index;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array2;
         }
+
+        internal EntityCollection<T3> buffer3
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array3;
+        }
+
+        internal uint count => buffer1.count;
+
+        readonly EntityCollection<T1> _array1;
+        readonly EntityCollection<T2> _array2;
+        readonly EntityCollection<T3> _array3;
     }
-    
-    public struct EntityCollections<T> where T : struct, IEntityStruct
+
+    public readonly ref struct EntityCollection<T1, T2, T3, T4> 
+                                                            where T1 : struct, IEntityComponent
+                                                            where T2 : struct, IEntityComponent
+                                                            where T3 : struct, IEntityComponent
+                                                            where T4 : struct, IEntityComponent
     {
-        public EntityCollections(IEntitiesDB db, ExclusiveGroup[] groups) : this()
+        internal EntityCollection
+            (in EntityCollection<T1> array1, in EntityCollection<T2> array2, in EntityCollection<T3> array3, in EntityCollection<T4> array4)
         {
-            _db = db;
-            _groups = groups;
+            _array1 = array1;
+            _array2 = array2;
+            _array3 = array3;
+            _array4 = array4;
         }
 
-        public EntityGroupsIterator GetEnumerator()
+        internal EntityCollection<T1> Item1
         {
-            return new EntityGroupsIterator(_db, _groups);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array1;
         }
 
-        readonly IEntitiesDB _db;
-        readonly ExclusiveGroup[] _groups;
-
-        public struct EntityGroupsIterator : IEnumerator<T>
+        internal EntityCollection<T2> Item2
         {
-            public EntityGroupsIterator(IEntitiesDB db, ExclusiveGroup[] groups) : this()
-            {
-                _db = db;
-                _groups = groups;
-                _indexGroup = -1;
-                _index = -1;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array2;
+        }
 
-            public bool MoveNext()
-            {
-                while (_index + 1 >= _count && ++_indexGroup < _groups.Length)
-                {
-                    _index = -1;
-                    _array = _db.QueryEntities<T>(_groups[_indexGroup], out _count);
-                }
+        internal EntityCollection<T3> Item3
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array3;
+        }
+        
+        internal EntityCollection<T4> Item4
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _array4;
+        }
 
-                return ++_index < _count;
-            }
+        internal uint count => _array1.count;
 
-            public void Reset()
-            {
-                _index = -1;
-                _indexGroup = -1;
-                _count = 0;
-            }
+        readonly EntityCollection<T1> _array1;
+        readonly EntityCollection<T2> _array2;
+        readonly EntityCollection<T3> _array3;
+        readonly EntityCollection<T4> _array4;
+    }
 
-            public ref T Current => ref _array[_index];
+    public readonly struct BT<BufferT1, BufferT2, BufferT3, BufferT4>
+    {
+        public readonly BufferT1 buffer1;
+        public readonly BufferT2 buffer2;
+        public readonly BufferT3 buffer3;
+        public readonly BufferT4 buffer4;
+        public readonly int     count;
 
-            T IEnumerator<T>.Current => throw new NotImplementedException();
-            object IEnumerator.Current => throw new NotImplementedException();
-
-            public void Dispose() {}
-
-            readonly IEntitiesDB _db;
-            readonly ExclusiveGroup[] _groups;
-
-            T[] _array;
-            uint _count;
-            int _index;
-            int _indexGroup;
+        public BT(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, BufferT4 bufferT4, uint count) : this()
+        {
+            this.buffer1 = bufferT1;
+            this.buffer2 = bufferT2;
+            this.buffer3 = bufferT3;
+            this.buffer4 = bufferT4;
+            this.count   = (int) count;
         }
     }
 
-    public struct EntityCollections<T1, T2> where T1 : struct, IEntityStruct where T2 : struct, IEntityStruct
+    public readonly struct BT<BufferT1, BufferT2, BufferT3>
     {
-        public EntityCollections(IEntitiesDB db, ExclusiveGroup[] groups) : this()
+        public readonly BufferT1 buffer1;
+        public readonly BufferT2 buffer2;
+        public readonly BufferT3 buffer3;
+        public readonly int     count;
+
+        public BT(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, uint count) : this()
         {
-            _db = db;
-            _groups = groups;
+            this.buffer1 = bufferT1;
+            this.buffer2 = bufferT2;
+            this.buffer3 = bufferT3;
+            this.count   = (int) count;
         }
 
-        public EntityGroupsIterator GetEnumerator()
+        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out BufferT3 bufferT3, out int count)
         {
-            return new EntityGroupsIterator(_db, _groups);
-        }
-
-        readonly IEntitiesDB _db;
-        readonly ExclusiveGroup[] _groups;
-
-        public struct EntityGroupsIterator : IEnumerator<ValueRef<T1, T2>>
-        {
-            public EntityGroupsIterator(IEntitiesDB db, ExclusiveGroup[] groups) : this()
-            {
-                _db = db;
-                _groups = groups;
-                _indexGroup = -1;
-                _index = -1;
-            }
-
-            public bool MoveNext()
-            {
-                while (_index + 1 >= _count && ++_indexGroup < _groups.Length)
-                {
-                    _index = -1;
-                    var array1 = _db.QueryEntities<T1>(_groups[_indexGroup], out _count);
-                    var array2 = _db.QueryEntities<T2>(_groups[_indexGroup], out var count1);
-                    _array = (array1, array2);
-
-#if DEBUG && !PROFILER
-                    if (_count != count1)
-                        throw new ECSException("number of entities in group doesn't match");
-#endif
-                }
-
-                return ++_index < _count;
-            }
-
-            public void Reset()
-            {
-                _index = -1;
-                _indexGroup = -1;
-
-                var array1 = _db.QueryEntities<T1>(_groups[0], out _count);
-                var array2 = _db.QueryEntities<T2>(_groups[0], out var count1);
-                _array = (array1, array2);
-#if DEBUG && !PROFILER
-                if (_count != count1)
-                    throw new ECSException("number of entities in group doesn't match");
-#endif
-            }
-
-            public ValueRef<T1, T2> Current
-            {
-                get
-                {
-                    var valueRef = new ValueRef<T1, T2>(_array, (uint) _index);
-                    return valueRef;
-                }
-            }
-
-            ValueRef<T1, T2> IEnumerator<ValueRef<T1, T2>>.Current => throw new NotImplementedException();
-            object IEnumerator.Current => throw new NotImplementedException();
-
-            public void Dispose() {}
-
-            readonly IEntitiesDB      _db;
-            readonly ExclusiveGroup[] _groups;
-            uint                      _count;
-            int                       _index;
-            int                       _indexGroup;
-            (T1[], T2[])              _array;
+            bufferT1 = buffer1;
+            bufferT2 = buffer2;
+            bufferT3 = buffer3;
+            count = this.count;
         }
     }
-    
-    public struct ValueRef<T1, T2>
+
+    public readonly struct BT<BufferT1>
     {
-        readonly (T1[], T2[]) array;
+        public readonly BufferT1 buffer;
+        public readonly int     count;
 
-        readonly uint index;
-
-        public ValueRef(in (T1[], T2[]) entity1, uint i)
+        public BT(BufferT1 bufferT1, uint count) : this()
         {
-            array = entity1;
-            index = i;
+            this.buffer = bufferT1;
+            this.count  = (int) count;
         }
-
-        public ref T1 entityStructA => ref array.Item1[index];
-        public ref T2 entityStructB => ref array.Item2[index];
+        
+        public void Deconstruct(out BufferT1 bufferT1, out int count)
+        {
+            bufferT1 = buffer;
+            count    = this.count;
+        }
+        
+        public static implicit operator BufferT1(BT<BufferT1> t) => t.buffer;
     }
-    
-    public struct ValueRef<T1, T2, T3>
+
+    public readonly struct BT<BufferT1, BufferT2>
     {
-        readonly (T1[], T2[], T3[]) array;
+        public readonly BufferT1 buffer1;
+        public readonly BufferT2 buffer2;
+        public readonly int     count;
 
-        readonly uint index;
-
-        public ValueRef(in (T1[], T2[], T3[]) entity1, uint i)
+        public BT(BufferT1 bufferT1, BufferT2 bufferT2, uint count) : this()
         {
-            array = entity1;
-            index = i;
+            this.buffer1 = bufferT1;
+            this.buffer2 = bufferT2;
+            this.count   = (int) count;
         }
-
-        public ref T1 entityStructA => ref array.Item1[index];
-        public ref T2 entityStructB => ref array.Item2[index];
-        public ref T3 entityStructC => ref array.Item3[index];
-
+        
+        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out int count)
+        {
+            bufferT1 = buffer1;
+            bufferT2 = buffer2;
+            count    = this.count;
+        }
     }
 }

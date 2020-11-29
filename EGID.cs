@@ -1,19 +1,21 @@
 using System;
-using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 #pragma warning disable 660,661
 
 namespace Svelto.ECS
 {
-    //todo: add debug map
     [Serialization.DoNotSerialize]
     [Serializable]
-    public struct EGID:IEquatable<EGID>,IEqualityComparer<EGID>,IComparable<EGID>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct EGID:IEquatable<EGID>,IComparable<EGID>
     {
-        public uint entityID => (uint) (_GID & 0xFFFFFFFF);
+        [FieldOffset(0)] public readonly uint                 entityID;
+        [FieldOffset(4)] public readonly ExclusiveGroupStruct groupID;
+        [FieldOffset(0)]        readonly ulong                _GID;
 
-        public ExclusiveGroup.ExclusiveGroupStruct groupID => new ExclusiveGroup.ExclusiveGroupStruct((uint) (_GID >> 32));
-
+        public static readonly EGID Empty = new EGID();
+        
         public static bool operator ==(EGID obj1, EGID obj2)
         {
             return obj1._GID == obj2._GID;
@@ -24,9 +26,14 @@ namespace Svelto.ECS
             return obj1._GID != obj2._GID;
         }
 
-        public EGID(uint entityID, ExclusiveGroup.ExclusiveGroupStruct groupID) : this()
+        public EGID(uint entityID, ExclusiveGroupStruct groupID) : this()
         {
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
+        }
+        
+        public EGID(uint entityID, BuildGroup groupID) : this()
+        {
+            _GID = MAKE_GLOBAL_ID(entityID, groupID.group);
         }
 
         static ulong MAKE_GLOBAL_ID(uint entityId, uint groupId)
@@ -52,9 +59,14 @@ namespace Svelto.ECS
             return x == y;
         }
 
-        public int GetHashCode(EGID obj)
+        public override int GetHashCode()
         {
             return _GID.GetHashCode();
+        }
+
+        public int GetHashCode(EGID egid)
+        {
+            return egid.GetHashCode();
         }
 
         public int CompareTo(EGID other)
@@ -69,9 +81,8 @@ namespace Svelto.ECS
 
         public override string ToString()
         {
-            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(groupID);
+            var value = groupID.ToName();
+            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(value);
         }
-
-        readonly ulong _GID;
     }
 }

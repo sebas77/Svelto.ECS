@@ -1,4 +1,4 @@
-#if DISABLE_DBC || !DEBUG || PROFILER
+#if DISABLE_DBC || !DEBUG || PROFILE_SVELTO
 #define DISABLE_CHECKS
 using System.Diagnostics;
 #endif

@@ -2,7 +2,6 @@
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
-using Svelto.ECS.Schedulers;
 
 namespace Svelto.ECS
 {
@@ -10,7 +9,7 @@ namespace Svelto.ECS
     {
         readonly FasterList<EntitySubmitOperation> _transientEntitiesOperations;
 
-        void SubmitEntityViews()
+        void SubmitEntityComponents()
         {
             using (var profiler = new PlatformProfiler("Svelto.ECS - Entities Submission"))
             {
@@ -18,29 +17,40 @@ namespace Svelto.ECS
                 do
                 {
                     SingleSubmission(profiler);
-                } while ((_groupedEntityToAdd.currentEntitiesCreatedPerGroup.Count > 0 ||
+                } while ((_groupedEntityToAdd.currentEntitiesCreatedPerGroup.count > 0 ||
                           _entitiesOperations.Count > 0) && ++iterations < 5);
 
-#if DEBUG && !PROFILER
+#if DEBUG && !PROFILE_SVELTO
                 if (iterations == 5)
                     throw new ECSException("possible circular submission detected");
 #endif
             }
         }
 
+        /// <summary>
+        /// Todo: it would be probably better to split even further the logic between submission and callbacks
+        /// Something to do when I will optimize the callbacks
+        /// </summary>
+        /// <param name="profiler"></param>
         void SingleSubmission(in PlatformProfiler profiler)
         {
+#if UNITY_NATIVE          
+            NativeOperationSubmission(profiler);
+#endif
+            ClearChecks();
+
+            bool entitiesAreSubmitted = false;
+            
             if (_entitiesOperations.Count > 0)
             {
                 using (profiler.Sample("Remove and Swap operations"))
                 {
                     _transientEntitiesOperations.FastClear();
-                    var entitySubmitOperations = _entitiesOperations.GetValuesArray(out var count);
-                    _transientEntitiesOperations.AddRange(entitySubmitOperations, count);
+                    _entitiesOperations.CopyValuesTo(_transientEntitiesOperations);
                     _entitiesOperations.FastClear();
 
-                    var entitiesOperations = _transientEntitiesOperations.ToArrayFast();
-                    for (var i = 0; i < _transientEntitiesOperations.Count; i++)
+                    EntitySubmitOperation[] entitiesOperations = _transientEntitiesOperations.ToArrayFast(out var count);
+                    for (var i = 0; i < count; i++)
                     {
                         try
                         {
@@ -48,57 +58,74 @@ namespace Svelto.ECS
                             {
                                 case EntitySubmitOperationType.Swap:
                                     MoveEntityFromAndToEngines(entitiesOperations[i].builders,
-                                        entitiesOperations[i].fromID,
-                                        entitiesOperations[i].toID);
+                                        entitiesOperations[i].fromID, entitiesOperations[i].toID);
                                     break;
                                 case EntitySubmitOperationType.Remove:
                                     MoveEntityFromAndToEngines(entitiesOperations[i].builders,
                                         entitiesOperations[i].fromID, null);
                                     break;
                                 case EntitySubmitOperationType.RemoveGroup:
-                                    RemoveGroupAndEntitiesFromDB(
+                                    RemoveEntitiesFromGroup(
                                         entitiesOperations[i].fromID.groupID, profiler);
+                                    break;
+                                case EntitySubmitOperationType.SwapGroup:
+                                    SwapEntitiesBetweenGroups(entitiesOperations[i].fromID.groupID,
+                                        entitiesOperations[i].toID.groupID, profiler);
                                     break;
                             }
                         }
-                        catch (Exception e)
+                        catch
                         {
                             var str = "Crash while executing Entity Operation "
                                 .FastConcat(entitiesOperations[i].type.ToString());
-
-                            throw new ECSException(str.FastConcat(" ")
-#if DEBUG && !PROFILER
-                                    .FastConcat(entitiesOperations[i].trace.ToString())
+                            
+                            
+                            Svelto.Console.LogError(str.FastConcat(" ")
+#if DEBUG && !PROFILE_SVELTO
+                                                      .FastConcat(entitiesOperations[i].trace.ToString())
 #endif
-                                , e);
+                                                 );
+
+                            throw;
                         }
                     }
                 }
+
+                entitiesAreSubmitted = true;
             }
 
             _groupedEntityToAdd.Swap();
 
-            if (_groupedEntityToAdd.otherEntitiesCreatedPerGroup.Count > 0)
+            if (_groupedEntityToAdd.otherEntitiesCreatedPerGroup.count > 0)
             {
                 using (profiler.Sample("Add operations"))
                 {
                     try
                     {
-                        AddEntityViewsToTheDBAndSuitableEngines(profiler);
+                        AddEntityComponentsToTheDBAndSuitableEngines(profiler);
                     }
                     finally
                     {
-                        using (profiler.Sample("clear operates double buffering"))
+                        using (profiler.Sample("clear 6operates double buffering"))
                         {
                             //other can be cleared now, but let's avoid deleting the dictionary every time
                             _groupedEntityToAdd.ClearOther();
                         }
                     }
                 }
+                
+                entitiesAreSubmitted = true;
+            }
+
+            if (entitiesAreSubmitted)
+            {
+                var enginesCount = _reactiveEnginesSubmission.count;
+                for (int i = 0; i < enginesCount; i++)
+                    _reactiveEnginesSubmission[i].EntitiesSubmitted();
             }
         }
 
-        void AddEntityViewsToTheDBAndSuitableEngines(in PlatformProfiler profiler)
+        void AddEntityComponentsToTheDBAndSuitableEngines(in PlatformProfiler profiler)
         {
             using (profiler.Sample("Add entities to database"))
             {
@@ -106,57 +133,46 @@ namespace Svelto.ECS
                 foreach (var groupOfEntitiesToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
                 {
                     var groupID = groupOfEntitiesToSubmit.Key;
+                    
+                    var groupDB = GetOrCreateGroup(groupID, profiler);
 
-                    //if the group doesn't exist in the current DB let's create it first
-                    if (_groupEntityViewsDB.TryGetValue(groupID, out var groupDB) == false)
-                        groupDB = _groupEntityViewsDB[groupID] =
-                            new FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary>();
-
-                    //add the entityViews in the group
-                    foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
+                    //add the entityComponents in the group
+                    foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
-                        var type = entityViewsToSubmit.Key;
-                        var typeSafeDictionary = entityViewsToSubmit.Value;
+                        var type = entityComponentsToSubmit.Key;
+                        var targetTypeSafeDictionary = entityComponentsToSubmit.Value;
+                        var wrapper = new RefWrapperType(type);
 
-                        var wrapper = new RefWrapper<Type>(type);
-                        if (groupDB.TryGetValue(wrapper, out var dbDic) == false)
-                            dbDic = groupDB[wrapper] = typeSafeDictionary.Create();
+                        ITypeSafeDictionary dbDic = GetOrCreateTypeSafeDictionary(groupID, groupDB, wrapper, 
+                            targetTypeSafeDictionary);
 
-                        //Fill the DB with the entity views generate this frame.
-                        dbDic.AddEntitiesFromDictionary(typeSafeDictionary, groupID);
-
-                        if (_groupsPerEntity.TryGetValue(wrapper, out var groupedGroup) == false)
-                            groupedGroup = _groupsPerEntity[wrapper] =
-                                new FasterDictionary<uint, ITypeSafeDictionary>();
-
-                        groupedGroup[groupID] = dbDic;
+                        //Fill the DB with the entity components generate this frame.
+                        dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, groupID);
                     }
                 }
             }
 
-            //then submit everything in the engines, so that the DB is up to date with all the entity views and struct
+            //then submit everything in the engines, so that the DB is up to date with all the entity components
             //created by the entity built
             using (profiler.Sample("Add entities to engines"))
             {
                 foreach (var groupToSubmit in _groupedEntityToAdd.otherEntitiesCreatedPerGroup)
                 {
                     var groupID = groupToSubmit.Key;
+                    var groupDB = _groupEntityComponentsDB[groupID];
 
-                    var groupDB = _groupEntityViewsDB[groupID];
-
-                    foreach (var entityViewsToSubmit in _groupedEntityToAdd.other[groupID])
+                    foreach (var entityComponentsToSubmit in _groupedEntityToAdd.other[groupID])
                     {
-                        var realDic = groupDB[new RefWrapper<Type>(entityViewsToSubmit.Key)];
+                        var realDic = groupDB[new RefWrapperType(entityComponentsToSubmit.Key)];
 
-                        entityViewsToSubmit.Value.AddEntitiesToEngines(_reactiveEnginesAddRemove, realDic, in profiler,
-                            new ExclusiveGroup.ExclusiveGroupStruct(groupToSubmit.Key));
+                        entityComponentsToSubmit.Value.ExecuteEnginesAddOrSwapCallbacks(_reactiveEnginesAddRemove, realDic,
+                            null, new ExclusiveGroupStruct(groupToSubmit.Key), in profiler);
                     }
                 }
             }
         }
 
-        DoubleBufferedEntitiesToAdd                             _groupedEntityToAdd;
-        readonly IEntitySubmissionScheduler                     _scheduler;
-        readonly FasterDictionary<ulong, EntitySubmitOperation> _entitiesOperations;
+        readonly DoubleBufferedEntitiesToAdd                        _groupedEntityToAdd;
+        readonly ThreadSafeDictionary<ulong, EntitySubmitOperation> _entitiesOperations;
     }
 }

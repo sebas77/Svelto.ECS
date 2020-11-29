@@ -16,18 +16,23 @@ namespace Svelto.ECS
                 _value = value;
 
                 if (_paused == false)
-                    _subscribers(_senderID, value);
+                    _subscriber(_senderID, value);
             }
         }
         
         public void NotifyOnValueSet(Action<EGID, T> action)
         {
-            _subscribers += action;    
+#if DEBUG && !PROFILE_SVELTO
+            DBC.ECS.Check.Require(_subscriber == null, $"{this.GetType().Name}: listener already registered");            
+#endif
+            _subscriber = action;
+            _paused = false;
         }
 
-        public void StopNotify(Action<EGID, T> action)
+        public void StopNotify()
         {
-            _subscribers -= action;
+            _subscriber = null;
+            _paused = true;
         }
 
         public void PauseNotify() { _paused = true; }
@@ -36,7 +41,7 @@ namespace Svelto.ECS
         protected T  _value;
         readonly EGID _senderID;
 
-        Action<EGID, T> _subscribers;
+        Action<EGID, T> _subscriber;
         bool            _paused;
     }
 }

@@ -9,6 +9,6 @@ namespace Svelto.ECS
 
         void ReuseAsNew();
         void Reset();
-        void BeginNextEntityStruct();
+        void BeginNextEntityComponent();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 #pragma warning disable 660,661
 
@@ -17,26 +18,12 @@ namespace Svelto.ECS
     ///     public static ExclusiveGroup[] GroupOfGroups = { MyExclusiveGroup1, ...}; //for each on this!
     /// }
     /// </summary>
-    ///
-
-    ///use this like:
-    /// public class TriggersGroup : ExclusiveGroup<TriggersGroup> {}
-    public abstract class NamedExclusiveGroup<T>:ExclusiveGroup
-    {
-        public static ExclusiveGroup Group = new ExclusiveGroup();
-        public static string         name  = typeof(T).FullName;
-
-        public NamedExclusiveGroup() { }
-
-        public NamedExclusiveGroup(string recognizeAs) : base(recognizeAs)
-        {}
-
-        public NamedExclusiveGroup(ushort range) : base(range)
-        {}
-    }
-
+    
+    ///To debug it use in your debug window: Svelto.ECS.Debugger.EGID.GetGroupNameFromId(groupID)
     public class ExclusiveGroup
     {
+        public const uint MaxNumberOfExclusiveGroups = 2 << 20; 
+        
         public ExclusiveGroup()
         {
             _group = ExclusiveGroupStruct.Generate();
@@ -46,7 +33,7 @@ namespace Svelto.ECS
         {
             _group = ExclusiveGroupStruct.Generate();
 
-            _serialisedGroups.Add(recognizeAs, _group);
+            _knownGroups.Add(recognizeAs, _group);
         }
 
         public ExclusiveGroup(ushort range)
@@ -61,7 +48,7 @@ namespace Svelto.ECS
         {
             return group._group;
         }
-
+        
         public static explicit operator uint(ExclusiveGroup group)
         {
             return group._group;
@@ -71,118 +58,34 @@ namespace Svelto.ECS
         {
 #if DEBUG
             if (a._range == 0)
-                throw new ECSException("adding values to a not ranged ExclusiveGroup");
+                throw new ECSException($"Adding values to a not ranged ExclusiveGroup: {(uint)a}");
             if (b >= a._range)
-                throw new ECSException("Using out of range group");
-#endif            
+                throw new ECSException($"Using out of range group: {(uint)a} + {b}");
+#endif
             return a._group + b;
         }
-
-        readonly ExclusiveGroupStruct _group;
-
-        //I use this as parameter because it must not be possible to pass null Exclusive Groups.
-        public struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>,
-                                IEqualityComparer<ExclusiveGroupStruct>
-        {
-            public static bool operator ==(ExclusiveGroupStruct c1, ExclusiveGroupStruct c2)
-            {
-                return c1.Equals(c2);
-            }
-
-            public static bool operator !=(ExclusiveGroupStruct c1, ExclusiveGroupStruct c2)
-            {
-                return c1.Equals(c2) == false;
-            }
-
-            public bool Equals(ExclusiveGroupStruct other)
-            {
-                return other._id == _id;
-            }
-
-            public int CompareTo(ExclusiveGroupStruct other)
-            {
-                return other._id.CompareTo(_id);
-            }
-
-            public bool Equals(ExclusiveGroupStruct x, ExclusiveGroupStruct y)
-            {
-                return x._id == y._id;
-            }
-
-            public int GetHashCode(ExclusiveGroupStruct obj)
-            {
-                return _id.GetHashCode();
-            }
-
-            internal static ExclusiveGroupStruct Generate()
-            {
-                ExclusiveGroupStruct groupStruct;
-
-                groupStruct._id = _globalId;
-                DBC.ECS.Check.Require(_globalId + 1 < ushort.MaxValue, "too many exclusive groups created");
-                _globalId++;
-
-                return groupStruct;
-            }
-
-            /// <summary>
-            /// Use this constructor to reserve N groups
-            /// </summary>
-            internal ExclusiveGroupStruct(ushort range)
-            {
-                _id =  _globalId;
-                DBC.ECS.Check.Require(_globalId + range < ushort.MaxValue, "too many exclusive groups created");
-                _globalId += range;
-            }
-
-            internal ExclusiveGroupStruct(uint groupID)
-            {
-                _id = groupID;
-            }
-
-            public ExclusiveGroupStruct(byte[] data, uint pos)
-            {
-                _id = (uint)(
-                    data[pos++]
-                    | data[pos++] << 8
-                    | data[pos++] << 16
-                    | data[pos++] << 24
-                );
-                
-                DBC.ECS.Check.Ensure(_id < _globalId, "Invalid group ID deserialiased");
-            }
-
-            public static implicit operator uint(ExclusiveGroupStruct groupStruct)
-            {
-                return groupStruct._id;
-            }
-
-            public static ExclusiveGroupStruct operator+(ExclusiveGroupStruct a, uint b)
-            {
-                var group = new ExclusiveGroupStruct();
-
-                group._id = a._id + b;
-
-                return group;
-            }
-
-            uint        _id;
-            static uint _globalId;
-        }
-
+        
+        //todo document the use case for this method
         public static ExclusiveGroupStruct Search(string holderGroupName)
         {
-            if (_serialisedGroups.ContainsKey(holderGroupName) == false)
+            if (_knownGroups.ContainsKey(holderGroupName) == false)
                 throw new Exception("Named Group Not Found ".FastConcat(holderGroupName));
 
-            return _serialisedGroups[holderGroupName];
+            return _knownGroups[holderGroupName];
         }
 
-        static readonly Dictionary<string, ExclusiveGroupStruct> _serialisedGroups = new Dictionary<string,
+        public override string ToString()
+        {
+            return _group.ToString();
+        }
+
+        static readonly Dictionary<string, ExclusiveGroupStruct> _knownGroups = new Dictionary<string,
             ExclusiveGroupStruct>();
+
 #if DEBUG
         readonly ushort _range;
-#endif        
+#endif
+        readonly ExclusiveGroupStruct _group;
     }
 }
 
@@ -260,6 +163,6 @@ namespace Svelto.ECS
         }
 
 #if DEBUG
-        static string[] groupNames = new string[ushort.MaxValue];
+        static string[] groupNames = new string[ExclusiveGroup.MaxNumberOfExclusiveGroups];
 #endif
 #endif

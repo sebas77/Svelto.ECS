@@ -10,8 +10,8 @@ namespace Svelto.ECS.Serialization
     public class PartialSerializerFieldAttribute : Attribute
     {}
 
-    public class PartialSerializer<T> : ISerializer<T>
-        where T : unmanaged, IEntityStruct
+    public class PartialSerializer<T> : IComponentSerializer<T>
+        where T : unmanaged, IEntityComponent
     {
         static PartialSerializer()
         {
@@ -25,18 +25,20 @@ namespace Svelto.ECS.Serialization
                 {
                     if (myAttributes[j] is PartialSerializerFieldAttribute)
                     {
-                        if (myMembers[i].FieldType == typeof(EGID))
-                            throw new ECSException("EGID fields cannot be serialised ".FastConcat(myType.FullName));
+                        var fieldType = myMembers[i].FieldType;
+                        if (fieldType.ContainsCustomAttribute(typeof(DoNotSerializeAttribute)) &&
+                            myMembers[i].IsPrivate == false)
+                                throw new ECSException($"field cannot be serialised {fieldType} in {myType.FullName}");
 
                         var offset = Marshal.OffsetOf<T>(myMembers[i].Name);
-                        var sizeOf = (uint)Marshal.SizeOf(myMembers[i].FieldType);
+                        var sizeOf = (uint)Marshal.SizeOf(fieldType);
                         offsets.Add(((uint) offset.ToInt32(), sizeOf));
                         totalSize += sizeOf;
                     }
                 }
             }
 
-            if (myType.GetProperties().Length > (EntityBuilder<T>.HAS_EGID ? 1 : 0))
+            if (myType.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
                 throw new ECSException("serializable entity struct must be property less ".FastConcat(myType.FullName));
         }
 
@@ -44,15 +46,15 @@ namespace Svelto.ECS.Serialization
         {
             unsafe
             {
-                fixed (byte* dataptr = serializationData.data.ToArrayFast())
+                fixed (byte* dataptr = serializationData.data.ToArrayFast(out _))
                 {
-                    var entityStruct = value;
+                    var entityComponent = value;
                     foreach ((uint offset, uint size) offset in offsets)
                     {
-                        byte* srcPtr = (byte*) &entityStruct + offset.offset;
+                        byte* srcPtr = (byte*) &entityComponent + offset.offset;
                         //todo move to Unsafe Copy when available as it is faster
                         Buffer.MemoryCopy(srcPtr, dataptr + serializationData.dataPos,
-                            serializationData.data.Count - serializationData.dataPos, offset.size);
+                            serializationData.data.count - serializationData.dataPos, offset.size);
                         serializationData.dataPos += offset.size;
                     }
                 }
@@ -66,7 +68,7 @@ namespace Svelto.ECS.Serialization
             unsafe
             {
                 T tempValue = value; //todo: temporary solution I want to get rid of this copy
-                fixed (byte* dataptr = serializationData.data.ToArrayFast())
+                fixed (byte* dataptr = serializationData.data.ToArrayFast(out _))
                     foreach ((uint offset, uint size) offset in offsets)
                     {
                         byte* dstPtr = (byte*) &tempValue + offset.offset;

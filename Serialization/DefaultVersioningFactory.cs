@@ -1,28 +1,32 @@
 using System.Collections.Generic;
+using Svelto.Common;
 
 namespace Svelto.ECS.Serialization
 {
     public class DefaultVersioningFactory<T> : IDeserializationFactory where T : IEntityDescriptor, new()
     {
-        public EntityStructInitializer BuildDeserializedEntity(EGID                          egid,
-                                                               ISerializationData            serializationData,
-                                                               ISerializableEntityDescriptor entityDescriptor,
-                                                               SerializationType             serializationType,
-                                                               IEntitySerialization          entitySerialization)
+        readonly IEnumerable<object> _implementors;
+
+        public DefaultVersioningFactory() {}
+
+        public DefaultVersioningFactory(IEnumerable<object> implementors)
         {
-            var initializer = _factory.BuildEntity<T>(egid, _implementors);
-                
-            entitySerialization.DeserializeEntityStructs(serializationData, entityDescriptor, ref initializer, serializationType);
+            _implementors = implementors;
+        }
+
+        public EntityComponentInitializer BuildDeserializedEntity
+        (EGID egid, ISerializationData serializationData, ISerializableEntityDescriptor entityDescriptor
+       , int serializationType, IEntitySerialization entitySerialization, IEntityFactory factory
+       , bool enginesRootIsDeserializationOnly)
+        {
+            var entityDescriptorEntitiesToSerialize = enginesRootIsDeserializationOnly ? entityDescriptor.entitiesToSerialize : entityDescriptor.componentsToBuild;
+
+            var initializer = factory.BuildEntity(egid, entityDescriptorEntitiesToSerialize, TypeCache<T>.type, _implementors);
+
+            entitySerialization.DeserializeEntityComponents(serializationData, entityDescriptor, ref initializer
+                                                          , serializationType);
 
             return initializer;
         }
-        
-        public DefaultVersioningFactory(IEntityFactory factory) { _factory = factory; }
-        public DefaultVersioningFactory(IEntityFactory factory, IEnumerable<object> implementors) { _factory = factory;
-            _implementors = implementors;
-        }
-        
-        readonly IEntityFactory _factory;
-        readonly IEnumerable<object> _implementors;
     }
 }

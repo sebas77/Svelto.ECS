@@ -1,7 +1,7 @@
 namespace Svelto.ECS
 {
-    struct EntityStructInfoView: IEntityStruct
+    struct EntityInfoComponent: IEntityComponent
     {
-        public IEntityBuilder[] entitiesToBuild;
+        public IComponentBuilder[] componentsToBuild;
     }
 }

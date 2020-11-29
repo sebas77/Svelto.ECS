@@ -1,15 +1,57 @@
 {
     "name": "Svelto.ECS",
     "references": [
+        "Unity.Entities",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Jobs",
         "Svelto.Common"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "System.Runtime.CompilerServices.Unsafe.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [
+        {
+            "name": "com.unity.entities",
+            "expression": "",
+            "define": "UNITY_ECS"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "",
+            "define": "UNITY_NATIVE"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_NATIVE"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_NATIVE"
+        },
+        {
+            "name": "com.unity.jobs",
+            "expression": "",
+            "define": "UNITY_JOBS"
+        }
+    ],
+    "noEngineReferences": false
 }
