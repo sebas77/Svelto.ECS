@@ -43,22 +43,14 @@ namespace Svelto.ECS
         /// <param name="groupStructId"></param>
         /// <param name="ed"></param>
         /// <param name="implementors"></param>
-        EntityComponentInitializer BuildEntity<T>(uint entityID, ExclusiveGroupStruct groupStructId,
+        EntityComponentInitializer BuildEntity<T>(uint entityID, BuildGroup groupStructId,
                                                IEnumerable<object> implementors = null)
             where T : IEntityDescriptor, new();
 
         EntityComponentInitializer BuildEntity<T>(EGID egid, IEnumerable<object> implementors = null)
             where T : IEntityDescriptor, new();
 
-        /// <summary>
-        ///     When the type of the entity is not known (this is a special case!) an EntityDescriptorInfo
-        ///     can be built in place of the generic parameter T.
-        /// </summary>
-        /// <param name="entityID"></param>
-        /// <param name="entityDescriptor"></param>
-        /// <param name="implementors"></param>
-        ///
-        EntityComponentInitializer BuildEntity<T>(uint entityID, ExclusiveGroupStruct groupStructId,
+        EntityComponentInitializer BuildEntity<T>(uint entityID, BuildGroup groupStructId,
                                                T    descriptorEntity, IEnumerable<object>  implementors = null)
             where T : IEntityDescriptor;
 
@@ -68,7 +60,7 @@ namespace Svelto.ECS
         EntityComponentInitializer BuildEntity
             (EGID egid, IComponentBuilder[] componentsToBuild, Type type, IEnumerable<object> implementors = null);
 
-#if UNITY_BURST
+#if UNITY_NATIVE
         NativeEntityFactory ToNative<T>(string memberName) where T : IEntityDescriptor, new();
 #endif        
     }

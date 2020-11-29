@@ -1,10 +1,34 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Svelto.ECS
 {
+    public readonly struct BuildGroup
+    {
+        internal BuildGroup(ExclusiveGroupStruct group)
+        {
+            this.group = group;
+        }
+
+        public static implicit operator BuildGroup(ExclusiveGroupStruct group)
+        {
+            return new BuildGroup(group);
+        }
+
+        public static implicit operator BuildGroup(ExclusiveGroup group)
+        {
+            return new BuildGroup(group);
+        }
+        
+        public static implicit operator uint(BuildGroup groupStruct)
+        {
+            return groupStruct.group;
+        }
+
+        internal ExclusiveGroupStruct @group             { get; }
+    }
+    
     [StructLayout(LayoutKind.Explicit, Size = 4)]
     public struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>,
                                          IEqualityComparer<ExclusiveGroupStruct>
@@ -65,7 +89,7 @@ namespace Svelto.ECS
 
             return groupStruct;
         }
-        
+
         internal ExclusiveGroupStruct(ExclusiveGroupStruct @group):this() { this = group; }
 
         /// <summary>
@@ -107,10 +131,9 @@ namespace Svelto.ECS
             return @group;
         }
 
-        [FieldOffset(0)] uint       _id;
+        [FieldOffset(0)] uint _id;
         [FieldOffset(3)] byte _bytemask;
-        
-        static uint _globalId = 1; //it starts from 1 because default EGID is considered not initalized value
-        
+
+        static           uint _globalId = 1; //it starts from 1 because default EGID is considered not initalized value
     }
 }

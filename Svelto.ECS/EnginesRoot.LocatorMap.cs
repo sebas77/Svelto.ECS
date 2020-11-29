@@ -4,31 +4,11 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public partial class EnginesRoot
+    // The EntityLocatorMap provides a bidirectional map to help locate entities without using an EGID which might
+    // change in runtime. The Entity Locator map uses a reusable unique identifier struct called EntityLocator to
+    // find the last known EGID from last entity submission.
+    public partial class EnginesRoot : IEntityLocatorMap
     {
-        // The EntityLocatorMap provides a bidirectional map to help locate entities without using an EGID which might
-        // change in runtime. The Entity Locator map uses a reusable unique identifier struct called EntityLocator to
-        // find the last known EGID from last entity submission.
-        class EntityLocatorMap : IEntityLocatorMap
-        {
-            public EntityLocatorMap(EnginesRoot enginesRoot)
-            {
-                _enginesRoot = new WeakReference<EnginesRoot>(enginesRoot);
-            }
-
-            public EntityLocator GetLocator(EGID egid)
-            {
-                return _enginesRoot.Target.GetLocator(egid);
-            }
-
-            public bool TryGetEGID(EntityLocator locator, out EGID egid)
-            {
-                return _enginesRoot.Target.TryGetEGID(locator, out egid);
-            }
-
-            WeakReference<EnginesRoot> _enginesRoot;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void CreateLocator(EGID egid)
         {
@@ -51,7 +31,7 @@ namespace Svelto.ECS
             // When we create a new one there is nothing to recycle anymore, so we need to update the last recycle entityId.
             if (_nextEntityId == _entityLocatorMap.count)
             {
-                _lastEntityId = _entityLocatorMap.count;
+                _lastEntityId = (uint)_entityLocatorMap.count;
             }
 
             // Update reverse map from egid to locator.
@@ -114,7 +94,7 @@ namespace Svelto.ECS
             }
 
             // Invalidate the entity locator element by bumping its version and setting the egid to point to a unexisting element.
-            _entityLocatorMap[locator.uniqueID].egid = new EGID(_entityLocatorMap.count, 0);
+            _entityLocatorMap[locator.uniqueID].egid = new EGID((uint)_entityLocatorMap.count, 0);
             _entityLocatorMap[locator.uniqueID].version++;
 
             // Mark the element as the last element used.
@@ -162,20 +142,6 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        EntityLocator GetLocator(EGID egid)
-        {
-            if (_egidToLocatorMap.TryGetValue(egid.groupID, out var groupMap))
-            {
-                if (groupMap.TryGetValue(egid.entityID, out var locator))
-                {
-                    return locator;
-                }
-            }
-
-            return EntityLocator.Invalid;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         EntityLocator GetAndRemoveLocator(EGID egid)
         {
             if (_egidToLocatorMap.TryGetValue(egid.groupID, out var groupMap))
@@ -190,7 +156,20 @@ namespace Svelto.ECS
             return EntityLocator.Invalid;
         }
 
-        bool TryGetEGID(EntityLocator locator, out EGID egid)
+        EntityLocator IEntityLocatorMap.GetLocator(EGID egid)
+        {
+            if (_egidToLocatorMap.TryGetValue(egid.groupID, out var groupMap))
+            {
+                if (groupMap.TryGetValue(egid.entityID, out var locator))
+                {
+                    return locator;
+                }
+            }
+
+            return EntityLocator.Invalid;
+        }
+
+        bool IEntityLocatorMap.TryGetEGID(EntityLocator locator, out EGID egid)
         {
             egid = new EGID();
             if (locator == EntityLocator.Invalid) return false;
@@ -201,10 +180,8 @@ namespace Svelto.ECS
                 egid = _entityLocatorMap[locator.uniqueID].egid;
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         uint _nextEntityId;

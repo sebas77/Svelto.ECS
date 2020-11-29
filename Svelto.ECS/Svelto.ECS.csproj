@@ -15,7 +15,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Svelto.Common_3\Svelto.Common.csproj" />
+    <ProjectReference Include="..\com.sebaslab.svelto.common@3.0.0\Svelto.Common.csproj" />
+    <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.2" />

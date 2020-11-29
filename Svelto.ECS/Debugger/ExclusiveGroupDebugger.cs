@@ -23,15 +23,16 @@ public static class ExclusiveGroupDebugger
                     {
                         if (field.IsStatic && typeof(ExclusiveGroup).IsAssignableFrom(field.FieldType))
                         {
-                            string name  = $"{type.FullName}.{field.Name}";
-                            var    group = (ExclusiveGroup) field.GetValue(null);
+                            var group = (ExclusiveGroup) field.GetValue(null);
+                            string name  = $"{type.FullName}.{field.Name} ({(uint)group})";
                             GroupMap.idToName[(ExclusiveGroupStruct) group] = name;
                         }
 
                         if (field.IsStatic && typeof(ExclusiveGroupStruct).IsAssignableFrom(field.FieldType))
                         {
-                            string name  = $"{type.FullName}.{field.Name}";
-                            var    group = (ExclusiveGroupStruct) field.GetValue(null);
+                            var group = (ExclusiveGroupStruct) field.GetValue(null);
+
+                            string name  = $"{type.FullName}.{field.Name} ({(uint)group})";
                             GroupMap.idToName[@group] = name;
                         }
                     }

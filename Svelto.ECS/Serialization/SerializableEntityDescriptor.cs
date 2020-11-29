@@ -42,7 +42,7 @@ namespace Svelto.ECS.Serialization
             // If the current serializable is an ExtendibleDescriptor, I have to update it.
             if (dynamicIndex != -1)
             {
-                ComponentsToBuild[dynamicIndex] = new ComponentBuilder<EntityInfoViewComponent>(new EntityInfoViewComponent
+                ComponentsToBuild[dynamicIndex] = new ComponentBuilder<EntityInfoComponent>(new EntityInfoComponent
                 {
                     componentsToBuild = ComponentsToBuild
                 });
@@ -50,13 +50,13 @@ namespace Svelto.ECS.Serialization
 
             /////
             var entitiesToSerialize = new FasterList<ISerializableComponentBuilder>();
-            EntityComponentsToSerializeMap = new FasterDictionary<RefWrapper<Type>, ISerializableComponentBuilder>();
+            EntityComponentsToSerializeMap = new FasterDictionary<RefWrapperType, ISerializableComponentBuilder>();
             foreach (IComponentBuilder e in defaultEntities)
             {
                 if (e is ISerializableComponentBuilder serializableEntityBuilder)
                 {
                     var entityType = serializableEntityBuilder.GetEntityComponentType();
-                    EntityComponentsToSerializeMap[new RefWrapper<Type>(entityType)] = serializableEntityBuilder;
+                    EntityComponentsToSerializeMap[new RefWrapperType(entityType)] = serializableEntityBuilder;
                     entitiesToSerialize.Add(serializableEntityBuilder);
                 }
             }
@@ -81,7 +81,7 @@ namespace Svelto.ECS.Serialization
                     --newLenght;
                 }
 
-                if (defaultEntities[i].GetEntityComponentType() == ComponentBuilderUtilities.ENTITY_STRUCT_INFO_VIEW)
+                if (defaultEntities[i].GetEntityComponentType() == ComponentBuilderUtilities.ENTITY_INFO_COMPONENT)
                 {
                     indexDynamic = i;
                 }
@@ -96,11 +96,11 @@ namespace Svelto.ECS.Serialization
 
         public IComponentBuilder[]             componentsToBuild   => ComponentsToBuild;
         public uint                            hash                => Hash;
-        public Type realType => Type;
+        public Type                            realType            => Type;
         public ISerializableComponentBuilder[] entitiesToSerialize => EntitiesToSerialize;
 
         static readonly IComponentBuilder[]                                               ComponentsToBuild;
-        static readonly FasterDictionary<RefWrapper<Type>, ISerializableComponentBuilder> EntityComponentsToSerializeMap;
+        static readonly FasterDictionary<RefWrapperType, ISerializableComponentBuilder> EntityComponentsToSerializeMap;
         static readonly ISerializableComponentBuilder[]                                   EntitiesToSerialize;
 
         static readonly uint Hash;

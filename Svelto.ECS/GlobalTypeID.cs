@@ -23,7 +23,7 @@ namespace Svelto.ECS
     {
         static Filler()
         {
-            DBC.ECS.Check.Require(UnmanagedTypeExtensions.IsUnmanagedEx<T>() == true, "invalid type used");
+            DBC.ECS.Check.Require(TypeCache<T>.IsUnmanaged == true, "invalid type used");
         }
 
         //it's an internal interface
@@ -37,7 +37,7 @@ namespace Svelto.ECS
 
     static class EntityComponentID<T>
     {
-#if UNITY_BURST
+#if UNITY_NATIVE
         internal static readonly Unity.Burst.SharedStatic<uint> ID =
             Unity.Burst.SharedStatic<uint>.GetOrCreate<GlobalTypeID, T>();
 #else

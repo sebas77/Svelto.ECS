@@ -1,4 +1,5 @@
-namespace Svelto.ECS.Serialization {
+namespace Svelto.ECS.Serialization
+{
     public static class SerializerExt
     {
         public static bool SerializeSafe<T>

@@ -46,7 +46,7 @@ namespace Svelto.ECS
             //efficient way to collect the fields of every EntityComponentType
             var setters = FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>.NoVirt.ToArrayFast(
                     entityComponentBlazingFastReflection, out var count);
-
+            
             //todo this should happen once per T, not once per Build<T>
             if (implementors != null)
             {

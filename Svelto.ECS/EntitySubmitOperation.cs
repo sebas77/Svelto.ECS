@@ -8,7 +8,7 @@ namespace Svelto.ECS
         : IEquatable<EntitySubmitOperation>
     {
         public readonly EntitySubmitOperationType type;
-        public readonly IComponentBuilder[]          builders;
+        public readonly IComponentBuilder[]       builders;
         public readonly EGID                      fromID;
         public readonly EGID                      toID;
 #if DEBUG && !PROFILE_SVELTO
@@ -26,7 +26,19 @@ namespace Svelto.ECS
             trace = default;
 #endif
         }
-        
+
+        public EntitySubmitOperation
+        (EntitySubmitOperationType operation, ExclusiveGroupStruct @group
+       , IComponentBuilder[] descriptorComponentsToBuild):this()
+        {
+            type          = operation;
+            this.builders = descriptorComponentsToBuild;
+            fromID = new EGID(0, group);
+#if DEBUG && !PROFILE_SVELTO
+            trace = default;
+#endif            
+        }
+
         public static bool operator ==(EntitySubmitOperation obj1, EntitySubmitOperation obj2)
         {
             return obj1.Equals(obj2);

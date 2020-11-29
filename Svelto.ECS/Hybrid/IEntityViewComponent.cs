@@ -1,6 +1,9 @@
 namespace Svelto.ECS.Hybrid
 {
-    public interface IEntityViewComponent:IEntityComponent, INeedEGID
+    public interface IManagedComponent:IEntityComponent
+    {}
+    
+    public interface IEntityViewComponent:IManagedComponent, INeedEGID
     {}
 }
 

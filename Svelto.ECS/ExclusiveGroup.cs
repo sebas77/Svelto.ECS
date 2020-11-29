@@ -65,6 +65,7 @@ namespace Svelto.ECS
             return a._group + b;
         }
         
+        //todo document the use case for this method
         public static ExclusiveGroupStruct Search(string holderGroupName)
         {
             if (_knownGroups.ContainsKey(holderGroupName) == false)

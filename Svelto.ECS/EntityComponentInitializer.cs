@@ -6,7 +6,7 @@ namespace Svelto.ECS
 {
     public readonly ref struct EntityComponentInitializer
     {
-        public EntityComponentInitializer(EGID id, FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> group)
+        public EntityComponentInitializer(EGID id, FasterDictionary<RefWrapperType, ITypeSafeDictionary> group)
         {
             _group = group;
             _ID = id;
@@ -16,7 +16,7 @@ namespace Svelto.ECS
 
         public void Init<T>(T initializer) where T : struct, IEntityComponent
         {
-            if (_group.TryGetValue(new RefWrapper<Type>(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
+            if (_group.TryGetValue(new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
                     out var typeSafeDictionary) == false) return;
 
             var dictionary = (ITypeSafeDictionary<T>) typeSafeDictionary;
@@ -30,7 +30,7 @@ namespace Svelto.ECS
 
         public ref T GetOrCreate<T>() where T : struct, IEntityComponent
         {
-            ref var entityDictionary = ref _group.GetOrCreate(new RefWrapper<Type>(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE)
+            ref var entityDictionary = ref _group.GetOrCreate(new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE)
             , TypeSafeDictionaryFactory<T>.Create);
             var dictionary = (ITypeSafeDictionary<T>) entityDictionary;
 
@@ -39,13 +39,13 @@ namespace Svelto.ECS
         
         public ref T Get<T>() where T : struct, IEntityComponent
         {
-            return ref (_group[new RefWrapper<Type>(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE)] as ITypeSafeDictionary<T>)[
+            return ref (_group[new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE)] as ITypeSafeDictionary<T>)[
                 _ID.entityID];
         }
         
         public bool Has<T>() where T : struct, IEntityComponent
         {
-            if (_group.TryGetValue(new RefWrapper<Type>(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
+            if (_group.TryGetValue(new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
                 out var typeSafeDictionary))
             {
                 var dictionary = (ITypeSafeDictionary<T>) typeSafeDictionary;
@@ -58,6 +58,6 @@ namespace Svelto.ECS
         }
         
         readonly EGID                                                    _ID;
-        readonly FasterDictionary<RefWrapper<Type>, ITypeSafeDictionary> _group;
+        readonly FasterDictionary<RefWrapperType, ITypeSafeDictionary> _group;
     }
 }

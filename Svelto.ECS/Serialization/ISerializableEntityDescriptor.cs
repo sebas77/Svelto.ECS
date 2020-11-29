@@ -2,10 +2,10 @@ using System;
 
 namespace Svelto.ECS.Serialization
 {
-    public interface ISerializableEntityDescriptor : IEntityDescriptor
+    public interface ISerializableEntityDescriptor : IDynamicEntityDescriptor
     {
-        uint                         hash                { get; }
+        uint                            hash                { get; }
         ISerializableComponentBuilder[] entitiesToSerialize { get; }
-        Type realType { get; }
+        Type                            realType            { get; }
     }
 }

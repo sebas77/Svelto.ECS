@@ -13,6 +13,8 @@ namespace Svelto.ECS
         [FieldOffset(0)] public readonly uint                 entityID;
         [FieldOffset(4)] public readonly ExclusiveGroupStruct groupID;
         [FieldOffset(0)]        readonly ulong                _GID;
+
+        public static readonly EGID Empty = new EGID();
         
         public static bool operator ==(EGID obj1, EGID obj2)
         {
@@ -27,6 +29,11 @@ namespace Svelto.ECS
         public EGID(uint entityID, ExclusiveGroupStruct groupID) : this()
         {
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
+        }
+        
+        public EGID(uint entityID, BuildGroup groupID) : this()
+        {
+            _GID = MAKE_GLOBAL_ID(entityID, groupID.group);
         }
 
         static ulong MAKE_GLOBAL_ID(uint entityId, uint groupId)
@@ -74,7 +81,8 @@ namespace Svelto.ECS
 
         public override string ToString()
         {
-            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(groupID.ToName());
+            var value = groupID.ToName();
+            return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(value);
         }
     }
 }
