@@ -65,7 +65,7 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 * [https://github.com/sebas77/Svelto.Tasks](https://github.com/sebas77/Svelto.Tasks)
 
-## Users Generated Content \(may use old versions of Svelto and be quite outdated\)
+## Users Generated Content \(I removed all the outdated articles, so this is a call for new ones!\)
 
 * [A Beginner’s Guide to Svelto.ECS (3.0) with Unity by Jiheh Ritterling](https://jiheh.medium.com/a-beginners-guide-to-svelto-ecs-3-0-with-unity-e9dbc88a2145)
 
