@@ -37,15 +37,15 @@ jobs:
         git checkout UPM
 
     - name: get preparation tools
-      run: git clone https://github.com/Ujinjinjin/upm-preparator.git --branch v1.0.10 --single-branch
+      run: git clone https://github.com/Ujinjinjin/upm-preparator.git --branch v1.0.12 --single-branch
 
     - name: bump package version
       run: |
-        python3 upm-preparator/version_bumpinator.py "temp/version.json" "temp/package.json"
+        python3 upm-preparator/version_bumpinator.py --version-file "temp/version.json" --package-file "temp/package.json" --env-file "${GITHUB_ENV}"
         rm "temp/version.json"
 
     - name: change project structure
-      run: python3 upm-preparator/structure_changinator.py "temp/${PKG_ROOT}"
+      run: python3 upm-preparator/structure_changinator.py --package-root "temp/${PKG_ROOT}"
 
     - name: move package.json & LICENSE & README from temp to root
       run: |
@@ -54,7 +54,7 @@ jobs:
         mv "temp/README.md" .
 
     - name: generate meta files
-      run: python3 upm-preparator/meta_makinator.py "package.json"
+      run: python3 upm-preparator/meta_makinator.py --package-file "package.json"
 
     - name: remove preparation tools and temp
       run: |
