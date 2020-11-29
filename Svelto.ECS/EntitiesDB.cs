@@ -18,15 +18,15 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool FindEGID(EntityLocator entityLocator, out EGID egid)
+        public bool FindEGID(EntityReference entityReference, out EGID egid)
         {
-            return _entityLocatorMap.TryGetEGID(entityLocator, out egid);
+            return _referenceLocatorMap.TryGetEGID(entityReference, out egid);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EntityLocator GetLocator(EGID egid)
+        public EntityReference GetEntityReference(EGID egid)
         {
-            return _entityLocatorMap.GetLocator(egid);
+            return _referenceLocatorMap.GetEntityReference(egid);
         }
 
         EntityCollection<T> InternalQueryEntities<T>(FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType)
@@ -359,7 +359,7 @@ namespace Svelto.ECS
 
         readonly EnginesRoot _enginesRoot;
 
-        IEntityLocatorMap _entityLocatorMap => _enginesRoot;
+        IEntityReferenceLocatorMap _referenceLocatorMap => _enginesRoot;
 
         EntitiesStreams _entityStream => _enginesRoot._entityStreams;
 

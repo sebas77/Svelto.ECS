@@ -35,7 +35,7 @@ namespace Svelto.ECS
         {
             CheckAddEntityID(entityID, descriptorType);
             Check.Require(entityID.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
-            CreateLocator(entityID);
+            CreateReferenceLocator(entityID);
 
             var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd, componentsToBuild
               , implementors, descriptorType);
@@ -83,11 +83,11 @@ namespace Svelto.ECS
                 // Update the egid to unique id maps.
                 if (toEntityGID.HasValue)
                 {
-                    UpdateLocator(fromEntityGID, toEntityGID.Value);
+                    UpdateReferenceLocator(fromEntityGID, toEntityGID.Value);
                 }
                 else
                 {
-                    RemoveLocator(fromEntityGID);
+                    RemoveReferenceLocator(fromEntityGID);
                 }
 
                 //Check if there is an EntityInfo linked to this entity, if so it's a DynamicEntityDescriptor!
@@ -217,7 +217,7 @@ namespace Svelto.ECS
                 FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup = GetGroup(fromIdGroupId);
                 FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup   = GetOrCreateGroup(toGroupId, profiler);
 
-                UpdateAllGroupLocators(fromIdGroupId, toGroupId);
+                UpdateAllGroupReferenceLocators(fromIdGroupId, toGroupId);
 
                 foreach (var dictionaryOfEntities in fromGroup)
                 {
@@ -296,7 +296,7 @@ namespace Svelto.ECS
 
         void RemoveEntitiesFromGroup(ExclusiveGroupStruct groupID, in PlatformProfiler profiler)
         {
-            RemoveAllGroupLocators(groupID);
+            RemoveAllGroupReferenceLocators(groupID);
 
             if (_groupEntityComponentsDB.TryGetValue(groupID, out var dictionariesOfEntities))
             {
