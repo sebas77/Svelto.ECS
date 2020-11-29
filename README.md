@@ -57,7 +57,7 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 ## Users Generated Content \(may use old versions of Svelto and be quite outdated\)
 
-I decided to remove all the references as they were super old, I hope new user content will arrive soon!
+* [A Beginner’s Guide to Svelto.ECS (3.0) with Unity by Jiheh Ritterling] (https://jiheh.medium.com/a-beginners-guide-to-svelto-ecs-3-0-with-unity-e9dbc88a2145)
 
 ## In case of bugs
 
