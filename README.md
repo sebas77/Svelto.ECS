@@ -11,7 +11,7 @@ The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submo
 
 ## Svelto is now distributed as Unity Package too [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
 
-read this article for more information:http://www.sebaslab.com/distributing-svelto-through-openupm/ or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
+read this article for more information: http://www.sebaslab.com/distributing-svelto-through-openupm/ or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
 
 *Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Depenendency System is: *
 
