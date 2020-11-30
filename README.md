@@ -11,7 +11,11 @@ The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submo
 
 ## Svelto is now distributed as Unity Package too [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
 
-read this article for more information:http://www.sebaslab.com/distributing-svelto-through-openupm/
+read this article for more information:http://www.sebaslab.com/distributing-svelto-through-openupm/ or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
+
+*Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Depenendency System is: *
+
+Unity Package System has a big deficency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. Since Unity Collection remove the Unsafe.dll dependency officially (I can't understand this move at all), I had to distribute my own package. This means that if you want to use Svelto from UPM, you will need Svelto unsafe dll to be the only unsafe dll in the project. Otherwise you just download the source code and solve dependencies manually.
 
 ## Official Examples
 
