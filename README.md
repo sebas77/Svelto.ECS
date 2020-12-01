@@ -7,7 +7,7 @@ Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainab
 Svelto.ECS wasn't born just from the needs of a large team, but also as result of years of reasoning behind software engineering applied to game development. Svelto.ECS hasn't been written just to develop faster code, it has been designed to help develop better code. Performance gains is just one of the benefits in using Svelto.ECS, as ECS in general is a great way to write cache-friendly code. Svelto.ECS has been developed with the idea of ECS being a paradigm and not just a pattern, letting the user shift completely away from Object Oriented Programming with consequent improvements of the code design and code maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be as fool proof as possible.
 
 ## How to clone the repository:
-The folders Svelto.ECS, Svelto.Tasks and Svelto.Common, where present, are submodules pointing to the relative repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
+The folders Svelto.ECS and Svelto.Common, where present, are submodules pointing to the relative repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
 
 ## Svelto is now distributed as Unity Package too [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
 
@@ -63,10 +63,6 @@ Unity Package System has a big deficency when it comes to dll dependency solving
 
 
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
-
-**The perfect companion for Svelto.ECS is Svelto.Tasks to run the logic of the Systems even on other threads!**
-
-* [https://github.com/sebas77/Svelto.Tasks](https://github.com/sebas77/Svelto.Tasks)
 
 ## Users Generated Content \(I removed all the outdated articles, so this is a call for new ones!\)
 
