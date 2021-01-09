@@ -1,5 +1,6 @@
 {
     "name": "Svelto.ECS",
+    "rootNamespace": "",
     "references": [
         "Unity.Entities",
         "Unity.Collections",
@@ -51,6 +52,11 @@
             "name": "com.unity.jobs",
             "expression": "",
             "define": "UNITY_JOBS"
+        },
+        {
+            "name": "com.unity.jobs",
+            "expression": "",
+            "define": "UNITY_NATIVE"
         }
     ],
     "noEngineReferences": false
