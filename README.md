@@ -30,7 +30,7 @@ Unity Package System has a big deficency when it comes to dll dependency solving
 
 **Framework articles:**
 
-* [Svelto ECS 3.0 is finally here (article in progress)](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)  \(re-introducing svelto\)
+* [Svelto ECS 3.0 is finally here](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)  \(re-introducing svelto\)
 * [Introducing Svelto ECS 2.9](http://www.sebaslab.com/introducing-svelto-ecs-2-9/)  \(shows what's changed since 2.8\)
 * [Introducing Svelto ECS 2.8](http://www.sebaslab.com/introducing-svelto-ecs-2-8/)  \(shows what's changed since 2.7\)
 * [Svelto.ECS 2.7: what’s new and best practices](http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/) \(shows what's changed since 2.5\)
@@ -48,6 +48,7 @@ Unity Package System has a big deficency when it comes to dll dependency solving
 * [The truth behind Inversion of Control – Part IV – Dependency Inversion Principle](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/)
 * [The truth behind Inversion of Control – Part V – Entity Component System design to achieve true Inversion of Flow Control](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/)
 * [The Quest for Maintainable Code and The Path to ECS](http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/)
+* [OOP abstraction layer in an ECS-centric application](https://www.sebaslab.com/oop-abstraction-layer-in-a-ecs-centric-application/)
 
 **Practical articles**
 
