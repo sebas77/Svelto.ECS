@@ -49,14 +49,9 @@
             "define": "UNITY_NATIVE"
         },
         {
-            "name": "com.unity.jobs",
-            "expression": "",
+            "name": "Unity",
+            "expression": "2019.3.0",
             "define": "UNITY_JOBS"
-        },
-        {
-            "name": "com.unity.jobs",
-            "expression": "",
-            "define": "UNITY_NATIVE"
         }
     ],
     "noEngineReferences": false

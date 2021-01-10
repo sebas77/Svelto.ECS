@@ -1,4 +1,5 @@
-using Unity.Jobs;
+#if UNITY_JOBS
+using Unity.Jobs; 
 
 namespace Svelto.ECS.Extensions.Unity
 {
@@ -16,3 +17,5 @@ namespace Svelto.ECS.Extensions.Unity
         string name { get; }
     }
 }
+
+#endif
