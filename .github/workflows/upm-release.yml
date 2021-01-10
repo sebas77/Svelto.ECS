@@ -13,7 +13,7 @@ jobs:
     env:
       PKG_ROOT: Svelto.ECS
       VERSION_JSON: ./Svelto.ECS/version.json
-      PKG_JSON: package.json
+      PKG_JSON: ./Svelto.ECS/package.json
       LICENSE: LICENSE
       README: README.md
 
