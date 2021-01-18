@@ -17,10 +17,14 @@ read this article for more information: http://www.sebaslab.com/distributing-sve
 
 Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. Since Unity Collection removed the Unsafe.dll dependency, I had to distribute my own package. This means that if you want to use Svelto from UPM, you will need Svelto unsafe dll to be the only unsafe dll in the project. Otherwise you just download the source code and solve dependencies manually.
 
-## Official Examples
+## Official Examples (A.K.A. where is the documentation?)
+
+Svelto doesn't have official documentation. The reason is that documentation is costly to mantain and...I reckon people don't need it, thanks to the highly documented and simple mini-examples. Please check and study them all regardless the platform you intend to use Svelto with.
 
 ### * **Mini Examples**: [https://github.com/sebas77/Svelto.MiniExamples](https://github.com/sebas77/Svelto.MiniExamples) \(including articles\)
 * **Unit Tests**: [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests)
+
+After that, you can get all the help you need from the official chat:
 
 **Official Discord Server \(join to get help from me for free!\)**
 
@@ -30,7 +34,7 @@ Unity Package System has a big deficiency when it comes to dll dependency solvin
 
 **Framework articles:**
 
-* [Svelto ECS 3.0 is finally here](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)  \(re-introducing svelto\)
+* [Svelto ECS 3.0 is finally here](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)  \(re-introducing svelto, this article is important for starters!\)
 * [Introducing Svelto ECS 2.9](http://www.sebaslab.com/introducing-svelto-ecs-2-9/)  \(shows what's changed since 2.8\)
 * [Introducing Svelto ECS 2.8](http://www.sebaslab.com/introducing-svelto-ecs-2-8/)  \(shows what's changed since 2.7\)
 * [Svelto.ECS 2.7: what’s new and best practices](http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/) \(shows what's changed since 2.5\)
@@ -40,6 +44,7 @@ Unity Package System has a big deficiency when it comes to dll dependency solvin
 
 **Theory related articles \(in order of publishing date\):**
 
+* [OOP abstraction layer in an ECS-centric application](https://www.sebaslab.com/oop-abstraction-layer-in-a-ecs-centric-application/)  \(this article is important for starters!\)
 * [Inversion of Control with Unity – part 1](http://www.sebaslab.com/ioc-container-for-unity3d-part-1/)
 * [Inversion of Control with Unity – part 2](http://www.sebaslab.com/ioc-container-for-unity3d-part-2/)
 * [The truth behind Inversion of Control – Part I – Dependency Injection](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/)
@@ -48,7 +53,6 @@ Unity Package System has a big deficiency when it comes to dll dependency solvin
 * [The truth behind Inversion of Control – Part IV – Dependency Inversion Principle](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/)
 * [The truth behind Inversion of Control – Part V – Entity Component System design to achieve true Inversion of Flow Control](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/)
 * [The Quest for Maintainable Code and The Path to ECS](http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/)
-* [OOP abstraction layer in an ECS-centric application](https://www.sebaslab.com/oop-abstraction-layer-in-a-ecs-centric-application/)
 
 **Practical articles**
 
