@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Svelto.ECS</AssemblyName>
     <LangVersion>7.3</LangVersion>
@@ -7,7 +7,9 @@
   <PropertyGroup>
     <PackageId>Svelto.ECS</PackageId>
     <Authors>sebas77</Authors>
-	<RepositoryUrl>https://github.com/sebas77/Svelto.ECS</RepositoryUrl>
+    <RepositoryUrl>https://github.com/sebas77/Svelto.ECS</RepositoryUrl>
+    <NuspecFile Condition="'$(Configuration)'=='Custom'">Svelto.ECS.nuspec</NuspecFile>
+    <NuspecProperties Condition="'$(Configuration)'=='Custom'">version=$(PackageVersion)</NuspecProperties>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -15,6 +17,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseSharedCompilation>false</UseSharedCompilation>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Custom' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <UseSharedCompilation>false</UseSharedCompilation>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
