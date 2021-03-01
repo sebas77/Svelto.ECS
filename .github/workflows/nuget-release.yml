@@ -30,36 +30,50 @@ jobs:
       run: git clone https://github.com/Ujinjinjin/upm-preparator.git --branch v1.0.12 --single-branch
 
     - name: create temp directory
-      run: mkdir temp
+      run: mkdir temp temp/com.sebaslab.svelto.common temp/com.sebaslab.svelto.ecs temp/bin temp/bin/debug temp/bin/release
     
     - name: create solution file
       run: dotnet new sln -n "${PKG_NAME}" -o temp/
     
-    # Svelto.Common
-    - name: create temp Svelto.Common directory
-      run: mkdir "temp/com.sebaslab.svelto.common"
-    
+    # Prepare solution    
     - name: copy Svelto.Common files to temp directory
       run: cp -r Svelto.Common/* "temp/com.sebaslab.svelto.common"
-    
-    - name: add Svelto.Common to solution
-      run: dotnet sln "temp/${PKG_NAME}.sln" add "temp/com.sebaslab.svelto.common/Svelto.Common.csproj"
-    
-    # Svelto.ECS
-    - name: get Svelto.ECS version
-      run: python3 upm-preparator/version.py --version-file "${ECS_VERSION_JSON}" --env-file "${GITHUB_ENV}"
-
-    - name: create temp Svelto.ECS directory
-      run: mkdir "temp/com.sebaslab.svelto.ecs"
     
     - name: copy Svelto.ECS files to temp directory
       run: cp -r Svelto.ECS/* "temp/com.sebaslab.svelto.ecs"
     
+    - name: add Svelto.Common to solution
+      run: dotnet sln "temp/${PKG_NAME}.sln" add "temp/com.sebaslab.svelto.common/Svelto.Common.csproj"
+    
     - name: add Svelto.ECS to solution
       run: dotnet sln "temp/${PKG_NAME}.sln" add "temp/com.sebaslab.svelto.ecs/Svelto.ECS.csproj"
+    
+    # Build for Debug
+    - name: create package for Debug configuration
+      run: dotnet pack /p:Version=1.0.0 -o temp/bin/debug temp/com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Debug
+
+    - name: unzip debug nuget package
+      run: unzip temp/bin/debug/Svelto.ECS.1.0.0.nupkg -d temp/bin/debug
+
+    - name: copy debug DLL to temp folder
+      run: sudo cp temp/bin/debug/lib/netstandard2.0/Svelto.ECS.dll temp/bin/debug
+
+    # Build for Release
+    - name: create package for Release configuration
+      run: dotnet pack /p:Version=1.0.0 -o temp/bin/release temp/com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Release
+
+    - name: unzip release nuget package
+      run: unzip temp/bin/release/Svelto.ECS.1.0.0.nupkg -d temp/bin/release
+
+    - name: copy release DLL to temp folder
+      run: sudo cp temp/bin/release/lib/netstandard2.0/Svelto.ECS.dll temp/bin/release
+
+    # Compile into nuget package
+    - name: get Svelto.ECS version
+      run: python3 upm-preparator/version.py --version-file "${ECS_VERSION_JSON}" --env-file "${GITHUB_ENV}"
 
     - name: build nuget package
-      run: dotnet pack /p:Version=${PKG_VERSION} -o . "temp/com.sebaslab.svelto.ecs/Svelto.ECS.csproj"
+      run: sudo dotnet pack /p:PackageVersion=${PKG_VERSION} -o . temp/com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Custom
 
-    - name: publish nuget package
-      run: dotnet nuget push ${{ env.PKG_NAME }}.${{ env.PKG_VERSION }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+    # - name: publish nuget package
+    #   run: dotnet nuget push ${{ env.PKG_NAME }}.${{ env.PKG_VERSION }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

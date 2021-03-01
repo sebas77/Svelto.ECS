@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>Svelto.ECS</id>
+        <authors>sebas77</authors>
+        <version>$version$</version>
+        <description>C# Lightweight Data Oriented Entity Component System Framework</description>
+        <projectUrl>https://github.com/sebas77/Svelto.ECS</projectUrl>
+        <licenseUrl>https://raw.githubusercontent.com/sebas77/Svelto.ECS/master/LICENSE</licenseUrl>
+        <repository type="git" url="https://github.com/sebas77/Svelto.ECS.git" />
+        <dependencies>
+            <group targetFramework="netstandard2.0" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="Svelto.ECS.targets" target="build/" />
+        <file src="../bin/debug/Svelto.ECS.dll" target="lib/Debug/netstandard2.0/" />
+        <file src="../bin/release/Svelto.ECS.dll" target="lib/Release/netstandard2.0/" />
+    </files>
+</package>
