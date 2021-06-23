@@ -87,6 +87,7 @@ Hey, thanks a lot for considering this. You can help in several ways. The simple
 
 ## Svelto Framework is used to develop the following products\(\*\):
 
+![image](https://user-images.githubusercontent.com/945379/123062411-65ee3600-d404-11eb-8dca-d30c28ed909d.png)
 ![Gamecraft](https://steamcdn-a.akamaihd.net/steamcommunity/public/images/clans/35037633/e05ca4fc6f20f1e6150a6ace1d12fe8cd145fa0d.png)
 ![Robocraft Infinity](https://i.ytimg.com/vi/m_4fpgHwoBs/maxresdefault.jpg) 
 ![Cardlife](https://i.ytimg.com/vi/q2jaUZjnNyg/maxresdefault.jpg)
