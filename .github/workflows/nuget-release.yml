@@ -32,8 +32,8 @@ jobs:
     - name: create temp directory
       run: mkdir temp temp/com.sebaslab.svelto.common temp/com.sebaslab.svelto.ecs temp/bin temp/bin/debug temp/bin/release
     
-    - name: create solution file
-      run: dotnet new sln -n "${PKG_NAME}" -o temp/
+    - name: copy solution file
+      run:  cp Svelto.ECS.sln "temp/Svelto.ECS.sln"
     
     # Prepare solution    
     - name: copy Svelto.Common files to temp directory
@@ -42,11 +42,11 @@ jobs:
     - name: copy Svelto.ECS files to temp directory
       run: cp -r Svelto.ECS/* "temp/com.sebaslab.svelto.ecs"
     
-    - name: add Svelto.Common to solution
-      run: dotnet sln "temp/${PKG_NAME}.sln" add "temp/com.sebaslab.svelto.common/Svelto.Common.csproj"
+ #   - name: add Svelto.Common to solution
+ #     run: dotnet sln "temp/${PKG_NAME}.sln" add "temp/com.sebaslab.svelto.common/Svelto.Common.csproj"
     
-    - name: add Svelto.ECS to solution
-      run: dotnet sln "temp/${PKG_NAME}.sln" add "temp/com.sebaslab.svelto.ecs/Svelto.ECS.csproj"
+  #  - name: add Svelto.ECS to solution
+  #    run: dotnet sln "temp/${PKG_NAME}.sln" add "temp/com.sebaslab.svelto.ecs/Svelto.ECS.csproj"
     
     # Build for Debug
     - name: create package for Debug configuration
