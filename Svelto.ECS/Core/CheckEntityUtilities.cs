@@ -4,6 +4,7 @@ using System.Diagnostics;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
@@ -17,18 +18,18 @@ namespace Svelto.ECS
 #if DONT_USE        
         [Conditional("CHECK_ALL")]
 #endif
-        void CheckRemoveEntityID(EGID egid, Type entityDescriptorType, string caller = "")
+        void CheckRemoveEntityID(EGID egid, Type entityDescriptorType, [CallerMemberName] string caller = null)
         {
             if (_multipleOperationOnSameEGIDChecker.ContainsKey(egid) == true)
                 throw new ECSException(
-                    "Executing multiple structural changes in one submission on the same entity is not supported "
+                    "Executing multiple structural changes (remove) in one submission on the same entity is not supported "
                        .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID).FastConcat(" groupid: ")
                        .FastConcat(egid.groupID.ToName()).FastConcat(" type: ")
                        .FastConcat(entityDescriptorType != null ? entityDescriptorType.Name : "not available")
-                       .FastConcat(" operation was: ")
+                       .FastConcat(" previous operation was: ")
                        .FastConcat(_multipleOperationOnSameEGIDChecker[egid] == 1 ? "add" : "remove"));
 
-            if (_idChecker.TryGetValue(egid.groupID, out var hash))
+            if (_idChecker.TryGetValue((uint) egid.groupID, out var hash))
                 if (hash.Contains(egid.entityID) == false)
                     throw new ECSException("Trying to remove an Entity never submitted in the database "
                                           .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID)
@@ -45,18 +46,18 @@ namespace Svelto.ECS
 #if DONT_USE
         [Conditional("CHECK_ALL")]
 #endif
-        void CheckAddEntityID(EGID egid, Type entityDescriptorType, string caller = "")
+        void CheckAddEntityID(EGID egid, Type entityDescriptorType, [CallerMemberName] string caller = null)
         {
             if (_multipleOperationOnSameEGIDChecker.ContainsKey(egid) == true)
                 throw new ECSException(
-                    "Executing multiple structural changes in one submission on the same entity is not supported "
+                    "Executing multiple structural changes (build) on the same entity is not supported "
                        .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID).FastConcat(" groupid: ")
                        .FastConcat(egid.groupID.ToName()).FastConcat(" type: ")
                        .FastConcat(entityDescriptorType != null ? entityDescriptorType.Name : "not available")
-                       .FastConcat(" operation was: ")
+                       .FastConcat(" previous operation was: ")
                        .FastConcat(_multipleOperationOnSameEGIDChecker[egid] == 1 ? "add" : "remove"));
 
-            var hash = _idChecker.GetOrCreate(egid.groupID, () => new HashSet<uint>());
+            var hash = _idChecker.GetOrCreate((uint) egid.groupID, () => new HashSet<uint>());
             if (hash.Contains(egid.entityID) == true)
                 throw new ECSException("Trying to add an Entity already submitted to the database "
                                       .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID)
@@ -72,7 +73,7 @@ namespace Svelto.ECS
 #if DONT_USE
         [Conditional("CHECK_ALL")]
 #endif
-        void RemoveGroupID(ExclusiveBuildGroup groupID) { _idChecker.Remove(groupID); }
+        void RemoveGroupID(ExclusiveBuildGroup groupID) { _idChecker.Remove((uint)groupID); }
 
 #if DONT_USE
         [Conditional("CHECK_ALL")]

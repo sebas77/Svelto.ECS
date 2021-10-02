@@ -25,19 +25,14 @@ namespace Svelto.ECS
         ///  </summary>
         ///  <typeparam name="T"></typeparam>
         ///  <param name="groupStructId"></param>
-        ///  <param name="size"></param>
-        void PreallocateEntitySpace<T>(ExclusiveGroupStruct groupStructId, uint size)
+        ///  <param name="numberOfEntities"></param>
+        void PreallocateEntitySpace<T>(ExclusiveGroupStruct groupStructId, uint numberOfEntities)
             where T : IEntityDescriptor, new();
 
         /// <summary>
         ///     The EntityDescriptor doesn't need to be ever instantiated. It just describes the Entity
         ///     itself in terms of EntityComponents to build. The Implementors are passed to fill the
-        ///     references of the EntityComponents components. Please read the articles on my blog
-        ///     to understand better the terminologies
-        ///     Using this function is like building a normal entity, but the entity components
-        ///     are grouped by groupID to be more efficiently processed inside engines and
-        ///     improve cache locality. Either class entityComponents and struct entityComponents can be
-        ///     grouped.
+        ///     references of the Entity View Components components if present. 
         /// </summary>
         /// <param name="entityID"></param>
         /// <param name="groupStructId"></param>
@@ -51,17 +46,18 @@ namespace Svelto.ECS
             where T : IEntityDescriptor, new();
 
         EntityInitializer BuildEntity<T>(uint entityID, ExclusiveBuildGroup groupStructId,
-                                               T    descriptorEntity, IEnumerable<object>  implementors = null)
+                                               T descriptorEntity, IEnumerable<object>  implementors = null)
             where T : IEntityDescriptor;
 
         EntityInitializer BuildEntity<T>(EGID egid, T entityDescriptor, IEnumerable<object> implementors = null)
             where T : IEntityDescriptor;
 
+        //Todo: analyze if this can be internal or just related to serialization
         EntityInitializer BuildEntity
-            (EGID egid, IComponentBuilder[] componentsToBuild, Type type, IEnumerable<object> implementors = null);
+            (EGID egid, IComponentBuilder[] componentsToBuild, Type descriptorType, IEnumerable<object> implementors = null);
 
 #if UNITY_NATIVE
-        NativeEntityFactory ToNative<T>(string callerName) where T : IEntityDescriptor, new();
+        Svelto.ECS.Native.NativeEntityFactory ToNative<T>(string callerName) where T : IEntityDescriptor, new();
 #endif        
     }
 }

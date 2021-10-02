@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Svelto.ECS.Schedulers
 {
     public abstract class EntitiesSubmissionScheduler

@@ -3,15 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace Svelto.ECS.Experimental
 {
+    /// <summary>
+    /// Todo: the entityDB should be aware of the ECSString and recycle it on entity removal
+    /// </summary>
     [Serialization.DoNotSerialize]
     [StructLayout(LayoutKind.Explicit)]
-    ///
-    /// Note: I should extend this to reuse unused id 
-    /// 
-    
-    //todo ResourcesECSDB<T> must be used only inside entity components. Same for ECSString.
-    //what I could do is that if the component is removed from the database, a reference counter to the object 
-    //will be modified. If 0 is reached, the ID should be recycled.
     public struct ECSString:IEquatable<ECSString>
     {
         [FieldOffset(0)] uint _id;

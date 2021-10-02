@@ -6,7 +6,7 @@ namespace Svelto.ECS
 {
     public readonly ref struct EntityCollection<T> where T : struct, IEntityComponent
     {
-        static readonly bool IsUnmanaged = TypeSafeDictionary<T>.IsUnmanaged;
+        static readonly bool IsUnmanaged = TypeSafeDictionary<T>.isUnmanaged;
 
         public EntityCollection(IBuffer<T> buffer, uint count) : this()
         {

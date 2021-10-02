@@ -63,6 +63,10 @@ namespace Svelto.ECS.Serialization
         /// <param name="egid"></param>
         void DeserializeEntityToDelete(EGID egid);
 
+        uint GetHashFromGroup(ExclusiveGroupStruct groupStruct);
+
+        ExclusiveGroupStruct GetGroupFromHash(uint groupHash);
+        
         void RegisterSerializationFactory<T>(IDeserializationFactory deserializationFactory)
             where T : ISerializableEntityDescriptor, new();
 

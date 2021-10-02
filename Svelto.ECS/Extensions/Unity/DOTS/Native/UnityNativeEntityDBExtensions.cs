@@ -4,9 +4,9 @@ using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Native
 {
-    public static class UnityEntityDBExtensions
+    public static class UnityNativeEntityDBExtensions
     {
         internal static NativeEGIDMapper<T> ToNativeEGIDMapper<T>(this TypeSafeDictionary<T> dic,
             ExclusiveGroupStruct groupStructId) where T : unmanaged, IEntityComponent
@@ -43,21 +43,15 @@ namespace Svelto.ECS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeEGIDMultiMapper<T> QueryNativeMappedEntities<T>(this EntitiesDB entitiesDb,
-            LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
+                                                                    LocalFasterReadOnlyList<ExclusiveGroupStruct> groups, Allocator allocator)
             where T : unmanaged, IEntityComponent
         {
-            var dictionary =
-                new SveltoDictionary<ExclusiveGroupStruct, SveltoDictionary<uint, T, 
-                            NativeStrategy<SveltoDictionaryNode<uint>>,
-                            NativeStrategy<T>, 
-                            NativeStrategy<int>>, 
-                        NativeStrategy<SveltoDictionaryNode<ExclusiveGroupStruct>>, 
-                        NativeStrategy<SveltoDictionary<uint, T, 
-                            NativeStrategy<SveltoDictionaryNode<uint>>, 
-                            NativeStrategy<T>,
-                            NativeStrategy<int>>>,
-                    NativeStrategy<int>> 
-                    ((uint) groups.count, Allocator.TempJob);
+            var dictionary = new SveltoDictionary<ExclusiveGroupStruct, //key 
+                    SveltoDictionary<uint, T, 
+                        NativeStrategy<SveltoDictionaryNode<uint>>, NativeStrategy<T>, NativeStrategy<int>>, //value 
+                        NativeStrategy<SveltoDictionaryNode<ExclusiveGroupStruct>>, //strategy to store the key
+                    NativeStrategy<SveltoDictionary<uint, T, NativeStrategy<SveltoDictionaryNode<uint>>, NativeStrategy<T>, NativeStrategy<int>>>, NativeStrategy<int>> //strategy to store the value 
+                    ((uint) groups.count, allocator);
         
             foreach (var group in groups)
             {

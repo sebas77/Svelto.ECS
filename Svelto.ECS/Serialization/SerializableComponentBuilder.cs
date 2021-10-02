@@ -16,9 +16,8 @@ namespace Svelto.ECS.Serialization
     {
         public static readonly uint SIZE = (uint) MemoryUtilities.SizeOf<T>();
         
-          public void Serialize
-        (uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
-       , int serializationType)
+          public void Serialize(uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
+                              , int serializationType)
         {
             IComponentSerializer<T> componentSerializer = _serializers[serializationType];
 
@@ -36,9 +35,8 @@ namespace Svelto.ECS.Serialization
             componentSerializer.SerializeSafe(val, serializationData);
         }
 
-        public void Deserialize
-        (uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
-       , int serializationType)
+        public void Deserialize(uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
+                              , int serializationType)
         {
             IComponentSerializer<T> componentSerializer = _serializers[(int) serializationType];
 
@@ -61,6 +59,11 @@ namespace Svelto.ECS.Serialization
             IComponentSerializer<T> componentSerializer = _serializers[(int) serializationType];
 
             componentSerializer.DeserializeSafe(ref initializer.GetOrCreate<T>(), serializationData);
+        }
+
+        public uint Size(int serializationType)
+        {
+            return _serializers[(int) serializationType].size;
         }
 
         public void Deserialize

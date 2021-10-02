@@ -21,14 +21,14 @@ namespace Svelto.ECS.Internal
         ITypeSafeDictionary Create();
 
         //todo: there is something wrong in the design of the execute callback methods. Something to cleanup
-        void ExecuteEnginesAddOrSwapCallbacks(FasterDictionary<RefWrapperType, FasterList<IReactEngine>> entityComponentEnginesDb,
+        void ExecuteEnginesAddOrSwapCallbacks(FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer>> entityComponentEnginesDb,
             ITypeSafeDictionary realDic, ExclusiveGroupStruct? fromGroup, ExclusiveGroupStruct toGroup, in PlatformProfiler profiler);
         void ExecuteEnginesSwapOrRemoveCallbacks(EGID fromEntityGid, EGID? toEntityID, ITypeSafeDictionary toGroup,
-                                                 FasterDictionary<RefWrapperType, FasterList<IReactEngine>> engines, in PlatformProfiler profiler);
-        void ExecuteEnginesRemoveCallbacks(FasterDictionary<RefWrapperType, FasterList<IReactEngine>> entityComponentEnginesDB,
+                                                 FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer>> engines, in PlatformProfiler profiler);
+        void ExecuteEnginesRemoveCallbacks(FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer>> entityComponentEnginesDB,
             in PlatformProfiler profiler, ExclusiveGroupStruct @group);
         
-        void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId);
+        void AddEntitiesFromDictionary(ITypeSafeDictionary entitiesToSubmit, uint groupId, EnginesRoot enginesRoot);
         
         void AddEntityToDictionary(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup);
         void RemoveEntityFromDictionary(EGID fromEntityGid);

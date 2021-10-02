@@ -59,7 +59,7 @@ namespace Svelto.ECS
                 serializationData.data[serializationData.dataPos++] = (byte) ((entityID >> 24) & 0xff);
 
                 // Splitting the groupID (uint, 32 bit) into four bytes.
-                uint groupID = egid.groupID;
+                uint groupID = (uint) egid.groupID;
                 serializationData.data[serializationData.dataPos++] = (byte) (groupID & 0xff);
                 serializationData.data[serializationData.dataPos++] = (byte) ((groupID >> 8) & 0xff);
                 serializationData.data[serializationData.dataPos++] = (byte) ((groupID >> 16) & 0xff);

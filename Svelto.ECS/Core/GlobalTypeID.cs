@@ -23,7 +23,7 @@ namespace Svelto.ECS
     {
         static Filler()
         {
-            DBC.ECS.Check.Require(TypeCache<T>.IsUnmanaged == true, "invalid type used");
+            DBC.ECS.Check.Require(TypeCache<T>.isUnmanaged == true, "invalid type used");
         }
 
         //it's an internal interface
@@ -52,7 +52,12 @@ namespace Svelto.ECS
 
     static class EntityComponentIDMap
     {
-        static readonly FasterList<IFiller> TYPE_IDS = new FasterList<IFiller>();
+        static readonly FasterList<IFiller> TYPE_IDS;
+
+        static EntityComponentIDMap()
+        {
+            TYPE_IDS = new FasterList<IFiller>();
+        }
 
         internal static void Register<T>(IFiller entityBuilder) where T : struct, IEntityComponent
         {

@@ -1,4 +1,3 @@
-using DBC.ECS;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
@@ -37,20 +36,15 @@ namespace Svelto.ECS
                 //attention, the while is necessary to skip empty groups
                 while (++_indexGroup < _groups.count)
                 {
-                    var entityCollection1 = _entitiesDB.QueryEntities<T1, T2, T3>(_groups[_indexGroup]);
-                    if (entityCollection1.count == 0)
-                        continue;
-                    var entityCollection2 = _entitiesDB.QueryEntities<T4>(_groups[_indexGroup]);
-                    if (entityCollection2.count == 0)
+                    var exclusiveGroupStruct = _groups[_indexGroup];
+                    if (!exclusiveGroupStruct.IsEnabled())
                         continue;
 
-                    Check.Assert(entityCollection1.count == entityCollection2.count
-                               , "congratulation, you found a bug in Svelto, please report it");
+                    var entityCollection1 = _entitiesDB.QueryEntities<T1, T2, T3, T4>(exclusiveGroupStruct);
 
                     var array  = entityCollection1;
-                    var array2 = entityCollection2;
                     _buffers = new EntityCollection<T1, T2, T3, T4>(array.buffer1, array.buffer2, array.buffer3
-                                                                  , array2);
+                                                                  , array.buffer4);
                     break;
                 }
 
@@ -79,7 +73,7 @@ namespace Svelto.ECS
         readonly EntitiesDB                                    _db;
         readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
-        public ref struct RefCurrent
+        public readonly ref struct RefCurrent
         {
             public RefCurrent(in EntityCollection<T1, T2, T3, T4> buffers, ExclusiveGroupStruct group)
             {
@@ -104,7 +98,6 @@ namespace Svelto.ECS
     {
         public GroupsEnumerable(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
         {
-            DBC.ECS.Check.Require(groups.count > 0, "can't initialise a query without valid groups");
             _db     = db;
             _groups = groups;
         }
@@ -123,7 +116,11 @@ namespace Svelto.ECS
                 //attention, the while is necessary to skip empty groups
                 while (++_indexGroup < _groups.count)
                 {
-                    var entityCollection = _entitiesDB.QueryEntities<T1, T2, T3>(_groups[_indexGroup]);
+                    var exclusiveGroupStruct = _groups[_indexGroup];
+                    if (!exclusiveGroupStruct.IsEnabled())
+                        continue;
+
+                    var entityCollection = _entitiesDB.QueryEntities<T1, T2, T3>(exclusiveGroupStruct);
                     if (entityCollection.count == 0)
                         continue;
 
@@ -156,7 +153,7 @@ namespace Svelto.ECS
         readonly EntitiesDB                                    _db;
         readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
-        public ref struct RefCurrent
+        public readonly ref struct RefCurrent
         {
             public RefCurrent(in EntityCollection<T1, T2, T3> buffers, ExclusiveGroupStruct group)
             {
@@ -198,7 +195,11 @@ namespace Svelto.ECS
                 //attention, the while is necessary to skip empty groups
                 while (++_indexGroup < _groups.count)
                 {
-                    var entityCollection = _db.QueryEntities<T1, T2>(_groups[_indexGroup]);
+                    var exclusiveGroupStruct = _groups[_indexGroup];
+                    if (!exclusiveGroupStruct.IsEnabled())
+                        continue;
+
+                    var entityCollection = _db.QueryEntities<T1, T2>(exclusiveGroupStruct);
                     if (entityCollection.count == 0)
                         continue;
 
@@ -231,7 +232,7 @@ namespace Svelto.ECS
         readonly EntitiesDB                                    _db;
         readonly LocalFasterReadOnlyList<ExclusiveGroupStruct> _groups;
 
-        public ref struct RefCurrent
+        public readonly ref struct RefCurrent
         {
             public RefCurrent(in EntityCollection<T1, T2> buffers, ExclusiveGroupStruct group)
             {
@@ -272,14 +273,19 @@ namespace Svelto.ECS
                 //attention, the while is necessary to skip empty groups
                 while (++_indexGroup < _groups.count)
                 {
-                    var entityCollection = _db.QueryEntities<T1>(_groups[_indexGroup]);
+                    var exclusiveGroupStruct = _groups[_indexGroup];
+                    
+                    if (!exclusiveGroupStruct.IsEnabled())
+                        continue;
+
+                    var entityCollection = _db.QueryEntities<T1>(exclusiveGroupStruct);
                     if (entityCollection.count == 0)
                         continue;
 
                     _buffer = entityCollection;
                     break;
                 }
-                
+
                 var moveNext = _indexGroup < _groups.count;
 
                 if (moveNext == false)
@@ -318,14 +324,14 @@ namespace Svelto.ECS
                 buffers = _buffers;
                 group   = _group;
             }
-            
+
             public void Deconstruct(out EntityCollection<T1> buffers)
             {
                 buffers = _buffers;
             }
 
-            public readonly EntityCollection<T1> _buffers;
-            public readonly ExclusiveGroupStruct _group;
+            internal readonly EntityCollection<T1> _buffers;
+            internal readonly ExclusiveGroupStruct _group;
         }
     }
 }

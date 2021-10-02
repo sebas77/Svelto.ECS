@@ -2,3 +2,6 @@
 /obj
 /bin/Release/netstandard2.0
 /bin/Debug/netstandard2.0
+Svelto.ECS/Svelto.ECS.sdpkg.user
+Svelto.ECS/obj/
+Svelto.ECS/.idea/

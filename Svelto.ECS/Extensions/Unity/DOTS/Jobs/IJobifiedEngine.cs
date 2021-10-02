@@ -16,6 +16,9 @@ namespace Svelto.ECS.Extensions.Unity
 
         string name { get; }
     }
+    
+    public interface IJobifiedGroupEngine<T> : IJobifiedEngine<T>
+    { }
 }
 
 #endif

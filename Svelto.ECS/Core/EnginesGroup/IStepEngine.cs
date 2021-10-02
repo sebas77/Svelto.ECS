@@ -14,7 +14,7 @@ namespace Svelto.ECS
         string name { get; }
     }
     
-    //this must stay IStep Engine as it may be part of a group itself
+    //this must stay IStepEngine as it may be part of a group itself
     public interface IStepGroupEngine : IStepEngine
     {
     }

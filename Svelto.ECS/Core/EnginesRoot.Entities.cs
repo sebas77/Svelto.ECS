@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using DBC.ECS;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
@@ -17,40 +16,45 @@ namespace Svelto.ECS
             return new GenericEntityStreamConsumerFactory(this);
         }
 
-        public IEntityFactory GenerateEntityFactory()
-        {
-            return new GenericEntityFactory(this);
-        }
-
-        public IEntityFunctions GenerateEntityFunctions()
-        {
-            return new GenericEntityFunctions(this);
-        }
+        public IEntityFactory GenerateEntityFactory() { return new GenericEntityFactory(this); }
+        public IEntityFunctions GenerateEntityFunctions() { return new GenericEntityFunctions(this); }
 
         ///--------------------------------------------
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        EntityInitializer BuildEntity
-        (EGID entityID, IComponentBuilder[] componentsToBuild, Type descriptorType,
-            IEnumerable<object> implementors = null)
+        EntityInitializer BuildEntity(EGID entityID, IComponentBuilder[] componentsToBuild, Type descriptorType
+                                    , IEnumerable<object> implementors = null)
         {
             CheckAddEntityID(entityID, descriptorType);
-            Check.Require(entityID.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
 
-            var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd, componentsToBuild
-              , implementors, descriptorType);
+            DBC.ECS.Check.Require((uint)entityID.groupID != 0
+                        , "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
 
-            return new EntityInitializer(entityID, dic);
+            var reference = _entityLocator.ClaimReference();
+            _entityLocator.SetReference(reference, entityID);
+
+            var dic = EntityFactory.BuildGroupedEntities(entityID, _groupedEntityToAdd, componentsToBuild, implementors
+#if DEBUG && !PROFILE_SVELTO
+                                                       , descriptorType
+#endif
+                                                         );
+
+            return new EntityInitializer(entityID, dic, reference);
         }
 
-        ///--------------------------------------------
-        void Preallocate<T>(ExclusiveGroupStruct groupID, uint size) where T : IEntityDescriptor, new()
+        /// <summary>
+        /// Preallocate memory to avoid the impact to resize arrays when many entities are submitted at once
+        /// </summary>
+        void Preallocate(ExclusiveGroupStruct groupID, uint numberOfEntities, IComponentBuilder[] entityComponentsToBuild)
         {
-            using (var profiler = new PlatformProfiler("Preallocate"))
+            void PreallocateEntitiesToAdd()
             {
-                var entityComponentsToBuild  = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
-                var numberOfEntityComponents = entityComponentsToBuild.Length;
+                _groupedEntityToAdd.Preallocate(groupID, numberOfEntities, entityComponentsToBuild);
+            }
 
-                FasterDictionary<RefWrapperType, ITypeSafeDictionary> group = GetOrCreateGroup(groupID, profiler);
+            void PreallocateDBGroup()
+            {
+                var numberOfEntityComponents = entityComponentsToBuild.Length;
+                FasterDictionary<RefWrapperType, ITypeSafeDictionary> group = GetOrCreateDBGroup(groupID);
 
                 for (var index = 0; index < numberOfEntityComponents; index++)
                 {
@@ -58,17 +62,20 @@ namespace Svelto.ECS
                     var entityComponentType    = entityComponentBuilder.GetEntityComponentType();
 
                     var refWrapper = new RefWrapperType(entityComponentType);
-                    if (group.TryGetValue(refWrapper, out var dbList) == false)
-                        group[refWrapper] = entityComponentBuilder.Preallocate(ref dbList, size);
-                    else
-                        dbList.SetCapacity(size);
+                    var dbList         = group.GetOrCreate(refWrapper, ()=>entityComponentBuilder.CreateDictionary(numberOfEntities));
+                    entityComponentBuilder.Preallocate(dbList, numberOfEntities);
 
                     if (_groupsPerEntity.TryGetValue(refWrapper, out var groupedGroup) == false)
-                        groupedGroup = _groupsPerEntity[refWrapper] = new FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>();
+                        groupedGroup = _groupsPerEntity[refWrapper] =
+                            new FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>();
 
                     groupedGroup[groupID] = dbList;
                 }
             }
+
+            PreallocateDBGroup();
+            PreallocateEntitiesToAdd();
+            _entityLocator.PreallocateReferenceMaps(groupID, numberOfEntities);
         }
 
         ///--------------------------------------------
@@ -77,23 +84,24 @@ namespace Svelto.ECS
         {
             using (var sampler = new PlatformProfiler("Move Entity From Engines"))
             {
-                var fromGroup = GetGroup(fromEntityGID.groupID);
+                var fromGroup = GetDBGroup(fromEntityGID.groupID);
 
                 //Check if there is an EntityInfo linked to this entity, if so it's a DynamicEntityDescriptor!
                 if (fromGroup.TryGetValue(new RefWrapperType(ComponentBuilderUtilities.ENTITY_INFO_COMPONENT)
-                      , out var entityInfoDic)
+                                        , out var entityInfoDic)
                  && (entityInfoDic as ITypeSafeDictionary<EntityInfoComponent>).TryGetValue(
                         fromEntityGID.entityID, out var entityInfo))
                     SwapOrRemoveEntityComponents(fromEntityGID, toEntityGID, entityInfo.componentsToBuild, fromGroup
-                      , sampler);
+                                               , sampler);
                 //otherwise it's a normal static entity descriptor
                 else
                     SwapOrRemoveEntityComponents(fromEntityGID, toEntityGID, componentBuilders, fromGroup, sampler);
             }
         }
 
-        void SwapOrRemoveEntityComponents(EGID fromEntityGID, EGID? toEntityGID, IComponentBuilder[] entitiesToMove
-          , FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup, in PlatformProfiler sampler)
+        void SwapOrRemoveEntityComponents
+        (EGID fromEntityGID, EGID? toEntityGID, IComponentBuilder[] entitiesToMove
+       , FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup, in PlatformProfiler sampler)
         {
             using (sampler.Sample("MoveEntityComponents"))
             {
@@ -103,41 +111,48 @@ namespace Svelto.ECS
 
                 //Swap is not like adding a new entity. While adding new entities happen at the end of submission
                 //Adding an entity to a group due to a swap of groups happens now.
-                if (toEntityGID != null)
+                if (toEntityGID.HasValue)
                 {
-                    var toGroupID = toEntityGID.Value.groupID;
+                    var entityGid = toEntityGID.Value;
+                    _entityLocator.UpdateEntityReference(fromEntityGID, entityGid);
 
-                    toGroup = GetOrCreateGroup(toGroupID, sampler);
+                    var toGroupID = entityGid.groupID;
+
+                    toGroup = GetOrCreateDBGroup(toGroupID);
 
                     //Add all the entities to the dictionary
                     for (var i = 0; i < length; i++)
-                        CopyEntityToDictionary(fromEntityGID, toEntityGID.Value, fromGroup, toGroup
-                          , entitiesToMove[i].GetEntityComponentType(), sampler);
+                        CopyEntityToDictionary(fromEntityGID, entityGid, fromGroup, toGroup
+                                             , entitiesToMove[i].GetEntityComponentType(), sampler);
+                }
+                else
+                {
+                    _entityLocator.RemoveEntityReference(fromEntityGID);
                 }
 
                 //call all the callbacks
                 for (var i = 0; i < length; i++)
                     ExecuteEnginesSwapOrRemoveCallbacks(fromEntityGID, toEntityGID, fromGroup, toGroup
-                      , entitiesToMove[i].GetEntityComponentType(), sampler);
+                                                      , entitiesToMove[i].GetEntityComponentType(), sampler);
 
                 //then remove all the entities from the dictionary
                 for (var i = 0; i < length; i++)
-                    RemoveEntityFromDictionary(fromEntityGID, fromGroup, entitiesToMove[i].GetEntityComponentType(),
-                        sampler);
+                    RemoveEntityFromDictionary(fromEntityGID, fromGroup, entitiesToMove[i].GetEntityComponentType()
+                                             , sampler);
             }
         }
 
         void CopyEntityToDictionary
         (EGID entityGID, EGID toEntityGID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup
-          , FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup, Type entityComponentType,
-            in PlatformProfiler sampler)
+       , FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup, Type entityComponentType
+       , in PlatformProfiler sampler)
         {
             using (sampler.Sample("CopyEntityToDictionary"))
             {
                 var wrapper = new RefWrapperType(entityComponentType);
 
                 ITypeSafeDictionary fromTypeSafeDictionary =
-                    GetTypeSafeDictionary(entityGID.groupID, fromGroup, wrapper);
+                    GetTypeSafeDictionary((uint) entityGID.groupID, fromGroup, wrapper);
 
 #if DEBUG && !PROFILE_SVELTO
                 if (fromTypeSafeDictionary.Has(entityGID.entityID) == false)
@@ -154,14 +169,14 @@ namespace Svelto.ECS
 
         void ExecuteEnginesSwapOrRemoveCallbacks
         (EGID entityGID, EGID? toEntityGID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup
-          , FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup, Type entityComponentType
-          , in PlatformProfiler profiler)
+       , FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup, Type entityComponentType
+       , in PlatformProfiler profiler)
         {
             using (profiler.Sample("MoveEntityComponentFromAndToEngines"))
             {
                 //add all the entities
                 var refWrapper             = new RefWrapperType(entityComponentType);
-                var fromTypeSafeDictionary = GetTypeSafeDictionary(entityGID.groupID, fromGroup, refWrapper);
+                var fromTypeSafeDictionary = GetTypeSafeDictionary((uint) entityGID.groupID, fromGroup, refWrapper);
 
                 ITypeSafeDictionary toEntitiesDictionary = null;
                 if (toGroup != null)
@@ -172,19 +187,21 @@ namespace Svelto.ECS
                     throw new EntityNotFoundException(entityGID, entityComponentType);
 #endif
                 fromTypeSafeDictionary.ExecuteEnginesSwapOrRemoveCallbacks(entityGID, toEntityGID, toEntitiesDictionary
-                  , toEntityGID == null ? _reactiveEnginesAddRemove : _reactiveEnginesSwap, in profiler);
+                                                                         , toEntityGID == null
+                                                                               ? _reactiveEnginesAddRemove
+                                                                               : _reactiveEnginesSwap, in profiler);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void RemoveEntityFromDictionary
         (EGID entityGID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup, Type entityComponentType
-          , in PlatformProfiler sampler)
+       , in PlatformProfiler sampler)
         {
             using (sampler.Sample("RemoveEntityFromDictionary"))
             {
                 var refWrapper             = new RefWrapperType(entityComponentType);
-                var fromTypeSafeDictionary = GetTypeSafeDictionary(entityGID.groupID, fromGroup, refWrapper);
+                var fromTypeSafeDictionary = GetTypeSafeDictionary((uint) entityGID.groupID, fromGroup, refWrapper);
 
                 fromTypeSafeDictionary.RemoveEntityFromDictionary(entityGID);
             }
@@ -199,27 +216,31 @@ namespace Svelto.ECS
         /// <param name="fromIdGroupId"></param>
         /// <param name="toGroupId"></param>
         /// <param name="profiler"></param>
-        void SwapEntitiesBetweenGroups(ExclusiveGroupStruct fromIdGroupId, ExclusiveGroupStruct toGroupId, in PlatformProfiler profiler)
+        void SwapEntitiesBetweenGroups
+            (ExclusiveGroupStruct fromIdGroupId, ExclusiveGroupStruct toGroupId, in PlatformProfiler profiler)
         {
             using (profiler.Sample("SwapEntitiesBetweenGroups"))
             {
-                FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup = GetGroup(fromIdGroupId);
-                FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup   = GetOrCreateGroup(toGroupId, profiler);
+                FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup = GetDBGroup(fromIdGroupId);
+                FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup   = GetOrCreateDBGroup(toGroupId);
+
+                _entityLocator.UpdateAllGroupReferenceLocators(fromIdGroupId, (uint) toGroupId);
 
                 foreach (var dictionaryOfEntities in fromGroup)
                 {
                     ITypeSafeDictionary toEntitiesDictionary =
                         GetOrCreateTypeSafeDictionary(toGroupId, toGroup, dictionaryOfEntities.Key
-                          , dictionaryOfEntities.Value);
+                                                    , dictionaryOfEntities.Value);
 
                     var groupsOfEntityType = _groupsPerEntity[dictionaryOfEntities.Key];
-
                     var groupOfEntitiesToCopyAndClear = groupsOfEntityType[fromIdGroupId];
-                    toEntitiesDictionary.AddEntitiesFromDictionary(groupOfEntitiesToCopyAndClear, toGroupId);
-                    
+
+                    toEntitiesDictionary.AddEntitiesFromDictionary(groupOfEntitiesToCopyAndClear, (uint) toGroupId, this);
+
                     //call all the MoveTo callbacks
                     dictionaryOfEntities.Value.ExecuteEnginesAddOrSwapCallbacks(_reactiveEnginesSwap
-                      , dictionaryOfEntities.Value, new ExclusiveGroupStruct(fromIdGroupId), new ExclusiveGroupStruct(toGroupId), profiler);
+                      , dictionaryOfEntities.Value, new ExclusiveGroupStruct(fromIdGroupId)
+                      , new ExclusiveGroupStruct(toGroupId), profiler);
 
                     //todo: if it's unmanaged, I can use fastclear
                     groupOfEntitiesToCopyAndClear.Clear();
@@ -227,33 +248,29 @@ namespace Svelto.ECS
             }
         }
 
-        FasterDictionary<RefWrapperType, ITypeSafeDictionary> GetGroup(ExclusiveGroupStruct fromIdGroupId)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        FasterDictionary<RefWrapperType, ITypeSafeDictionary> GetDBGroup(ExclusiveGroupStruct fromIdGroupId)
         {
             if (_groupEntityComponentsDB.TryGetValue(fromIdGroupId
-              , out FasterDictionary<RefWrapperType, ITypeSafeDictionary>
-                    fromGroup) == false)
-                throw new ECSException("Group doesn't exist: ".FastConcat(fromIdGroupId));
+                                                   , out FasterDictionary<RefWrapperType, ITypeSafeDictionary>
+                                                         fromGroup) == false)
+                throw new ECSException("Group doesn't exist: ".FastConcat((uint) fromIdGroupId));
 
             return fromGroup;
         }
 
-        FasterDictionary<RefWrapperType, ITypeSafeDictionary> GetOrCreateGroup(ExclusiveGroupStruct toGroupId,
-                                                                               in PlatformProfiler profiler)
-        {
-            using (profiler.Sample("GetOrCreateGroup"))
-            {
-                if (_groupEntityComponentsDB.TryGetValue(
-                    toGroupId, out FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup) == false)
-                    toGroup = _groupEntityComponentsDB[toGroupId] =
-                        new FasterDictionary<RefWrapperType, ITypeSafeDictionary>();
 
-                return toGroup;
-            }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        FasterDictionary<RefWrapperType, ITypeSafeDictionary> GetOrCreateDBGroup
+            (ExclusiveGroupStruct toGroupId)
+        {
+            return _groupEntityComponentsDB.GetOrCreate(
+                toGroupId, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
         }
 
         ITypeSafeDictionary GetOrCreateTypeSafeDictionary
-        (ExclusiveGroupStruct groupId, FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup, RefWrapperType type
-       , ITypeSafeDictionary fromTypeSafeDictionary)
+        (ExclusiveGroupStruct groupId, FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup
+       , RefWrapperType type, ITypeSafeDictionary fromTypeSafeDictionary)
         {
             //be sure that the TypeSafeDictionary for the entity Type exists
             if (toGroup.TryGetValue(type, out ITypeSafeDictionary toEntitiesDictionary) == false)
@@ -264,7 +281,8 @@ namespace Svelto.ECS
 
             //update GroupsPerEntity
             if (_groupsPerEntity.TryGetValue(type, out var groupedGroup) == false)
-                groupedGroup = _groupsPerEntity[type] = new FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>();
+                groupedGroup = _groupsPerEntity[type] =
+                    new FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>();
 
             groupedGroup[groupId] = toEntitiesDictionary;
             return toEntitiesDictionary;
@@ -283,16 +301,17 @@ namespace Svelto.ECS
 
         void RemoveEntitiesFromGroup(ExclusiveGroupStruct groupID, in PlatformProfiler profiler)
         {
+            _entityLocator.RemoveAllGroupReferenceLocators(groupID);
+
             if (_groupEntityComponentsDB.TryGetValue(groupID, out var dictionariesOfEntities))
             {
                 foreach (var dictionaryOfEntities in dictionariesOfEntities)
                 {
                     dictionaryOfEntities.Value.ExecuteEnginesRemoveCallbacks(_reactiveEnginesAddRemove, profiler
-                      , new ExclusiveGroupStruct(groupID));
+                                                                           , new ExclusiveGroupStruct(groupID));
                     dictionaryOfEntities.Value.FastClear();
 
-                    var groupsOfEntityType =
-                        _groupsPerEntity[dictionaryOfEntities.Key];
+                    var groupsOfEntityType = _groupsPerEntity[dictionaryOfEntities.Key];
                     groupsOfEntityType[groupID].FastClear();
                 }
             }

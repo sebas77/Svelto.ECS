@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace Svelto.ECS.Schedulers
 {
@@ -7,52 +7,54 @@ namespace Svelto.ECS.Schedulers
     {
         public SimpleEntitiesSubmissionScheduler(uint maxNumberOfOperationsPerFrame = UInt32.MaxValue)
         {
-            _maxNumberOfOperationsPerFrame = maxNumberOfOperationsPerFrame;
+            _enumerator = SubmitEntitiesAsync(maxNumberOfOperationsPerFrame);
         }
-        
-        public IEnumerator SubmitEntitiesAsync()
+
+        public IEnumerator<bool> SubmitEntitiesAsync() { return _enumerator; }
+
+        public IEnumerator<bool> SubmitEntitiesAsync(uint maxNumberOfOperations)
         {
-            if (paused == false)
+            EnginesRoot.EntitiesSubmitter entitiesSubmitter = _onTick.Value;
+            entitiesSubmitter.maxNumberOfOperationsPerFrame = maxNumberOfOperations;
+
+            while (true)
             {
-                var submitEntities = _onTick.Invoke(_maxNumberOfOperationsPerFrame);
-                
-                while (submitEntities.MoveNext())
-                    yield return null;
-            }
-        }
-        
-        public IEnumerator SubmitEntitiesAsync(uint maxNumberOfOperationsPerFrame)
-        {
-            if (paused == false)
-            {
-                var submitEntities = _onTick.Invoke(maxNumberOfOperationsPerFrame);
-                
-                while (submitEntities.MoveNext())
-                    yield return null;
+                if (paused == false)
+                {
+                    var entitiesSubmitterSubmitEntities = entitiesSubmitter.submitEntities;
+
+                    entitiesSubmitterSubmitEntities.MoveNext();
+
+                    if (entitiesSubmitterSubmitEntities.Current == true)
+                        yield return true;
+                    else
+                        yield return false;
+                }
             }
         }
 
         public void SubmitEntities()
         {
-            var enumerator = SubmitEntitiesAsync();
+            _enumerator.MoveNext();
 
-            while (enumerator.MoveNext());
+            while (_enumerator.Current == true)
+                _enumerator.MoveNext();
         }
 
-        public override bool paused                        { get; set; }
+        public override bool paused    { get; set; }
         public override void Dispose() { }
 
         protected internal override EnginesRoot.EntitiesSubmitter onTick
         {
             set
             {
-                DBC.ECS.Check.Require(_onTick.IsUnused, "a scheduler can be exclusively used by one enginesRoot only");
-                
+                DBC.ECS.Check.Require(_onTick == null, "a scheduler can be exclusively used by one enginesRoot only");
+
                 _onTick = value;
             }
         }
 
-        EnginesRoot.EntitiesSubmitter _onTick;
-        readonly uint                 _maxNumberOfOperationsPerFrame;
+        EnginesRoot.EntitiesSubmitter? _onTick;
+        readonly IEnumerator<bool>     _enumerator;
     }
 }

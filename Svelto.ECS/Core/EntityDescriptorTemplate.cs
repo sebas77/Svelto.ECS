@@ -2,7 +2,7 @@ using System;
 
 namespace Svelto.ECS
 {
-    static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
+    public static class EntityDescriptorTemplate<TType> where TType : IEntityDescriptor, new()
     {
         static EntityDescriptorTemplate()
         {

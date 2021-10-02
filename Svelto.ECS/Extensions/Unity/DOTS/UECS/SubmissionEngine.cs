@@ -5,18 +5,23 @@ using Unity.Jobs;
 
 namespace Svelto.ECS.Extensions.Unity
 {
-    public abstract class SubmissionEngine : SystemBase, IJobifiedEngine
+    public interface IUpdateBeforeSubmission
     {
-        public JobHandle Execute(JobHandle inputDeps)
-        {
-            Dependency = JobHandle.CombineDependencies(Dependency, inputDeps);
-            
-            OnUpdate();
-            
-            return Dependency; 
-        }
+        JobHandle BeforeSubmissionUpdate(JobHandle jobHandle);
+        string    name { get; }
+    }
 
+    public interface IUpdateAfterSubmission
+    {
+        JobHandle AfterSubmissionUpdate(JobHandle jobHandle);
+        string    name { get; }
+    }
+
+    public abstract class SubmissionEngine : SystemBase, IEngine
+    {
         public    EntityCommandBuffer ECB { get; internal set; }
+        
+        protected sealed override void OnUpdate() {}
 
         public string name => TypeToString.Name(this);
     }
