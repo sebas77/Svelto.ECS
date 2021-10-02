@@ -33,7 +33,7 @@ namespace Svelto.ECS.Internal
         void AddEntityToDictionary(EGID fromEntityGid, EGID toEntityID, ITypeSafeDictionary toGroup);
         void RemoveEntityFromDictionary(EGID fromEntityGid);
 
-        void SetCapacity(uint size);
+        void ResizeTo(uint size);
         void Trim();
         void Clear();
         void FastClear();

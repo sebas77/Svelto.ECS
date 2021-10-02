@@ -20,9 +20,9 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj"/>
-        <PackageReference Include="System.Memory" Version="4.5.2"/>
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0-preview8.19405.3"/>
-        <None Remove="**\*.meta"/>
+        <PackageReference Include="System.Memory" Version="4.5.2" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0-preview8.19405.3" />
+        <None Remove="**\*.meta" />
+        <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj" />
     </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Svelto.ECS</id>
-        <authors>sebas77</authors>
+        <authors>Sebastiano Mandala</authors>
         <version>$version$</version>
         <description>C# Lightweight Data Oriented Entity Component System Framework</description>
         <projectUrl>https://github.com/sebas77/Svelto.ECS</projectUrl>
