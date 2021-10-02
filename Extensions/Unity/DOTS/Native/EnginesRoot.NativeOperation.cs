@@ -5,21 +5,17 @@ using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
+using Svelto.ECS.Native;
 
 namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        //todo: I very likely don't need to create one for each native entity factory, the same can be reused
-        readonly AtomicNativeBags _nativeAddOperationQueue = new AtomicNativeBags(Common.Allocator.Persistent);
-        readonly AtomicNativeBags _nativeRemoveOperationQueue = new AtomicNativeBags(Common.Allocator.Persistent);
-        readonly AtomicNativeBags _nativeSwapOperationQueue = new AtomicNativeBags(Common.Allocator.Persistent);
-
         NativeEntityRemove ProvideNativeEntityRemoveQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
-            //DBC.ECS.Check.Require(EntityDescriptorTemplate<T>.descriptor.IsUnmanaged(), "can't remove entities with not native types");
+            //DBC.ECS.Check.Require(EntityDescriptorTemplate<T>.descriptor.isUnmanaged(), "can't remove entities with not native types");
             //todo: remove operation array and store entity descriptor hash in the return value
-            //todo I maybe able to provide a  _nativeSwap.SwapEntity<entityDescriptor> 
+            //todo I maybe able to provide a  _nativeSwap.SwapEntity<entityDescriptor>
             _nativeRemoveOperations.Add(new NativeOperationRemove(
                                             EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type
                                           , memberName));
@@ -29,7 +25,7 @@ namespace Svelto.ECS
 
         NativeEntitySwap ProvideNativeEntitySwapQueue<T>(string memberName) where T : IEntityDescriptor, new()
         {
-           // DBC.ECS.Check.Require(EntityDescriptorTemplate<T>.descriptor.IsUnmanaged(), "can't swap entities with not native types");
+           // DBC.ECS.Check.Require(EntityDescriptorTemplate<T>.descriptor.isUnmanaged(), "can't swap entities with not native types");
             //todo: remove operation array and store entity descriptor hash in the return value
             _nativeSwapOperations.Add(new NativeOperationSwap(EntityDescriptorTemplate<T>.descriptor.componentsToBuild
                                                             , TypeCache<T>.type, memberName));
@@ -44,14 +40,15 @@ namespace Svelto.ECS
             _nativeAddOperations.Add(
                 new NativeOperationBuild(EntityDescriptorTemplate<T>.descriptor.componentsToBuild, TypeCache<T>.type, memberName));
 
-            return new NativeEntityFactory(_nativeAddOperationQueue, _nativeAddOperations.count - 1);
+            return new NativeEntityFactory(_nativeAddOperationQueue, _nativeAddOperations.count - 1, _entityLocator);
         }
 
-        void NativeOperationSubmission(in PlatformProfiler profiler)
+        void FlushNativeOperations(in PlatformProfiler profiler)
         {
             using (profiler.Sample("Native Remove/Swap Operations"))
             {
                 var removeBuffersCount = _nativeRemoveOperationQueue.count;
+                //todo, I don't like that this scans all the queues even if they are empty
                 for (int i = 0; i < removeBuffersCount; i++)
                 {
                     ref var buffer = ref _nativeRemoveOperationQueue.GetBuffer(i);
@@ -105,18 +102,26 @@ namespace Svelto.ECS
                     {
                         var componentsIndex = buffer.Dequeue<uint>();
                         var egid            = buffer.Dequeue<EGID>();
+                        var reference       = buffer.Dequeue<EntityReference>();
                         var componentCounts = buffer.Dequeue<uint>();
-                        
+
+                        Check.Require((uint)egid.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
+
                         var componentBuilders    = _nativeAddOperations[componentsIndex].components;
+#if DEBUG && !PROFILE_SVELTO
                         var entityDescriptorType = _nativeAddOperations[componentsIndex].entityDescriptorType;
                         CheckAddEntityID(egid, entityDescriptorType, _nativeAddOperations[componentsIndex].caller);
+#endif
 
-                        Check.Require(egid.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
-
+                        _entityLocator.SetReference(reference, egid);
                         var dic = EntityFactory.BuildGroupedEntities(egid, _groupedEntityToAdd, componentBuilders
-                                                                   , null, entityDescriptorType);
+                                                                   , null
+#if DEBUG && !PROFILE_SVELTO
+                                                                   , entityDescriptorType
+#endif
+                                                                     );
 
-                        var init = new EntityInitializer(egid, dic);
+                        var init = new EntityInitializer(egid, dic, reference);
 
                         //only called if Init is called on the initialized (there is something to init)
                         while (componentCounts > 0)
@@ -126,7 +131,6 @@ namespace Svelto.ECS
                             var typeID = buffer.Dequeue<uint>();
 
                             IFiller entityBuilder = EntityComponentIDMap.GetTypeFromID(typeID);
-
                             //after the typeID, I expect the serialized component
                             entityBuilder.FillFromByteArray(init, buffer);
                         }
@@ -145,6 +149,11 @@ namespace Svelto.ECS
         FasterList<NativeOperationRemove> _nativeRemoveOperations;
         FasterList<NativeOperationSwap>   _nativeSwapOperations;
         FasterList<NativeOperationBuild>  _nativeAddOperations;
+        
+        //todo: I very likely don't need to create one for each native entity factory, the same can be reused
+        readonly AtomicNativeBags _nativeAddOperationQueue;
+        readonly AtomicNativeBags _nativeRemoveOperationQueue;
+        readonly AtomicNativeBags _nativeSwapOperationQueue;
     }
 
     readonly struct DoubleEGID

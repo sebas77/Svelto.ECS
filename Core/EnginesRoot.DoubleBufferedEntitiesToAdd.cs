@@ -42,6 +42,7 @@ namespace Svelto.ECS
                         }
                     }
                     
+                    //reset the number of entities created so far
                     otherEntitiesCreatedPerGroup.FastClear();
                     other.FastClear();
                     return;
@@ -74,22 +75,24 @@ namespace Svelto.ECS
                         }
                     }
 
+                    //reset the number of entities created so far
                     otherEntitiesCreatedPerGroup.FastClear();
                 }
             }
-
-            /// <summary>
-            /// To avoid extra allocation, I don't clear the dictionaries, so I need an extra data structure
-            /// to keep count of the number of entities submitted this frame
-            /// </summary>
-            internal FasterDictionary<ExclusiveGroupStruct, uint> currentEntitiesCreatedPerGroup;
-            internal FasterDictionary<ExclusiveGroupStruct, uint> otherEntitiesCreatedPerGroup;
-
+            
             //Before I tried for the third time to use a SparseSet instead of FasterDictionary, remember that
-            //while group indices are sequential, they may not be used in a sequential order. Sparaset needs
+            //while group indices are sequential, they may not be used in a sequential order. Sparseset needs
             //entities to be created sequentially (the index cannot be managed externally)
             internal FasterDictionary<uint, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> current;
             internal FasterDictionary<uint, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> other;
+
+            /// <summary>
+            /// To avoid extra allocation, I don't clear the groups, so I need an extra data structure
+            /// to keep count of the number of entities built this frame. At the moment the actual number
+            /// of entities built is not used
+            /// </summary>
+            FasterDictionary<ExclusiveGroupStruct, uint> currentEntitiesCreatedPerGroup;
+            FasterDictionary<ExclusiveGroupStruct, uint> otherEntitiesCreatedPerGroup;
 
             readonly FasterDictionary<uint, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
                 _entityComponentsToAddBufferA =
@@ -141,6 +144,45 @@ namespace Svelto.ECS
                         }
                     }
                 }
+            }
+
+            internal void IncrementEntityCount(ExclusiveGroupStruct groupID)
+            {
+                currentEntitiesCreatedPerGroup.GetOrCreate(groupID)++;
+            }
+
+            internal bool AnyEntityCreated()
+            {
+                return currentEntitiesCreatedPerGroup.count > 0;
+            }
+
+            internal bool AnyOtherEntityCreated()
+            {
+                return otherEntitiesCreatedPerGroup.count > 0;
+            }
+
+            internal void Preallocate
+                (ExclusiveGroupStruct groupID, uint numberOfEntities, IComponentBuilder[] entityComponentsToBuild)
+            {
+                void PreallocateDictionaries(FasterDictionary<uint, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> fasterDictionary1)
+                {
+                    FasterDictionary<RefWrapperType, ITypeSafeDictionary> group =
+                        fasterDictionary1.GetOrCreate((uint) groupID, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
+
+                    foreach (var componentBuilder in entityComponentsToBuild)
+                    {
+                        var entityComponentType = componentBuilder.GetEntityComponentType();
+                        var safeDictionary = @group.GetOrCreate(new RefWrapperType(entityComponentType)
+                                                             , () => componentBuilder.CreateDictionary(numberOfEntities));
+                        componentBuilder.Preallocate(safeDictionary, numberOfEntities);
+                    }
+                }
+
+                PreallocateDictionaries(current);
+                PreallocateDictionaries(other);
+
+                currentEntitiesCreatedPerGroup.GetOrCreate(groupID);
+                otherEntitiesCreatedPerGroup.GetOrCreate(groupID);
             }
         }
     }

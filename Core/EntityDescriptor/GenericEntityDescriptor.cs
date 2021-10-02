@@ -2,7 +2,7 @@
 {
     public abstract class GenericEntityDescriptor<T> : IEntityDescriptor where T : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _componentBuilders;
+        internal static readonly IComponentBuilder[] _componentBuilders;
         static GenericEntityDescriptor() { _componentBuilders = new IComponentBuilder[] {new ComponentBuilder<T>()}; }
 
         public IComponentBuilder[] componentsToBuild => _componentBuilders;
@@ -11,7 +11,7 @@
     public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor
         where T : struct,  IEntityComponent where U : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _componentBuilders;
+        internal static readonly IComponentBuilder[] _componentBuilders;
 
         static GenericEntityDescriptor()
         {
@@ -24,7 +24,7 @@
     public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor
         where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
     {
-        static readonly IComponentBuilder[] _componentBuilders;
+        internal static readonly IComponentBuilder[] _componentBuilders;
 
         static GenericEntityDescriptor()
         {

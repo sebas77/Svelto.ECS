@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Native
 {
     public readonly struct NativeEGIDMapper<T>:IEGIDMapper where T : unmanaged, IEntityComponent
     {
@@ -22,7 +22,7 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Entity(uint entityID)
         {
-#if DEBUG && !PROFILE_SVELTO
+#if DEBUG
             if (_map.TryFindIndex(entityID, out var findIndex) == false)
                 throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
@@ -56,7 +56,11 @@ namespace Svelto.ECS
                 return new NB<T>(_map.GetValues(out var count).ToNativeArray(out _), count);
             }
 
+#if DEBUG
             throw new ECSException("Entity not found");
+#else
+            return default;
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,7 +1,7 @@
 #if UNITY_NATIVE
 using Svelto.ECS.DataStructures;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Native
 {
     public readonly struct NativeEntityRemove
     {

@@ -33,15 +33,15 @@ namespace Svelto.ECS
                     if (*(bool*) _consumers[i].mustBeDisposed)
                     {
                         _consumers[i].Free();
-                        _consumers.UnorderedRemoveAt(i);
+                        _consumers.UnorderedRemoveAt((uint) i);
                         --i;
                         continue;
                     }
 
                     if (_consumers[i].hasGroup)
                     {
-                        if (egid.groupID == _consumers[i].@group) 
-                        _consumers[i].Enqueue(entity, egid);
+                        if (egid.groupID == _consumers[i].@group)
+                            _consumers[i].Enqueue(entity, egid);
                     }
                     else
                     {

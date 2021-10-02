@@ -78,8 +78,7 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-                var sizeOf   = MemoryUtilities.SizeOf<UnsafeBlob>();
-                var listData = (UnsafeBlob*) MemoryUtilities.Alloc((uint) sizeOf, allocator);
+                var listData = (UnsafeBlob*) MemoryUtilities.Alloc<UnsafeBlob>((uint) 1, allocator);
 
                 //clear to nullify the pointers
                 //MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
@@ -130,7 +129,7 @@ namespace Svelto.ECS.DataStructures
                 {
 #endif            
                 _queue->Dispose();
-                    MemoryUtilities.Free((IntPtr) _queue, _queue->allocator);
+                MemoryUtilities.Free((IntPtr) _queue, _queue->allocator);
                 _queue = null;
 #if ENABLE_THREAD_SAFE_CHECKS
                 }
@@ -151,6 +150,7 @@ namespace Svelto.ECS.DataStructures
 
                 var sizeOf = MemoryUtilities.SizeOf<T>();
                 if (_queue->space - sizeOf < 0)
+                    //Todo: NativeBag is very complicated. At the time of writing of this comment I don't remember if the sizeof really needs to be aligned by 4. To check and change this comment
                     _queue->Realloc((uint) ((_queue->capacity +  MemoryUtilities.Align4((uint) sizeOf)) * 2.0f));
 
 #if ENABLE_THREAD_SAFE_CHECKS
@@ -182,6 +182,7 @@ namespace Svelto.ECS.DataStructures
 #endif
                 var sizeOf = MemoryUtilities.SizeOf<T>();
                 if (_queue->space - sizeOf < 0)
+                    //Todo: NativeBag is very complicated. At the time of writing of this comment I don't remember if the sizeof really needs to be aligned by 4. To check and change this comment
                     _queue->Realloc((uint) ((_queue->capacity + MemoryUtilities.Align4((uint) sizeOf)) * 2.0f));
 
                 _queue->Write(item);
@@ -272,7 +273,7 @@ namespace Svelto.ECS.DataStructures
 #if ENABLE_THREAD_SAFE_CHECKS
         int _threadSentinel;
 #endif
-#if UNITY_NATIVE
+#if UNITY_COLLECTIONS
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe UnsafeBlob* _queue;

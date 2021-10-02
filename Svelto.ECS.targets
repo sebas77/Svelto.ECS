@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Reference Include="Svelto.ECS">
+      <HintPath Condition="'$(Optimize)'!='false'">$(MSBuildThisFileDirectory)../lib/Release/netstandard2.0/Svelto.ECS.dll</HintPath>
+      <HintPath Condition="'$(Optimize)'=='false'">$(MSBuildThisFileDirectory)../lib/Debug/netstandard2.0/Svelto.ECS.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

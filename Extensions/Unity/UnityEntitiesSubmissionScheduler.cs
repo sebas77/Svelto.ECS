@@ -1,7 +1,5 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
-using System;
 using Object = UnityEngine.Object;
-using System.Collections;
 using UnityEngine;
 
 namespace Svelto.ECS.Schedulers.Unity
@@ -10,37 +8,9 @@ namespace Svelto.ECS.Schedulers.Unity
     //You can customize the scheduler if you wish
     public class UnityEntitiesSubmissionScheduler : EntitiesSubmissionScheduler
     {
-        class Scheduler : MonoBehaviour
-        {
-            public Scheduler()
-            {
-                _coroutine = Coroutine();
-            }
-
-            void Update()
-            {
-                _coroutine.MoveNext();
-            }
-            
-            IEnumerator Coroutine()
-            {
-                while (true)
-                {
-                    yield return _wait;
-                    
-                    onTick();
-                }
-            }
-
-            readonly WaitForEndOfFrame _wait = new WaitForEndOfFrame();
-            readonly IEnumerator       _coroutine;
-            
-            public System.Action onTick;
-        }
-
         public UnityEntitiesSubmissionScheduler(string name)
         {
-            _scheduler = new GameObject(name).AddComponent<Scheduler>();
+            _scheduler = new GameObject(name).AddComponent<MonoScheduler>();
             GameObject.DontDestroyOnLoad(_scheduler.gameObject);
             _scheduler.onTick = SubmitEntities;
         }
@@ -59,8 +29,10 @@ namespace Svelto.ECS.Schedulers.Unity
         {
             if (paused == false)
             {
-                var enumerator = _onTick.Invoke(UInt32.MaxValue);
-                while (enumerator.MoveNext()) ;
+                var enumerator = _onTick.submitEntities;
+                enumerator.MoveNext();
+                    
+                while (enumerator.Current == true) enumerator.MoveNext();
             }
         }
 
@@ -69,7 +41,7 @@ namespace Svelto.ECS.Schedulers.Unity
             set => _onTick = value;
         }
 
-        readonly Scheduler       _scheduler;
+        readonly MonoScheduler        _scheduler;
         EnginesRoot.EntitiesSubmitter _onTick;
     }
 }

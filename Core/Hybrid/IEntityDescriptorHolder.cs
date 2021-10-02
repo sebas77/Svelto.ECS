@@ -1,4 +1,4 @@
-namespace Svelto.ECS
+namespace Svelto.ECS.Hybrid
 {
     public interface IEntityDescriptorHolder
     {

@@ -32,7 +32,7 @@ namespace Svelto.ECS
         const string NOT_FOUND_EXCEPTION =
             "<color=teal>Svelto.ECS</color> Implementor not found for an EntityComponent. ";
 
-        public static void FillEntityComponent<T>
+        public static void SetEntityViewComponentImplementors<T>
         (this IComponentBuilder componentBuilder, ref T entityComponent
        , FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> entityComponentBlazingFastReflection
        , IEnumerable<object> implementors
@@ -43,48 +43,44 @@ namespace Svelto.ECS
 #endif
        , Dictionary<Type, Type[]> cachedTypeInterfaces)
         {
-            //efficient way to collect the fields of every EntityComponentType
-            var setters = FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>.NoVirt.ToArrayFast(
-                    entityComponentBlazingFastReflection, out var count);
+            DBC.ECS.Check.Require(implementors != null, NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent "
+                                , componentBuilder
+                                 .GetEntityComponentType().ToString()));
             
-            //todo this should happen once per T, not once per Build<T>
-            if (implementors != null)
+            foreach (var implementor in implementors)
             {
-                foreach (var implementor in implementors)
+                DBC.ECS.Check.Require(implementor != null, "invalid null implementor used to build an entity");
                 {
-                    if (implementor != null)
+                    var type = implementor.GetType();
+
+                    //fetch all the interfaces that the implementor implements
+                    if (cachedTypeInterfaces.TryGetValue(type, out var interfaces) == false)
+                        interfaces = cachedTypeInterfaces[type] = type.GetInterfacesEx();
+
+                    for (var iindex = 0; iindex < interfaces.Length; iindex++)
                     {
-                        var type = implementor.GetType();
-
-                        if (cachedTypeInterfaces.TryGetValue(type, out var interfaces) == false)
-                            interfaces = cachedTypeInterfaces[type] = type.GetInterfacesEx();
-
-                        for (var iindex = 0; iindex < interfaces.Length; iindex++)
-                        {
-                            var componentType = interfaces[iindex];
+                        var componentType = interfaces[iindex];
+                        //an implementor can implement multiple interfaces, so for each interface we reference
+                        //the implementation object. Multiple entity view component fields can then be implemented
+                        //by the same implementor
 #if DEBUG && !PROFILE_SVELTO
-                            if (implementorsByType.TryGetValue(componentType, out var implementorData))
-                            {
-                                implementorData.numberOfImplementations++;
-                                implementorsByType[componentType] = implementorData;
-                            }
-                            else
-                                implementorsByType[componentType] = new ECSTuple<object, int>(implementor, 1);
+                        if (implementorsByType.TryGetValue(componentType, out var implementorData))
+                        {
+                            implementorData.numberOfImplementations++;
+                            implementorsByType[componentType] = implementorData;
+                        }
+                        else
+                            implementorsByType[componentType] = new ECSTuple<object, int>(implementor, 1);
 #else
                         implementorsByType[componentType] = implementor;
 #endif
-                        }
                     }
-#if DEBUG && !PROFILE_SVELTO
-                    else
-                    {
-                        Console.Log(NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent "
-                                                                    , componentBuilder
-                                                                     .GetEntityComponentType().ToString()));
-                    }
-#endif
                 }
             }
+
+            //efficient way to collect the fields of every EntityComponentType
+            var setters = FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>.NoVirt.ToArrayFast(
+                entityComponentBlazingFastReflection, out var count);
 
             for (var i = 0; i < count; i++)
             {

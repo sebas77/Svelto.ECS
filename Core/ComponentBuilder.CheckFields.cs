@@ -4,7 +4,6 @@ using System.Diagnostics;
 #endif
 using System;
 using System.Reflection;
-using Svelto.Common;
 
 namespace Svelto.ECS
 {
@@ -46,44 +45,40 @@ namespace Svelto.ECS
 
                 if (fields.Length < 1)
                 {
-                    ProcessError("No valid fields found in Entity View Components", entityComponentType);
+                    ProcessError("Entity View Components must have at least one interface declared as public field and not property", entityComponentType);
                 }
 
                 for (int i = fields.Length - 1; i >= 0; --i)
                 {
                     FieldInfo fieldInfo = fields[i];
 
-                    if (fieldInfo.FieldType.IsInterfaceEx() == true)
+                    if (fieldInfo.FieldType.IsInterfaceEx() == false)
                     {
-                        PropertyInfo[] properties = fieldInfo.FieldType.GetProperties(
-                            BindingFlags.Public | BindingFlags.Instance
-                                                | BindingFlags.DeclaredOnly);
+                        ProcessError("Entity View Components must hold only entity components interfaces."
+                                   , entityComponentType);
+                    }
 
-                        for (int j = properties.Length - 1; j >= 0; --j)
+                    PropertyInfo[] properties = fieldInfo.FieldType.GetProperties(
+                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                    for (int j = properties.Length - 1; j >= 0; --j)
+                    {
+                        if (properties[j].PropertyType.IsGenericType)
                         {
-                            if (properties[j].PropertyType.IsGenericType)
+                            Type genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
+                            if (genericTypeDefinition == RECATIVEVALUETYPE)
                             {
-                                Type genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
-                                if (genericTypeDefinition == DISPATCHONSETTYPE
-                                 || genericTypeDefinition == DISPATCHONCHANGETYPE)
-                                {
-                                    continue;
-                                }
+                                continue;
                             }
+                        }
 
-                            Type propertyType = properties[j].PropertyType;
-
+                        Type propertyType = properties[j].PropertyType;
+                        if (propertyType != STRINGTYPE)
+                        {
                             //for EntityComponentStructs, component fields that are structs that hold strings
                             //are allowed
                             SubCheckFields(propertyType, entityComponentType, isStringAllowed: true);
                         }
-                    }
-                    else
-                    if (fieldInfo.FieldType.IsUnmanagedEx() == false)
-                    {
-                        ProcessError("Entity View Components must hold only public interfaces, strings or unmanaged type fields.",
-                                     entityComponentType);
-
                     }
                 }
             }
@@ -129,8 +124,7 @@ namespace Svelto.ECS
             throw new ECSException(message, entityComponentType);
         }
 
-        static readonly Type DISPATCHONCHANGETYPE       = typeof(DispatchOnChange<>);
-        static readonly Type DISPATCHONSETTYPE          = typeof(DispatchOnSet<>);
+        static readonly Type RECATIVEVALUETYPE       = typeof(ReactiveValue<>);
         static readonly Type EGIDType                   = typeof(EGID);
         static readonly Type EXCLUSIVEGROUPSTRUCTTYPE   = typeof(ExclusiveGroupStruct);
         static readonly Type SERIALIZABLE_ENTITY_STRUCT = typeof(SerializableEntityComponent);

@@ -17,9 +17,19 @@ namespace Svelto.ECS
             return new ExclusiveBuildGroup(group);
         }
         
-        public static implicit operator uint(ExclusiveBuildGroup groupStruct)
+        public static implicit operator ExclusiveGroupStruct(ExclusiveBuildGroup group)
         {
-            return groupStruct.group;
+            return new ExclusiveGroupStruct(group.group);
+        }
+        
+        public static explicit operator uint(ExclusiveBuildGroup groupStruct)
+        {
+            return (uint) groupStruct.@group;
+        }
+        
+        public override string ToString()
+        {
+            return this.group.ToName();
         }
 
         internal ExclusiveGroupStruct @group { get; }

@@ -11,9 +11,11 @@ namespace Svelto.ECS.Extensions.Unity
     /// with UECS. However this is designed to make it work almost out of the box, but it should be eventually
     /// substituted by project customized code.
     /// This is a JobifiedEngine and as such it expect to be ticked. Normally it must be executed in a
-    /// SortedEnginesGroup as step that happens after the Svelto jobified engines run. The flow should be:
-    /// Svelto Engines Run
-    /// This Engine runs, which causeS:
+    /// SortedEnginesGroup as step that happens after the Svelto jobified engines run.
+    ///
+    /// The flow should be:
+    /// Svelto (GameLogic) Engines Run first
+    /// Then this Engine runs, which causes:
     /// Jobs to be completed (it's a sync point)
     /// Synchronizations engines to be executed (Svelto to UECS)
     /// Submission of Entities to be executed
@@ -44,8 +46,10 @@ namespace Svelto.ECS.Extensions.Unity
 
             //This is the UECS group that takes care of all the UECS systems that creates entities
             //it also submits Svelto entities
-            _sveltoUecsEntitiesSubmissionGroup = new SveltoUECSEntitiesSubmissionGroup(scheduler, world);
+            _sveltoUecsEntitiesSubmissionGroup = new SveltoUECSEntitiesSubmissionGroup(scheduler);
             //This is the group that handles the UECS sync systems that copy the svelto entities values to UECS entities
+            enginesRoot.AddEngine(_sveltoUecsEntitiesSubmissionGroup);
+            world.AddSystem(_sveltoUecsEntitiesSubmissionGroup);
             _syncSveltoToUecsGroup = new SyncSveltoToUECSGroup();
             enginesRoot.AddEngine(_syncSveltoToUecsGroup);
             _syncUecsToSveltoGroup = new SyncUECSToSveltoGroup();
@@ -74,10 +78,10 @@ namespace Svelto.ECS.Extensions.Unity
             return _syncUecsToSveltoGroup.Execute(handle);
         }
 
-        public void AddUECSSubmissionEngine(SubmissionEngine spawnUnityEntityOnSveltoEntityEngine)
+        public void AddUECSSubmissionEngine(SubmissionEngine submissionEngine)
         {
-            _sveltoUecsEntitiesSubmissionGroup.Add(spawnUnityEntityOnSveltoEntityEngine);
-            _enginesRoot.AddEngine(spawnUnityEntityOnSveltoEntityEngine);
+            _sveltoUecsEntitiesSubmissionGroup.Add(submissionEngine);
+            _enginesRoot.AddEngine(submissionEngine);
         }
 
         public void AddSveltoToUECSEngine(SyncSveltoToUECSEngine engine)
