@@ -364,15 +364,15 @@ namespace Svelto.ECS.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetCapacity(uint size)
+        public void ResizeTo(uint size)
         {
             if (isUnmanaged)
             {
-                implUnmgd.ExpandTo(size);
+                implUnmgd.ResizeTo(size);
             }
             else
             {
-                implMgd.ExpandTo(size);
+                implMgd.ResizeTo(size);
             }
         }
 

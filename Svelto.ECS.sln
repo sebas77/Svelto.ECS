@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.Common", "Svelto.Common\Svelto.Common.csproj", "{85590169-907B-46E7-8409-100FF08ACFCF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.ECS", "Svelto.ECS\Svelto.ECS.csproj", "{11637B78-CB8A-4F32-A1CF-6D82719B5CD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{85590169-907B-46E7-8409-100FF08ACFCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85590169-907B-46E7-8409-100FF08ACFCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85590169-907B-46E7-8409-100FF08ACFCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85590169-907B-46E7-8409-100FF08ACFCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11637B78-CB8A-4F32-A1CF-6D82719B5CD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11637B78-CB8A-4F32-A1CF-6D82719B5CD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11637B78-CB8A-4F32-A1CF-6D82719B5CD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11637B78-CB8A-4F32-A1CF-6D82719B5CD6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
