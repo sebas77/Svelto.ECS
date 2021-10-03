@@ -222,6 +222,7 @@ namespace Svelto.ECS
         }
 
         internal LocatorMap entityLocator => _entityLocator;
+        
         LocatorMap          _entityLocator;
     }
 }

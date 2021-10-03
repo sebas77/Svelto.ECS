@@ -148,6 +148,8 @@ namespace Svelto.ECS
             readonly EntitiesDB          _entitiesDB;
         }
 
+        //todo: there is a steep cost to pay to copy these structs, one day I may need to investigate this more.
+        //the structs are quite big, in the order of 100+ bytes.
         public GroupsIterator GetEnumerator() { return new GroupsIterator(_db, _groups); }
 
         readonly EntitiesDB                                    _db;
