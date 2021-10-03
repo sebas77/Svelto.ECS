@@ -72,7 +72,7 @@ namespace Svelto.ECS.DataStructures
             }
         }
         
-#if UNITY_COLLECTIONS
+#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
         [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         NativeBag* _data;

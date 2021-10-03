@@ -3,6 +3,8 @@
         <AssemblyName>Svelto.ECS</AssemblyName>
         <LangVersion>8</LangVersion>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <Company>Svelto</Company>
+        <AssemblyVersion>3.2.1</AssemblyVersion>
     </PropertyGroup>
     <PropertyGroup>
         <PackageId>Svelto.ECS</PackageId>
@@ -23,6 +25,6 @@
         <PackageReference Include="System.Memory" Version="4.5.2" />
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0-preview8.19405.3" />
         <None Remove="**\*.meta" />
-        <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj" />
+        <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" />
     </ItemGroup>
 </Project>

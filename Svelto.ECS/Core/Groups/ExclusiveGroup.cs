@@ -18,20 +18,19 @@ namespace Svelto.ECS
     ///     public static ExclusiveGroup[] GroupOfGroups = { MyExclusiveGroup1, ...}; //for each on this!
     /// }
     /// </summary>
-
     ///To debug it use in your debug window: Svelto.ECS.Debugger.EGID.GetGroupNameFromId(groupID)
     public sealed class ExclusiveGroup
     {
-        public const           uint                 MaxNumberOfExclusiveGroups = 2 << 20;
+        public const uint MaxNumberOfExclusiveGroups = 2 << 20;
 
         public ExclusiveGroup(ExclusiveGroupBitmask bitmask = 0)
         {
-            _group = ExclusiveGroupStruct.Generate((byte)bitmask);
+            _group = ExclusiveGroupStruct.Generate((byte) bitmask);
         }
 
         public ExclusiveGroup(string recognizeAs, ExclusiveGroupBitmask bitmask = 0)
         {
-            _group = ExclusiveGroupStruct.Generate((byte)bitmask);
+            _group = ExclusiveGroupStruct.Generate((byte) bitmask);
 
             _knownGroups.Add(recognizeAs, _group);
         }
@@ -66,13 +65,13 @@ namespace Svelto.ECS
             return (uint) @group._group;
         }
 
-        public static ExclusiveGroupStruct operator+(ExclusiveGroup a, uint b)
+        public static ExclusiveGroupStruct operator +(ExclusiveGroup a, uint b)
         {
 #if DEBUG
             if (a._range == 0)
-                throw new ECSException($"Adding values to a not ranged ExclusiveGroup: {(uint)a}");
+                throw new ECSException($"Adding values to a not ranged ExclusiveGroup: {(uint) a}");
             if (b >= a._range)
-                throw new ECSException($"Using out of range group: {(uint)a} + {b}");
+                throw new ECSException($"Using out of range group: {(uint) a} + {b}");
 #endif
             return a._group + b;
         }
@@ -91,8 +90,8 @@ namespace Svelto.ECS
             return _group.ToString();
         }
 
-        static readonly Dictionary<string, ExclusiveGroupStruct> _knownGroups = new Dictionary<string,
-            ExclusiveGroupStruct>();
+        static readonly Dictionary<string, ExclusiveGroupStruct> _knownGroups =
+            new Dictionary<string, ExclusiveGroupStruct>();
 
 #if DEBUG
         readonly ushort _range;

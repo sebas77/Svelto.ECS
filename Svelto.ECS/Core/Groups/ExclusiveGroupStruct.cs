@@ -122,6 +122,8 @@ namespace Svelto.ECS
 
         internal ExclusiveGroupStruct(uint groupID):this()
         {
+            DBC.ECS.Check.Require(groupID < 0xFFFFFF);
+            
             _id = groupID;
         }
 

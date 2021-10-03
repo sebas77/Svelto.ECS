@@ -77,7 +77,7 @@ namespace Svelto.ECS
             if(_groupsByHash.ContainsKey(nameHash))
                 throw new ECSException($"Group hash collision with {name} and {_groupsByHash[nameHash]}");
             
-            Console.LogDebug($"Reigstering group {name} with ID {(uint)exclusiveGroupStruct} to {nameHash}");
+            Console.LogDebug($"Registering group {name} with ID {(uint)exclusiveGroupStruct} to {nameHash}");
             
             _groupsByHash.Add(nameHash, exclusiveGroupStruct);
             _hashByGroups.Add(exclusiveGroupStruct, nameHash);

@@ -21,7 +21,7 @@ namespace Svelto.ECS.Hybrid
 
         public ValueReference(T obj) { _pointer = GCHandle.Alloc(obj, GCHandleType.Normal); }
 
-        public W Convert<W>(W implementer) where W:T, new()
+        public W Convert<W>(W implementer) where W:T
         {
             var pointerTarget = _pointer.Target;
             return (W)pointerTarget;
