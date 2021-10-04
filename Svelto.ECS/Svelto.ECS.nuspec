@@ -14,7 +14,7 @@
     </metadata>
     <files>
         <file src="Svelto.ECS.targets" target="build/" />
-        <file src="../bin/debug/Svelto.ECS.dll" target="lib/Debug/netstandard2.0/" />
-        <file src="../bin/release/Svelto.ECS.dll" target="lib/Release/netstandard2.0/" />
+        <file src="../temp/bin/debug/Svelto.ECS.dll" target="lib/Debug/netstandard2.0/" />
+        <file src="../temp/bin/release/Svelto.ECS.dll" target="lib/Release/netstandard2.0/" />
     </files>
 </package>
