@@ -1,3 +1,3 @@
 [submodule "Svelto.Common"]
-	path = Svelto.Common
+	path = com.sebaslab.svelto.common
 	url = https://github.com/sebas77/Svelto.Common
