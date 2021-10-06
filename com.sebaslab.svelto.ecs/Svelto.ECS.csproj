@@ -33,7 +33,6 @@
         <PackageReference Include="System.Memory" Version="4.5.2" />
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0" />
         <None Remove="**\*.meta" />
-        <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" />
-        <ProjectReference Include="..\Svelto.Common\Svelto.Common.csproj" /> <!-- Do not delete. Used for nuget packing -->
+        <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" /> <!-- Do not delete. Used for nuget packing -->
     </ItemGroup>
 </Project>

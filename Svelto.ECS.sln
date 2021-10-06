@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.Common", "Svelto.Common\Svelto.Common.csproj", "{85590169-907B-46E7-8409-100FF08ACFCF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.Common", "com.sebaslab.svelto.common\Svelto.Common.csproj", "{85590169-907B-46E7-8409-100FF08ACFCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.ECS", "Svelto.ECS\Svelto.ECS.csproj", "{11637B78-CB8A-4F32-A1CF-6D82719B5CD6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Svelto.ECS", "com.sebaslab.svelto.ecs\Svelto.ECS.csproj", "{11637B78-CB8A-4F32-A1CF-6D82719B5CD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

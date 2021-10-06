@@ -7,3 +7,7 @@ Svelto.ECS/obj/
 Svelto.ECS/.idea/
 .idea/
 Svelto.ECS/bin/
+com.sebaslab.svelto.ecs/obj/
+.vs/Svelto.ECS/DesignTimeBuild/.dtbcache.v2
+.vs/Svelto.ECS/v16/.suo
+com.sebaslab.svelto.ecs/bin/
