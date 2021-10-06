@@ -26,7 +26,7 @@ namespace Svelto.ECS
         {
             CheckAddEntityID(entityID, descriptorType);
 
-            DBC.ECS.Check.Require((uint)entityID.groupID != 0
+            DBC.ECS.Check.Require(entityID.groupID.isInvalid == false
                         , "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
 
             var reference = _entityLocator.ClaimReference();
@@ -152,7 +152,7 @@ namespace Svelto.ECS
                 var wrapper = new RefWrapperType(entityComponentType);
 
                 ITypeSafeDictionary fromTypeSafeDictionary =
-                    GetTypeSafeDictionary((uint) entityGID.groupID, fromGroup, wrapper);
+                    GetTypeSafeDictionary(entityGID.groupID, fromGroup, wrapper);
 
 #if DEBUG && !PROFILE_SVELTO
                 if (fromTypeSafeDictionary.Has(entityGID.entityID) == false)
@@ -176,7 +176,7 @@ namespace Svelto.ECS
             {
                 //add all the entities
                 var refWrapper             = new RefWrapperType(entityComponentType);
-                var fromTypeSafeDictionary = GetTypeSafeDictionary((uint) entityGID.groupID, fromGroup, refWrapper);
+                var fromTypeSafeDictionary = GetTypeSafeDictionary(entityGID.groupID, fromGroup, refWrapper);
 
                 ITypeSafeDictionary toEntitiesDictionary = null;
                 if (toGroup != null)
@@ -201,7 +201,7 @@ namespace Svelto.ECS
             using (sampler.Sample("RemoveEntityFromDictionary"))
             {
                 var refWrapper             = new RefWrapperType(entityComponentType);
-                var fromTypeSafeDictionary = GetTypeSafeDictionary((uint) entityGID.groupID, fromGroup, refWrapper);
+                var fromTypeSafeDictionary = GetTypeSafeDictionary(entityGID.groupID, fromGroup, refWrapper);
 
                 fromTypeSafeDictionary.RemoveEntityFromDictionary(entityGID);
             }
@@ -224,7 +224,7 @@ namespace Svelto.ECS
                 FasterDictionary<RefWrapperType, ITypeSafeDictionary> fromGroup = GetDBGroup(fromIdGroupId);
                 FasterDictionary<RefWrapperType, ITypeSafeDictionary> toGroup   = GetOrCreateDBGroup(toGroupId);
 
-                _entityLocator.UpdateAllGroupReferenceLocators(fromIdGroupId, (uint) toGroupId);
+                _entityLocator.UpdateAllGroupReferenceLocators(fromIdGroupId, toGroupId);
 
                 foreach (var dictionaryOfEntities in fromGroup)
                 {
@@ -235,12 +235,11 @@ namespace Svelto.ECS
                     var groupsOfEntityType = _groupsPerEntity[dictionaryOfEntities.Key];
                     var groupOfEntitiesToCopyAndClear = groupsOfEntityType[fromIdGroupId];
 
-                    toEntitiesDictionary.AddEntitiesFromDictionary(groupOfEntitiesToCopyAndClear, (uint) toGroupId, this);
+                    toEntitiesDictionary.AddEntitiesFromDictionary(groupOfEntitiesToCopyAndClear, toGroupId, this);
 
                     //call all the MoveTo callbacks
                     dictionaryOfEntities.Value.ExecuteEnginesAddOrSwapCallbacks(_reactiveEnginesSwap
-                      , dictionaryOfEntities.Value, new ExclusiveGroupStruct(fromIdGroupId)
-                      , new ExclusiveGroupStruct(toGroupId), profiler);
+                      , dictionaryOfEntities.Value, fromIdGroupId, toGroupId, profiler);
 
                     //todo: if it's unmanaged, I can use fastclear
                     groupOfEntitiesToCopyAndClear.Clear();
@@ -254,7 +253,7 @@ namespace Svelto.ECS
             if (_groupEntityComponentsDB.TryGetValue(fromIdGroupId
                                                    , out FasterDictionary<RefWrapperType, ITypeSafeDictionary>
                                                          fromGroup) == false)
-                throw new ECSException("Group doesn't exist: ".FastConcat((uint) fromIdGroupId));
+                throw new ECSException("Group doesn't exist: ".FastConcat(fromIdGroupId.ToName()));
 
             return fromGroup;
         }
@@ -289,11 +288,11 @@ namespace Svelto.ECS
         }
 
         static ITypeSafeDictionary GetTypeSafeDictionary
-            (uint groupID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> @group, RefWrapperType refWrapper)
+            (ExclusiveGroupStruct groupID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> @group, RefWrapperType refWrapper)
         {
             if (@group.TryGetValue(refWrapper, out ITypeSafeDictionary fromTypeSafeDictionary) == false)
             {
-                throw new ECSException("no group found: ".FastConcat(groupID));
+                throw new ECSException("no group found: ".FastConcat(groupID.ToName()));
             }
 
             return fromTypeSafeDictionary;
@@ -308,7 +307,7 @@ namespace Svelto.ECS
                 foreach (var dictionaryOfEntities in dictionariesOfEntities)
                 {
                     dictionaryOfEntities.Value.ExecuteEnginesRemoveCallbacks(_reactiveEnginesAddRemove, profiler
-                                                                           , new ExclusiveGroupStruct(groupID));
+                                                                           , groupID);
                     dictionaryOfEntities.Value.FastClear();
 
                     var groupsOfEntityType = _groupsPerEntity[dictionaryOfEntities.Key];

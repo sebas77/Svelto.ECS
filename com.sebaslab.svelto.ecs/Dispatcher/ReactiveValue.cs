@@ -39,8 +39,7 @@ namespace Svelto.ECS
         {
             set
             {
-                if (_notifyOnChange == ReactiveType.ReactOnSet || 
-                    EqualityComparer<T>.Default.Equals(_value) == false)
+                if (_notifyOnChange == ReactiveType.ReactOnSet || _comp.Equals(_value, value) == false)
                 {
                     if (_paused == false)
                         _subscriber(_senderID, value);
@@ -82,11 +81,12 @@ namespace Svelto.ECS
             _paused     = true;
         }
 
-        readonly ReactiveType      _notifyOnChange;
-        readonly EntityReference   _senderID;
-        bool                       _paused;
-        Action<EntityReference, T> _subscriber;
-        T                          _value;
+        readonly ReactiveType        _notifyOnChange;
+        readonly EntityReference     _senderID;
+        bool                         _paused;
+        Action<EntityReference, T>   _subscriber;
+        T                            _value;
+        static readonly EqualityComparer<T> _comp = EqualityComparer<T>.Default;
     }
 
     public enum ReactiveType

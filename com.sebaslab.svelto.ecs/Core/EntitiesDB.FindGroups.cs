@@ -61,7 +61,7 @@ namespace Svelto.ECS
                     //if the same group is found used with both T1 and T2
                     if (groupID == fasterDictionaryNodes2[j].key)
                     {
-                        result.Add(new ExclusiveGroupStruct(groupID));
+                        result.Add(groupID);
                         break;
                     }
                 }

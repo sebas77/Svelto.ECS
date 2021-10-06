@@ -29,7 +29,7 @@ namespace Svelto.ECS
                        .FastConcat(" previous operation was: ")
                        .FastConcat(_multipleOperationOnSameEGIDChecker[egid] == 1 ? "add" : "remove"));
 
-            if (_idChecker.TryGetValue((uint) egid.groupID, out var hash))
+            if (_idChecker.TryGetValue(egid.groupID, out var hash))
                 if (hash.Contains(egid.entityID) == false)
                     throw new ECSException("Trying to remove an Entity never submitted in the database "
                                           .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID)
@@ -57,7 +57,7 @@ namespace Svelto.ECS
                        .FastConcat(" previous operation was: ")
                        .FastConcat(_multipleOperationOnSameEGIDChecker[egid] == 1 ? "add" : "remove"));
 
-            var hash = _idChecker.GetOrCreate((uint) egid.groupID, () => new HashSet<uint>());
+            var hash = _idChecker.GetOrCreate(egid.groupID, () => new HashSet<uint>());
             if (hash.Contains(egid.entityID) == true)
                 throw new ECSException("Trying to add an Entity already submitted to the database "
                                       .FastConcat(" caller: ", caller, " ").FastConcat(egid.entityID)
@@ -67,13 +67,12 @@ namespace Svelto.ECS
                                                       : "not available"));
             hash.Add(egid.entityID);
             _multipleOperationOnSameEGIDChecker.Add(egid, 1);
-            
         }
 
 #if DONT_USE
         [Conditional("CHECK_ALL")]
 #endif
-        void RemoveGroupID(ExclusiveBuildGroup groupID) { _idChecker.Remove((uint)groupID); }
+        void RemoveGroupID(ExclusiveBuildGroup groupID) { _idChecker.Remove(groupID); }
 
 #if DONT_USE
         [Conditional("CHECK_ALL")]
@@ -81,6 +80,6 @@ namespace Svelto.ECS
         void ClearChecks() { _multipleOperationOnSameEGIDChecker.FastClear(); }
 
         readonly FasterDictionary<EGID, uint> _multipleOperationOnSameEGIDChecker = new FasterDictionary<EGID, uint>();
-        readonly FasterDictionary<uint, HashSet<uint>> _idChecker = new FasterDictionary<uint, HashSet<uint>>();
+        readonly FasterDictionary<ExclusiveGroupStruct, HashSet<uint>> _idChecker = new FasterDictionary<ExclusiveGroupStruct, HashSet<uint>>();
     }
 }

@@ -97,7 +97,7 @@ namespace Svelto.ECS
                                 //each group is indexed by entity view type. for each type there is a dictionary indexed by entityID
                                 foreach (var groupToSubmit in _groupedEntityToAdd.other)
                                 {
-                                    var groupID = new ExclusiveGroupStruct(groupToSubmit.Key);
+                                    var groupID = groupToSubmit.Key;
                                     var groupDB = GetOrCreateDBGroup(groupID);
 
                                     //add the entityComponents in the group
@@ -111,7 +111,7 @@ namespace Svelto.ECS
                                             groupID, groupDB, wrapper, targetTypeSafeDictionary);
 
                                         //Fill the DB with the entity components generated this frame.
-                                        dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, (uint) groupID, this);
+                                        dbDic.AddEntitiesFromDictionary(targetTypeSafeDictionary, groupID, this);
                                     }
                                 }
                             }
@@ -122,7 +122,7 @@ namespace Svelto.ECS
                             {
                                 foreach (var groupToSubmit in _groupedEntityToAdd.other)
                                 {
-                                    var groupID = new ExclusiveGroupStruct(groupToSubmit.Key);
+                                    var groupID = groupToSubmit.Key;
                                     var groupDB = GetDBGroup(groupID);
 //entityComponentsToSubmit is the array of components found in the groupID per component type. 
 //if there are N entities to submit, and M components type to add for each entity, this foreach will run NxM times. 
@@ -131,8 +131,7 @@ namespace Svelto.ECS
                                         var realDic = groupDB[new RefWrapperType(entityComponentsToSubmit.Key)];
 
                                         entityComponentsToSubmit.Value.ExecuteEnginesAddOrSwapCallbacks(
-                                            _reactiveEnginesAddRemove, realDic, null, new ExclusiveGroupStruct(groupID)
-                                          , in profiler);
+                                            _reactiveEnginesAddRemove, realDic, null, groupID, in profiler);
 
                                         numberOfOperations += entityComponentsToSubmit.Value.count;
 

@@ -28,11 +28,11 @@ namespace Svelto.ECS.Internal
         static FasterDictionary<RefWrapperType, ITypeSafeDictionary> FetchEntityGroup
             (ExclusiveGroupStruct groupID, EnginesRoot.DoubleBufferedEntitiesToAdd groupEntityComponentsByType)
         {
-            if (groupEntityComponentsByType.current.TryGetValue((uint) groupID, out var group) == false)
+            if (groupEntityComponentsByType.current.TryGetValue(groupID, out var group) == false)
             {
                 group = new FasterDictionary<RefWrapperType, ITypeSafeDictionary>();
 
-                groupEntityComponentsByType.current.Add((uint) groupID, group);
+                groupEntityComponentsByType.current.Add(groupID, group);
             }
 
             //track the number of entities created so far in the group.
@@ -49,9 +49,9 @@ namespace Svelto.ECS.Internal
 #endif
         )
         {
-#if DEBUG && !PROFILE_SVELTO            
+#if DEBUG && !PROFILE_SVELTO
             DBC.ECS.Check.Require(componentBuilders != null, $"Invalid Entity Descriptor {descriptorType}");
-#endif            
+#endif
             var numberOfComponents = componentBuilders.Length;
 
 #if DEBUG && !PROFILE_SVELTO
@@ -81,7 +81,9 @@ namespace Svelto.ECS.Internal
                               , IComponentBuilder componentBuilder, IEnumerable<object> implementors)
         {
             var entityComponentType = componentBuilder.GetEntityComponentType();
-            var safeDictionary = group.GetOrCreate(new RefWrapperType(entityComponentType), (ref IComponentBuilder cb) => cb.CreateDictionary(1), ref componentBuilder);
+            var safeDictionary = group.GetOrCreate(new RefWrapperType(entityComponentType)
+                                                 , (ref IComponentBuilder cb) => cb.CreateDictionary(1)
+                                                 , ref componentBuilder);
 
             //if the safeDictionary hasn't been created yet, it will be created inside this method. 
             componentBuilder.BuildEntityAndAddToList(safeDictionary, entityID, implementors);

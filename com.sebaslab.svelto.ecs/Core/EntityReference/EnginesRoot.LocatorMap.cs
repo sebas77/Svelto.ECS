@@ -129,7 +129,7 @@ namespace Svelto.ECS
                 _egidToReferenceMap.Remove(groupId);
             }
 
-            internal void UpdateAllGroupReferenceLocators(ExclusiveGroupStruct fromGroupId, uint toGroupId)
+            internal void UpdateAllGroupReferenceLocators(ExclusiveGroupStruct fromGroupId, ExclusiveGroupStruct toGroupId)
             {
                 if (_egidToReferenceMap.TryGetValue(fromGroupId, out var groupMap) == false)
                     return;

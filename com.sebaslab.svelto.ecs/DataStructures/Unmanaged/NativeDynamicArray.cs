@@ -377,8 +377,11 @@ namespace Svelto.ECS.DataStructures
             }
         }
         
-#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
-        [global::Unity.Burst.NoAlias] [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+#if UNITY_COLLECTIONS || UNITY_JOBS
+#if UNITY_BURST        
+        [global::Unity.Burst.NoAlias]
+#endif       
+        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe UnsafeArray* _list;
 #if DEBUG && !PROFILE_SVELTO

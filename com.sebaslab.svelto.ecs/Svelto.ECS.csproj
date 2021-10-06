@@ -30,8 +30,8 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="System.Memory" Version="4.5.2" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0" />
+        <PackageReference Include="System.Memory" Version="4.5.4" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
         <None Remove="**\*.meta" />
         <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" /> <!-- Do not delete. Used for nuget packing -->
     </ItemGroup>
