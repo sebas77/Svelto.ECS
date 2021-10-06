@@ -10,13 +10,13 @@ on:
     branches:
       - master
     paths:
-      - Svelto.ECS/version.json
+      - com.sebaslab.svelto.ecs/version.json
 
 jobs:
   build:
     env:
       PKG_NAME: Svelto.ECS
-      ECS_VERSION_JSON: Svelto.ECS/version.json
+      ECS_VERSION_JSON: com.sebaslab.svelto.ecs/version.json
 
     runs-on: ubuntu-latest
 
@@ -34,7 +34,7 @@ jobs:
     
     # Build for Debug
     - name: create package for Debug configuration
-      run: dotnet pack /p:PackageVersion=1.0.0 -o temp/bin/debug Svelto.ECS/Svelto.ECS.csproj -c Debug
+      run: dotnet pack /p:PackageVersion=1.0.0 -o temp/bin/debug com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Debug
 
     - name: unzip debug nuget package
       run: unzip temp/bin/debug/Svelto.ECS.1.0.0.nupkg -d temp/bin/debug
@@ -44,7 +44,7 @@ jobs:
 
     # Build for Release
     - name: create package for Release configuration
-      run: dotnet pack /p:PackageVersion=1.0.0 -o temp/bin/release Svelto.ECS/Svelto.ECS.csproj -c Release
+      run: dotnet pack /p:PackageVersion=1.0.0 -o temp/bin/release com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Release
 
     - name: unzip release nuget package
       run: unzip temp/bin/release/Svelto.ECS.1.0.0.nupkg -d temp/bin/release
@@ -57,7 +57,7 @@ jobs:
       run: python3 upm-preparator/version.py --version-file "${ECS_VERSION_JSON}" --env-file "${GITHUB_ENV}"
 
     - name: build nuget package
-      run: sudo dotnet pack /p:PackageVersion=${PKG_VERSION} -o . Svelto.ECS/Svelto.ECS.csproj -c NugetPack
+      run: sudo dotnet pack /p:PackageVersion=${PKG_VERSION} -o . com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c NugetPack
 
     - name: publish nuget package
       run: dotnet nuget push ${{ env.PKG_NAME }}.${{ env.PKG_VERSION }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
