@@ -15,7 +15,7 @@ on:
 jobs:
   build:
     env:
-      PKG_ROOT: Svelto.ECS
+      PKG_ROOT: com.sebaslab.svelto.ecs
       VERSION_JSON: com.sebaslab.svelto.ecs/version.json
       PKG_JSON: com.sebaslab.svelto.ecs/package.json
       LICENSE: LICENSE
