@@ -105,7 +105,7 @@ namespace Svelto.ECS
                         var reference       = buffer.Dequeue<EntityReference>();
                         var componentCounts = buffer.Dequeue<uint>();
 
-                        Check.Require((uint)egid.groupID != 0, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
+                        Check.Require(egid.groupID.isInvalid == false, "invalid group detected, are you using new ExclusiveGroupStruct() instead of new ExclusiveGroup()?");
 
                         var componentBuilders    = _nativeAddOperations[componentsIndex].components;
 #if DEBUG && !PROFILE_SVELTO

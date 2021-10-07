@@ -1,14 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <AssemblyName>Svelto.ECS</AssemblyName>
         <LangVersion>8</LangVersion>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Company>Svelto</Company>
         <AssemblyVersion>3.2.1</AssemblyVersion>
+        <PackageVersion>3.2.1</PackageVersion>
     </PropertyGroup>
     <PropertyGroup>
         <PackageId>Svelto.ECS</PackageId>
-        <Authors>sebas77</Authors>
+        <Authors>Sebastiano Mandala</Authors>
         <RepositoryUrl>https://github.com/sebas77/Svelto.ECS</RepositoryUrl>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -21,10 +22,17 @@
         <UseSharedCompilation>false</UseSharedCompilation>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'NugetPack' "> <!-- Do not delete. Used for nuget packing -->
+        <NuspecFile>Svelto.ECS.nuspec</NuspecFile>
+        <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <UseSharedCompilation>false</UseSharedCompilation>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="System.Memory" Version="4.5.2" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0-preview8.19405.3" />
+        <PackageReference Include="System.Memory" Version="4.5.4" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
         <None Remove="**\*.meta" />
-        <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" />
+        <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" /> <!-- Do not delete. Used for nuget packing -->
     </ItemGroup>
 </Project>

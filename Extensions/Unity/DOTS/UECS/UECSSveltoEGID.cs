@@ -12,16 +12,16 @@ namespace Svelto.ECS.Extensions.Unity
 
     public struct UECSSveltoGroupID : ISharedComponentData
     {
-        public readonly uint group;
+        public readonly ExclusiveGroupStruct group;
 
         public UECSSveltoGroupID(ExclusiveGroupStruct exclusiveGroup)
         {
-            @group = (uint) exclusiveGroup;
+            @group = exclusiveGroup;
         }
 
         public static implicit operator ExclusiveGroupStruct(UECSSveltoGroupID group)
         {
-            return new ExclusiveGroupStruct(group.@group);
+            return group.@group;
         }
     }
 

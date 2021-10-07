@@ -23,36 +23,29 @@ namespace Svelto.ECS
     {
         public const uint MaxNumberOfExclusiveGroups = 2 << 20;
 
-        public ExclusiveGroup(ExclusiveGroupBitmask bitmask = 0)
+        public ExclusiveGroup()
         {
-            _group = ExclusiveGroupStruct.Generate((byte) bitmask);
+            _group = ExclusiveGroupStruct.Generate();
         }
 
-        public ExclusiveGroup(string recognizeAs, ExclusiveGroupBitmask bitmask = 0)
+        public ExclusiveGroup(string recognizeAs)
         {
-            _group = ExclusiveGroupStruct.Generate((byte) bitmask);
+            _group = ExclusiveGroupStruct.Generate();
 
             _knownGroups.Add(recognizeAs, _group);
         }
-
+        
+        public ExclusiveGroup(ExclusiveGroupBitmask bitmask)
+        {
+            _group = ExclusiveGroupStruct.Generate((byte) bitmask);
+        }
+        
         public ExclusiveGroup(ushort range)
         {
-            _group = new ExclusiveGroupStruct(range);
+            _group = ExclusiveGroupStruct.GenerateWithRange(range);
 #if DEBUG
             _range = range;
 #endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Disable()
-        {
-            _group.Disable();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Enable()
-        {
-            _group.Enable();
         }
 
         public static implicit operator ExclusiveGroupStruct(ExclusiveGroup group)
@@ -60,21 +53,18 @@ namespace Svelto.ECS
             return group._group;
         }
 
-        public static explicit operator uint(ExclusiveGroup group)
-        {
-            return (uint) @group._group;
-        }
-
-        public static ExclusiveGroupStruct operator +(ExclusiveGroup a, uint b)
+        public static ExclusiveGroupStruct operator+(ExclusiveGroup @group, uint b)
         {
 #if DEBUG
-            if (a._range == 0)
-                throw new ECSException($"Adding values to a not ranged ExclusiveGroup: {(uint) a}");
-            if (b >= a._range)
-                throw new ECSException($"Using out of range group: {(uint) a} + {b}");
+            if (@group._range == 0)
+                throw new ECSException($"Adding values to a not ranged ExclusiveGroup: {@group.id}");
+            if (b >= @group._range)
+                throw new ECSException($"Using out of range group: {@group.id} + {b}");
 #endif
-            return a._group + b;
+            return group._group + b;
         }
+
+        public uint id => _group.id;
 
         //todo document the use case for this method
         public static ExclusiveGroupStruct Search(string holderGroupName)
@@ -96,6 +86,6 @@ namespace Svelto.ECS
 #if DEBUG
         readonly ushort _range;
 #endif
-        ExclusiveGroupStruct _group;
+        readonly ExclusiveGroupStruct _group;
     }
 }

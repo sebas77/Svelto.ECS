@@ -47,7 +47,7 @@ namespace Svelto.ECS
                         continue;
 
                     _array.collection = new EntityCollection<T1>(typeSafeDictionary.GetValues(out var count), count);
-                    _array.@group     = new ExclusiveGroupStruct(group.Key);
+                    _array.@group     = group.Key;
 
                     return true;
                 }

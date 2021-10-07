@@ -9,11 +9,11 @@ namespace Svelto.ECS
     [Serialization.DoNotSerialize]
     [Serializable]
     [StructLayout(LayoutKind.Explicit)]
-    public struct EGID:IEquatable<EGID>,IComparable<EGID>
+    public struct EGID : IEquatable<EGID>, IComparable<EGID>
     {
         [FieldOffset(0)] public readonly uint                 entityID;
         [FieldOffset(4)] public readonly ExclusiveGroupStruct groupID;
-        [FieldOffset(0)]        readonly ulong                _GID;
+        [FieldOffset(0)] readonly        ulong                _GID;
 
         public static bool operator ==(EGID obj1, EGID obj2)
         {
@@ -27,17 +27,17 @@ namespace Svelto.ECS
 
         public EGID(uint entityID, ExclusiveGroupStruct groupID) : this()
         {
-#if DEBUG && !PROFILE_SVELTO            
-            if (groupID == (ExclusiveGroupStruct)default)
-             throw new Exception("Trying to use a not initialised group ID");
-#endif            
-            
-            _GID = MAKE_GLOBAL_ID(entityID, (uint) groupID);
+#if DEBUG && !PROFILE_SVELTO
+            if (groupID == (ExclusiveGroupStruct) default)
+                throw new Exception("Trying to use a not initialised group ID");
+#endif
+
+            _GID = MAKE_GLOBAL_ID(entityID, groupID.ToIDAndBitmask());
         }
-        
+
         static ulong MAKE_GLOBAL_ID(uint entityId, uint groupId)
         {
-            return (ulong)groupId << 32 | ((ulong)entityId & 0xFFFFFFFF);
+            return (ulong) groupId << 32 | ((ulong) entityId & 0xFFFFFFFF);
         }
 
         public static explicit operator uint(EGID id)
@@ -46,7 +46,10 @@ namespace Svelto.ECS
         }
 
         //in the way it's used, ulong must be always the same for each id/group
-        public static explicit operator ulong(EGID id) { return id._GID; }
+        public static explicit operator ulong(EGID id)
+        {
+            return id._GID;
+        }
 
         public bool Equals(EGID other)
         {
@@ -72,7 +75,7 @@ namespace Svelto.ECS
         {
             return _GID.CompareTo(other._GID);
         }
-        
+
         internal EGID(uint entityID, uint groupID) : this()
         {
             _GID = MAKE_GLOBAL_ID(entityID, groupID);
@@ -81,10 +84,10 @@ namespace Svelto.ECS
         public override string ToString()
         {
             var value = groupID.ToName();
-            
+
             return "id ".FastConcat(entityID).FastConcat(" group ").FastConcat(value);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EntityReference ToEntityReference(EntitiesDB entitiesDB)
         {

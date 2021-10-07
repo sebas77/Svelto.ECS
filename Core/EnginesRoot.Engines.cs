@@ -101,7 +101,7 @@ namespace Svelto.ECS
                     try
                     {
                         entityList.Value.ExecuteEnginesRemoveCallbacks(_reactiveEnginesAddRemoveOnDispose, profiler
-                                                                     , new ExclusiveGroupStruct(groups.Key));
+                                                                     , groups.Key);
                     }
                     catch (Exception e)
                     {
