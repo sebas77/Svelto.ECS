@@ -231,7 +231,7 @@ namespace Svelto.ECS.DataStructures
                 ptr      = newPointer;
                 capacity = newCapacity;
 
-                //_readIndex  = 0;
+                //_readIndex  = 0; readIndex won't change to keep the previous reserved indices valid
                 _writeIndex = _readIndex + currentSize;
             }
         }
