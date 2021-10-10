@@ -15,12 +15,12 @@ namespace Svelto.ECS.DataStructures
 {
     /// <summary>
     ///     Burst friendly RingBuffer on steroid:
-    ///     it can: Enqueue/Dequeue, it wraps if there is enough space after dequeuing
+    ///     it can: Enqueue/Dequeue, it wraps around if there is enough space after dequeuing
     ///     It resizes if there isn't enough space left.
-    ///     It's a "bag", you can queue and dequeue any T. Just be sure that you dequeue what you queue! No check on type
+    ///     It's a "bag", you can queue and dequeue any type and mix them. Just be sure that you dequeue what you queue! No check on type
     ///     is done.
     ///     You can reserve a position in the queue to update it later.
-    ///     The datastructure is a struct and it's "copyable"
+    ///     The datastructure is a struct and it's "copiable"
     ///     I eventually decided to call it NativeBag and not NativeBag because it can also be used as
     ///     a preallocated memory pool where any kind of T can be stored as long as T is unmanaged
     /// </summary>
@@ -34,11 +34,11 @@ namespace Svelto.ECS.DataStructures
                 unsafe
                 {
                     BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS                    
+#if ENABLE_THREAD_SAFE_CHECKS
                     try
                     {
 #endif
-                        return _queue->size;
+                    return _queue->size;
 #if ENABLE_THREAD_SAFE_CHECKS
                     }
                     finally
@@ -62,7 +62,7 @@ namespace Svelto.ECS.DataStructures
                     try
                     {
 #endif
-                        return _queue->capacity;
+                    return _queue->capacity;
 #if ENABLE_THREAD_SAFE_CHECKS
                     }
                     finally
@@ -84,9 +84,9 @@ namespace Svelto.ECS.DataStructures
                 //MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
                 listData->allocator = allocator;
                 _queue              = listData;
-#if ENABLE_THREAD_SAFE_CHECKS                
-                _threadSentinel     = 0;
-#endif                
+#if ENABLE_THREAD_SAFE_CHECKS
+                _threadSentinel = 0;
+#endif
             }
         }
 
@@ -100,8 +100,8 @@ namespace Svelto.ECS.DataStructures
                 try
                 {
 #endif
-                    if (_queue == null || _queue->ptr == null)
-                        return true;
+                if (_queue == null || _queue->ptr == null)
+                    return true;
 #if ENABLE_THREAD_SAFE_CHECKS
                 }
                 finally
@@ -127,7 +127,7 @@ namespace Svelto.ECS.DataStructures
 
                 try
                 {
-#endif            
+#endif
                 _queue->Dispose();
                 MemoryUtilities.Free((IntPtr) _queue, _queue->allocator);
                 _queue = null;
@@ -137,7 +137,7 @@ namespace Svelto.ECS.DataStructures
                 {
                 Volatile.Write(ref _threadSentinel, 0);
                 }
-#endif                
+#endif
             }
         }
 
@@ -149,16 +149,17 @@ namespace Svelto.ECS.DataStructures
                 BasicTests();
 
                 var sizeOf = MemoryUtilities.SizeOf<T>();
-                if (_queue->space - sizeOf < 0)
-                    //Todo: NativeBag is very complicated. At the time of writing of this comment I don't remember if the sizeof really needs to be aligned by 4. To check and change this comment
-                    _queue->Realloc((uint) ((_queue->capacity +  MemoryUtilities.Align4((uint) sizeOf)) * 2.0f));
+                if (_queue->availableSpace - sizeOf < 0)
+                {
+                    _queue->Realloc((_queue->capacity + (uint)sizeOf) << 1);
+                }
 
 #if ENABLE_THREAD_SAFE_CHECKS
                 try
                 {
 #endif
 
-                    return ref _queue->Reserve<T>(out index);
+                return ref _queue->Reserve<T>(out index);
 #if ENABLE_THREAD_SAFE_CHECKS
                 }
                 finally
@@ -181,11 +182,14 @@ namespace Svelto.ECS.DataStructures
                 {
 #endif
                 var sizeOf = MemoryUtilities.SizeOf<T>();
-                if (_queue->space - sizeOf < 0)
-                    //Todo: NativeBag is very complicated. At the time of writing of this comment I don't remember if the sizeof really needs to be aligned by 4. To check and change this comment
-                    _queue->Realloc((uint) ((_queue->capacity + MemoryUtilities.Align4((uint) sizeOf)) * 2.0f));
+                if (_queue->availableSpace - sizeOf < 0)
+                {
+                    var capacityInBytes = (_queue->capacity + (uint)sizeOf);
 
-                _queue->Write(item);
+                    _queue->Realloc(capacityInBytes << 1);
+                }
+
+                _queue->Enqueue(item);
 #if ENABLE_THREAD_SAFE_CHECKS
                 }
                 finally
@@ -226,7 +230,7 @@ namespace Svelto.ECS.DataStructures
                 try
                 {
 #endif
-                    return _queue->Read<T>();
+                return _queue->Dequeue<T>();
 #if ENABLE_THREAD_SAFE_CHECKS
                 }
                 finally
@@ -237,16 +241,16 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
-        internal ref T AccessReserved<T>(UnsafeArrayIndex reserverIndex) where T : struct
+        public ref T AccessReserved<T>(UnsafeArrayIndex reservedIndex) where T : struct
         {
             unsafe
             {
                 BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS                
+#if ENABLE_THREAD_SAFE_CHECKS
                 try
                 {
 #endif
-                    return ref _queue->AccessReserved<T>(reserverIndex);
+                return ref _queue->AccessReserved<T>(reservedIndex);
 #if ENABLE_THREAD_SAFE_CHECKS
                 }
                 finally
@@ -267,14 +271,17 @@ namespace Svelto.ECS.DataStructures
              if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
                  throw new Exception("NativeBag is not thread safe, reading and writing operations can happen"
                                    + "on different threads, but not simultaneously");
-#endif            
+#endif
         }
 
 #if ENABLE_THREAD_SAFE_CHECKS
         int _threadSentinel;
 #endif
 #if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
-        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+#if UNITY_BURST
+        [Unity.Burst.NoAlias]
+#endif
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe UnsafeBlob* _queue;
     }

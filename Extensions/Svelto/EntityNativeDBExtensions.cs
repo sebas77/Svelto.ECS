@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
+using Svelto.DataStructures.Native;
 using Svelto.ECS.Internal;
 
 //todo: once using native memory for unmanaged struct will be optional, this will need to be moved under the Native namespace

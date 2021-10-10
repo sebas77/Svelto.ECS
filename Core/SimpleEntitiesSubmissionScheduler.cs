@@ -10,7 +10,10 @@ namespace Svelto.ECS.Schedulers
             _enumerator = SubmitEntitiesAsync(maxNumberOfOperationsPerFrame);
         }
 
-        public IEnumerator<bool> SubmitEntitiesAsync() { return _enumerator; }
+        public IEnumerator<bool> SubmitEntitiesAsync()
+        {
+            return _enumerator;
+        }
 
         public IEnumerator<bool> SubmitEntitiesAsync(uint maxNumberOfOperations)
         {
@@ -22,23 +25,20 @@ namespace Svelto.ECS.Schedulers
                 if (paused == false)
                 {
                     var entitiesSubmitterSubmitEntities = entitiesSubmitter.submitEntities;
-
+                    
                     entitiesSubmitterSubmitEntities.MoveNext();
-
-                    if (entitiesSubmitterSubmitEntities.Current == true)
-                        yield return true;
-                    else
-                        yield return false;
+                    
+                    yield return entitiesSubmitterSubmitEntities.Current == true;
                 }
             }
         }
 
         public void SubmitEntities()
         {
-            _enumerator.MoveNext();
-
-            while (_enumerator.Current == true)
+            do
+            {
                 _enumerator.MoveNext();
+            } while (_enumerator.Current == true);
         }
 
         public override bool paused    { get; set; }

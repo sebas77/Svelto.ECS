@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
+## [3.2.5]
+
+* refactor and improved NativeBag and UnsafeBlob. This fix a previously known crash with Unity IL2CPP
+
 ## [3.2.0]
 
 * Improved checks on Svelto rules for the declaration of components and view components. This set of rules is not final yet (ideally one day they should be moved to static analyzers)

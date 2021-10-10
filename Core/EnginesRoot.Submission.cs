@@ -76,7 +76,7 @@ namespace Svelto.ECS
                             if ((uint) numberOfOperations >= (uint) _maxNumberOfOperationsPerFrame)
                             {
                                 using (sample.Yield())
-                                yield return true;
+                                    yield return true;
 
                                 numberOfOperations = 0;
                             }

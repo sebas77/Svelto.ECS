@@ -79,7 +79,7 @@ namespace Svelto.ECS
 #endif
         void ClearChecks() { _multipleOperationOnSameEGIDChecker.FastClear(); }
 
-        readonly FasterDictionary<EGID, uint> _multipleOperationOnSameEGIDChecker = new FasterDictionary<EGID, uint>();
-        readonly FasterDictionary<ExclusiveGroupStruct, HashSet<uint>> _idChecker = new FasterDictionary<ExclusiveGroupStruct, HashSet<uint>>();
+        readonly FasterDictionary<EGID, uint>                          _multipleOperationOnSameEGIDChecker;
+        readonly FasterDictionary<ExclusiveGroupStruct, HashSet<uint>> _idChecker;
     }
 }
