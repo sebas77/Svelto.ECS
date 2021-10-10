@@ -12,10 +12,9 @@ namespace Svelto.ECS.DataStructures
 
     /// <summary>
     ///     Note: this must work inside burst, so it must follow burst restrictions
-    ///     Note: All the svelto native structures
     ///     It's a typeless native queue based on a ring-buffer model. This means that the writing head and the
-    ///     reading head always advance independently. IF there is enough space left by dequeued elements,
-    ///     the writing head will wrap around. The writing head cannot ever surpass the reading head.
+    ///     reading head always advance independently. If there is enough space left by dequeued elements,
+    ///     the writing head will wrap around if it reaches the end of the array. The writing head cannot ever surpass the reading head.
     ///  
     /// </summary>
     struct UnsafeBlob : IDisposable
@@ -55,7 +54,6 @@ namespace Svelto.ECS.DataStructures
                 var structSize = (uint) MemoryUtilities.SizeOf<T>();
                 var writeHead  = _writeIndex % capacity;
 
-                //the idea is, considering the wrap, a read pointer must always be behind a writer pointer
 #if DEBUG && !PROFILE_SVELTO
                 var size  = _writeIndex - _readIndex;
                 var spaceAvailable = capacity - size;
@@ -69,7 +67,7 @@ namespace Svelto.ECS.DataStructures
                 {
                     Unsafe.Write(ptr + writeHead, item);
                 }
-                else //copy with wrap, will start to copy and wrap for the reminder
+                else //copy with wrap, will start to copy and wrap for the remainder
                 {
                     var byteCountToEnd = capacity - writeHead;
 
