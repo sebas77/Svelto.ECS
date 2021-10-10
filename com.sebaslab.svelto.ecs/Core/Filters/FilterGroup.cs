@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
+using Svelto.DataStructures.Native;
 using Svelto.ECS.DataStructures;
 
 namespace Svelto.ECS
@@ -24,9 +25,9 @@ namespace Svelto.ECS
             //from the index, find the entityID
             _reverseEIDs = new NativeDynamicArrayCast<uint>(NativeDynamicArray.Alloc<uint>(Allocator.Persistent));
             //from the entityID, find the index
-            _indexOfEntityInDenseList                 = new SharedSveltoDictionaryNative<uint, uint>(0);
-            _exclusiveGroupStruct = exclusiveGroupStruct;
-            _ID = ID;
+            _indexOfEntityInDenseList = new SharedSveltoDictionaryNative<uint, uint>(0);
+            _exclusiveGroupStruct     = exclusiveGroupStruct;
+            _ID                       = ID;
         }
 
         /// <summary>

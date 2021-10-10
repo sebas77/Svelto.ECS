@@ -133,8 +133,11 @@ namespace Svelto.ECS.DataStructures
             _writeIndex = count;
         }
         
-#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
-        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST    
+#if UNITY_BURST
+        [Unity.Burst.NoAlias]
+#endif
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
 #endif
         unsafe byte* _ptr;
         

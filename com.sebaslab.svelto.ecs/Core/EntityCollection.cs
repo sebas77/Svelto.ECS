@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
+using Svelto.DataStructures.Native;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS

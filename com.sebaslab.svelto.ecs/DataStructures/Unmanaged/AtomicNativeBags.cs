@@ -34,7 +34,7 @@ namespace Svelto.ECS.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref NativeBag GetBuffer(int index)
+        public readonly ref NativeBag GetBuffer(int index)
         {
 #if DEBUG            
             if (_data == null)
@@ -72,12 +72,16 @@ namespace Svelto.ECS.DataStructures
             }
         }
         
-#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
-        [global::Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
-#endif
-        NativeBag* _data;
         readonly Allocator _allocator;
         readonly uint      _threadsCount;
+        
+#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST    
+#if UNITY_BURST
+        [Unity.Burst.NoAlias]
+#endif
+        [Unity.Collections.LowLevel.Unsafe.NativeDisableUnsafePtrRestriction]
+#endif
+        NativeBag* _data;
     }
 }
 #endif

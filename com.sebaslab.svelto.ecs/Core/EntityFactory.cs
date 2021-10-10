@@ -28,12 +28,8 @@ namespace Svelto.ECS.Internal
         static FasterDictionary<RefWrapperType, ITypeSafeDictionary> FetchEntityGroup
             (ExclusiveGroupStruct groupID, EnginesRoot.DoubleBufferedEntitiesToAdd groupEntityComponentsByType)
         {
-            if (groupEntityComponentsByType.current.TryGetValue(groupID, out var group) == false)
-            {
-                group = new FasterDictionary<RefWrapperType, ITypeSafeDictionary>();
-
-                groupEntityComponentsByType.current.Add(groupID, group);
-            }
+            var group = groupEntityComponentsByType.current.GetOrCreate(
+                groupID, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
 
             //track the number of entities created so far in the group.
             groupEntityComponentsByType.IncrementEntityCount(groupID);
@@ -77,15 +73,16 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        static void BuildEntity(EGID entityID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> group
-                              , IComponentBuilder componentBuilder, IEnumerable<object> implementors)
+        static void BuildEntity
+        (EGID entityID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> group
+       , IComponentBuilder componentBuilder, IEnumerable<object> implementors)
         {
             var entityComponentType = componentBuilder.GetEntityComponentType();
             var safeDictionary = group.GetOrCreate(new RefWrapperType(entityComponentType)
                                                  , (ref IComponentBuilder cb) => cb.CreateDictionary(1)
                                                  , ref componentBuilder);
 
-            //if the safeDictionary hasn't been created yet, it will be created inside this method. 
+            //   if the safeDictionary hasn't been created yet, it will be created inside this method. 
             componentBuilder.BuildEntityAndAddToList(safeDictionary, entityID, implementors);
         }
     }

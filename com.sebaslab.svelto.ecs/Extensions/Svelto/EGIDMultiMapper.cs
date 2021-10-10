@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
+using Svelto.DataStructures.Native;
 using Svelto.ECS.Hybrid;
 
 namespace Svelto.ECS
@@ -13,7 +14,7 @@ namespace Svelto.ECS
             public EGIDMultiMapper
             (SveltoDictionary<ExclusiveGroupStruct,
                  SveltoDictionary<uint, T, NativeStrategy<
-                         SveltoDictionaryNode<uint>>, NativeStrategy<T>, NativeStrategy<int>>, 
+                     SveltoDictionaryNode<uint>>, NativeStrategy<T>, NativeStrategy<int>>, 
                  ManagedStrategy<SveltoDictionaryNode<ExclusiveGroupStruct>>,
                  ManagedStrategy<SveltoDictionary<uint, T, NativeStrategy<SveltoDictionaryNode<uint>>, NativeStrategy<T>
                    , NativeStrategy<int>>>, NativeStrategy<int>> dictionary)

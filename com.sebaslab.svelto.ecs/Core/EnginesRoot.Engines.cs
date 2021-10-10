@@ -24,7 +24,9 @@ namespace Svelto.ECS
         /// </summary>
         public EnginesRoot(EntitiesSubmissionScheduler entitiesComponentScheduler)
         {
-            _entitiesOperations            = new FasterDictionary<ulong, EntitySubmitOperation>();
+            _entitiesOperations                 = new FasterDictionary<ulong, EntitySubmitOperation>();
+            _idChecker                          = new FasterDictionary<ExclusiveGroupStruct, HashSet<uint>>();
+            _multipleOperationOnSameEGIDChecker = new FasterDictionary<EGID, uint>();
 #if UNITY_NATIVE //because of the thread count, ATM this is only for unity            
             _nativeSwapOperationQueue   = new DataStructures.AtomicNativeBags(Allocator.Persistent);
             _nativeRemoveOperationQueue = new DataStructures.AtomicNativeBags(Allocator.Persistent);
@@ -282,7 +284,6 @@ namespace Svelto.ECS
 #if UNITY_NATIVE
                             enginesRootTarget.FlushNativeOperations(profiler);
 #endif
-
                             //todo: proper unit test structural changes made as result of add/remove callbacks
                             while (enginesRootTarget.HasMadeNewStructuralChangesInThisIteration() && iterations++ < 5)
                             {

@@ -89,7 +89,7 @@ namespace Svelto.ECS
                 //Check if there is an EntityInfo linked to this entity, if so it's a DynamicEntityDescriptor!
                 if (fromGroup.TryGetValue(new RefWrapperType(ComponentBuilderUtilities.ENTITY_INFO_COMPONENT)
                                         , out var entityInfoDic)
-                 && (entityInfoDic as ITypeSafeDictionary<EntityInfoComponent>).TryGetValue(
+                 && ((ITypeSafeDictionary<EntityInfoComponent>) entityInfoDic).TryGetValue(
                         fromEntityGID.entityID, out var entityInfo))
                     SwapOrRemoveEntityComponents(fromEntityGID, toEntityGID, entityInfo.componentsToBuild, fromGroup
                                                , sampler);
