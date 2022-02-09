@@ -12,10 +12,9 @@ namespace Svelto.ECS.DataStructures
 
     /// <summary>
     ///     Note: this must work inside burst, so it must follow burst restrictions
-    ///     Note: All the svelto native structures
     ///     It's a typeless native queue based on a ring-buffer model. This means that the writing head and the
-    ///     reading head always advance independently. IF there is enough space left by dequeued elements,
-    ///     the writing head will wrap around. The writing head cannot ever surpass the reading head.
+    ///     reading head always advance independently. If there is enough space left by dequeued elements,
+    ///     the writing head will wrap around if it reaches the end of the array. The writing head cannot ever surpass the reading head.
     ///  
     /// </summary>
     struct UnsafeBlob : IDisposable
@@ -55,7 +54,6 @@ namespace Svelto.ECS.DataStructures
                 var structSize = (uint) MemoryUtilities.SizeOf<T>();
                 var writeHead  = _writeIndex % capacity;
 
-                //the idea is, considering the wrap, a read pointer must always be behind a writer pointer
 #if DEBUG && !PROFILE_SVELTO
                 var size  = _writeIndex - _readIndex;
                 var spaceAvailable = capacity - size;
@@ -69,7 +67,7 @@ namespace Svelto.ECS.DataStructures
                 {
                     Unsafe.Write(ptr + writeHead, item);
                 }
-                else //copy with wrap, will start to copy and wrap for the reminder
+                else //copy with wrap, will start to copy and wrap for the remainder
                 {
                     var byteCountToEnd = capacity - writeHead;
 
@@ -179,75 +177,16 @@ namespace Svelto.ECS.DataStructures
             }
         }
 
-//         /// <summary>
-//         /// Note when a realloc happens it doesn't just unwrap the data, but also reset the readIndex to 0 so
-//         /// if readIndex is greater than 0 the index of elements of an unwrapped queue will be shifted back  
-//         /// </summary>
-//         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-//         internal void ReallocOld(uint newCapacity)
-//         {
-//             unsafe
-//             {
-//                 //be sure it's multiple of 4. Assuming that what we write is aligned to 4, then we will always have aligned wrapped heads
-//                 //the reading and writing head always increment in multiple of 4
-//                 newCapacity += MemoryUtilities.Pad4(newCapacity);
-//
-//                 byte* newPointer = null;
-// #if DEBUG && !PROFILE_SVELTO
-//                 if (newCapacity <= capacity)
-//                     throw new Exception("new capacity must be bigger than current");
-// #endif
-//                 newPointer = (byte*) MemoryUtilities.Alloc(newCapacity, allocator);
-//
-//                 //copy wrapped content if there is any
-//                 var currentSize = _writeIndex - _readIndex;
-//                 if (currentSize > 0)
-//                 {
-//                     var readerHead = _readIndex % capacity;
-//                     var writerHead = _writeIndex % capacity;
-//
-//                     //there was no wrapping
-//                     if (readerHead < writerHead)
-//                     {
-//                         //copy to the new pointer, starting from the first byte still to be read, so that readIndex
-//                         //position can be reset
-//                         Unsafe.CopyBlock(newPointer, ptr + readerHead, (uint) currentSize);
-//                     }
-//                     //the goal of the following code is to unwrap the queue into a linear array.
-//                     //the assumption is that if the wrapped writeHead is smaller than the wrapped readHead
-//                     //the writerHead wrapped and restart from the being of the array.
-//                     //so I have to copy the data from readerHead to the end of the array and then
-//                     //from the start of the array to writerHead (which is the same position of readerHead)
-//                     else
-//                     {
-//                         var byteCountToEnd = capacity - readerHead;
-//
-//                         Unsafe.CopyBlock(newPointer, ptr + readerHead, byteCountToEnd);
-//                         Unsafe.CopyBlock(newPointer + byteCountToEnd, ptr, (uint) writerHead);
-//                     }
-//                 }
-//
-//                 if (ptr != null)
-//                     MemoryUtilities.Free((IntPtr) ptr, allocator);
-//
-//                 ptr      = newPointer;
-//                 capacity = newCapacity;
-//
-//                 _readIndex  = 0;
-//                 _writeIndex = currentSize;
-//             }
-//         }
-        
         /// <summary>
-        /// This version of Realloc unwrap a queue, but doesn't change the unwrapped index of existing elements.
-        /// In this way the previously index will remain valid
+        /// This version of Realloc unwraps a queue, but doesn't change the unwrapped index of existing elements.
+        /// In this way the previously indices will remain valid
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Realloc(uint newCapacity)
         {
             unsafe
             {
-                //be sure it's multiple of 4. Assuming that what we write is aligned to 4, then we will always have aligned wrapped heads
+                //be sure it's multiple of 4. Assuming that what we write is aligned to 4, then we will always have aligned wrapped heads.
                 //the reading and writing head always increment in multiple of 4
                 newCapacity += MemoryUtilities.Pad4(newCapacity);
 
@@ -292,7 +231,7 @@ namespace Svelto.ECS.DataStructures
                 ptr      = newPointer;
                 capacity = newCapacity;
 
-                //_readIndex  = 0;
+                //_readIndex  = 0; readIndex won't change to keep the previous reserved indices valid
                 _writeIndex = _readIndex + currentSize;
             }
         }
