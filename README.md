@@ -26,7 +26,27 @@ read this article for more information: http://www.sebaslab.com/distributing-sve
 
 **Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Dependency System is:**
 
-Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. Since Unity Collection removed the Unsafe.dll dependency, I had to distribute my own package. This means that if you want to use Svelto from UPM, you will need Svelto unsafe dll to be the only unsafe dll in the project. Otherwise you just download the source code and solve dependencies manually.
+Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. Since Unity Collection removed the Unsafe.dll dependency, ~~I had to distribute my own package. This means that if you want to use Svelto from UPM, you will need Svelto unsafe dll to be the only unsafe dll in the project. Otherwise you just download the source code and solve dependencies manually.~~
+
+For Unity Users: to solve the unsafe dependency you need to add the following scopedRegistries in manifest.json:
+```
+  {
+    "scopedRegistries": [
+        {
+            "name": "package.openupm.com",
+            "url": "https://package.openupm.com",
+            "scopes": [
+                "com.sebaslab.svelto.common",
+                "com.sebaslab.svelto.ecs",
+                "org.nuget.system.runtime.compilerservices.unsafe"
+            ]
+        }
+    ],
+    "dependencies": {
+        "com.sebaslab.svelto.ecs": "3.2.6"
+    }
+}
+```
 
 ## Svelto distributed as Nuget
 
