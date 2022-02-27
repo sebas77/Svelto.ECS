@@ -109,7 +109,7 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 **Svelto Extensions**
 
-* [Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS] https://github.com/cathei/Svelto.ECS.Schema
+* [Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS](https://github.com/cathei/Svelto.ECS.Schema)
 
 ## In case of bugs
 
