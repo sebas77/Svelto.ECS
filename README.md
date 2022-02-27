@@ -101,6 +101,10 @@ After that, you can get all the help you need from the official chat:
 * [Porting a boid simulation from UnityECS/Jobs to Svelto.ECS/Tasks](https://www.sebaslab.com/porting-a-boid-simulation-from-unityecs-to-svelto-ecs/)
 * [Svelto.ECS+Tasks to write Data Oriented, Cache Friendly, Multi-Threaded code](http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/)
 
+**Svelto Extensions**
+
+[Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS] https://github.com/cathei/Svelto.ECS.Schema
+
 
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
 
