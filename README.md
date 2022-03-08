@@ -111,6 +111,7 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 * [Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS](https://github.com/cathei/Svelto.ECS.Schema)
 * [Automatic way to control svelto engines order without having to pass in a string using attributes](https://gist.github.com/dragonslaya84/88e6bb998eda8fe4ee912f01d67feec9)
+* [Foundation for a possible platform agnostic Svelto.ECS inspector](https://github.com/akrogame/svelto-ecs-inspector)
 
 ## In case of bugs
 
