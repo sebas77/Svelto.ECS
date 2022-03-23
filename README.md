@@ -80,6 +80,7 @@ After that, you can get all the help you need from the official chat:
 **Theory related articles \(in order of publishing date\):**
 
 * [OOP abstraction layer in an ECS-centric application](https://www.sebaslab.com/oop-abstraction-layer-in-a-ecs-centric-application/)  \(this article is important for starters!\)
+* [ECS abstraction layers and module encapsulation] (https://www.sebaslab.com/ecs-abstraction-layers-and-modules-encapsulation/)
 * [Inversion of Control with Unity – part 1](http://www.sebaslab.com/ioc-container-for-unity3d-part-1/)
 * [Inversion of Control with Unity – part 2](http://www.sebaslab.com/ioc-container-for-unity3d-part-2/)
 * [The truth behind Inversion of Control – Part I – Dependency Injection](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/)
