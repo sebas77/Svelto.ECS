@@ -77,7 +77,7 @@ After that, you can get all the help you need from the official chat:
 * [Svelto.ECS 2.0 is production ready](http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/) \(shows what's changed since 1.0\)
 * [Svelto ECS is now production ready](http://www.sebaslab.com/ecs-1-0/)
 
-**Theory related articles \(in order of publishing date\):**
+**Theory related articles:**
 
 * [OOP abstraction layer in an ECS-centric application](https://www.sebaslab.com/oop-abstraction-layer-in-a-ecs-centric-application/)  \(this article is important for starters!\)
 * [ECS abstraction layers and module encapsulation](https://www.sebaslab.com/ecs-abstraction-layers-and-modules-encapsulation/)
