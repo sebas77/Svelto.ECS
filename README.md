@@ -1,4 +1,4 @@
-# Svelto Entity Component System 3.x
+# Svelto C# Entity Component System 3.x
 =====================================
 
 Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, code without pain. Although the framework is platform agnostic \(compatible with c\# 7 and .net standard 2.0\), it comes with several Unity extensions.
