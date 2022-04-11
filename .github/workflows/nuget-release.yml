@@ -31,31 +31,32 @@ jobs:
 
     - name: create temp directory
       run: mkdir temp temp/bin temp/bin/debug temp/bin/release
+      
+    - name: get Svelto.ECS version
+      run: python3 upm-preparator/version.py --version-file "${ECS_VERSION_JSON}" --env-file "${GITHUB_ENV}"
     
     # Build for Debug
     - name: create package for Debug configuration
-      run: dotnet pack /p:PackageVersion=1.0.0 -o temp/bin/debug com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Debug
+      run: dotnet pack /p:PackageVersion=${{ env.PKG_VERSION }} -o temp/bin/debug com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Debug
 
     - name: unzip debug nuget package
-      run: unzip temp/bin/debug/Svelto.ECS.1.0.0.nupkg -d temp/bin/debug
+      run: unzip temp/bin/debug/Svelto.ECS.${{ env.PKG_VERSION }}.nupkg -d temp/bin/debug
 
     - name: copy debug DLL to temp folder
       run: sudo cp temp/bin/debug/lib/netstandard2.0/Svelto.ECS.dll temp/bin/debug
 
     # Build for Release
     - name: create package for Release configuration
-      run: dotnet pack /p:PackageVersion=1.0.0 -o temp/bin/release com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Release
+      run: dotnet pack /p:PackageVersion=${{ env.PKG_VERSION }} -o temp/bin/release com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c Release
 
     - name: unzip release nuget package
-      run: unzip temp/bin/release/Svelto.ECS.1.0.0.nupkg -d temp/bin/release
+      run: unzip temp/bin/release/Svelto.ECS.${{ env.PKG_VERSION }}.nupkg -d temp/bin/release
 
     - name: copy release DLL to temp folder
       run: sudo cp temp/bin/release/lib/netstandard2.0/Svelto.ECS.dll temp/bin/release
 
     # Compile into nuget package
-    - name: get Svelto.ECS version
-      run: python3 upm-preparator/version.py --version-file "${ECS_VERSION_JSON}" --env-file "${GITHUB_ENV}"
-
+    
     - name: build nuget package
       run: sudo dotnet pack /p:PackageVersion=${PKG_VERSION} -o . com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c NugetPack
 
