@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 #pragma warning disable 660,661
 
@@ -43,7 +42,7 @@ namespace Svelto.ECS
         public ExclusiveGroup(ushort range)
         {
             _group = ExclusiveGroupStruct.GenerateWithRange(range);
-#if DEBUG
+#if DEBUG && !PROFILE_SVELTO
             _range = range;
 #endif
         }
@@ -55,7 +54,7 @@ namespace Svelto.ECS
 
         public static ExclusiveGroupStruct operator+(ExclusiveGroup @group, uint b)
         {
-#if DEBUG
+#if DEBUG && !PROFILE_SVELTO
             if (@group._range == 0)
                 throw new ECSException($"Adding values to a not ranged ExclusiveGroup: {@group.id}");
             if (b >= @group._range)
@@ -83,7 +82,7 @@ namespace Svelto.ECS
         static readonly Dictionary<string, ExclusiveGroupStruct> _knownGroups =
             new Dictionary<string, ExclusiveGroupStruct>();
 
-#if DEBUG
+#if DEBUG && !PROFILE_SVELTO
         readonly ushort _range;
 #endif
         readonly ExclusiveGroupStruct _group;

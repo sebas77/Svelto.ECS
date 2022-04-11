@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Svelto.ECS.Serialization
 {
     public interface IEntitySerialization
@@ -49,19 +51,29 @@ namespace Svelto.ECS.Serialization
         /// <returns></returns>
         EntityInitializer DeserializeNewEntity(EGID egid, ISerializationData serializationData,
                                                         int serializationType);
+        /// <summary>
+        /// Skips over entities without deserializing them, but incrementing the data position of the serialization data
+        /// as if it had 
+        /// </summary>
+        /// <param name="serializationData"></param>
+        /// <param name="serializationType"></param>
+        /// <param name="numberOfEntities"></param>
+        void SkipEntityDeserialization(ISerializationData serializationData, int serializationType,
+            int numberOfEntities);
 
         /// <summary>
         /// Special Entity Swap method that works without knowing the EntityDescriptor to swap
         /// </summary>
-        /// <param name="localEgid"></param>
-        /// <param name="toEgid"></param>
-        void DeserializeEntityToSwap(EGID localEgid, EGID toEgid);
+        /// <param name="fromEGID"></param>
+        /// <param name="toEGID"></param>
+        /// <param name="caller"></param>
+        void DeserializeEntityToSwap(EGID fromEGID, EGID toEGID,  [CallerMemberName] string caller = null);
 
         /// <summary>
         /// Special Entity delete method that works without knowing the EntityDescriptor to delete
         /// </summary>
         /// <param name="egid"></param>
-        void DeserializeEntityToDelete(EGID egid);
+        void DeserializeEntityToDelete(EGID egid, [CallerMemberName] string caller = null);
 
         uint GetHashFromGroup(ExclusiveGroupStruct groupStruct);
 

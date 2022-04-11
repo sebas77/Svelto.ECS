@@ -5,72 +5,85 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS.Experimental
 {
-    struct GroupsList
+    internal struct GroupsList
     {
-        static GroupsList()
+        public static GroupsList Init()
         {
-            groups = new FasterList<ExclusiveGroupStruct>();
-            sets   = new HashSet<ExclusiveGroupStruct>();
+            var group = new GroupsList();
+
+            group._groups = new FasterList<ExclusiveGroupStruct>();
+            group._sets   = new HashSet<ExclusiveGroupStruct>();
+
+            return group;
         }
 
-        static readonly FasterList<ExclusiveGroupStruct> groups;
-        static readonly HashSet<ExclusiveGroupStruct>    sets;
-
-        public void Reset() { sets.Clear(); }
+        public void Reset()
+        {
+            _sets.Clear();
+        }
 
         public void AddRange(ExclusiveGroupStruct[] groupsToAdd, int length)
         {
-            for (int i = 0; i < length; i++)
-            {
-                sets.Add(groupsToAdd[i]);
-            }
+            for (var i = 0; i < length; i++) _sets.Add(groupsToAdd[i]);
         }
 
-        public void Add(ExclusiveGroupStruct @group) { sets.Add(group); }
+        public void Add(ExclusiveGroupStruct group)
+        {
+            _sets.Add(group);
+        }
 
         public void Exclude(ExclusiveGroupStruct[] groupsToIgnore, int length)
         {
-            for (int i = 0; i < length; i++)
-            {
-                sets.Remove(groupsToIgnore[i]);
-            }
+            for (var i = 0; i < length; i++) _sets.Remove(groupsToIgnore[i]);
         }
 
-        public void Exclude(ExclusiveGroupStruct groupsToIgnore) { sets.Remove(groupsToIgnore); }
+        public void Exclude(ExclusiveGroupStruct groupsToIgnore)
+        {
+            _sets.Remove(groupsToIgnore);
+        }
 
-        public void EnsureCapacity(uint preparecount) { groups.EnsureCapacity(preparecount); }
+        public void Resize(uint preparecount)
+        {
+            _groups.Resize(preparecount);
+        }
 
         public FasterList<ExclusiveGroupStruct> Evaluate()
         {
-            groups.FastClear();
+            _groups.FastClear();
 
-            foreach (var item in sets)
-            {
-                groups.Add(item);
-            }
+            foreach (var item in _sets) _groups.Add(item);
 
-            return groups;
+            return _groups;
         }
+        
+        FasterList<ExclusiveGroupStruct> _groups;
+        HashSet<ExclusiveGroupStruct>    _sets;
     }
 
+    //I am not 100% sure why I made this thread-safe since it cannot be used inside jobs.
     public ref struct QueryGroups
     {
-        static readonly ThreadLocal<GroupsList> groups = new ThreadLocal<GroupsList>();
+        static readonly ThreadLocal<GroupsList> groups;
+
+        static QueryGroups()
+        {
+            groups = new ThreadLocal<GroupsList>(GroupsList.Init);
+        }
 
         public QueryGroups(LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
         {
             var groupsValue = QueryGroups.groups.Value;
 
             groupsValue.Reset();
-             groupsValue.AddRange(groups.ToArrayFast(out var count), count);
+            groupsValue.AddRange(groups.ToArrayFast(out var count), count);
         }
 
-        public QueryGroups(ExclusiveGroupStruct @group)
+        public QueryGroups(ExclusiveGroupStruct group)
         {
             var groupsValue = groups.Value;
 
             groupsValue.Reset();
-            groupsValue.Add(@group);
+            groupsValue.Add(group);
         }
 
         public QueryGroups(uint preparecount)
@@ -78,7 +91,7 @@ namespace Svelto.ECS.Experimental
             var groupsValue = groups.Value;
 
             groupsValue.Reset();
-            groupsValue.EnsureCapacity(preparecount);
+            groupsValue.Resize(preparecount);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -114,7 +127,7 @@ namespace Svelto.ECS.Experimental
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public QueryGroups Except(ExclusiveGroupStruct[] groupsToIgnore)
         {
-            var groupsValue = QueryGroups.groups.Value;
+            var groupsValue = groups.Value;
 
             groupsValue.Exclude(groupsToIgnore, groupsToIgnore.Length);
 
@@ -124,7 +137,7 @@ namespace Svelto.ECS.Experimental
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public QueryGroups Except(LocalFasterReadOnlyList<ExclusiveGroupStruct> groupsToIgnore)
         {
-            var groupsValue = QueryGroups.groups.Value;
+            var groupsValue = groups.Value;
 
             groupsValue.Exclude(groupsToIgnore.ToArrayFast(out var count), count);
 
@@ -134,7 +147,7 @@ namespace Svelto.ECS.Experimental
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public QueryGroups Except(FasterList<ExclusiveGroupStruct> groupsToIgnore)
         {
-            var groupsValue = QueryGroups.groups.Value;
+            var groupsValue = groups.Value;
 
             groupsValue.Exclude(groupsToIgnore.ToArrayFast(out var count), count);
 
@@ -144,7 +157,7 @@ namespace Svelto.ECS.Experimental
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public QueryGroups Except(FasterReadOnlyList<ExclusiveGroupStruct> groupsToIgnore)
         {
-            var groupsValue = QueryGroups.groups.Value;
+            var groupsValue = groups.Value;
 
             groupsValue.Exclude(groupsToIgnore.ToArrayFast(out var count), count);
 
@@ -176,29 +189,49 @@ namespace Svelto.ECS.Experimental
 
             return new QueryResult(groupsValue.Evaluate());
         }
+        
+        public void Evaluate(FasterList<ExclusiveGroupStruct> group)
+        {
+            var groupsValue = groups.Value;
+
+            groupsValue.Evaluate().CopyTo(group.ToArrayFast(out var count), count);
+        }
     }
 
     public readonly ref struct QueryResult
     {
-        public QueryResult(FasterList<ExclusiveGroupStruct> @group) { _group = @group; }
+        public QueryResult(FasterList<ExclusiveGroupStruct> group)
+        {
+            _group = group;
+        }
 
         public LocalFasterReadOnlyList<ExclusiveGroupStruct> result => _group;
 
         readonly FasterReadOnlyList<ExclusiveGroupStruct> _group;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Count<T>(EntitiesDB entitiesDB)
-            where T : struct, IEntityComponent
+        public int Count<T>(EntitiesDB entitiesDB) where T : struct, IEntityComponent
         {
-            int count = 0;
+            var count = 0;
 
-            var groupsCount = result.count;
-            for (int i = 0; i < groupsCount; ++i)
-            {
-                count += entitiesDB.Count<T>(result[i]);
-            }
+            var groupsCount                             = result.count;
+            for (var i = 0; i < groupsCount; ++i) count += entitiesDB.Count<T>(result[i]);
 
             return count;
+        }
+
+        public int Max<T>(EntitiesDB entitiesDB) where T : struct, IEntityComponent
+        {
+            var max = 0;
+
+            var groupsCount                           = result.count;
+            for (var i = 0; i < groupsCount; ++i)
+            {
+                var count = entitiesDB.Count<T>(result[i]);
+                if (count > max) max = count;
+            }
+
+            return max;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Svelto.ECS
         {
             return new ExclusiveBuildGroup(group);
         }
-        
+
         public static implicit operator ExclusiveGroupStruct(ExclusiveBuildGroup group)
         {
             return group.group;

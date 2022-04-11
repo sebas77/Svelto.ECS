@@ -1,6 +1,5 @@
 using System.Threading;
 using Svelto.Common;
-using Svelto.DataStructures;
 using Svelto.ECS.DataStructures;
 
 namespace Svelto.ECS
@@ -23,7 +22,7 @@ namespace Svelto.ECS
     {
         static Filler()
         {
-            DBC.ECS.Check.Require(TypeCache<T>.isUnmanaged == true, "invalid type used");
+            DBC.ECS.Check.Require(TypeType.isUnmanaged<T>() == true, "invalid type used");
         }
 
         //it's an internal interface
@@ -35,28 +34,20 @@ namespace Svelto.ECS
         }
     }
 
+#if UNITY_NATIVE //at the moment I am still considering NativeOperations useful only for Unity
     static class EntityComponentID<T>
     {
-#if UNITY_NATIVE
         internal static readonly Unity.Burst.SharedStatic<uint> ID =
             Unity.Burst.SharedStatic<uint>.GetOrCreate<GlobalTypeID, T>();
-#else
-        internal struct SharedStatic
-        {
-            public uint Data;
-        }
-
-        internal static SharedStatic ID;
-#endif
     }
 
     static class EntityComponentIDMap
     {
-        static readonly FasterList<IFiller> TYPE_IDS;
+        static readonly Svelto.DataStructures.FasterList<IFiller> TYPE_IDS;
 
         static EntityComponentIDMap()
         {
-            TYPE_IDS = new FasterList<IFiller>();
+            TYPE_IDS = new Svelto.DataStructures.FasterList<IFiller>();
         }
 
         internal static void Register<T>(IFiller entityBuilder) where T : struct, IEntityComponent
@@ -67,4 +58,5 @@ namespace Svelto.ECS
 
         internal static IFiller GetTypeFromID(uint typeId) { return TYPE_IDS[typeId]; }
     }
+#endif
 }

@@ -55,7 +55,7 @@ namespace DBC.ECS
     ///
     static class Check
     {
-        #region Interface
+#region Interface
 
         /// <summary>
         /// Precondition check.
@@ -65,15 +65,8 @@ namespace DBC.ECS
 #endif
         public static void Require(bool assertion, string message)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new PreconditionException(message);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Precondition: " + message);
-            }
+            if (!assertion)
+                throw new PreconditionException(message);
         }
 
         /// <summary>
@@ -85,15 +78,8 @@ namespace DBC.ECS
 #endif
         public static void Require(bool assertion, string message, Exception inner)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new PreconditionException(message, inner);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Precondition: " + message);
-            }
+            if (!assertion)
+                throw new PreconditionException(message, inner);
         }
 
         /// <summary>
@@ -105,15 +91,8 @@ namespace DBC.ECS
 #endif
         public static void Require(bool assertion)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new PreconditionException("Precondition failed.");
-            }
-            else
-            {
-                Trace.Assert(assertion, "Precondition failed.");
-            }
+            if (!assertion)
+                throw new PreconditionException("Precondition failed.");
         }
 
         /// <summary>
@@ -125,15 +104,8 @@ namespace DBC.ECS
 #endif
         public static void Ensure(bool assertion, string message)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new PostconditionException(message);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Postcondition: " + message);
-            }
+            if (!assertion)
+                throw new PostconditionException(message);
         }
 
         /// <summary>
@@ -145,15 +117,8 @@ namespace DBC.ECS
 #endif
         public static void Ensure(bool assertion, string message, Exception inner)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new PostconditionException(message, inner);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Postcondition: " + message);
-            }
+            if (!assertion)
+                throw new PostconditionException(message, inner);
         }
 
         /// <summary>
@@ -165,15 +130,8 @@ namespace DBC.ECS
 #endif
         public static void Ensure(bool assertion)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new PostconditionException("Postcondition failed.");
-            }
-            else
-            {
-                Trace.Assert(assertion, "Postcondition failed.");
-            }
+            if (!assertion)
+                throw new PostconditionException("Postcondition failed.");
         }
 
         /// <summary>
@@ -185,15 +143,8 @@ namespace DBC.ECS
 #endif
         public static void Invariant(bool assertion, string message)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new InvariantException(message);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Invariant: " + message);
-            }
+            if (!assertion)
+                throw new InvariantException(message);
         }
 
         /// <summary>
@@ -205,15 +156,8 @@ namespace DBC.ECS
 #endif
         public static void Invariant(bool assertion, string message, Exception inner)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new InvariantException(message, inner);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Invariant: " + message);
-            }
+            if (!assertion)
+                throw new InvariantException(message, inner);
         }
 
         /// <summary>
@@ -225,15 +169,8 @@ namespace DBC.ECS
 #endif
         public static void Invariant(bool assertion)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new InvariantException("Invariant failed.");
-            }
-            else
-            {
-                Trace.Assert(assertion, "Invariant failed.");
-            }
+            if (!assertion)
+                throw new InvariantException("Invariant failed.");
         }
 
         /// <summary>
@@ -244,15 +181,8 @@ namespace DBC.ECS
 #endif
         public static void Assert(bool assertion, string message)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new AssertionException(message);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Assertion: " + message);
-            }
+            if (!assertion)
+                throw new AssertionException(message);
         }
 
         /// <summary>
@@ -264,15 +194,8 @@ namespace DBC.ECS
 #endif
         public static void Assert(bool assertion, string message, Exception inner)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new AssertionException(message, inner);
-            }
-            else
-            {
-                Trace.Assert(assertion, "Assertion: " + message);
-            }
+            if (!assertion)
+                throw new AssertionException(message, inner);
         }
 
         /// <summary>
@@ -284,59 +207,22 @@ namespace DBC.ECS
 #endif
         public static void Assert(bool assertion)
         {
-            if (UseExceptions)
-            {
-                if (!assertion)
-                    throw new AssertionException("Assertion failed.");
-            }
-            else
-            {
-                Trace.Assert(assertion, "Assertion failed.");
-            }
+            if (!assertion)
+                throw new AssertionException("Assertion failed.");
         }
 
-        /// <summary>
-        /// Set this if you wish to use Trace Assert statements
-        /// instead of exception handling.
-        /// (The Check class uses exception handling by default.)
-        /// </summary>
-        public static bool UseAssertions
-        {
+#endregion // Interface
 
-            get
-            {
-                return useAssertions;
-            }
-            set
-            {
-                useAssertions = value;
-            }
-        }
-
-        #endregion // Interface
-
-        #region Implementation
+#region Implementation
 
         // No creation
 
         /// <summary>
         /// Is exception handling being used?
         /// </summary>
-        static bool UseExceptions
-        {
-            get
-            {
-                return !useAssertions;
-            }
-        }
 
-        // Are trace assertion statements being used?
-        // Default is to use exception handling.
-        static bool useAssertions;
-
-        #endregion // Implementation
-
-    } // End Check
+#endregion // Implementation
+    }      // End Check
 
     internal class Trace
     {
@@ -350,7 +236,7 @@ namespace DBC.ECS
         }
     }
 
-    #region Exceptions
+#region Exceptions
 
     /// <summary>
     /// Exception raised when a contract is broken.
@@ -360,9 +246,17 @@ namespace DBC.ECS
     /// </summary>
     public class DesignByContractException : Exception
     {
-        protected DesignByContractException() {}
-        protected DesignByContractException(string message) : base(message) {}
-        protected DesignByContractException(string message, Exception inner) : base(message, inner) {}
+        protected DesignByContractException()
+        {
+        }
+
+        protected DesignByContractException(string message) : base(message)
+        {
+        }
+
+        protected DesignByContractException(string message, Exception inner) : base(message, inner)
+        {
+        }
     }
 
     /// <summary>
@@ -373,15 +267,23 @@ namespace DBC.ECS
         /// <summary>
         /// Precondition Exception.
         /// </summary>
-        public PreconditionException() {}
+        public PreconditionException()
+        {
+        }
+
         /// <summary>
         /// Precondition Exception.
         /// </summary>
-        public PreconditionException(string message) : base(message) {}
+        public PreconditionException(string message) : base(message)
+        {
+        }
+
         /// <summary>
         /// Precondition Exception.
         /// </summary>
-        public PreconditionException(string message, Exception inner) : base(message, inner) {}
+        public PreconditionException(string message, Exception inner) : base(message, inner)
+        {
+        }
     }
 
     /// <summary>
@@ -392,15 +294,23 @@ namespace DBC.ECS
         /// <summary>
         /// Postcondition Exception.
         /// </summary>
-        public PostconditionException() {}
+        public PostconditionException()
+        {
+        }
+
         /// <summary>
         /// Postcondition Exception.
         /// </summary>
-        public PostconditionException(string message) : base(message) {}
+        public PostconditionException(string message) : base(message)
+        {
+        }
+
         /// <summary>
         /// Postcondition Exception.
         /// </summary>
-        public PostconditionException(string message, Exception inner) : base(message, inner) {}
+        public PostconditionException(string message, Exception inner) : base(message, inner)
+        {
+        }
     }
 
     /// <summary>
@@ -411,15 +321,23 @@ namespace DBC.ECS
         /// <summary>
         /// Invariant Exception.
         /// </summary>
-        public InvariantException() {}
+        public InvariantException()
+        {
+        }
+
         /// <summary>
         /// Invariant Exception.
         /// </summary>
-        public InvariantException(string message) : base(message) {}
+        public InvariantException(string message) : base(message)
+        {
+        }
+
         /// <summary>
         /// Invariant Exception.
         /// </summary>
-        public InvariantException(string message, Exception inner) : base(message, inner) {}
+        public InvariantException(string message, Exception inner) : base(message, inner)
+        {
+        }
     }
 
     /// <summary>
@@ -430,17 +348,24 @@ namespace DBC.ECS
         /// <summary>
         /// Assertion Exception.
         /// </summary>
-        public AssertionException() {}
+        public AssertionException()
+        {
+        }
+
         /// <summary>
         /// Assertion Exception.
         /// </summary>
-        public AssertionException(string message) : base(message) {}
+        public AssertionException(string message) : base(message)
+        {
+        }
+
         /// <summary>
         /// Assertion Exception.
         /// </summary>
-        public AssertionException(string message, Exception inner) : base(message, inner) {}
+        public AssertionException(string message, Exception inner) : base(message, inner)
+        {
+        }
     }
 
-    #endregion // Exception classes
-
-} // End Design By Contract
+#endregion // Exception classes
+}          // End Design By Contract

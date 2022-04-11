@@ -30,19 +30,30 @@ namespace Svelto.ECS.Serialization
                             myMembers[i].IsPrivate == false)
                                 throw new ECSException($"field cannot be serialised {fieldType} in {myType.FullName}");
 
-                        var offset = Marshal.OffsetOf<T>(myMembers[i].Name);
-                        var sizeOf = (uint)Marshal.SizeOf(fieldType);
+                        var  offset = Marshal.OffsetOf<T>(myMembers[i].Name);
+                        uint sizeOf;
+                        if (fieldType == typeof(bool))
+                            sizeOf = 1;
+                        else
+                            sizeOf = (uint)Marshal.SizeOf(fieldType);
+                        
                         offsets.Add(((uint) offset.ToInt32(), sizeOf));
                         totalSize += sizeOf;
                     }
                 }
             }
 
+            if (myType.IsExplicitLayout == false)
+                throw new ECSException($"PartialSerializer requires explicit layout {myType}");
+#if SLOW_SVELTO_SUBMISSION            
             if (myType.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
                 throw new ECSException("serializable entity struct must be property less ".FastConcat(myType.FullName));
+#endif                
+            if (totalSize == 0)
+                throw new ECSException($"{typeof(T).Name} is being serialized with {nameof(PartialSerializer<T>)} but has size 0!");
         }
 
-        public bool Serialize(in T value, ISerializationData serializationData)
+        public bool Serialize(in T value, ISerializationData serializationData) 
         {
             unsafe
             {
@@ -63,7 +74,7 @@ namespace Svelto.ECS.Serialization
             return true;
         }
 
-        public bool Deserialize(ref T value, ISerializationData serializationData)
+        public bool Deserialize(ref T value, ISerializationData serializationData) 
         {
             unsafe
             {

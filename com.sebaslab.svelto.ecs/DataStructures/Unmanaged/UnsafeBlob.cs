@@ -14,7 +14,7 @@ namespace Svelto.ECS.DataStructures
     ///     Note: this must work inside burst, so it must follow burst restrictions
     ///     It's a typeless native queue based on a ring-buffer model. This means that the writing head and the
     ///     reading head always advance independently. If there is enough space left by dequeued elements,
-    ///     the writing head will wrap around if it reaches the end of the array. The writing head cannot ever surpass the reading head.
+    ///     the writing head will wrap around. The writing head cannot ever surpass the reading head.
     ///  
     /// </summary>
     struct UnsafeBlob : IDisposable
@@ -47,7 +47,7 @@ namespace Svelto.ECS.DataStructures
         internal Allocator allocator;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Enqueue<T>(in T item) where T : struct
+        internal void Enqueue<T>(in T item) where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
@@ -93,7 +93,7 @@ namespace Svelto.ECS.DataStructures
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         //The index returned is the index of the unwrapped ring. It must be wrapped again before to be used
-        internal ref T Reserve<T>(out UnsafeArrayIndex index) where T : struct
+        internal ref T Reserve<T>(out UnsafeArrayIndex index) where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
@@ -119,7 +119,7 @@ namespace Svelto.ECS.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ref T AccessReserved<T>(UnsafeArrayIndex index) where T : struct
+        internal ref T AccessReserved<T>(UnsafeArrayIndex index) where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
@@ -133,7 +133,7 @@ namespace Svelto.ECS.DataStructures
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T Dequeue<T>() where T : struct
+        internal T Dequeue<T>()  where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
@@ -176,36 +176,39 @@ namespace Svelto.ECS.DataStructures
                 return item;
             }
         }
-
+        
         /// <summary>
-        /// This version of Realloc unwraps a queue, but doesn't change the unwrapped index of existing elements.
-        /// In this way the previously indices will remain valid
+        /// This code unwraps the queue and resizes the array, but doesn't change the unwrapped index of existing elements.
+        /// In this way the previously reserved indices will remain valid
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Realloc(uint newCapacity)
+        internal void Grow<T>() where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
-                //be sure it's multiple of 4. Assuming that what we write is aligned to 4, then we will always have aligned wrapped heads.
+                var sizeOf      = MemoryUtilities.SizeOf<T>();
+
+                var oldCapacity = capacity;
+                
+                uint newCapacity = (uint) ((oldCapacity + sizeOf) << 1);
+                //be sure it's multiple of 4. Assuming that what we write is aligned to 4, then we will always have aligned wrapped heads
                 //the reading and writing head always increment in multiple of 4
                 newCapacity += MemoryUtilities.Pad4(newCapacity);
 
                 byte* newPointer = null;
-#if DEBUG && !PROFILE_SVELTO
-                if (newCapacity <= capacity)
-                    throw new Exception("new capacity must be bigger than current");
-#endif
                 newPointer = (byte*) MemoryUtilities.Alloc(newCapacity, allocator);
 
                 //copy wrapped content if there is any
                 var currentSize = _writeIndex - _readIndex;
                 if (currentSize > 0)
                 {
-                    var oldReaderHead = _readIndex % capacity;
-                    var writerHead = _writeIndex % capacity;
+                    var oldReaderHead = _readIndex % oldCapacity;
+                    var oldWriterHead    = _writeIndex % oldCapacity;
 
-                    //there was no wrapping
-                    if (oldReaderHead < writerHead)
+                    //Remembering that the unwrapped reader cannot ever surpass the unwrapped writer, if the reader is behind the writer
+                    //it means that the writer didn't wrap. It's the natural position so the data can be copied with
+                    //a single memcpy
+                    if (oldReaderHead < oldWriterHead)
                     {
                         var newReaderHead = _readIndex % newCapacity;
                         
@@ -213,15 +216,21 @@ namespace Svelto.ECS.DataStructures
                     }
                     else
                     {
-                        var byteCountToEnd = capacity - oldReaderHead;
-                        var newReaderHead = _readIndex % newCapacity;
+                        //if the wrapped writer is behind the wrapped reader, it means the writer wrapped. Therefore
+                        //I need to copy the data from the current wrapped reader to the end and then from the 
+                        //begin of the array to the current wrapped writer.
+                        
+                        var byteCountToEnd = oldCapacity - oldReaderHead; //bytes to copy from the reader to the end
+                        var newReaderHead  = _readIndex % newCapacity;
                         
 #if DEBUG && !PROFILE_SVELTO
-                        if (newReaderHead + byteCountToEnd + writerHead > newCapacity)
+                        if (newReaderHead + byteCountToEnd + oldWriterHead > newCapacity) //basically the test is the old size must be less than the new capacity. 
                             throw new Exception("something is wrong with my previous assumptions");
 #endif                  
+                        //I am leaving on purpose gap at the begin of the new array if there is any, it will be 
+                        //anyway used once it's time to wrap. 
                         Unsafe.CopyBlock(newPointer + newReaderHead, ptr + oldReaderHead, byteCountToEnd); //from the old reader head to the end of the old array
-                        Unsafe.CopyBlock(newPointer + newReaderHead + byteCountToEnd, ptr + 0, (uint) writerHead); //from the begin of the old array to the old writer head (rember the writerHead wrapped)
+                        Unsafe.CopyBlock(newPointer + newReaderHead + byteCountToEnd, ptr + 0, (uint) oldWriterHead); //from the begin of the old array to the old writer head (rember the writerHead wrapped)
                     }
                 }
 
@@ -231,7 +240,7 @@ namespace Svelto.ECS.DataStructures
                 ptr      = newPointer;
                 capacity = newCapacity;
 
-                //_readIndex  = 0; readIndex won't change to keep the previous reserved indices valid
+                //_readIndex  = 0; the idea is that the old readIndex should remain unchanged. Remember this is the unwrapped index.
                 _writeIndex = _readIndex + currentSize;
             }
         }

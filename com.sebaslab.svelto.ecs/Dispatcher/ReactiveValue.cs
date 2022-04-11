@@ -21,7 +21,7 @@ namespace Svelto.ECS
             _subscriber = callback;
 
             if (notifyImmediately)
-                _subscriber(_senderID, initialValue);
+                _subscriber(senderID, initialValue);
 
             _senderID       = senderID;
             _value          = initialValue;

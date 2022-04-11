@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
@@ -115,9 +114,9 @@ namespace Svelto.ECS
 
             foreach (var value in localArray[startIndex])
             {
-                if (value.Key.IsEnabled())
+                if (value.key.IsEnabled())
                 {
-                    localGroups.Add(value.Key, value.Key);
+                    localGroups.Add(value.key, value.key);
                 }
             }
 
@@ -171,9 +170,9 @@ namespace Svelto.ECS
 
             foreach (var value in localArray[startIndex])
             {
-                if (value.Key.IsEnabled())
+                if (value.key.IsEnabled())
                 {
-                    localGroups.Add(value.Key, value.Key);
+                    localGroups.Add(value.key, value.key);
                 }
             }
 

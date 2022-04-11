@@ -4,8 +4,11 @@
         <LangVersion>8</LangVersion>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Company>Svelto</Company>
-        <AssemblyVersion>3.2.1</AssemblyVersion>
-        <PackageVersion>3.2.1</PackageVersion>
+        <AssemblyVersion>3.2.0</AssemblyVersion>
+        <PackageVersion>3.2.0</PackageVersion>
+        <IsPackable>false</IsPackable>
+        <Configurations>Debug;Release;SlowSubmissionRelease;SlowSubmissionDebug</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
     <PropertyGroup>
         <PackageId>Svelto.ECS</PackageId>
@@ -29,9 +32,19 @@
         <UseSharedCompilation>false</UseSharedCompilation>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'SlowSubmissionRelease' ">
+      <DefineConstants>TRACE;SLOW_SVELTO_SUBMISSION;RELEASE</DefineConstants>
+      <Optimize>true</Optimize>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'SlowSubmissionDebug' ">
+      <DefineConstants>TRACE;SLOW_SVELTO_SUBMISSION;DEBUG</DefineConstants>
+      <DebugSymbols>true</DebugSymbols>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="System.Memory" Version="4.5.4" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
         <None Remove="**\*.meta" />
         <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" /> <!-- Do not delete. Used for nuget packing -->
     </ItemGroup>

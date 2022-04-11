@@ -75,7 +75,7 @@ namespace Svelto.ECS.DataStructures
         readonly Allocator _allocator;
         readonly uint      _threadsCount;
         
-#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST    
+#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
 #if UNITY_BURST
         [Unity.Burst.NoAlias]
 #endif

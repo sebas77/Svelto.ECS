@@ -1,4 +1,5 @@
 #if UNITY_5 || UNITY_5_3_OR_NEWER
+using System;
 using Object = UnityEngine.Object;
 using UnityEngine;
 
@@ -23,16 +24,19 @@ namespace Svelto.ECS.Schedulers.Unity
             }
         }
 
-        public override bool paused { get; set; }
-
         void SubmitEntities()
         {
-            if (paused == false)
+            try
             {
-                var enumerator = _onTick.submitEntities;
-                enumerator.MoveNext();
-                    
-                while (enumerator.Current == true) enumerator.MoveNext();
+                _onTick.SubmitEntities();
+            }
+            catch (Exception e)
+            {
+                paused = true;
+                
+                Svelto.Console.LogException(e);
+                
+                throw;
             }
         }
 

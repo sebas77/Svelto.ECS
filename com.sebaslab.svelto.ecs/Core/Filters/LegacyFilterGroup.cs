@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Svelto.Common;
-using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
 using Svelto.ECS.DataStructures;
 
@@ -16,9 +15,9 @@ namespace Svelto.ECS
     ///     sparse[0] = position in the dense list of the entity 0
     ///     dense[index] = entity ID but also index in the sparse list of the same entity ID
     /// </summary>
-    public struct FilterGroup
+    public struct LegacyFilterGroup
     {
-        internal FilterGroup(ExclusiveGroupStruct exclusiveGroupStruct, int ID)
+        internal LegacyFilterGroup(ExclusiveGroupStruct exclusiveGroupStruct, int ID)
         {
             _denseListOfIndicesToEntityComponentArray =
                 new NativeDynamicArrayCast<uint>(NativeDynamicArray.Alloc<uint>(Allocator.Persistent));
@@ -33,7 +32,7 @@ namespace Svelto.ECS
         /// <summary>
         /// Todo: how to detect if the indices are still pointing to valid entities?
         /// </summary>
-        public FilteredIndices filteredIndices => new FilteredIndices(_denseListOfIndicesToEntityComponentArray);
+        public LegacyFilteredIndices filteredIndices => new LegacyFilteredIndices(_denseListOfIndicesToEntityComponentArray);
 
         public bool Add<N>(uint entityID, N mapper)  where N:IEGIDMapper
         {
@@ -85,11 +84,11 @@ namespace Svelto.ECS
         /// Filters were initially designed to be used for tagging operations within submissions of entities.
         /// They were designed as a fast tagging mechanism to be used within the submission frame. However I then
         /// extended it, but the extension includes a drawback:
-        ///If filters are not in sync with the operations of remove and swap, filters may end up pointing to
-        ///invalid indices. I need to put in place a way to be able to recognised an invalid filter.
-        ///This is currently a disadvantage of the filters. The filters are not updated by the framework
-        ///but they must be updated by the user.
-        ///When to use this method: Add and Removed should be used to add and remove entities in the filters. This is
+        /// If filters are not in sync with the operations of remove and swap, filters may end up pointing to
+        /// invalid indices. I need to put in place a way to be able to recognised an invalid filter.
+        /// This is currently a disadvantage of the filters. The filters are not updated by the framework
+        /// but they must be updated by the user.
+        /// When to use this method: Add and Removed should be used to add and remove entities in the filters. This is
         /// valid as long as no structural changes happen in the group of entities involved.
         /// IF structural changes happen, the indices stored in the filters won't be valid anymore as they will possibly
         /// point to entities that were not the original ones. On structural changes
@@ -107,11 +106,11 @@ namespace Svelto.ECS
             _reverseEIDs.Clear();
 
             foreach (var value in _indexOfEntityInDenseList)
-                if (mapper.FindIndex(value.Key, out var indexOfEntityInBufferComponent) == true)
+                if (mapper.FindIndex(value.key, out var indexOfEntityInBufferComponent) == true)
                 {
                     _denseListOfIndicesToEntityComponentArray.Add(indexOfEntityInBufferComponent);
                     var lastIndex = (uint) (_denseListOfIndicesToEntityComponentArray.Count() - 1);
-                    _reverseEIDs.AddAt(lastIndex) = value.Key;
+                    _reverseEIDs.AddAt(lastIndex) = value.key;
                 }
 
             _indexOfEntityInDenseList.Clear();

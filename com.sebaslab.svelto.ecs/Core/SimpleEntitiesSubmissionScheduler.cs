@@ -1,60 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Svelto.ECS.Schedulers
+﻿namespace Svelto.ECS.Schedulers
 {
     public sealed class SimpleEntitiesSubmissionScheduler : EntitiesSubmissionScheduler
     {
-        public SimpleEntitiesSubmissionScheduler(uint maxNumberOfOperationsPerFrame = UInt32.MaxValue)
-        {
-            _enumerator = SubmitEntitiesAsync(maxNumberOfOperationsPerFrame);
-        }
-
-        public IEnumerator<bool> SubmitEntitiesAsync()
-        {
-            return _enumerator;
-        }
-
-        public IEnumerator<bool> SubmitEntitiesAsync(uint maxNumberOfOperations)
-        {
-            EnginesRoot.EntitiesSubmitter entitiesSubmitter = _onTick.Value;
-            entitiesSubmitter.maxNumberOfOperationsPerFrame = maxNumberOfOperations;
-
-            while (true)
-            {
-                if (paused == false)
-                {
-                    var entitiesSubmitterSubmitEntities = entitiesSubmitter.submitEntities;
-                    
-                    entitiesSubmitterSubmitEntities.MoveNext();
-                    
-                    yield return entitiesSubmitterSubmitEntities.Current == true;
-                }
-            }
-        }
-
-        public void SubmitEntities()
-        {
-            do
-            {
-                _enumerator.MoveNext();
-            } while (_enumerator.Current == true);
-        }
-
-        public override bool paused    { get; set; }
-        public override void Dispose() { }
-
         protected internal override EnginesRoot.EntitiesSubmitter onTick
         {
             set
             {
-                DBC.ECS.Check.Require(_onTick == null, "a scheduler can be exclusively used by one enginesRoot only");
+                DBC.ECS.Check.Require(_entitiesSubmitter == null, "a scheduler can be exclusively used by one enginesRoot only");
 
-                _onTick = value;
+                _entitiesSubmitter = value;
             }
         }
 
-        EnginesRoot.EntitiesSubmitter? _onTick;
-        readonly IEnumerator<bool>     _enumerator;
+        public override void Dispose() { }
+
+        public void SubmitEntities()
+        {
+            try
+            {
+                _entitiesSubmitter.Value.SubmitEntities();
+            }
+            catch
+            {
+                paused = true;
+                
+                throw;
+            }
+        }
+
+        EnginesRoot.EntitiesSubmitter? _entitiesSubmitter;
     }
 }

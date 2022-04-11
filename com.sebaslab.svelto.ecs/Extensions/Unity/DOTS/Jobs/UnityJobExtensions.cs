@@ -1,11 +1,11 @@
 #if UNITY_JOBS
 using System;
-using Svelto.ECS.Extensions.Unity;
+using Svelto.ECS.SveltoOnDOTS;
 using Unity.Jobs;
 
 namespace Svelto.ECS
 {
-    public static class UnityJobExtensions2
+    public static class UnityJobExtensions
     {
         public static JobHandle ScheduleDispose
             <T1>(this T1 disposable, JobHandle inputDeps) where T1 : struct, IDisposable

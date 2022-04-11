@@ -3,16 +3,19 @@ using Svelto.ECS.DataStructures;
 
 namespace Svelto.ECS
 {
-    public readonly struct FilteredIndices
+    public readonly struct LegacyFilteredIndices
     {
-        public FilteredIndices(NativeDynamicArrayCast<uint> denseListOfIndicesToEntityComponentArray)
+        public LegacyFilteredIndices(NativeDynamicArrayCast<uint> denseListOfIndicesToEntityComponentArray)
         {
             _denseListOfIndicesToEntityComponentArray = denseListOfIndicesToEntityComponentArray;
             _count                                    = _denseListOfIndicesToEntityComponentArray.count;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Count() => _count;
+        public int count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _count; }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint Get(uint index) => _denseListOfIndicesToEntityComponentArray[index];

@@ -1,6 +1,11 @@
+#if DEBUG && !PROFILE_SVELTO
+#define ENABLE_DEBUG_CHECKS
+#endif
+
 using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
+using Svelto.Common.DataStructures;
 using Allocator = Svelto.Common.Allocator;
 
 namespace Svelto.ECS.DataStructures
@@ -24,7 +29,7 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
@@ -34,13 +39,13 @@ namespace Svelto.ECS.DataStructures
                 return (_list->count / MemoryUtilities.SizeOf<T>());
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Size() 
+        public int SizeInBytes()
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
 
@@ -54,7 +59,7 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
@@ -74,16 +79,19 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
-                var rtnStruc = new NativeDynamicArray {_hashType = TypeHash<T>.hash};
-#else           
+#if ENABLE_DEBUG_CHECKS
+                var rtnStruc = new NativeDynamicArray
+                {
+                    _hashType       = TypeHash<T>.hash,
+                };
+#else
                 NativeDynamicArray rtnStruc = default;
 #endif
-                UnsafeArray* listData    = (UnsafeArray*) MemoryUtilities.Alloc<UnsafeArray>(1, allocator);
+                UnsafeArray* listData = (UnsafeArray*)MemoryUtilities.Alloc<UnsafeArray>(1, allocator);
 
                 //clear to nullify the pointers
                 //MemoryUtilities.MemClear((IntPtr) listData, structSize);
-
+                
                 rtnStruc._allocator = allocator;
                 listData->Realloc<T>(newLength, allocator);
 
@@ -98,7 +106,7 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
@@ -106,14 +114,22 @@ namespace Svelto.ECS.DataStructures
                 if (index >= Count<T>())
                     throw new Exception($"NativeDynamicArray: out of bound access, index {index} count {Count<T>()}");
 #endif
-                return ref _list->Get<T>(index);
+                
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    return ref _list->Get<T>(index);
+#if ENABLE_DEBUG_CHECKS                    
+                }
+#endif
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Get<T>(int index) where T : struct
         {
-            return ref Get<T>((uint) index);
+            return ref Get<T>((uint)index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,27 +137,45 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
                 if (index >= Capacity<T>())
-                    throw new Exception($"NativeDynamicArray: out of bound access, index {index} capacity {Capacity<T>()}");
+                    throw new Exception(
+                        $"NativeDynamicArray: out of bound access, index {index} capacity {Capacity<T>()}");
 #endif
-                _list->Set(index, value);
+                
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    _list->Set(index, value);
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
         public unsafe void Dispose()
         {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
             if (_list == null)
                 throw new Exception("NativeDynamicArray: null-access");
 #endif
-            _list->Dispose(_allocator);
-            MemoryUtilities.Free((IntPtr) _list, _allocator);
             
+#if ENABLE_DEBUG_CHECKS
+            using (_threadSentinel.TestThreadSafety())
+            {
+#endif
+                _list->Dispose(_allocator);
+                MemoryUtilities.Free((IntPtr)_list, _allocator);
+                
+#if ENABLE_DEBUG_CHECKS
+            }
+#endif
             _list = null;
         }
 
@@ -150,56 +184,80 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
 #endif
-                if (Count<T>() == Capacity<T>())
+                
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
                 {
-                    _list->Realloc<T>((uint) ((Capacity<T>() + 1) * 1.5f), _allocator);
-                }
+#endif
+                    if (Count<T>() == Capacity<T>())
+                    {
+                        _list->Realloc<T>((uint)((Capacity<T>() + 1) * 1.5f), _allocator);
+                    }
 
-                _list->Add(item);
+                    _list->Add(item);
+#if ENABLE_DEBUG_CHECKS                    
+                }
+#endif
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddAt<T>(uint index) where T : struct
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
 #endif
-                var structSize = (uint) MemoryUtilities.SizeOf<T>();
+                var structSize = (uint)MemoryUtilities.SizeOf<T>();
 
-                if (index >= Capacity<T>())
-                    _list->Realloc<T>((uint) ((index + 1) * 1.5f), _allocator);
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    if (index >= Capacity<T>())
+                        _list->Realloc<T>((uint)((index + 1) * 1.5f), _allocator);
 
-                var writeIndex = (index + 1) * structSize;
-                if (_list->count < writeIndex)
-                    _list->SetCountTo(writeIndex);
+                    var writeIndex = (index + 1) * structSize;
+                    if (_list->count < writeIndex)
+                        _list->SetCountTo(writeIndex);
 
-                return ref _list->Get<T>(index);
+                    return ref _list->Get<T>(index);
+#if ENABLE_DEBUG_CHECKS                    
+                }
+#endif
             }
         }
-        
+
         public void Resize<T>(uint newCapacity) where T : struct
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
 #endif
-                _list->Realloc<T>((uint) newCapacity, _allocator);
+                
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    _list->Realloc<T>((uint)newCapacity, _allocator);
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
@@ -207,16 +265,24 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
 #endif
-                uint structSize = (uint) MemoryUtilities.SizeOf<T>();
-                uint size       = (uint) (count * structSize);
+                uint structSize = (uint)MemoryUtilities.SizeOf<T>();
+                uint size       = (uint)(count * structSize);
 
-                _list->SetCountTo((uint) size);
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    _list->SetCountTo((uint)size);
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
@@ -225,18 +291,27 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
 
-                var structSize = (uint) MemoryUtilities.SizeOf<T>();
-                
+                var structSize = (uint)MemoryUtilities.SizeOf<T>();
+
                 if (_list->space - (int)structSize < 0)
                     throw new Exception("NativeDynamicArray: no writing authorized");
 #endif
-                _list->Add(item);
+                
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    _list->Add(item);
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
@@ -245,7 +320,7 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
@@ -253,13 +328,22 @@ namespace Svelto.ECS.DataStructures
                 if (Count<T>() == 0)
                     throw new Exception("NativeDynamicArray: empty array invalid operation");
 #endif
-                var indexToMove = Count<T>() - 1;
-                if (index < indexToMove)
-                {
-                    Set<T>(index, Get<T>((uint) indexToMove));
-                }
 
-                _list->Pop<T>();
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    var indexToMove = Count<T>() - 1;
+                    if (index < indexToMove)
+                    {
+                        Set<T>(index, Get<T>((uint)indexToMove));
+                    }
+
+                    _list->Pop<T>();
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
@@ -268,38 +352,47 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
 #endif
-                _list->Clear();
+                
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    _list->Clear();
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
         public unsafe T* ToPTR<T>() where T : unmanaged
         {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
             if (_list == null)
                 throw new Exception("NativeDynamicArray: null-access");
             if (_hashType != TypeHash<T>.hash)
                 throw new Exception("NativeDynamicArray: not expected type used");
 
 #endif
-            return (T*) _list->ptr;
+            return (T*)_list->ptr;
         }
 
         public IntPtr ToIntPTR<T>() where T : struct
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
-            if (_list == null)
-                throw new Exception("NativeDynamicArray: null-access");
-            if (_hashType != TypeHash<T>.hash)
-                throw new Exception("NativeDynamicArray: not expected type used");
+#if ENABLE_DEBUG_CHECKS
+                if (_list == null)
+                    throw new Exception("NativeDynamicArray: null-access");
+                if (_hashType != TypeHash<T>.hash)
+                    throw new Exception("NativeDynamicArray: not expected type used");
 
 #endif
-                return (IntPtr) _list->ptr;
+                return (IntPtr)_list->ptr;
             }
         }
 
@@ -307,7 +400,7 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
@@ -318,12 +411,20 @@ namespace Svelto.ECS.DataStructures
                 var ret                 = new T[count];
                 var lengthToCopyInBytes = count * MemoryUtilities.SizeOf<T>();
 
-                fixed (void* handle = ret)
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
                 {
-                    Unsafe.CopyBlock(handle, _list->ptr, (uint) lengthToCopyInBytes);
-                }
+#endif
+                    fixed (void* handle = ret)
+                    {
+                        Unsafe.CopyBlock(handle, _list->ptr, (uint)lengthToCopyInBytes);
+                    }
 
-                return ret;
+                    return ret;
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
@@ -331,20 +432,27 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
 #endif
-                var capacity            = Capacity<T>();
-                var lengthToCopyInBytes = capacity * MemoryUtilities.SizeOf<T>();
-                var ret                 = new T[capacity];
+                var capacity = Capacity<T>();
+                var ret      = new T[capacity];
 
-                fixed (void* handle = ret)
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
                 {
-                    Unsafe.CopyBlock(handle, _list->ptr, (uint) lengthToCopyInBytes);
+#endif
+                    fixed (void* handle = ret)
+                    {
+                        MemoryUtilities.MemCpy<T>((IntPtr)_list->ptr, 0, (IntPtr)handle, 0, (uint)capacity);
+                    }
+                    
+#if ENABLE_DEBUG_CHECKS
                 }
+#endif
 
                 return ret;
             }
@@ -354,18 +462,24 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-#if DEBUG && !PROFILE_SVELTO
+#if ENABLE_DEBUG_CHECKS
                 if (_list == null)
                     throw new Exception("NativeDynamicArray: null-access");
                 if (_hashType != TypeHash<T>.hash)
                     throw new Exception("NativeDynamicArray: not expected type used");
 #endif
 
-                var sizeOf = MemoryUtilities.SizeOf<T>();
-                //Unsafe.CopyBlock may not be memory overlapping safe (memcpy vs memmove)
-                Buffer.MemoryCopy(_list->ptr + (index + 1) * sizeOf, _list->ptr + index * sizeOf, _list->count
-                                , (uint) ((Count<T>() - (index + 1)) * sizeOf));
-                _list->Pop<T>();
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    MemoryUtilities.MemMove<T>((IntPtr)_list->ptr, index + 1, index, (uint)(Count<T>() - (index + 1)));
+
+                    _list->Pop<T>();
+                    
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
 
@@ -373,11 +487,18 @@ namespace Svelto.ECS.DataStructures
         {
             unsafe
             {
-                MemoryUtilities.MemClear((IntPtr) _list->ptr, (uint) _list->capacity);
+#if ENABLE_DEBUG_CHECKS
+                using (_threadSentinel.TestThreadSafety())
+                {
+#endif
+                    MemoryUtilities.MemClear((IntPtr)_list->ptr, (uint)_list->capacity);
+#if ENABLE_DEBUG_CHECKS
+                }
+#endif
             }
         }
-        
-#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST    
+
+#if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
 #if UNITY_BURST
         [Unity.Burst.NoAlias]
 #endif
@@ -387,6 +508,9 @@ namespace Svelto.ECS.DataStructures
 #if DEBUG && !PROFILE_SVELTO
         int _hashType;
 #endif
+        
+        Sentinel _threadSentinel;
+
         Allocator _allocator;
     }
 }

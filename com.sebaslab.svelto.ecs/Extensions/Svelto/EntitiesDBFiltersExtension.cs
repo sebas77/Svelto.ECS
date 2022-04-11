@@ -5,10 +5,10 @@ namespace Svelto.ECS
 {
     public static class EntitiesDBFiltersExtension
     {
-        public static bool AddEntityToFilter<N>(this EntitiesDB.Filters filters, int filtersID, EGID egid, N mapper) where N : IEGIDMultiMapper
+        public static bool AddEntityToFilter<N>(this EntitiesDB.LegacyFilters legacyFilters, int filtersID, EGID egid, N mapper) where N : IEGIDMultiMapper
         {
             ref var filter =
-                ref filters.CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapperType(mapper.entityType));
+                ref legacyFilters.CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapperType(mapper.entityType));
 
             return filter.Add(egid.entityID, mapper);
         }

@@ -1,58 +1,63 @@
 {
-  "name": "Svelto.ECS",
-  "rootNamespace": "",
-  "references": [
-    "Unity.Entities",
-    "Unity.Collections",
-    "Unity.Burst",
-    "Unity.Jobs",
-    "Svelto.Common"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": true,
-  "overrideReferences": true,
-  "precompiledReferences": [
-    "System.Runtime.CompilerServices.Unsafe.dll"
-  ],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [
-    {
-      "name": "Unity",
-      "expression": "2019.3",
-      "define": "UNITY_JOBS"
-    },
-    {
-      "name": "com.unity.entities",
-      "expression": "",
-      "define": "UNITY_ECS"
-    },
-    {
-      "name": "com.unity.burst",
-      "expression": "",
-      "define": "UNITY_BURST"
-    },
-    {
-      "name": "com.unity.collections",
-      "expression": "",
-      "define": "UNITY_COLLECTIONS"
-    },
-    {
-      "name": "com.unity.entities",
-      "expression": "",
-      "define": "UNITY_NATIVE"
-    },
-    {
-      "name": "com.unity.burst",
-      "expression": "",
-      "define": "UNITY_NATIVE"
-    },
-    {
-      "name": "com.unity.collections",
-      "expression": "",
-      "define": "UNITY_NATIVE"
-    }
-  ],
-  "noEngineReferences": false
+    "name": "Svelto.ECS",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Entities",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Jobs",
+        "Svelto.Common"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "System.Runtime.CompilerServices.Unsafe.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "Unity",
+            "expression": "2019.3",
+            "define": "UNITY_JOBS"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "",
+            "define": "UNITY_ECS"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "",
+            "define": "UNITY_NATIVE"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_NATIVE"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_NATIVE"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "0.45",
+            "define": "UNITY_ECS_050"
+        }
+    ],
+    "noEngineReferences": false
 }

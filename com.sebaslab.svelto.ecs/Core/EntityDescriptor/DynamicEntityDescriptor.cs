@@ -129,7 +129,7 @@ namespace Svelto.ECS
 
                     uint index = 0;
                     foreach (var couple in xtraComponents)
-                        newComponents[index++] = couple.Key.value;
+                        newComponents[index++] = couple.key.type;
                 }
 
                 IComponentBuilder[] componentBuilders =

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using DBC.ECS;
 using Svelto.Common;
 using Svelto.DataStructures;
@@ -22,33 +23,59 @@ namespace Svelto.ECS
             return obj.GetEntityComponentType().GetHashCode();
         }
     }
+
+    public static class BurstCompatibleCounter
+    {
+        public static int counter;        
+    }
     
-    public class ComponentBuilder<T> : IComponentBuilder
-        where T : struct, IEntityComponent
+    public class ComponentID<T> where T : struct, IEntityComponent
+    {
+        public static readonly SharedStaticWrapper<int, ComponentID<T>> id;
+
+#if UNITY_BURST 
+        [Unity.Burst.BurstDiscard] 
+        //SharedStatic values must be initialized from not burstified code
+#endif
+        public static void Init()
+        {
+            id.Data = Interlocked.Increment(ref BurstCompatibleCounter.counter);
+
+            DBC.ECS.Check.Ensure(id.Data < ushort.MaxValue, "too many types registered, HOW :)");
+        }
+    }
+
+    public class ComponentBuilder<T> : IComponentBuilder where T : struct, IEntityComponent
     {
         internal static readonly Type ENTITY_COMPONENT_TYPE;
-        public static readonly   bool HAS_EGID;
         internal static readonly bool IS_ENTITY_VIEW_COMPONENT;
 
         static readonly T      DEFAULT_IT;
         static readonly string ENTITY_COMPONENT_NAME;
         static readonly bool   IS_UNMANAGED;
-        public static   bool   HAS_REFERENCE;
+#if SLOW_SVELTO_SUBMISSION            
+        public static readonly bool HAS_EGID;
+        public static readonly bool HAS_REFERENCE;
+#endif
 
         static ComponentBuilder()
         {
-            ENTITY_COMPONENT_TYPE    = typeof(T);
-            DEFAULT_IT               = default;
+            ENTITY_COMPONENT_TYPE = typeof(T);
+            DEFAULT_IT = default;
             IS_ENTITY_VIEW_COMPONENT = typeof(IEntityViewComponent).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
-            HAS_EGID                 = typeof(INeedEGID).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
-            HAS_REFERENCE            = typeof(INeedEntityReference).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
-            ENTITY_COMPONENT_NAME    = ENTITY_COMPONENT_TYPE.ToString();
-            IS_UNMANAGED             = ENTITY_COMPONENT_TYPE.IsUnmanagedEx();
-
+#if SLOW_SVELTO_SUBMISSION            
+            HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
+            HAS_REFERENCE = typeof(INeedEntityReference).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
+            
+            SetEGIDWithoutBoxing<T>.Warmup();
+#endif
+            ComponentID<T>.Init();
+            ENTITY_COMPONENT_NAME = ENTITY_COMPONENT_TYPE.ToString();
+            IS_UNMANAGED = TypeType.isUnmanaged<T>(); //attention this is important as it serves as warm up for Type<T>
+#if UNITY_NATIVE
             if (IS_UNMANAGED)
                 EntityComponentIDMap.Register<T>(new Filler<T>());
-
-            SetEGIDWithoutBoxing<T>.Warmup();
+#endif
 
             ComponentBuilderUtilities.CheckFields(ENTITY_COMPONENT_TYPE, IS_ENTITY_VIEW_COMPONENT);
 
@@ -58,16 +85,22 @@ namespace Svelto.ECS
             }
             else
             {
-                if (ENTITY_COMPONENT_TYPE != ComponentBuilderUtilities.ENTITY_INFO_COMPONENT
-                 && ENTITY_COMPONENT_TYPE.IsUnmanagedEx() == false)
+                if (ENTITY_COMPONENT_TYPE != ComponentBuilderUtilities.ENTITY_INFO_COMPONENT &&
+                    ENTITY_COMPONENT_TYPE.IsUnmanagedEx() == false)
                     throw new Exception(
                         $"Entity Component check failed, unexpected struct type (must be unmanaged) {ENTITY_COMPONENT_TYPE}");
             }
         }
 
-        public ComponentBuilder() { _initializer = DEFAULT_IT; }
+        public ComponentBuilder()
+        {
+            _initializer = DEFAULT_IT;
+        }
 
-        public ComponentBuilder(in T initializer) : this() { _initializer = initializer; }
+        public ComponentBuilder(in T initializer) : this()
+        {
+            _initializer = initializer;
+        }
 
         public bool isUnmanaged => IS_UNMANAGED;
 
@@ -75,37 +108,51 @@ namespace Svelto.ECS
         {
             var castedDic = dictionary as ITypeSafeDictionary<T>;
 
-            T entityComponent = default;
-
             if (IS_ENTITY_VIEW_COMPONENT)
             {
-                Check.Require(castedDic.ContainsKey(egid.entityID) == false
-                            , $"building an entity with already used entity id! id: '{(ulong) egid}', {ENTITY_COMPONENT_NAME}");
+                T entityComponent = default;
+                
+                Check.Require(castedDic.ContainsKey(egid.entityID) == false,
+                    $"building an entity with already used entity id! id: '{(ulong)egid}', {ENTITY_COMPONENT_NAME}");
 
-                this.SetEntityViewComponentImplementors(ref entityComponent, EntityViewComponentCache.cachedFields
-                                                      , implementors, EntityViewComponentCache.implementorsByType
-                                                      , EntityViewComponentCache.cachedTypes);
+                this.SetEntityViewComponentImplementors(ref entityComponent, EntityViewComponentCache.cachedFields,
+                    implementors, EntityViewComponentCache.implementorsByType, EntityViewComponentCache.cachedTypes);
 
                 castedDic.Add(egid.entityID, entityComponent);
             }
             else
             {
-                Check.Require(!castedDic.ContainsKey(egid.entityID)
-                            , $"building an entity with already used entity id! id: '{egid.entityID}'");
+                Check.Require(!castedDic.ContainsKey(egid.entityID),
+                    $"building an entity with already used entity id! id: '{egid.entityID}'");
 
                 castedDic.Add(egid.entityID, _initializer);
             }
         }
 
-        void IComponentBuilder.Preallocate(ITypeSafeDictionary dictionary, uint size) { Preallocate(dictionary, size); }
+        void IComponentBuilder.Preallocate(ITypeSafeDictionary dictionary, uint size)
+        {
+            Preallocate(dictionary, size);
+        }
 
-        public ITypeSafeDictionary CreateDictionary(uint size) { return TypeSafeDictionaryFactory<T>.Create(size); }
+        public ITypeSafeDictionary CreateDictionary(uint size)
+        {
+            return TypeSafeDictionaryFactory<T>.Create(size);
+        }
 
-        public Type GetEntityComponentType() { return ENTITY_COMPONENT_TYPE; }
+        public Type GetEntityComponentType()
+        {
+            return ENTITY_COMPONENT_TYPE;
+        }
 
-        public override int GetHashCode() { return _initializer.GetHashCode(); }
+        public override int GetHashCode()
+        {
+            return _initializer.GetHashCode();
+        }
 
-        static void Preallocate(ITypeSafeDictionary dictionary, uint size) { dictionary.ResizeTo(size); }
+        static void Preallocate(ITypeSafeDictionary dictionary, uint size)
+        {
+            dictionary.EnsureCapacity(size);
+        }
 
         readonly T _initializer;
 
@@ -156,7 +203,9 @@ namespace Svelto.ECS
 #endif
             }
 
-            internal static void InitCache() { }
+            internal static void InitCache()
+            {
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Svelto.ECS.Reference;
 
 namespace Svelto.ECS
 {
@@ -18,7 +17,7 @@ namespace Svelto.ECS
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EnginesRoot.LocatorMap GetEntityLocator()
+        public EnginesRoot.EntityReferenceMap GetEntityReferenceMap()
         {
             return _entityReferencesMap;
         }

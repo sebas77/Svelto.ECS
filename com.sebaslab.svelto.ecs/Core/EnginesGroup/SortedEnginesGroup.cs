@@ -11,7 +11,6 @@ namespace Svelto.ECS
     ///{
     ///    WiresTimeRunningGroup,
     ///    WiresPreInitTimeRunningGroup,
-    ///    WiresInitTimeStoppedGroup,
     ///    WiresInitTimeRunningGroup
     ///}
     ///

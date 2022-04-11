@@ -3,7 +3,7 @@ using Svelto.DataStructures;
 using Unity.Jobs;
 using Svelto.Common;
 
-namespace Svelto.ECS.Extensions.Unity
+namespace Svelto.ECS.SveltoOnDOTS
 {
     /// <summary>
     /// Note sorted jobs run in serial
@@ -15,38 +15,40 @@ namespace Svelto.ECS.Extensions.Unity
     {
         protected SortedJobifiedEnginesGroup(FasterList<Interface> engines)
         {
-            _name = "SortedJobifiedEnginesGroup - "+this.GetType().Name;
+            _name              = "SortedJobifiedEnginesGroup - " + this.GetType().Name;
             _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
         }
 
         public JobHandle Execute(JobHandle inputHandles)
         {
-            var sequenceItems = _instancedSequence.items;
+            var       sequenceItems   = _instancedSequence.items;
             JobHandle combinedHandles = inputHandles;
             using (var profiler = new PlatformProfiler(_name))
             {
                 for (var index = 0; index < sequenceItems.count; index++)
                 {
                     var engine = sequenceItems[index];
-                    using (profiler.Sample(engine.name)) combinedHandles = engine.Execute(combinedHandles);
+                    using (profiler.Sample(engine.name))
+                        combinedHandles = engine.Execute(combinedHandles);
                 }
             }
 
-            return combinedHandles; 
+            return combinedHandles;
         }
 
         public string name => _name;
-        
-        readonly string _name;
+
+        readonly string                             _name;
         readonly Sequence<Interface, SequenceOrder> _instancedSequence;
-    } 
-    
-    public abstract class SortedJobifiedEnginesGroup<Interface, Parameter, SequenceOrder>: IJobifiedGroupEngine<Parameter>
+    }
+
+    public abstract class
+        SortedJobifiedEnginesGroup<Interface, Parameter, SequenceOrder> : IJobifiedGroupEngine<Parameter>
         where SequenceOrder : struct, ISequenceOrder where Interface : class, IJobifiedEngine<Parameter>
     {
         protected SortedJobifiedEnginesGroup(FasterList<Interface> engines)
         {
-            _name = "SortedJobifiedEnginesGroup - "+this.GetType().Name;
+            _name              = "SortedJobifiedEnginesGroup - " + this.GetType().Name;
             _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
         }
 
@@ -58,7 +60,8 @@ namespace Svelto.ECS.Extensions.Unity
                 for (var index = 0; index < sequenceItems.count; index++)
                 {
                     var engine = sequenceItems[index];
-                    using (profiler.Sample(engine.name)) combinedHandles = engine.Execute(combinedHandles, ref param);
+                    using (profiler.Sample(engine.name))
+                        combinedHandles = engine.Execute(combinedHandles, ref param);
                 }
             }
 
@@ -66,8 +69,8 @@ namespace Svelto.ECS.Extensions.Unity
         }
 
         public string name => _name;
-        
-        readonly string _name;
+
+        readonly string                             _name;
         readonly Sequence<Interface, SequenceOrder> _instancedSequence;
     }
 }

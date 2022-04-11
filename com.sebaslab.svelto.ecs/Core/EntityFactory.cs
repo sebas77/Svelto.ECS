@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 
@@ -10,11 +9,15 @@ namespace Svelto.ECS.Internal
         (EGID egid, EnginesRoot.DoubleBufferedEntitiesToAdd groupEntitiesToAdd, IComponentBuilder[] componentsToBuild
        , IEnumerable<object> implementors
 #if DEBUG && !PROFILE_SVELTO
-       , Type descriptorType
+       , System.Type descriptorType
 #endif
         )
         {
-            var group = FetchEntityGroup(egid.groupID, groupEntitiesToAdd);
+            var group = groupEntitiesToAdd.currentComponentsToAddPerGroup.GetOrAdd(
+                egid.groupID, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
+
+            //track the number of entities created so far in the group.
+            groupEntitiesToAdd.IncrementEntityCount(egid.groupID);
 
             BuildEntitiesAndAddToGroup(egid, group, componentsToBuild, implementors
 #if DEBUG && !PROFILE_SVELTO
@@ -25,23 +28,11 @@ namespace Svelto.ECS.Internal
             return group;
         }
 
-        static FasterDictionary<RefWrapperType, ITypeSafeDictionary> FetchEntityGroup
-            (ExclusiveGroupStruct groupID, EnginesRoot.DoubleBufferedEntitiesToAdd groupEntityComponentsByType)
-        {
-            var group = groupEntityComponentsByType.current.GetOrCreate(
-                groupID, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
-
-            //track the number of entities created so far in the group.
-            groupEntityComponentsByType.IncrementEntityCount(groupID);
-
-            return group;
-        }
-
         static void BuildEntitiesAndAddToGroup
         (EGID entityID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> @group
        , IComponentBuilder[] componentBuilders, IEnumerable<object> implementors
 #if DEBUG && !PROFILE_SVELTO
-       , Type descriptorType
+       , System.Type descriptorType
 #endif
         )
         {
@@ -51,7 +42,7 @@ namespace Svelto.ECS.Internal
             var numberOfComponents = componentBuilders.Length;
 
 #if DEBUG && !PROFILE_SVELTO
-            HashSet<Type> types = new HashSet<Type>();
+            var types = new HashSet<System.Type>();
 
             for (var index = 0; index < numberOfComponents; ++index)
             {
@@ -78,7 +69,7 @@ namespace Svelto.ECS.Internal
        , IComponentBuilder componentBuilder, IEnumerable<object> implementors)
         {
             var entityComponentType = componentBuilder.GetEntityComponentType();
-            var safeDictionary = group.GetOrCreate(new RefWrapperType(entityComponentType)
+            ITypeSafeDictionary safeDictionary = group.GetOrAdd(new RefWrapperType(entityComponentType)
                                                  , (ref IComponentBuilder cb) => cb.CreateDictionary(1)
                                                  , ref componentBuilder);
 

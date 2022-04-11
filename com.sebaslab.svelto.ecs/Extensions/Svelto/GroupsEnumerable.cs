@@ -40,11 +40,11 @@ namespace Svelto.ECS
                     if (!exclusiveGroupStruct.IsEnabled())
                         continue;
 
-                    var entityCollection1 = _entitiesDB.QueryEntities<T1, T2, T3, T4>(exclusiveGroupStruct);
+                    var entityCollection = _entitiesDB.QueryEntities<T1, T2, T3, T4>(exclusiveGroupStruct);
+                    if (entityCollection.count == 0)
+                        continue;
 
-                    var array  = entityCollection1;
-                    _buffers = new EntityCollection<T1, T2, T3, T4>(array.buffer1, array.buffer2, array.buffer3
-                                                                  , array.buffer4);
+                    _buffers = entityCollection;
                     break;
                 }
 
@@ -120,7 +120,7 @@ namespace Svelto.ECS
                     if (!exclusiveGroupStruct.IsEnabled())
                         continue;
 
-                    var entityCollection = _entitiesDB.QueryEntities<T1, T2, T3>(exclusiveGroupStruct);
+                    EntityCollection<T1, T2, T3> entityCollection = _entitiesDB.QueryEntities<T1, T2, T3>(exclusiveGroupStruct);
                     if (entityCollection.count == 0)
                         continue;
 

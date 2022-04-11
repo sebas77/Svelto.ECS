@@ -2,7 +2,7 @@
 using Unity.Entities;
 using Unity.Jobs;
 
-namespace Svelto.ECS.Extensions.Unity
+namespace Svelto.ECS.SveltoOnDOTS
 {
     /// <summary>
     ///     HOW DOTS SYSTEMBASE DEPENDENCY SYSTEM WORKS:
@@ -50,24 +50,36 @@ namespace Svelto.ECS.Extensions.Unity
     // Tim Johansson  2 hours ago
     // Yes, you would have to do it every time
 
-    public class SyncSveltoToUECSGroup : UnsortedJobifiedEnginesGroup<SyncSveltoToUECSEngine> {}
+    public class SyncSveltoToDOTSGroup : UnsortedJobifiedEnginesGroup<SyncSveltoToDOTSEngine> {}
 
-    public abstract class SyncSveltoToUECSEngine : SystemBase, IJobifiedEngine
+    public abstract partial class SyncSveltoToDOTSEngine : SystemBase, IJobifiedEngine
     {
         //The dependency returned is enough for the Svelto Engines running after this to take in consideration
         //the Systembase jobs. The svelto engines do not need to take in consideration the new dependencies created
         //by the World.Update because those are independent and are needed only by the next World.Update() jobs
         public JobHandle Execute(JobHandle inputDeps)
         {
-            //SysteBase jobs that will use this Dependency will wait for inputDeps to be completed before to execute
-            Dependency = JobHandle.CombineDependencies(Dependency, inputDeps);
+            _inputDeps = inputDeps;
 
-            Update();
+            Update(); //this complete the previous frame jobs so dependency cannot be modified atr this point
 
             return Dependency;
         }
 
+        //TODO if this is correct must change SyncDOTSToSveltoGroup too
+        protected sealed override void OnUpdate()
+        {
+            //SysteBase jobs that will use this Dependency will wait for inputDeps to be completed before to execute
+            Dependency = JobHandle.CombineDependencies(Dependency, _inputDeps);
+            
+            OnSveltoUpdate();
+        }
+
+        protected abstract void OnSveltoUpdate();
+
         public abstract string name { get; }
+        
+        JobHandle _inputDeps;
     }
 }
 #endif

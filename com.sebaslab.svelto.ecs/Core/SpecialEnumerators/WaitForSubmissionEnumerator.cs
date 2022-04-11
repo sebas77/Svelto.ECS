@@ -7,9 +7,9 @@ namespace Svelto.ECS
     /// <summary>
     /// Enumerator that yields until the next Entities Submission
     /// </summary>
-    public struct WaitForSubmissionEnumerator : IEnumerator
+    public class WaitForSubmissionEnumerator : IEnumerator
     {
-        public WaitForSubmissionEnumerator(EntitiesSubmissionScheduler scheduler):this()
+        public WaitForSubmissionEnumerator(EntitiesSubmissionScheduler scheduler)
         {
             _scheduler       = scheduler;
         }

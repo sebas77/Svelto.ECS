@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Svelto.Common;
-using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
 using Svelto.ECS.DataStructures;
 using Svelto.ECS.Reference;
@@ -12,7 +11,7 @@ namespace Svelto.ECS
     // find the last known EGID from last entity submission.
     public partial class EnginesRoot
     {
-        public struct LocatorMap
+        public struct EntityReferenceMap
         {
             internal EntityReference ClaimReference()
             {
@@ -78,11 +77,12 @@ namespace Svelto.ECS
 
                 // Update reverse map from egid to locator.
                 var groupMap =
-                    _egidToReferenceMap.GetOrCreate(egid.groupID
+                    _egidToReferenceMap.GetOrAdd(egid.groupID
                                                   , () => new SharedSveltoDictionaryNative<uint, EntityReference>(0));
                 groupMap[egid.entityID] = reference;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal void UpdateEntityReference(EGID from, EGID to)
             {
                 var reference = FetchAndRemoveReference(@from);
@@ -90,11 +90,12 @@ namespace Svelto.ECS
                 _entityReferenceMap[reference.index].egid = to;
 
                 var groupMap =
-                    _egidToReferenceMap.GetOrCreate(
+                    _egidToReferenceMap.GetOrAdd(
                         to.groupID, () => new SharedSveltoDictionaryNative<uint, EntityReference>(0));
                 groupMap[to.entityID] = reference;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal void RemoveEntityReference(EGID egid)
             {
                 var reference = FetchAndRemoveReference(@egid);
@@ -108,6 +109,7 @@ namespace Svelto.ECS
                 _nextFreeIndex.Set((int)reference.index);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             EntityReference FetchAndRemoveReference(EGID @from)
             {
                 var egidToReference = _egidToReferenceMap[@from.groupID];
@@ -117,6 +119,7 @@ namespace Svelto.ECS
                 return reference;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal void RemoveAllGroupReferenceLocators(ExclusiveGroupStruct groupId)
             {
                 if (_egidToReferenceMap.TryGetValue(groupId, out var groupMap) == false)
@@ -125,11 +128,12 @@ namespace Svelto.ECS
                 // We need to traverse all entities in the group and remove the locator using the egid.
                 // RemoveLocator would modify the enumerator so this is why we traverse the dictionary from last to first.
                 foreach (var item in groupMap)
-                    RemoveEntityReference(new EGID(item.Key, groupId));
+                    RemoveEntityReference(new EGID(item.key, groupId));
 
                 _egidToReferenceMap.Remove(groupId);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal void UpdateAllGroupReferenceLocators(ExclusiveGroupStruct fromGroupId, ExclusiveGroupStruct toGroupId)
             {
                 if (_egidToReferenceMap.TryGetValue(fromGroupId, out var groupMap) == false)
@@ -138,7 +142,7 @@ namespace Svelto.ECS
                 // We need to traverse all entities in the group and update the locator using the egid.
                 // UpdateLocator would modify the enumerator so this is why we traverse the dictionary from last to first.
                 foreach (var item in groupMap)
-                    UpdateEntityReference(new EGID(item.Key, fromGroupId), new EGID(item.Key, toGroupId));
+                    UpdateEntityReference(new EGID(item.key, fromGroupId), new EGID(item.key, toGroupId));
 
                 _egidToReferenceMap.Remove(fromGroupId);
             }
@@ -188,8 +192,8 @@ namespace Svelto.ECS
             internal void PreallocateReferenceMaps(ExclusiveGroupStruct groupID, uint size)
             {
                 _egidToReferenceMap
-                   .GetOrCreate(groupID, () => new SharedSveltoDictionaryNative<uint, EntityReference>(size))
-                   .ResizeTo(size);
+                   .GetOrAdd(groupID, () => new SharedSveltoDictionaryNative<uint, EntityReference>(size))
+                   .EnsureCapacity(size);
 
                 _entityReferenceMap.Resize(size);
             }
@@ -211,7 +215,7 @@ namespace Svelto.ECS
                 _entityReferenceMap.Dispose();
 
                 foreach (var element in _egidToReferenceMap)
-                    element.Value.Dispose();
+                    element.value.Dispose();
                 _egidToReferenceMap.Dispose();
             }
 
@@ -222,8 +226,8 @@ namespace Svelto.ECS
                 _egidToReferenceMap;
         }
 
-        internal LocatorMap entityLocator => _entityLocator;
+        EntityReferenceMap entityLocator => _entityLocator;
         
-        LocatorMap          _entityLocator;
+        EntityReferenceMap          _entityLocator;
     }
 }
