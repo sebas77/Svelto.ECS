@@ -1,10 +1,12 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Svelto.ECS
 {
+    [DebuggerDisplay("{ToString()}")]
     [StructLayout(LayoutKind.Explicit, Size = 4)]
     //the type doesn't implement IEqualityComparer, what implements it is a custom comparer
     public readonly struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>

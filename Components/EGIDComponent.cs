@@ -1,3 +1,4 @@
+#if SLOW_SVELTO_SUBMISSION
 namespace Svelto.ECS
 {
     public struct EGIDComponent:IEntityComponent, INeedEGID
@@ -5,3 +6,4 @@ namespace Svelto.ECS
         public EGID ID { get; set; }
     }
 }
+#endif

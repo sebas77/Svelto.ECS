@@ -30,6 +30,8 @@ namespace Svelto.ECS
             return obj1._GID != obj2._GID;
         }
 
+        public override int GetHashCode() { return _GID.GetHashCode(); }
+
         public EntityReference(uint uniqueId) : this(uniqueId, 0) {}
 
         public EntityReference(uint uniqueId, uint version) : this()
@@ -59,7 +61,7 @@ namespace Svelto.ECS
 
             return entitiesDB.GetEGID(this);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ToEGID(EntitiesDB entitiesDB, out EGID egid)
         {

@@ -7,77 +7,98 @@ namespace Svelto.ECS
     {
         internal class DoubleBufferedEntitiesToAdd
         {
-            const int MAX_NUMBER_OF_ITEMS_PER_FRAME_BEFORE_TO_CLEAR = 100;
+            //while caching is good to avoid over creating dictionaries that may be reused, the side effect
+            //is that I have to iterate every time up to 100 dictionaries during the flushing of the build entities
+            //even if there are 0 entities inside.
+            const int MAX_NUMBER_OF_GROUPS_TO_CACHE          = 100;
+            const int MAX_NUMBER_OF_TYPES_PER_GROUP_TO_CACHE = 100;
 
             public DoubleBufferedEntitiesToAdd()
             {
-                _currentEntitiesCreatedPerGroup = _entitiesCreatedPerGroupA;
-                _otherEntitiesCreatedPerGroup   = _entitiesCreatedPerGroupB;
+                var entitiesCreatedPerGroupA = new FasterDictionary<ExclusiveGroupStruct, uint>();
+                var entitiesCreatedPerGroupB = new FasterDictionary<ExclusiveGroupStruct, uint>();
+                var entityComponentsToAddBufferA =
+                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>();
+                var entityComponentsToAddBufferB =
+                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>();
 
-                current = _entityComponentsToAddBufferA;
-                other   = _entityComponentsToAddBufferB;
+                _currentNumberEntitiesCreatedPerGroup = entitiesCreatedPerGroupA;
+                _lastNumberEntitiesCreatedPerGroup   = entitiesCreatedPerGroupB;
+
+                currentComponentsToAddPerGroup = entityComponentsToAddBufferA;
+                lastComponentsToAddPerGroup   = entityComponentsToAddBufferB;
             }
 
-            public void ClearOther()
+            public void ClearLastAddOperations()
             {
-                //do not clear the groups created so far, they will be reused, unless they are too many!
-                var otherCount = other.count;
-                if (otherCount > MAX_NUMBER_OF_ITEMS_PER_FRAME_BEFORE_TO_CLEAR)
+                var numberOfGroupsAddedSoFar     = lastComponentsToAddPerGroup.count;
+                var componentDictionariesPerType = lastComponentsToAddPerGroup.unsafeValues;
+                
+                //TODO: rewrite the caching logic with the new RecycleOrAdd dictionary functionality
+                //I still do not want to cache too many groups
+                
+                //If we didn't create too many groups, we keep them alive, so we avoid the cost of creating new dictionaries
+                //during future submissions, otherwise we clean up everything
+                if (numberOfGroupsAddedSoFar > MAX_NUMBER_OF_GROUPS_TO_CACHE)
                 {
-                    var otherValuesArray = other.unsafeValues;
-                    for (var i = 0; i < otherCount; ++i)
+                    for (var i = 0; i < numberOfGroupsAddedSoFar; ++i)
                     {
-                        var safeDictionariesCount = otherValuesArray[i].count;
-                        var safeDictionaries      = otherValuesArray[i].unsafeValues;
+                        var componentTypesCount      = componentDictionariesPerType[i].count;
+                        var componentTypesDictionary = componentDictionariesPerType[i].unsafeValues;
                         {
-                            for (var j = 0; j < safeDictionariesCount; ++j)
-                                //clear the dictionary of entities create do far (it won't allocate though)
-                                safeDictionaries[j].Dispose();
+                            for (var j = 0; j < componentTypesCount; ++j)
+                                //dictionaries of components may be native so they need to be disposed
+                                //before the references are GCed
+                                componentTypesDictionary[j].Dispose();
                         }
                     }
-
+                
                     //reset the number of entities created so far
-                    _otherEntitiesCreatedPerGroup.FastClear();
-                    other.FastClear();
+                    _lastNumberEntitiesCreatedPerGroup.FastClear();
+                    lastComponentsToAddPerGroup.FastClear();
+                
                     return;
                 }
-
+                
+                for (var i = 0; i < numberOfGroupsAddedSoFar; ++i)
                 {
-                    var otherValuesArray = other.unsafeValues;
-                    for (var i = 0; i < otherCount; ++i)
+                    var                   componentTypesCount      = componentDictionariesPerType[i].count;
+                    ITypeSafeDictionary[] componentTypesDictionary = componentDictionariesPerType[i].unsafeValues;
+                    for (var j = 0; j < componentTypesCount; ++j)
+                        //clear the dictionary of entities created so far (it won't allocate though)
+                        componentTypesDictionary[j].Clear();
+                
+                    //if we didn't create too many component for this group, I reuse the component arrays
+                    if (componentTypesCount <= MAX_NUMBER_OF_TYPES_PER_GROUP_TO_CACHE)
                     {
-                        var safeDictionariesCount = otherValuesArray[i].count;
-                        var safeDictionaries      = otherValuesArray[i].unsafeValues;
-                        //do not remove the dictionaries of entities per type created so far, they will be reused
-                        if (safeDictionariesCount <= MAX_NUMBER_OF_ITEMS_PER_FRAME_BEFORE_TO_CLEAR)
-                        {
-                            for (var j = 0; j < safeDictionariesCount; ++j)
-                                //clear the dictionary of entities create do far (it won't allocate though)
-                                safeDictionaries[j].FastClear();
-                        }
-                        else
-                        {
-                            for (var j = 0; j < safeDictionariesCount; ++j)
-                                //clear the dictionary of entities create do far (it won't allocate though)
-                                safeDictionaries[j].Dispose();
-
-                            otherValuesArray[i].FastClear();
-                        }
+                        for (var j = 0; j < componentTypesCount; ++j)
+                            componentTypesDictionary[j].Clear();
                     }
-
-                    //reset the number of entities created so far
-                    _otherEntitiesCreatedPerGroup.FastClear();
+                    else
+                    {
+                        //here I have to dispose, because I am actually clearing the reference of the dictionary
+                        //with the next line.
+                        for (var j = 0; j < componentTypesCount; ++j)
+                            componentTypesDictionary[j].Dispose();
+                
+                        componentDictionariesPerType[i].FastClear();
+                    }
                 }
+
+                //reset the number of entities created so far
+                _lastNumberEntitiesCreatedPerGroup.FastClear();
+
+          //      _totalEntitiesToAdd = 0;
             }
 
             public void Dispose()
             {
                 {
-                    var otherValuesArray = other.unsafeValues;
-                    for (var i = 0; i < other.count; ++i)
+                    var otherValuesArray = lastComponentsToAddPerGroup.unsafeValues;
+                    for (var i = 0; i < lastComponentsToAddPerGroup.count; ++i)
                     {
-                        var safeDictionariesCount = otherValuesArray[i].count;
-                        var safeDictionaries      = otherValuesArray[i].unsafeValues;
+                        int                   safeDictionariesCount = otherValuesArray[i].count;
+                        ITypeSafeDictionary[] safeDictionaries      = otherValuesArray[i].unsafeValues;
                         //do not remove the dictionaries of entities per type created so far, they will be reused
                         for (var j = 0; j < safeDictionariesCount; ++j)
                             //clear the dictionary of entities create do far (it won't allocate though)
@@ -85,33 +106,44 @@ namespace Svelto.ECS
                     }
                 }
                 {
-                    var currentValuesArray = current.unsafeValues;
-                    for (var i = 0; i < current.count; ++i)
+                    var currentValuesArray = currentComponentsToAddPerGroup.unsafeValues;
+                    for (var i = 0; i < currentComponentsToAddPerGroup.count; ++i)
                     {
-                        var safeDictionariesCount = currentValuesArray[i].count;
-                        var safeDictionaries      = currentValuesArray[i].unsafeValues;
+                        int                   safeDictionariesCount = currentValuesArray[i].count;
+                        ITypeSafeDictionary[] safeDictionaries      = currentValuesArray[i].unsafeValues;
                         //do not remove the dictionaries of entities per type created so far, they will be reused
                         for (var j = 0; j < safeDictionariesCount; ++j)
                             //clear the dictionary of entities create do far (it won't allocate though)
                             safeDictionaries[j].Dispose();
                     }
                 }
+
+                _currentNumberEntitiesCreatedPerGroup = null;
+                _lastNumberEntitiesCreatedPerGroup   = null;
+                lastComponentsToAddPerGroup          = null;
+                currentComponentsToAddPerGroup        = null;
             }
 
             internal bool AnyEntityCreated()
             {
-                return _currentEntitiesCreatedPerGroup.count > 0;
+                return _currentNumberEntitiesCreatedPerGroup.count > 0;
             }
 
-            internal bool AnyOtherEntityCreated()
+            internal bool AnyPreviousEntityCreated()
             {
-                return _otherEntitiesCreatedPerGroup.count > 0;
+                return _lastNumberEntitiesCreatedPerGroup.count > 0;
             }
 
             internal void IncrementEntityCount(ExclusiveGroupStruct groupID)
             {
-                _currentEntitiesCreatedPerGroup.GetOrCreate(groupID)++;
+                _currentNumberEntitiesCreatedPerGroup.GetOrAdd(groupID)++;
+             //   _totalEntitiesToAdd++;
             }
+
+            // public uint NumberOfEntitiesToAdd()
+            // {
+            //     return _totalEntitiesToAdd;
+            // }
 
             internal void Preallocate
                 (ExclusiveGroupStruct groupID, uint numberOfEntities, IComponentBuilder[] entityComponentsToBuild)
@@ -119,64 +151,113 @@ namespace Svelto.ECS
                 void PreallocateDictionaries
                     (FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> dic)
                 {
-                    var group = dic.GetOrCreate(groupID, () => new FasterDictionary<RefWrapperType,
-                                                                      ITypeSafeDictionary>());
+                    var group = dic.GetOrAdd(
+                        groupID, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
 
                     foreach (var componentBuilder in entityComponentsToBuild)
                     {
                         var entityComponentType = componentBuilder.GetEntityComponentType();
-                        var safeDictionary = group.GetOrCreate(new RefWrapperType(entityComponentType)
+                        var safeDictionary = group.GetOrAdd(new RefWrapperType(entityComponentType)
                                                              , () => componentBuilder
                                                                   .CreateDictionary(numberOfEntities));
                         componentBuilder.Preallocate(safeDictionary, numberOfEntities);
                     }
                 }
 
-                PreallocateDictionaries(current);
-                PreallocateDictionaries(other);
+                PreallocateDictionaries(currentComponentsToAddPerGroup);
+                PreallocateDictionaries(lastComponentsToAddPerGroup);
 
-                _currentEntitiesCreatedPerGroup.GetOrCreate(groupID);
-                _otherEntitiesCreatedPerGroup.GetOrCreate(groupID);
+                _currentNumberEntitiesCreatedPerGroup.GetOrAdd(groupID);
+                _lastNumberEntitiesCreatedPerGroup.GetOrAdd(groupID);
             }
 
             internal void Swap()
             {
-                Swap(ref current, ref other);
-                Swap(ref _currentEntitiesCreatedPerGroup, ref _otherEntitiesCreatedPerGroup);
+                Swap(ref currentComponentsToAddPerGroup, ref lastComponentsToAddPerGroup);
+                Swap(ref _currentNumberEntitiesCreatedPerGroup, ref _lastNumberEntitiesCreatedPerGroup);
             }
 
-            void Swap<T>(ref T item1, ref T item2)
+            static void Swap<T>(ref T item1, ref T item2)
             {
-                var toSwap = item2;
-                item2 = item1;
-                item1 = toSwap;
+                (item2, item1) = (item1, item2);
+            }
+
+            public OtherComponentsToAddPerGroupEnumerator GetEnumerator()
+            {
+                return new OtherComponentsToAddPerGroupEnumerator(lastComponentsToAddPerGroup
+                                                                , _lastNumberEntitiesCreatedPerGroup);
             }
 
             //Before I tried for the third time to use a SparseSet instead of FasterDictionary, remember that
             //while group indices are sequential, they may not be used in a sequential order. Sparseset needs
             //entities to be created sequentially (the index cannot be managed externally)
-            internal FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> current;
-            internal FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> other;
+            internal FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+                currentComponentsToAddPerGroup;
 
-            readonly FasterDictionary<ExclusiveGroupStruct, uint> _entitiesCreatedPerGroupA =
-                new FasterDictionary<ExclusiveGroupStruct, uint>();
-
-            readonly FasterDictionary<ExclusiveGroupStruct, uint> _entitiesCreatedPerGroupB =
-                new FasterDictionary<ExclusiveGroupStruct, uint>();
-
-            readonly FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> _entityComponentsToAddBufferA =
-                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>();
-
-            readonly FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> _entityComponentsToAddBufferB =
-                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>();
+            FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+                lastComponentsToAddPerGroup;
 
             /// <summary>
             ///     To avoid extra allocation, I don't clear the groups, so I need an extra data structure
             ///     to keep count of the number of entities built this frame. At the moment the actual number
             ///     of entities built is not used
             /// </summary>
-            FasterDictionary<ExclusiveGroupStruct, uint> _currentEntitiesCreatedPerGroup;
-            FasterDictionary<ExclusiveGroupStruct, uint> _otherEntitiesCreatedPerGroup;
+            FasterDictionary<ExclusiveGroupStruct, uint> _currentNumberEntitiesCreatedPerGroup;
+            FasterDictionary<ExclusiveGroupStruct, uint> _lastNumberEntitiesCreatedPerGroup;
+
+            //uint _totalEntitiesToAdd;
         }
+    }
+
+    struct OtherComponentsToAddPerGroupEnumerator
+    {
+        public OtherComponentsToAddPerGroupEnumerator
+        (FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+             lastComponentsToAddPerGroup
+       , FasterDictionary<ExclusiveGroupStruct, uint> otherNumberEntitiesCreatedPerGroup)
+        {
+            _lastComponentsToAddPerGroup       = lastComponentsToAddPerGroup;
+            _lastNumberEntitiesCreatedPerGroup = otherNumberEntitiesCreatedPerGroup.GetEnumerator();
+            Current                             = default;
+        }
+
+        public bool MoveNext()
+        {
+            while (_lastNumberEntitiesCreatedPerGroup.MoveNext())
+            {
+                var current = _lastNumberEntitiesCreatedPerGroup.Current;
+
+                if (current.value > 0) //there are entities in this group
+                {
+                    var value = _lastComponentsToAddPerGroup[current.key];
+                    Current = new GroupInfo()
+                    {
+                        group      = current.key
+                      , components = value
+                    };
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public GroupInfo Current { get; private set; }
+
+        //cannot be read only as they will be modified by MoveNext
+        readonly FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+            _lastComponentsToAddPerGroup;
+
+        SveltoDictionaryKeyValueEnumerator<ExclusiveGroupStruct, uint,
+                ManagedStrategy<SveltoDictionaryNode<ExclusiveGroupStruct>>, ManagedStrategy<uint>,
+                ManagedStrategy<int>>
+            _lastNumberEntitiesCreatedPerGroup;
+    }
+
+    struct GroupInfo
+    {
+        public ExclusiveGroupStruct                                  group;
+        public FasterDictionary<RefWrapperType, ITypeSafeDictionary> components;
     }
 }

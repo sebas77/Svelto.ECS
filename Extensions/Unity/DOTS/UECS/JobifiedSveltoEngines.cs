@@ -1,9 +1,9 @@
 #if UNITY_ECS
-namespace Svelto.ECS.Extensions.Unity
+namespace Svelto.ECS.SveltoOnDOTS
 {
     public enum JobifiedSveltoEngines
     {
-        SveltoOverUECS
+        SveltoOnDOTS
     }
 }
 #endif

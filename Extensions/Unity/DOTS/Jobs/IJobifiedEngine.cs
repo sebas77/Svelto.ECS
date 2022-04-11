@@ -1,7 +1,7 @@
 #if UNITY_JOBS
 using Unity.Jobs; 
 
-namespace Svelto.ECS.Extensions.Unity
+namespace Svelto.ECS.SveltoOnDOTS
 {
     public interface IJobifiedEngine<T> : IEngine
     {

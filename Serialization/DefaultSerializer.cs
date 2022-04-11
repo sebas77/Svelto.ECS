@@ -15,9 +15,10 @@ namespace Svelto.ECS.Serialization
                     field.IsPrivate == false)
                     throw new ECSException($"field cannot be serialised {fieldFieldType} in {_type.FullName}");
             }
-
+#if SLOW_SVELTO_SUBMISSION            
             if (_type.GetProperties().Length > (ComponentBuilder<T>.HAS_EGID ? 1 : 0))
                 throw new ECSException("serializable entity struct must be property less ".FastConcat(_type.FullName));
+#endif
         }
 
         public uint size => SIZEOFT;

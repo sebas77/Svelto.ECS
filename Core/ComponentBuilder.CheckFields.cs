@@ -4,10 +4,11 @@ using System.Diagnostics;
 #endif
 using System;
 using System.Reflection;
+using Svelto.ECS.Hybrid;
 
 namespace Svelto.ECS
 {
-    static class ComponentBuilderUtilities
+    public static class ComponentBuilderUtilities
     {
         const string MSG = "Entity Components and Entity View Components fields cannot hold managed fields outside the Svelto rules.";
 
@@ -63,16 +64,28 @@ namespace Svelto.ECS
 
                     for (int j = properties.Length - 1; j >= 0; --j)
                     {
-                        if (properties[j].PropertyType.IsGenericType)
+                        Type propertyType = properties[j].PropertyType;
+                        if (propertyType.IsGenericType)
                         {
-                            Type genericTypeDefinition = properties[j].PropertyType.GetGenericTypeDefinition();
+                            Type genericTypeDefinition = propertyType.GetGenericTypeDefinition();
                             if (genericTypeDefinition == RECATIVEVALUETYPE)
                             {
                                 continue;
                             }
                         }
 
-                        Type propertyType = properties[j].PropertyType;
+                        // Special rules for ValueReference<T>
+                        if (IsValueReference(propertyType))
+                        {
+                            // Getters of ValueReference must be refs, which would cause a failure on the common check.
+                            if (properties[j].CanRead == true && propertyType.IsByRef == false)
+                            {
+                                ProcessError(MSG, entityComponentType, propertyType);
+                            }
+
+                            continue;
+                        }
+
                         if (propertyType != STRINGTYPE)
                         {
                             //for EntityComponentStructs, component fields that are structs that hold strings
@@ -89,6 +102,12 @@ namespace Svelto.ECS
             return type == STRINGTYPE || type == STRINGBUILDERTYPE;
         }
 
+        static bool IsValueReference(Type type)
+        {
+            var interfaces = type.GetInterfaces();
+            return interfaces.Length == 1 && interfaces[0] == VALUE_REF_TYPE;
+        }
+
         /// <summary>
         /// This method checks the fields if it's an IEntityComponent, but checks all the properties if it's
         /// IEntityViewComponent
@@ -99,8 +118,9 @@ namespace Svelto.ECS
         static void SubCheckFields(Type fieldType, Type entityComponentType, bool isStringAllowed = false)
         {
             //pass if it's Primitive or C# 8 unmanaged, or it's a string and string are allowed
-            //this check must allow pointers are they are unmanaged types
-            if ((isStringAllowed == true && IsString(fieldType) == true) || fieldType.IsValueTypeEx() == true)
+            //this check must allow pointers as they are unmanaged types
+            if ((isStringAllowed == true && IsString(fieldType) == true) ||
+                fieldType.IsValueTypeEx() == true)
             {
                 //if it's a struct we have to check the fields recursively
                 if (IsString(fieldType) == false)
@@ -110,7 +130,7 @@ namespace Svelto.ECS
 
                 return;
             }
-            
+
             ProcessError(MSG, entityComponentType, fieldType);
         }
 
@@ -124,7 +144,8 @@ namespace Svelto.ECS
             throw new ECSException(message, entityComponentType);
         }
 
-        static readonly Type RECATIVEVALUETYPE       = typeof(ReactiveValue<>);
+        static readonly Type RECATIVEVALUETYPE          = typeof(ReactiveValue<>);
+        static readonly Type VALUE_REF_TYPE             = typeof(IValueReferenceInternal);
         static readonly Type EGIDType                   = typeof(EGID);
         static readonly Type EXCLUSIVEGROUPSTRUCTTYPE   = typeof(ExclusiveGroupStruct);
         static readonly Type SERIALIZABLE_ENTITY_STRUCT = typeof(SerializableEntityComponent);

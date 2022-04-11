@@ -1,4 +1,4 @@
-# Svelto Entity Component System 3.x
+# Svelto C# Entity Component System framework 3.x
 =====================================
 
 Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, code without pain. Although the framework is platform agnostic \(compatible with c\# 7 and .net standard 2.0\), it comes with several Unity extensions.
@@ -22,11 +22,31 @@ The folders Svelto.ECS and Svelto.Common, where present, are submodules pointing
 
 ## Svelto distributed as Unity Package through OpenUPM [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
 
-read this article for more information: http://www.sebaslab.com/distributing-svelto-through-openupm/ or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
+read this article for more information: http://www.sebaslab.com/distributing-svelto-through-openupm/ ~~or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com~~
 
 **Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Dependency System is:**
 
-Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. Since Unity Collection removed the Unsafe.dll dependency, I had to distribute my own package. This means that if you want to use Svelto from UPM, you will need Svelto unsafe dll to be the only unsafe dll in the project. Otherwise you just download the source code and solve dependencies manually.
+Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. Since Unity Collection removed the Unsafe.dll dependency, ~~I had to distribute my own package. This means that if you want to use Svelto from UPM, you will need Svelto unsafe dll to be the only unsafe dll in the project. Otherwise you just download the source code and solve dependencies manually.~~
+
+For Unity Users: to solve the unsafe dependency you need to add the following scopedRegistries in manifest.json:
+```
+  {
+    "scopedRegistries": [
+        {
+            "name": "package.openupm.com",
+            "url": "https://package.openupm.com",
+            "scopes": [
+                "com.sebaslab.svelto.common",
+                "com.sebaslab.svelto.ecs",
+                "org.nuget.system.runtime.compilerservices.unsafe"
+            ]
+        }
+    ],
+    "dependencies": {
+        "com.sebaslab.svelto.ecs": "3.2.6"
+    }
+}
+```
 
 ## Svelto distributed as Nuget
 
@@ -57,17 +77,18 @@ After that, you can get all the help you need from the official chat:
 * [Svelto.ECS 2.0 is production ready](http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/) \(shows what's changed since 1.0\)
 * [Svelto ECS is now production ready](http://www.sebaslab.com/ecs-1-0/)
 
-**Theory related articles \(in order of publishing date\):**
+**Theory related articles (from the most recent to the oldest, read from the oldest if you are new to it):**
 
 * [OOP abstraction layer in an ECS-centric application](https://www.sebaslab.com/oop-abstraction-layer-in-a-ecs-centric-application/)  \(this article is important for starters!\)
-* [Inversion of Control with Unity – part 1](http://www.sebaslab.com/ioc-container-for-unity3d-part-1/)
-* [Inversion of Control with Unity – part 2](http://www.sebaslab.com/ioc-container-for-unity3d-part-2/)
-* [The truth behind Inversion of Control – Part I – Dependency Injection](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/)
-* [The truth behind Inversion of Control – Part II – Inversion of Control](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-ii-inversion-of-control/)
-* [The truth behind Inversion of Control – Part III – Entity Component System Design](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/)
-* [The truth behind Inversion of Control – Part IV – Dependency Inversion Principle](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/)
-* [The truth behind Inversion of Control – Part V – Entity Component System design to achieve true Inversion of Flow Control](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/)
+* [ECS abstraction layers and module encapsulation](https://www.sebaslab.com/ecs-abstraction-layers-and-modules-encapsulation/)
 * [The Quest for Maintainable Code and The Path to ECS](http://www.sebaslab.com/the-quest-for-maintainable-code-and-the-path-to-ecs/)
+* [The truth behind Inversion of Control – Part V – Entity Component System design to achieve true Inversion of Flow Control](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-v-drifting-away-from-ioc-containers/)
+* [The truth behind Inversion of Control – Part IV – Dependency Inversion Principle](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iv-dependency-inversion-principle/)
+* [The truth behind Inversion of Control – Part III – Entity Component System Design](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-iii-entity-component-systems/)
+* [The truth behind Inversion of Control – Part II – Inversion of Control](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-ii-inversion-of-control/)
+* [The truth behind Inversion of Control – Part I – Dependency Injection](http://www.sebaslab.com/the-truth-behind-inversion-of-control-part-i-dependency-injection/)
+* [Inversion of Control with Unity – part 2](http://www.sebaslab.com/ioc-container-for-unity3d-part-2/)
+* [Inversion of Control with Unity – part 1](http://www.sebaslab.com/ioc-container-for-unity3d-part-1/)
 
 **Practical articles**
 
@@ -81,12 +102,18 @@ After that, you can get all the help you need from the official chat:
 * [Porting a boid simulation from UnityECS/Jobs to Svelto.ECS/Tasks](https://www.sebaslab.com/porting-a-boid-simulation-from-unityecs-to-svelto-ecs/)
 * [Svelto.ECS+Tasks to write Data Oriented, Cache Friendly, Multi-Threaded code](http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/)
 
-
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
 
 ## Users Generated Content \(I removed all the outdated articles, so this is a call for new ones!\)
 
 * [A Beginner’s Guide to Svelto.ECS (3.0) with Unity by Jiheh Ritterling](https://jiheh.medium.com/a-beginners-guide-to-svelto-ecs-3-0-with-unity-e9dbc88a2145)
+
+**Svelto Extensions**
+
+* [Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS](https://github.com/cathei/Svelto.ECS.Schema)
+* [Automatic way to control svelto engines order without having to pass in a string using attributes](https://gist.github.com/dragonslaya84/88e6bb998eda8fe4ee912f01d67feec9)
+* [Foundation for a possible platform agnostic Svelto.ECS inspector](https://github.com/akrogame/svelto-ecs-inspector)
+* [Being able to swap entities between a subset of compound tags to another subset of compound tags](https://gist.github.com/jlreymendez/c2f441aaf6ac7b5f233ecd990314e9cc)
 
 ## In case of bugs
 

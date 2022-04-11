@@ -8,16 +8,16 @@ namespace Svelto.ECS
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public readonly struct EGIDMapper<T>: IEGIDMapper where T : struct, IEntityComponent
+    public readonly struct EGIDMapper<T> : IEGIDMapper where T : struct, IEntityComponent
     {
-        public uint                 length          => _map.count;
-        public ExclusiveGroupStruct groupID         { get; }
-        public Type                 entityType            => TypeCache<T>.type;
+        public int                  count      => _map.count;
+        public ExclusiveGroupStruct groupID    { get; }
+        public Type                 entityType => TypeCache<T>.type;
 
         internal EGIDMapper(ExclusiveGroupStruct groupStructId, ITypeSafeDictionary<T> dic) : this()
         {
             groupID = groupStructId;
-            _map     = dic;
+            _map    = dic;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -25,9 +25,10 @@ namespace Svelto.ECS
         {
 #if DEBUG && !PROFILE_SVELTO
             if (_map == null)
-                throw new System.Exception("Not initialized EGIDMapper in this group ".FastConcat(typeof(T).ToString()));
-                if (_map.TryFindIndex(entityID, out var findIndex) == false)
-                    throw new System.Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
+                throw new System.Exception(
+                    "Not initialized EGIDMapper in this group ".FastConcat(typeof(T).ToString()));
+            if (_map.TryFindIndex(entityID, out var findIndex) == false)
+                throw new System.Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
             _map.TryFindIndex(entityID, out var findIndex);
 #endif
@@ -72,8 +73,8 @@ namespace Svelto.ECS
         bool FindIndex(uint valueKey, out uint index);
         uint GetIndex(uint entityID);
         bool Exists(uint idEntityId);
-        
-        ExclusiveGroupStruct groupID { get; }
-        Type          entityType    { get; }
+
+        ExclusiveGroupStruct groupID    { get; }
+        Type                 entityType { get; }
     }
 }

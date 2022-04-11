@@ -4,8 +4,8 @@ namespace Svelto.ECS
     {
         public static bool IsUnmanaged(this IEntityDescriptor descriptor)
         {
-            foreach (var component in descriptor.componentsToBuild)
-                if (component.isUnmanaged == false)
+            foreach (IComponentBuilder component in descriptor.componentsToBuild)
+                if (component.GetEntityComponentType() != typeof(EntityInfoComponent) && component.isUnmanaged == false)
                     return false;
             
             return true;

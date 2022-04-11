@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
+## [3.3.0] - 04-2022
+
+* INeedEGID and INeedEntityReference interfaces are not deprecated, but still available for backwards compatibility through the define SLOW_SVELTO_SUBMISSION
+* There are some minor breaking changes, you may need to rename a bunch of methods calls
+* Drastically improved Submission phase performance
+* All the IReactOn interfaces are now replaced by much faster IReacOn*Ex interfaces. Use those~~~~
+* QueryEntities methods now optionally return also an array of Entity IDs that you can reference like a component (this supersedes INeedEGID)
+* Completely reworked and way more powerful filter API. The old one has been renamed to Legacy and left for backward compatibility
+* NativeEGIDMultiMapper doesn't need to be created every submission anymore. It can be created permanently and disposed when not used anymore (some caveats with it)
+* Improved Serialization system
+* Improved SveltoOnDots system
+* Tons of other improvements and bug fixes
+~~~~
 ## [3.2.5]
 
 * refactor and improved NativeBag and UnsafeBlob. This fix a previously known crash with Unity IL2CPP

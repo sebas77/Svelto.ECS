@@ -1,15 +1,11 @@
 #if DEBUG && !PROFILE_SVELTO
 #define ENABLE_DEBUG_CHECKS
 #endif
-
-#if DEBUG && !PROFILE_SVELTO
-//#define ENABLE_THREAD_SAFE_CHECKS
-#endif
-
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
+using Svelto.Common.DataStructures;
 
 namespace Svelto.ECS.DataStructures
 {
@@ -34,18 +30,11 @@ namespace Svelto.ECS.DataStructures
                 unsafe
                 {
                     BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS
-                    try
+                    
+                    using (_threadSentinel.TestThreadSafety())
                     {
-#endif
-                    return _queue->size;
-#if ENABLE_THREAD_SAFE_CHECKS
+                        return _queue->size;
                     }
-                    finally
-                    {
-                        Volatile.Write(ref _threadSentinel, 0);
-                    }
-#endif
                 }
             }
         }
@@ -58,35 +47,23 @@ namespace Svelto.ECS.DataStructures
                 unsafe
                 {
                     BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS
-                    try
+                    
+                    using (_threadSentinel.TestThreadSafety())
                     {
-#endif
-                    return _queue->capacity;
-#if ENABLE_THREAD_SAFE_CHECKS
+                        return _queue->capacity;
                     }
-                    finally
-                    {
-                        Volatile.Write(ref _threadSentinel, 0);
-                    }
-#endif
                 }
             }
         }
 
-        public NativeBag(Allocator allocator)
+        public NativeBag(Allocator allocator):this()
         {
             unsafe
             {
-                var listData = (UnsafeBlob*) MemoryUtilities.Alloc<UnsafeBlob>((uint) 1, allocator);
+                var listData = (UnsafeBlob*)MemoryUtilities.Alloc<UnsafeBlob>((uint)1, allocator);
 
-                //clear to nullify the pointers
-                //MemoryUtilities.MemClear((IntPtr) listData, (uint) sizeOf);
                 listData->allocator = allocator;
                 _queue              = listData;
-#if ENABLE_THREAD_SAFE_CHECKS
-                _threadSentinel = 0;
-#endif
             }
         }
 
@@ -96,19 +73,12 @@ namespace Svelto.ECS.DataStructures
             unsafe
             {
                 BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS
-                try
+
+                using (_threadSentinel.TestThreadSafety())
                 {
-#endif
-                if (_queue == null || _queue->ptr == null)
-                    return true;
-#if ENABLE_THREAD_SAFE_CHECKS
+                    if (_queue == null || _queue->ptr == null)
+                        return true;
                 }
-                finally
-                {
-                    Volatile.Write(ref _threadSentinel, 0);
-                }
-#endif
             }
 
             return count == 0;
@@ -119,84 +89,58 @@ namespace Svelto.ECS.DataStructures
         {
             if (_queue != null)
             {
-#if ENABLE_THREAD_SAFE_CHECKS
-                //todo: this must be unit tested
-                if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                    throw new Exception("NativeBag is not thread safe, reading and writing operations can happen" +
-                        "on different threads, but not simultaneously");
+                BasicTests();
 
-                try
+                using (_threadSentinel.TestThreadSafety())
                 {
-#endif
-                _queue->Dispose();
-                MemoryUtilities.Free((IntPtr) _queue, _queue->allocator);
-                _queue = null;
-#if ENABLE_THREAD_SAFE_CHECKS
+                    _queue->Dispose();
+                    MemoryUtilities.Free((IntPtr)_queue, _queue->allocator);
+                    _queue = null;
                 }
-                finally
-                {
-                Volatile.Write(ref _threadSentinel, 0);
-                }
-#endif
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T ReserveEnqueue<T>(out UnsafeArrayIndex index) where T : struct
+        public ref T ReserveEnqueue<T>
+            (out UnsafeArrayIndex index)
+            where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
                 BasicTests();
 
                 var sizeOf = MemoryUtilities.SizeOf<T>();
-                if (_queue->availableSpace - sizeOf < 0)
+                
+                using (_threadSentinel.TestThreadSafety())
                 {
-                    _queue->Realloc((_queue->capacity + (uint)sizeOf) << 1);
-                }
+                    if (_queue->availableSpace - sizeOf < 0)
+                    {
+                        _queue->Grow<T>();
+                    }
 
-#if ENABLE_THREAD_SAFE_CHECKS
-                try
-                {
-#endif
-
-                return ref _queue->Reserve<T>(out index);
-#if ENABLE_THREAD_SAFE_CHECKS
+                    return ref _queue->Reserve<T>(out index);
                 }
-                finally
-                {
-                    Volatile.Write(ref _threadSentinel, 0);
-                }
-#endif
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Enqueue<T>(in T item) where T : struct
+        public void Enqueue<T>
+            (in T item) where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
                 BasicTests();
 
-#if ENABLE_THREAD_SAFE_CHECKS
-                try
+                using (_threadSentinel.TestThreadSafety())
                 {
-#endif
-                var sizeOf = MemoryUtilities.SizeOf<T>();
-                if (_queue->availableSpace - sizeOf < 0)
-                {
-                    var capacityInBytes = (_queue->capacity + (uint)sizeOf);
+                    var sizeOf = MemoryUtilities.SizeOf<T>();
+                    if (_queue->availableSpace - sizeOf < 0)
+                    {
+                        _queue->Grow<T>();
+                    }
 
-                    _queue->Realloc(capacityInBytes << 1);
+                    _queue->Enqueue(item);
                 }
-
-                _queue->Enqueue(item);
-#if ENABLE_THREAD_SAFE_CHECKS
-                }
-                finally
-                {
-                Volatile.Write(ref _threadSentinel, 0);
-                }
-#endif
             }
         }
 
@@ -206,58 +150,37 @@ namespace Svelto.ECS.DataStructures
             unsafe
             {
                 BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS
-                try
+
+                using (_threadSentinel.TestThreadSafety())
                 {
-#endif
-                _queue->Clear();
-#if ENABLE_THREAD_SAFE_CHECKS
+                    _queue->Clear();
                 }
-                finally
-                {
-                Volatile.Write(ref _threadSentinel, 0);
-                }
-#endif
             }
         }
 
-        public T Dequeue<T>() where T : struct
+        public T Dequeue<T>() where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
                 BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS
-                try
+
+                using (_threadSentinel.TestThreadSafety())
                 {
-#endif
-                return _queue->Dequeue<T>();
-#if ENABLE_THREAD_SAFE_CHECKS
+                    return _queue->Dequeue<T>();
                 }
-                finally
-                {
-                    Volatile.Write(ref _threadSentinel, 0);
-                }
-#endif
             }
         }
 
-        public ref T AccessReserved<T>(UnsafeArrayIndex reservedIndex) where T : struct
+        public ref T AccessReserved<T>(UnsafeArrayIndex reservedIndex) where T : struct //should be unmanaged, but it's not due to Svelto.ECS constraints.
         {
             unsafe
             {
                 BasicTests();
-#if ENABLE_THREAD_SAFE_CHECKS
-                try
+
+                using (_threadSentinel.TestThreadSafety())
                 {
-#endif
-                return ref _queue->AccessReserved<T>(reservedIndex);
-#if ENABLE_THREAD_SAFE_CHECKS
+                    return ref _queue->AccessReserved<T>(reservedIndex);
                 }
-                finally
-                {
-                    Volatile.Write(ref _threadSentinel, 0);
-                }
-#endif
             }
         }
 
@@ -266,17 +189,10 @@ namespace Svelto.ECS.DataStructures
         {
             if (_queue == null)
                 throw new Exception("SimpleNativeArray: null-access");
-#if ENABLE_THREAD_SAFE_CHECKS
-            todo: this must be unit tested
-             if (Interlocked.CompareExchange(ref _threadSentinel, 1, 0) != 0)
-                 throw new Exception("NativeBag is not thread safe, reading and writing operations can happen"
-                                   + "on different threads, but not simultaneously");
-#endif
         }
+        
+        readonly Sentinel _threadSentinel;
 
-#if ENABLE_THREAD_SAFE_CHECKS
-        int _threadSentinel;
-#endif
 #if UNITY_COLLECTIONS || UNITY_JOBS || UNITY_BURST
 #if UNITY_BURST
         [Unity.Burst.NoAlias]

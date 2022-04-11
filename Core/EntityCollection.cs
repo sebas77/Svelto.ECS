@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Native;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -9,134 +8,139 @@ namespace Svelto.ECS
     {
         static readonly bool IsUnmanaged = TypeSafeDictionary<T>.isUnmanaged;
 
+        public EntityCollection(IBuffer<T> buffer, uint count, EntityIDs entityIDs) : this()
+        {
+            DBC.ECS.Check.Require(count == 0 || buffer.isValid, "Buffer is found in impossible state");
+            if (IsUnmanaged)
+            {
+                _nativedBuffer  = (NB<T>)buffer;
+                _nativedIndices = entityIDs.nativeIDs;
+            }
+            else
+            {
+                _managedBuffer  = (MB<T>)buffer;
+                _managedIndices = entityIDs.managedIDs;
+            }
+
+            this.count          = count;
+        }
+        
         public EntityCollection(IBuffer<T> buffer, uint count) : this()
         {
             DBC.ECS.Check.Require(count == 0 || buffer.isValid, "Buffer is found in impossible state");
             if (IsUnmanaged)
-                _nativedBuffer = (NB<T>) buffer;
+                _nativedBuffer = (NB<T>)buffer;
             else
-                _managedBuffer = (MB<T>) buffer;
+                _managedBuffer = (MB<T>)buffer;
 
-            _count = count;
+            this.count = count;
         }
 
-        public uint count => _count;
+        public uint count { get; }
 
         internal readonly MB<T> _managedBuffer;
         internal readonly NB<T> _nativedBuffer;
-
-        readonly uint _count;
+        
+        internal readonly NativeEntityIDs  _nativedIndices;
+        internal readonly ManagedEntityIDs _managedIndices;
     }
 
-    public readonly ref struct EntityCollection<T1, T2>
-        where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
+    public readonly ref struct EntityCollection<T1, T2> where T1 : struct, IEntityComponent
+        where T2 : struct, IEntityComponent
     {
         internal EntityCollection(in EntityCollection<T1> array1, in EntityCollection<T2> array2)
         {
-            _array1 = array1;
-            _array2 = array2;
+            buffer1 = array1;
+            buffer2 = array2;
         }
 
-        public uint count => _array1.count;
+        public int count => (int)buffer1.count;
 
         internal EntityCollection<T2> buffer2
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array2;
+            get;
         }
 
         internal EntityCollection<T1> buffer1
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array1;
+            get;
         }
-
-        readonly EntityCollection<T1> _array1;
-        readonly EntityCollection<T2> _array2;
     }
 
     public readonly ref struct EntityCollection<T1, T2, T3> where T3 : struct, IEntityComponent
-                                                            where T2 : struct, IEntityComponent
-                                                            where T1 : struct, IEntityComponent
+        where T2 : struct, IEntityComponent
+        where T1 : struct, IEntityComponent
     {
-        internal EntityCollection
-            (in EntityCollection<T1> array1, in EntityCollection<T2> array2, in EntityCollection<T3> array3)
+        internal EntityCollection(in EntityCollection<T1> array1, in EntityCollection<T2> array2,
+            in EntityCollection<T3> array3)
         {
-            _array1 = array1;
-            _array2 = array2;
-            _array3 = array3;
+            buffer1 = array1;
+            buffer2 = array2;
+            buffer3 = array3;
         }
 
         internal EntityCollection<T1> buffer1
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array1;
+            get;
         }
 
         internal EntityCollection<T2> buffer2
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array2;
+            get;
         }
 
         internal EntityCollection<T3> buffer3
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array3;
+            get;
         }
 
-        internal uint count => buffer1.count;
-
-        readonly EntityCollection<T1> _array1;
-        readonly EntityCollection<T2> _array2;
-        readonly EntityCollection<T3> _array3;
+        internal int count => (int)buffer1.count;
     }
 
     public readonly ref struct EntityCollection<T1, T2, T3, T4> where T1 : struct, IEntityComponent
-                                                                where T2 : struct, IEntityComponent
-                                                                where T3 : struct, IEntityComponent
-                                                                where T4 : struct, IEntityComponent
+        where T2 : struct, IEntityComponent
+        where T3 : struct, IEntityComponent
+        where T4 : struct, IEntityComponent
     {
-        internal EntityCollection
-        (in EntityCollection<T1> array1, in EntityCollection<T2> array2, in EntityCollection<T3> array3
-       , in EntityCollection<T4> array4)
+        internal EntityCollection(in EntityCollection<T1> array1, in EntityCollection<T2> array2,
+            in EntityCollection<T3> array3, in EntityCollection<T4> array4)
         {
-            _array1 = array1;
-            _array2 = array2;
-            _array3 = array3;
-            _array4 = array4;
+            buffer1 = array1;
+            buffer2 = array2;
+            buffer3 = array3;
+            buffer4 = array4;
         }
 
         internal EntityCollection<T1> buffer1
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array1;
+            get;
         }
 
         internal EntityCollection<T2> buffer2
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array2;
+            get;
         }
 
         internal EntityCollection<T3> buffer3
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array3;
+            get;
         }
 
         internal EntityCollection<T4> buffer4
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array4;
+            get;
         }
 
-        internal uint count => _array1.count;
-
-        readonly EntityCollection<T1> _array1;
-        readonly EntityCollection<T2> _array2;
-        readonly EntityCollection<T3> _array3;
-        readonly EntityCollection<T4> _array4;
+        internal int count => (int)buffer1.count;
     }
 
     public readonly struct BT<BufferT1, BufferT2, BufferT3, BufferT4>
@@ -147,13 +151,20 @@ namespace Svelto.ECS
         public readonly BufferT4 buffer4;
         public readonly int      count;
 
-        public BT(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, BufferT4 bufferT4, uint count) : this()
+        BT(in (BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, BufferT4 bufferT4, int count) buffer) :
+            this()
         {
-            this.buffer1 = bufferT1;
-            this.buffer2 = bufferT2;
-            this.buffer3 = bufferT3;
-            this.buffer4 = bufferT4;
-            this.count   = (int) count;
+            buffer1 = buffer.bufferT1;
+            buffer2 = buffer.bufferT2;
+            buffer3 = buffer.bufferT3;
+            buffer4 = buffer.bufferT4;
+            count   = buffer.count;
+        }
+
+        public static implicit operator BT<BufferT1, BufferT2, BufferT3, BufferT4>(
+            in (BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, BufferT4 bufferT4, int count) buffer)
+        {
+            return new BT<BufferT1, BufferT2, BufferT3, BufferT4>(buffer);
         }
     }
 
@@ -164,20 +175,18 @@ namespace Svelto.ECS
         public readonly BufferT3 buffer3;
         public readonly int      count;
 
-        public BT(BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, uint count) : this()
+        BT(in (BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, int count) buffer) : this()
         {
-            this.buffer1 = bufferT1;
-            this.buffer2 = bufferT2;
-            this.buffer3 = bufferT3;
-            this.count   = (int) count;
+            buffer1 = buffer.bufferT1;
+            buffer2 = buffer.bufferT2;
+            buffer3 = buffer.bufferT3;
+            count   = buffer.count;
         }
 
-        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out BufferT3 bufferT3, out int count)
+        public static implicit operator BT<BufferT1, BufferT2, BufferT3>(
+            in (BufferT1 bufferT1, BufferT2 bufferT2, BufferT3 bufferT3, int count) buffer)
         {
-            bufferT1 = buffer1;
-            bufferT2 = buffer2;
-            bufferT3 = buffer3;
-            count    = this.count;
+            return new BT<BufferT1, BufferT2, BufferT3>(buffer);
         }
     }
 
@@ -186,16 +195,15 @@ namespace Svelto.ECS
         public readonly BufferT1 buffer;
         public readonly int      count;
 
-        public BT(BufferT1 bufferT1, uint count) : this()
+        BT(in (BufferT1 bufferT1, int count) buffer) : this()
         {
-            this.buffer = bufferT1;
-            this.count  = (int) count;
+            this.buffer = buffer.bufferT1;
+            count  = buffer.count;
         }
 
-        public void Deconstruct(out BufferT1 bufferT1, out int count)
+        public static implicit operator BT<BufferT1>(in (BufferT1 bufferT1, int count) buffer)
         {
-            bufferT1 = buffer;
-            count    = this.count;
+            return new BT<BufferT1>(buffer);
         }
 
         public static implicit operator BufferT1(BT<BufferT1> t) => t.buffer;
@@ -207,18 +215,17 @@ namespace Svelto.ECS
         public readonly BufferT2 buffer2;
         public readonly int      count;
 
-        public BT(BufferT1 bufferT1, BufferT2 bufferT2, uint count) : this()
+        BT(in (BufferT1 bufferT1, BufferT2 bufferT2, int count) buffer) : this()
         {
-            this.buffer1 = bufferT1;
-            this.buffer2 = bufferT2;
-            this.count   = (int) count;
+            buffer1 = buffer.bufferT1;
+            buffer2 = buffer.bufferT2;
+            count   = buffer.count;
         }
 
-        public void Deconstruct(out BufferT1 bufferT1, out BufferT2 bufferT2, out int count)
+        public static implicit operator BT<BufferT1, BufferT2>(
+            in (BufferT1 bufferT1, BufferT2 bufferT2, int count) buffer)
         {
-            bufferT1 = buffer1;
-            bufferT2 = buffer2;
-            count    = this.count;
+            return new BT<BufferT1, BufferT2>(buffer);
         }
     }
 }

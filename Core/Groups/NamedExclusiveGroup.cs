@@ -13,7 +13,7 @@ namespace Svelto.ECS
 
         static NamedExclusiveGroup()
         {
-#if DEBUG        
+#if DEBUG && !PROFILE_SVELTO
             GroupNamesMap.idToName[Group] = $"{name} ID {Group.id}";
 #endif            
             //The hashname is independent from the actual group ID. this is fundamental because it is want

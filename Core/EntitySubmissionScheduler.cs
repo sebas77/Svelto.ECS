@@ -6,9 +6,9 @@ namespace Svelto.ECS.Schedulers
 
         public abstract void Dispose();
 
-        public abstract bool paused    { get; set; }
-        public          uint iteration { get; protected internal set;  }
-        
+        public bool paused    { get; set; }
+        public uint iteration { get; protected internal set; }
+
         internal bool isRunning;
     }
 }

@@ -1,9 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using Svelto.Common;
 
 namespace Svelto.ECS.DataStructures
 {
-    public struct NativeDynamicArrayCast<T> where T : struct
+    public struct NativeDynamicArrayCast<T>:IDisposable where T : struct
     {
         public NativeDynamicArrayCast(uint size, Allocator allocator)
         {
@@ -61,6 +62,18 @@ namespace Svelto.ECS.DataStructures
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeDynamicArray ToNativeArray() { return _array; }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Set(uint index, in T value)
+        {
+            _array.Set(index, value);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Set(int index, in T value)
+        {
+            _array.Set((uint)index, value);
+        }
 
         public bool isValid => _array.isValid;
 

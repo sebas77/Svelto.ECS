@@ -6,14 +6,13 @@ using System;
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.DataStructures.Native;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
     public partial class EntitiesDB
     {
-        internal EntitiesDB(EnginesRoot enginesRoot, EnginesRoot.LocatorMap entityReferencesMap)
+        internal EntitiesDB(EnginesRoot enginesRoot, EnginesRoot.EntityReferenceMap entityReferencesMap)
         {
             _enginesRoot   = enginesRoot;
             _entityReferencesMap = entityReferencesMap;
@@ -25,15 +24,17 @@ namespace Svelto.ECS
         {
             uint       count = 0;
             IBuffer<T> buffer;
+            EntityIDs  ids = default;
             if (SafeQueryEntityDictionary<T>(out var typeSafeDictionary, entitiesInGroupPerType) == false)
                 buffer = RetrieveEmptyEntityComponentArray<T>();
             else
             {
-                var safeDictionary = (typeSafeDictionary as ITypeSafeDictionary<T>);
+                ITypeSafeDictionary<T> safeDictionary = (typeSafeDictionary as ITypeSafeDictionary<T>);
                 buffer = safeDictionary.GetValues(out count);
+                ids    = safeDictionary.entityIDs;
             }
 
-            return new EntityCollection<T>(buffer, count);
+            return new EntityCollection<T>(buffer, count, ids);
         }
 
         /// <summary>
@@ -257,7 +258,7 @@ namespace Svelto.ECS
         public bool IsDisposing => _enginesRoot._isDisposing;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool SafeQueryEntityDictionary<T>
+        bool SafeQueryEntityDictionary<T>
         (out ITypeSafeDictionary typeSafeDictionary
        , FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType) where T : IEntityComponent
         {
@@ -353,6 +354,6 @@ namespace Svelto.ECS
         FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> groupsPerEntity =>
             _enginesRoot._groupsPerEntity;
 
-        EnginesRoot.LocatorMap _entityReferencesMap;
+        EnginesRoot.EntityReferenceMap _entityReferencesMap;
     }
 }

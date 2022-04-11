@@ -31,7 +31,7 @@ namespace Svelto.ECS.Serialization
 
             serializationData.dataPos = (uint) serializationData.data.count;
 
-            serializationData.data.ExpandBy(componentSerializer.size);
+            serializationData.data.IncrementCountBy(componentSerializer.size);
             componentSerializer.SerializeSafe(val, serializationData);
         }
 
@@ -58,7 +58,7 @@ namespace Svelto.ECS.Serialization
         {
             IComponentSerializer<T> componentSerializer = _serializers[(int) serializationType];
 
-            componentSerializer.DeserializeSafe(ref initializer.GetOrCreate<T>(), serializationData);
+            componentSerializer.DeserializeSafe(ref initializer.GetOrAdd<T>(), serializationData);
         }
 
         public uint Size(int serializationType)

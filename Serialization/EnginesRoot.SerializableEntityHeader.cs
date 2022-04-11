@@ -43,7 +43,7 @@ namespace Svelto.ECS
 
             internal void Copy(ISerializationData serializationData)
             {
-                serializationData.data.ExpandBy(SIZE);
+                serializationData.data.IncrementCountBy(SIZE);
 
                 // Splitting the descriptorHash_ (uint, 32 bit) into four bytes.
                 serializationData.data[serializationData.dataPos++] = (byte) (descriptorHash & 0xff);

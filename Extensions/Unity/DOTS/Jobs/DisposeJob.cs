@@ -2,7 +2,7 @@
 using System;
 using Unity.Jobs;
 
-namespace Svelto.ECS.Extensions.Unity
+namespace Svelto.ECS.SveltoOnDOTS
 {
     public struct DisposeJob<T>:IJob where T:struct,IDisposable
     {
