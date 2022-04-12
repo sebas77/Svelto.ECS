@@ -135,7 +135,7 @@ the Hello World example uses the nuget package directly: https://github.com/seba
 
 ## Official Examples (A.K.A. where is the documentation?)
 
-Svelto doesn't have official documentation. The reason is that documentation is costly to mantain and...I reckon people don't need it, thanks to the highly documented and simple mini-examples. Please check and study them all regardless the platform you intend to use Svelto with.
+Documentation is costly to mantain so check the highly documented and simple mini-examples. Please study them all regardless the platform you intend to use Svelto with.
 
 ### * **Mini Examples**: [https://github.com/sebas77/Svelto.MiniExamples](https://github.com/sebas77/Svelto.MiniExamples) \(including articles\)
 * **Unit Tests**: [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests)
