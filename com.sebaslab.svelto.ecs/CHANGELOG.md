@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file. Changes are
 * Improved Serialization system
 * Improved SveltoOnDots system
 * Tons of other improvements and bug fixes
-~~~~
+
 ## [3.2.5]
 
 * refactor and improved NativeBag and UnsafeBlob. This fix a previously known crash with Unity IL2CPP

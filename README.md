@@ -7,7 +7,36 @@ Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainab
 Svelto.ECS is easy to start with, but full of tricks for expert users. The hardest problem to overcome is usually to shift mentality from OOP programming to ECS programming more than using the framework itself.
 
 ### Svelto.ECS at glance
-WIP
+```csharp
+    public class SimpleContext
+    {
+        public SimpleContext()
+        {
+            var simpleSubmissionEntityViewScheduler = new SimpleEntitiesSubmissionScheduler();
+            //Build Svelto Entities and Engines container, called EnginesRoot
+            _enginesRoot = new EnginesRoot(simpleSubmissionEntityViewScheduler);
+
+            var entityFactory   = _enginesRoot.GenerateEntityFactory();
+            var entityFunctions = _enginesRoot.GenerateEntityFunctions();
+
+            //Add an Engine to the enginesRoot to manage the SimpleEntities
+            var behaviourForEntityClassEngine = new BehaviourForEntityClassEngine(entityFunctions);
+            _enginesRoot.AddEngine(behaviourForEntityClassEngine);
+
+            //build a new Entity with ID 0 in group0
+            entityFactory.BuildEntity<SimpleEntityDescriptor>(new EGID(0, ExclusiveGroups.group0));
+
+            //submit the previously built entities to the Svelto database
+            simpleSubmissionEntityViewScheduler.SubmitEntities();
+
+            //as Svelto doesn't provide an engine ticking system, it's the user's responsibility to
+            //update engines 
+            behaviourForEntityClassEngine.Update();
+        }
+        
+        readonly EnginesRoot _enginesRoot;
+   }
+```
 
 ## Why using Svelto.ECS with Unity?
 Svelto.ECS wasn't born just from the needs of a large team, but also as a result of years of reasoning behind software engineering applied to game development. Svelto.ECS hasn't been written just to develop faster code, it has been designed to help develop better code. Performance gains is just one of the benefits in using Svelto.ECS, as ECS is a great way to write cache-friendly code. Svelto.ECS has been developed with the idea of ECS being a paradigm and not just a pattern, letting the user shift completely away from Object Oriented Programming with consequent improvements of the code design and code maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be as foolproof as possible. Svelto.ECS has been designed to be used by a medium-size/large team working on long term projects where the cost of maintainability is relevant.

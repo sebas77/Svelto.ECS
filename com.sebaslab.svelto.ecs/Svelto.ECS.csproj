@@ -48,4 +48,9 @@
         <None Remove="**\*.meta" />
         <ProjectReference Include="..\com.sebaslab.svelto.common\Svelto.Common.csproj" /> <!-- Do not delete. Used for nuget packing -->
     </ItemGroup>
+    <ItemGroup>
+      <Content Include="..\README.md">
+        <Link>README.md</Link>
+      </Content>
+    </ItemGroup>
 </Project>
