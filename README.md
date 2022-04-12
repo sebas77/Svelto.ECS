@@ -6,7 +6,7 @@ Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainab
 ## Svelto.ECS in pills
 Svelto.ECS is easy to start with, but full of tricks for expert users. The hardest problem to overcome is usually to shift mentality from OOP programming to ECS programming more than using the framework itself.
 
-### Svelto.ECS at glance
+### Svelto.ECS at glance: 
 ```csharp
     public class SimpleContext
     {
@@ -38,6 +38,46 @@ Svelto.ECS is easy to start with, but full of tricks for expert users. The harde
         
         readonly EnginesRoot _enginesRoot;
    }
+```
+
+your first entity descriptor:
+
+```csharp
+    public struct EntityComponent : IEntityComponent
+    {
+        public int  counter;
+    }
+
+    class SimpleEntityDescriptor : GenericEntityDescriptor<EntityComponent>
+    {}
+```
+
+your first engine to apply behaviours to entities:
+
+```csharp
+        public class BehaviourForEntityClassEngine : IQueryingEntitiesEngine
+        {
+            public BehaviourForEntityClassEngine(IEntityFunctions entityFunctions)
+            {
+                _entityFunctions = entityFunctions;
+            }
+
+            public EntitiesDB entitiesDB { get; set; }
+
+            public void Ready() { }
+
+            public void Update()
+            {
+                var (entityViews, count) = entitiesDB.QueryEntities<EntityComponent>(ExclusiveGroups.group1);
+
+                for (var i = 0; i < count; i++)
+                    entityViews[i].counter++;
+
+                Console.Log("Entity Struct engine executed");
+            }
+            
+            readonly IEntityFunctions _entityFunctions;
+        }
 ```
 
 ## Why using Svelto.ECS with Unity?
