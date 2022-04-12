@@ -68,7 +68,7 @@ your first engine to apply behaviours to entities:
 
             public void Update()
             {
-                var (entityViews, count) = entitiesDB.QueryEntities<EntityComponent>(ExclusiveGroups.group1);
+                var (entityViews, count) = entitiesDB.QueryEntities<EntityComponent>(ExclusiveGroups.group0);
 
                 for (var i = 0; i < count; i++)
                     entityViews[i].counter++;
