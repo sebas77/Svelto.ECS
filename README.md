@@ -91,42 +91,6 @@ The question is just for fun! There are so many c# game engines out there (Strid
 
 Svelto.ECS is an Open Source Project provided as it is, no support is guaranteed other than the help given on the Svelto Discord channel. Issues will be fixed when possible. If you decide to adopt Svelto.ECS, it's assumed you are willing to partecipate to the development of the product if necessary.
 
-## How to clone the repository:
-The folders Svelto.ECS and Svelto.Common, where present, are submodules pointing to the relative repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
-
-## Svelto distributed as Unity Package through OpenUPM [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
-
-or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
-
-**Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Dependency System is:**
-
-Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. For this reason I decided to let my packages to point to the unsafe dll distribution from openUPM
-
-to solve the unsafe dependency you need to add the following scopedRegistries in manifest.json:
-```
-  {
-    "scopedRegistries": [
-        {
-            "name": "package.openupm.com",
-            "url": "https://package.openupm.com",
-            "scopes": [
-                "com.sebaslab.svelto.common",
-                "com.sebaslab.svelto.ecs",
-                "org.nuget.system.runtime.compilerservices.unsafe"
-            ]
-        }
-    ]
-}
-```
-
-this is shown in this example too: https://github.com/sebas77/Svelto.MiniExamples/tree/master/UPM-Integration/UPM
-
-## Svelto distributed as Nuget
-
-I am not a Nuget expert, but thanks to our contributors, Svelto.ECS can be found at https://www.nuget.org/packages/Svelto.ECS/
-
-the Hello World example uses the nuget package directly: https://github.com/sebas77/Svelto.MiniExamples/tree/master/Example5-Net-HelloWorld
-
 ## Official Examples (A.K.A. where is the documentation?)
 
 Documentation is costly to mantain so check the highly documented and simple mini-examples. Please study them all regardless the platform you intend to use Svelto with.
@@ -179,6 +143,42 @@ Note: I included the IoC articles just to show how I shifted over the years from
 * [Automatic way to control svelto engines order without having to pass in a string using attributes](https://gist.github.com/dragonslaya84/88e6bb998eda8fe4ee912f01d67feec9)
 * [Foundation for a possible platform agnostic Svelto.ECS inspector](https://github.com/akrogame/svelto-ecs-inspector)
 * [Being able to swap entities between a subset of compound tags to another subset of compound tags](https://gist.github.com/jlreymendez/c2f441aaf6ac7b5f233ecd990314e9cc)
+
+## How to clone the repository:
+The folders Svelto.ECS and Svelto.Common, where present, are submodules pointing to the relative repositories. If you find them empty, you need to update them through the submodule command. Check some instructions here: https://github.com/sebas77/Svelto.ECS.Vanilla.Example/wiki
+
+## Svelto distributed as Unity Package through OpenUPM [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
+
+or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
+
+**Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Dependency System is:**
+
+Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. For this reason I decided to let my packages to point to the unsafe dll distribution from openUPM
+
+to solve the unsafe dependency you need to add the following scopedRegistries in manifest.json:
+```
+  {
+    "scopedRegistries": [
+        {
+            "name": "package.openupm.com",
+            "url": "https://package.openupm.com",
+            "scopes": [
+                "com.sebaslab.svelto.common",
+                "com.sebaslab.svelto.ecs",
+                "org.nuget.system.runtime.compilerservices.unsafe"
+            ]
+        }
+    ]
+}
+```
+
+this is shown in this example too: https://github.com/sebas77/Svelto.MiniExamples/tree/master/UPM-Integration/UPM
+
+## Svelto distributed as Nuget
+
+I am not a Nuget expert, but thanks to our contributors, Svelto.ECS can be found at https://www.nuget.org/packages/Svelto.ECS/
+
+the Hello World example uses the nuget package directly: https://github.com/sebas77/Svelto.MiniExamples/tree/master/Example5-Net-HelloWorld
 
 ## In case of bugs
 
