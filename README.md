@@ -54,27 +54,27 @@ your first entity descriptor:
 your first engine to apply behaviours to entities:
 
 ```csharp
-        public class BehaviourForEntityClassEngine : IQueryingEntitiesEngine
+    public class BehaviourForEntityClassEngine : IQueryingEntitiesEngine
+    {
+        public BehaviourForEntityClassEngine(IEntityFunctions entityFunctions)
         {
-            public BehaviourForEntityClassEngine(IEntityFunctions entityFunctions)
-            {
-                _entityFunctions = entityFunctions;
-            }
-
-            public EntitiesDB entitiesDB { get; set; }
-
-            public void Ready() { }
-
-            public void Update()
-            {
-                var (components, count) = entitiesDB.QueryEntities<EntityComponent>(ExclusiveGroups.group0);
-
-                for (var i = 0; i < count; i++)
-                    components[i].counter++;
-            }
-            
-            readonly IEntityFunctions _entityFunctions;
+            _entityFunctions = entityFunctions;
         }
+
+        public EntitiesDB entitiesDB { get; set; }
+
+        public void Ready() { }
+
+        public void Update()
+        {
+            var (components, count) = entitiesDB.QueryEntities<EntityComponent>(ExclusiveGroups.group0);
+
+            for (var i = 0; i < count; i++)
+                components[i].counter++;
+        }
+        
+        readonly IEntityFunctions _entityFunctions;
+    }
 ```
 
 ## Why using Svelto.ECS with Unity?
