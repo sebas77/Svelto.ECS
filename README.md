@@ -18,10 +18,9 @@ Svelto.ECS is easy to start with, but full of tricks for expert users. The harde
             _enginesRoot = new EnginesRoot(simpleSubmissionEntityViewScheduler);
 
             var entityFactory   = _enginesRoot.GenerateEntityFactory();
-            var entityFunctions = _enginesRoot.GenerateEntityFunctions();
 
             //Add an Engine to the enginesRoot to manage the SimpleEntities
-            var behaviourForEntityClassEngine = new BehaviourForEntityClassEngine(entityFunctions);
+            var behaviourForEntityClassEngine = new BehaviourForEntityClassEngine();
             _enginesRoot.AddEngine(behaviourForEntityClassEngine);
 
             //build a new Entity with ID 0 in group0
@@ -56,11 +55,6 @@ your first engine to apply behaviours to entities:
 ```csharp
     public class BehaviourForEntityClassEngine : IQueryingEntitiesEngine
     {
-        public BehaviourForEntityClassEngine(IEntityFunctions entityFunctions)
-        {
-            _entityFunctions = entityFunctions;
-        }
-
         public EntitiesDB entitiesDB { get; set; }
 
         public void Ready() { }
@@ -72,8 +66,6 @@ your first engine to apply behaviours to entities:
             for (var i = 0; i < count; i++)
                 components[i].counter++;
         }
-        
-        readonly IEntityFunctions _entityFunctions;
     }
 ```
 
