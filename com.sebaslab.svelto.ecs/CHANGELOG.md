@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. Changes are
 * INeedEGID and INeedEntityReference interfaces are not deprecated, but still available for backwards compatibility through the define SLOW_SVELTO_SUBMISSION
 * There are some minor breaking changes, you may need to rename a bunch of methods calls
 * Drastically improved Submission phase performance
-* All the IReactOn interfaces are now replaced by much faster IReacOn*Ex interfaces. Use those~~~~
+* All the IReactOn interfaces are now replaced by much faster IReacOn\*Ex interfaces. Use those isntead.
 * QueryEntities methods now optionally return also an array of Entity IDs that you can reference like a component (this supersedes INeedEGID)
 * Completely reworked and way more powerful filter API. The old one has been renamed to Legacy and left for backward compatibility
 * NativeEGIDMultiMapper doesn't need to be created every submission anymore. It can be created permanently and disposed when not used anymore (some caveats with it)
