@@ -33,29 +33,20 @@ All notable changes to this project will be documented in this file. Changes are
 * Improved and fixed Serialization code
 * Ensure that the creation of static groups is deterministic (GroupHashMap)
 
-
 ## [3.1.3]
-
-### Fixed
 
 * bumped dependency of Svelto.Common due to an important fix there.
 
 ## [3.1.2]
-
-### Changed
 
 * improved async entity submission code (still experimental)
 * improved native entity operations debug info
 
 ## [3.1.1]
 
-### Changed
-
 * SubmissionEngine didn't need the EntityManager property, so it has been removed
 
 ## [3.1.0]
-
-### Changed
 
 * rearrange folders structures for clarity
 * added DoubleEntitiesEnumerator, as seen in MiniExample 4, to allow a double iteration of the same group skipping
@@ -70,5 +61,5 @@ All notable changes to this project will be documented in this file. Changes are
   but can be converted to the original object in OOP abstract layers
 * renamed NativeEntityComponentInitializer to NativeEntityInitializer
 
-### Fixed
+
 
