@@ -76,6 +76,8 @@ learn more about svelto on the Wiki page: https://github.com/sebas77/Svelto.ECS/
 ## Why using Svelto.ECS with Unity?
 Svelto.ECS wasn't born just from the needs of a large team, but also as a result of years of reasoning behind software engineering applied to game development. Svelto.ECS hasn't been written just to develop faster code, it has been designed to help develop better code. Performance gains is just one of the benefits in using Svelto.ECS, as ECS is a great way to write cache-friendly code. Svelto.ECS has been developed with the idea of ECS being a paradigm and not just a pattern, letting the user shift completely away from Object Oriented Programming with consequent improvements of the code design and code maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be as foolproof as possible. Svelto.ECS has been designed to be used by a medium-size/large team working on long term projects where the cost of maintainability is relevant.
 
+Svelto.ECS is lean, it hasn't been designed to move a whole engine from OOP to ECS, therefore it doesn't suffer from unjustifiable complexity overhead to try to solve problems that often are not linked to gameplay development. Svelto.ECS is fundamentally feature complete at this point of writing and new features in new versions are more nice to have than fundamental features.
+
 **Svelto.ECS is fully compatible with DOTS Burst and Jobs.**
 
 Svelto.ECS is compatible with Unity 2019.3.x cycle as long as it's not used with DOTS ECS. 
