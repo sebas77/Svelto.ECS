@@ -9,7 +9,8 @@ Svelto.ECS is easy to start with, but full of tricks for expert users. The harde
 ```csharp
     public class SimpleContext
     {
-        public static ExclusiveGroup group0 = new ExclusiveGroup(); //the group where the entity will be built in
+        //the group where the entity will be built in
+        public static ExclusiveGroup group0 = new ExclusiveGroup(); 
 
         public SimpleContext()
         {
