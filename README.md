@@ -1,7 +1,7 @@
 # Svelto.ECS C# Entity Component System framework
 =====================================
 
-Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, code without pain. Although the framework is platform agnostic \(compatible with c\# 7 and .net standard 2.0\), it comes with several Unity extensions.
+Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, code without pain. Although the framework is platform agnostic \(compatible with c\# 7 and above and .net standard 2.0 and above\), it comes with several Unity extensions.
 
 ## Svelto.ECS in pills
 Svelto.ECS is easy to start with, but full of tricks for expert users. The hardest problem to overcome is usually to shift mentality from OOP programming to ECS programming more than using the framework itself. If you want to read an ECS faq, you can check this article: https://github.com/SanderMertens/ecs-faq
@@ -68,12 +68,10 @@ your first engine to apply behaviours to entities:
 
             public void Update()
             {
-                var (entityViews, count) = entitiesDB.QueryEntities<EntityComponent>(ExclusiveGroups.group0);
+                var (components, count) = entitiesDB.QueryEntities<EntityComponent>(ExclusiveGroups.group0);
 
                 for (var i = 0; i < count; i++)
-                    entityViews[i].counter++;
-
-                Console.Log("Entity Struct engine executed");
+                    components[i].counter++;
             }
             
             readonly IEntityFunctions _entityFunctions;
