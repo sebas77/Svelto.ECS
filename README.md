@@ -49,9 +49,13 @@ to solve the unsafe dependency you need to add the following scopedRegistries in
 }
 ```
 
+this is shown in this example too: https://github.com/sebas77/Svelto.MiniExamples/tree/master/UPM-Integration/UPM
+
 ## Svelto distributed as Nuget
 
 I am not a Nuget expert, but thanks to our contributors, Svelto.ECS can be found at https://www.nuget.org/packages/Svelto.ECS/
+
+the Hello World example uses the nuget package directly: https://github.com/sebas77/Svelto.MiniExamples/tree/master/Example5-Net-HelloWorld
 
 ## Official Examples (A.K.A. where is the documentation?)
 
