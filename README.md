@@ -114,10 +114,7 @@ to solve the unsafe dependency you need to add the following scopedRegistries in
                 "org.nuget.system.runtime.compilerservices.unsafe"
             ]
         }
-    ],
-    "dependencies": {
-        "com.sebaslab.svelto.ecs": "3.2.6"
-    }
+    ]
 }
 ```
 
