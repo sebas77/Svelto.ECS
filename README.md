@@ -69,7 +69,9 @@ your first engine to apply behaviours to entities:
     }
 ```
 
-learn more about svelto on the Wiki page: https://github.com/sebas77/Svelto.ECS/wiki
+learn more about svelto on the Wiki page: https://github.com/sebas77/Svelto.ECS/wiki or on this article: 
+
+* [Svelto ECS 3.0 is finally here](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)  \(re-introducing svelto, this article is important for starters!\)
 
 ## Why using Svelto.ECS with Unity?
 Svelto.ECS wasn't born just from the needs of a large team, but also as a result of years of reasoning behind software engineering applied to game development. Svelto.ECS hasn't been written just to develop faster code, it has been designed to help develop better code. Performance gains is just one of the benefits in using Svelto.ECS, as ECS is a great way to write cache-friendly code. Svelto.ECS has been developed with the idea of ECS being a paradigm and not just a pattern, letting the user shift completely away from Object Oriented Programming with consequent improvements of the code design and code maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be as foolproof as possible. Svelto.ECS has been designed to be used by a medium-size/large team working on long term projects where the cost of maintainability is relevant.
@@ -139,16 +141,6 @@ After that, you can get all the help you need from the official chat:
 * [https://discord.gg/3qAdjDb](https://discord.gg/3qAdjDb) 
 
 ## Official Articles
-
-**Framework articles:**
-
-* [Svelto ECS 3.0 is finally here](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)  \(re-introducing svelto, this article is important for starters!\)
-* [Introducing Svelto ECS 2.9](http://www.sebaslab.com/introducing-svelto-ecs-2-9/)  \(shows what's changed since 2.8\)
-* [Introducing Svelto ECS 2.8](http://www.sebaslab.com/introducing-svelto-ecs-2-8/)  \(shows what's changed since 2.7\)
-* [Svelto.ECS 2.7: what’s new and best practices](http://www.sebaslab.com/svelto-2-7-whats-new-and-best-practices/) \(shows what's changed since 2.5\)
-* [Introducing Svelto ECS 2.5](http://www.sebaslab.com/svelto-ecs-2-5-and-allocation-0-code/) \(shows what's changed since 2.0\)
-* [Svelto.ECS 2.0 is production ready](http://www.sebaslab.com/svelto-ecs-2-0-almost-production-ready/) \(shows what's changed since 1.0\)
-* [Svelto ECS is now production ready](http://www.sebaslab.com/ecs-1-0/)
 
 **Theory related articles (from the most recent to the oldest, read from the oldest if you are new to it):**
 
