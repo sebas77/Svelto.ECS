@@ -51,7 +51,7 @@ your first entity descriptor:
     {}
 ```
 
-your first engine to apply behaviours to entities:
+your first engine executing entities behaviours:
 
 ```csharp
     public class BehaviourForEntityClassEngine : IQueryingEntitiesEngine
