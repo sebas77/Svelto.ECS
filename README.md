@@ -85,7 +85,7 @@ Svelto.ECS is compatible with Unity 2019.3.x cycle as long as it's not used with
 Svelto.ECS is also designed to use DOTS ECS as engine library, using the SveltoOnDOTS wrapper. This wrapper is designed to take advantage of DOTS for engine related operations, like rendering, physics and so on. When DOTS ECS integration is necessary, Svelto.ECS will always target the last stable unity version with the most up to date DOTS package.
 
 ## Why using Svelto.ECS without Unity?
-The question is just for fun! There are so many c# game engines out there (Stride, Monogame, FlatRedBall, WaveEngine, UnrealCLR, UniEngine just to mention some) and Svelto.ECS is compatible with all of them! 
+The question is just for fun! There are so many c# game engines out there (Stride, Flax, Monogame, FlatRedBall, Evergine, UnrealCLR, UniEngine just to mention some) and Svelto.ECS is compatible with all of them! 
 
 ## If you decide to use Svelto.ECS
 
