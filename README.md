@@ -87,8 +87,7 @@ Svelto.ECS is also designed to use DOTS ECS as engine library, using the SveltoO
 ## Why using Svelto.ECS without Unity?
 The question is just for fun! There are so many c# game engines out there (Stride, Flax, Monogame, FlatRedBall, Evergine, UnrealCLR, UniEngine just to mention some) and Svelto.ECS is compatible with all of them! 
 
-## Performance consideration
-
+## Performance considerations
 Aside from resizing the database absolutely when necessary, all the Svelto operations are memory allocation free. Some containers may need to be preallocated (and then disposed) but those are already advanced scenarios. When using pure ECS (no EntityViewComponents) components are stored in native collections across all the platforms, which means gaining some performance from losing the managed memory checks. With pure ECS, iterating components is automatically cache-friendly.
 
 ## If you decide to use Svelto.ECS
