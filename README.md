@@ -87,12 +87,14 @@ Svelto.ECS is also designed to use DOTS ECS as engine library, using the SveltoO
 ## Why using Svelto.ECS without Unity?
 The question is just for fun! There are so many c# game engines out there (Stride, Flax, Monogame, FlatRedBall, Evergine, UnrealCLR, UniEngine just to mention some) and Svelto.ECS is compatible with all of them! 
 
-## If you decide to use Svelto.ECS
+## Performance consideration
 
+Aside from resizing the database absolutely when necessary, all the Svelto operations are memory allocation free. Some containers may need to be preallocated (and then disposed) but those are already advanced scenarios. When using pure ECS (no EntityViewComponents) components are stored in native collections across all the platforms, which means gaining some performance from losing the managed memory checks. With pure ECS, iterating components is automatically cache-friendly.
+
+## If you decide to use Svelto.ECS
 Svelto.ECS is an Open Source Project provided as it is, no support is guaranteed other than the help given on the Svelto Discord channel. Issues will be fixed when possible. If you decide to adopt Svelto.ECS, it's assumed you are willing to partecipate to the development of the product if necessary.
 
 ## Official Examples (A.K.A. where is the documentation?)
-
 Documentation is costly to mantain so check the highly documented and simple mini-examples. Please study them all regardless the platform you intend to use Svelto with.
 
 * **Mini Examples**: [https://github.com/sebas77/Svelto.MiniExamples](https://github.com/sebas77/Svelto.MiniExamples)
@@ -105,7 +107,6 @@ After that, you can get all the help you need from the official chat:
 * [https://discord.gg/3qAdjDb](https://discord.gg/3qAdjDb) 
 
 ## Official Articles
-
 **Theory related articles (from the most recent to the oldest, read from the oldest if you are new to it):**
 
 * [OOP abstraction layer in an ECS-centric application](https://www.sebaslab.com/oop-abstraction-layer-in-a-ecs-centric-application/)  \(this article is important for starters!\)
@@ -135,7 +136,6 @@ After that, you can get all the help you need from the official chat:
 Note: I included the IoC articles just to show how I shifted over the years from using an IoC container to use an ECS framework and the rationale behind its adoption.
 
 ## Users Generated Content \(I removed all the outdated articles, so this is a call for new ones!\)
-
 * [A Beginner’s Guide to Svelto.ECS (3.0) with Unity by Jiheh Ritterling](https://jiheh.medium.com/a-beginners-guide-to-svelto-ecs-3-0-with-unity-e9dbc88a2145)
 
 **Svelto Extensions**
@@ -176,21 +176,17 @@ to solve the unsafe dependency you need to add the following scopedRegistries in
 this is shown in this example too: https://github.com/sebas77/Svelto.MiniExamples/tree/master/UPM-Integration/UPM
 
 ## Svelto distributed as Nuget
-
 I am not a Nuget expert, but thanks to our contributors, Svelto.ECS can be found at https://www.nuget.org/packages/Svelto.ECS/
 
 the Hello World example uses the nuget package directly: https://github.com/sebas77/Svelto.MiniExamples/tree/master/Example5-Net-HelloWorld
 
 ## In case of bugs
-
 Best option is to fork and clone [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests), add new tests to reproduce the problem and request a pull. I will then fix the issue. Also feel free to contact me on Discord.
 
 ## I like the project, how can I help?
-
 Hey, thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, the more we are, the better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: *A visual debugger and more unit tests are needed*. Other platforms other than Unity could get some love too: Stride Game, Godot, monogame, FNA or whatever supports c#. Porting to other languages, especially c++, would be awesome but probably pointless. Please check the lane dedicated to the community tasks list here: https://github.com/users/sebas77/projects/3 and let me know if you want to take something on!
 
 ## Svelto Framework is used to develop the following products\(\*\):
-
 ![Techblox](https://user-images.githubusercontent.com/945379/123062411-65ee3600-d404-11eb-8dca-d30c28ed909d.png)
 ![Gamecraft](https://user-images.githubusercontent.com/945379/163145452-3e8d959a-1453-4373-8010-38bb7717f79e.png)
 ![Robocraft Infinity](https://user-images.githubusercontent.com/945379/163145385-7635f193-b69b-4508-a391-f41a3331122c.png)
