@@ -90,6 +90,8 @@ The question is just for fun! There are so many c# game engines out there (Strid
 ## Performance considerations
 Aside from resizing the database absolutely when necessary, all the Svelto operations are memory allocation free. Some containers may need to be preallocated (and then disposed) but those are already advanced scenarios. When using pure ECS (no EntityViewComponents) components are stored in native collections across all the platforms, which means gaining some performance from losing the managed memory checks. With pure ECS, iterating components is automatically cache-friendly.
 
+Note: Svelto.ECS has a ton of allocating run-time checks in debug, so if you want to profile you need to profile a release version or use PROFILE_SVELTO define
+
 ## If you decide to use Svelto.ECS
 Svelto.ECS is an Open Source Project provided as it is, no support is guaranteed other than the help given on the Svelto Discord channel. Issues will be fixed when possible. If you decide to adopt Svelto.ECS, it's assumed you are willing to partecipate to the development of the product if necessary.
 
