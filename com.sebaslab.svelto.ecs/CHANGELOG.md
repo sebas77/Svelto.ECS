@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
+## [3.3.1] - 26-2022
+
+* Fixed serious bug that would affect the new IReactOnRemoveEx callbacks
+
 ## [3.3.0] - 04-2022
 
 * INeedEGID and INeedEntityReference interfaces are not deprecated, but still available for backwards compatibility through the define SLOW_SVELTO_SUBMISSION
