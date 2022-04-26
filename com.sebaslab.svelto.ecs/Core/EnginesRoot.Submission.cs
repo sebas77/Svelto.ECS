@@ -75,6 +75,8 @@ namespace Svelto.ECS
 
                 using (sampler.Sample("Remove Entities"))
                 {
+                    enginesRoot._cachedRangeOfSubmittedIndices.FastClear();
+
                     foreach (var entitiesToRemove in removeOperations)
                     {
                         ExclusiveGroupStruct fromGroup           = entitiesToRemove.key;
