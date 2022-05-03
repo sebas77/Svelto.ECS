@@ -11,10 +11,12 @@
         <dependencies>
             <group targetFramework="netstandard2.0" />
         </dependencies>
+        <readme>docs/README.md</readme>
     </metadata>
     <files>
         <file src="Svelto.ECS.targets" target="build/" />
         <file src="../temp/bin/debug/Svelto.ECS.dll" target="lib/Debug/netstandard2.0/" />
         <file src="../temp/bin/release/Svelto.ECS.dll" target="lib/Release/netstandard2.0/" />
+        <file src="../README.md" target="docs/" />
     </files>
 </package>
