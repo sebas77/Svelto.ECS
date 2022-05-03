@@ -56,9 +56,13 @@ jobs:
       run: sudo cp temp/bin/release/lib/netstandard2.0/Svelto.ECS.dll temp/bin/release
 
     # Compile into nuget package
-    
     - name: build nuget package
       run: sudo dotnet pack /p:PackageVersion=${PKG_VERSION} -o . com.sebaslab.svelto.ecs/Svelto.ECS.csproj -c NugetPack
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PKG_NAME }}.${{ env.PKG_VERSION }}.nupkg
+        path: ${{ env.PKG_NAME }}.${{ env.PKG_VERSION }}.nupkg
 
     - name: publish nuget package
       run: dotnet nuget push ${{ env.PKG_NAME }}.${{ env.PKG_VERSION }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
