@@ -66,10 +66,23 @@ namespace Svelto.ECS
                     {
                         var entitiesCount = entityIDs.count;
                         
+                        _filtersSwapBackIndexByEntityID.FastClear();
+                        _filtersSwapBackEntityIDByIndex.FastClear();
+                        for (var entityIndex = 0; entityIndex < entitiesCount; ++entityIndex)
+                        {
+                            var index = fromDic.GetIndex(entityIDs[entityIndex].Item1);
+                            
+                            _filtersSwapBackIndexByEntityID.Add(entityIDs[entityIndex].Item1, index);
+                            _filtersSwapBackEntityIDByIndex.Add(index, entityIDs[entityIndex].Item1);
+                        }
+
                         for (int entityIndex = 0; entityIndex < entitiesCount; ++entityIndex)
                         {
                             uint fromentityID = entityIDs[entityIndex].Item1;
-                            var  fromIndex    = fromDic.GetIndex(fromentityID);
+                            var  fromIndex    = _filtersSwapBackIndexByEntityID[fromentityID];
+
+                            if (_filtersSwapBackEntityIDByIndex.TryGetValue(currentLastIndex, out var lastEntityID))
+                                _filtersSwapBackIndexByEntityID[lastEntityID] = fromIndex;                            
 
                             groupFilter.RemoveWithSwapBack(fromentityID, fromIndex, currentLastIndex--);
                         }
@@ -122,17 +135,30 @@ namespace Svelto.ECS
                         }
                     }
 
+                    _filtersSwapBackIndexByEntityID.FastClear();
+                    _filtersSwapBackEntityIDByIndex.FastClear();
+                    foreach (var (fromEntityID, _, _) in fromEntityToEntityIDs)
+                    {
+                        uint fromIndex; //index in the from dictionary
+                        if (fromGroupFilter.Exists(fromEntityID))
+                            fromIndex = fromGroupFilter._entityIDToDenseIndex[fromEntityID];
+                        else
+                            fromIndex = beforeSubmissionFromIDs[fromEntityID];
+                            
+                        _filtersSwapBackIndexByEntityID.Add(fromEntityID, fromIndex);
+                        _filtersSwapBackEntityIDByIndex.Add(fromIndex, fromEntityID);
+                    }
+                    
                     foreach (var (fromEntityID, _, _) in fromEntityToEntityIDs)
                     {
                         //fromIndex is the same of the index in the filter if the entity is in the filter, but
                         //we need to update the entity index of the last entity swapped from the dictionary even
                         //in the case when the fromEntity is not present in the filter.
 
-                        uint fromIndex; //index in the from dictionary
-                        if (fromGroupFilter.Exists(fromEntityID))
-                            fromIndex = fromGroupFilter._entityIDToDenseIndex[fromEntityID];
-                        else
-                            fromIndex = beforeSubmissionFromIDs[fromEntityID];
+                        uint fromIndex = _filtersSwapBackIndexByEntityID[fromEntityID]; //index in the from dictionary
+                        
+                        if (_filtersSwapBackEntityIDByIndex.TryGetValue(currentLastIndex, out var lastEntityID))
+                            _filtersSwapBackIndexByEntityID[lastEntityID] = fromIndex;    
 
                         //Removing an entity from the dictionary may affect the index of the last entity in the
                         //values dictionary array, so we need to to update the indices of the affected entities.
@@ -150,6 +176,9 @@ namespace Svelto.ECS
                 }
             }
         }
+
+        FasterDictionary<uint, uint> _filtersSwapBackIndexByEntityID = new FasterDictionary<uint, uint>();
+        FasterDictionary<uint, uint> _filtersSwapBackEntityIDByIndex = new FasterDictionary<uint, uint>();
 
         internal SharedSveltoDictionaryNative<long, EntityFilterCollection> _transientEntityFilters;
         internal SharedSveltoDictionaryNative<long, EntityFilterCollection> _persistentEntityFilters;
