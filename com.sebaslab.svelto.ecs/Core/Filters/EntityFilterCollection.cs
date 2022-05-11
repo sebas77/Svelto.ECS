@@ -36,7 +36,7 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Add(EGID egid, uint toIndex)
         {
-            return GetGroupFilter(egid.groupID).Add(egid.entityID, toIndex);
+            return GetOrCreateGroupFilter(egid.groupID).Add(egid.entityID, toIndex);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -54,11 +54,21 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists(EGID egid)
         {
-            return GetGroupFilter(egid.groupID).Exists(egid.entityID);
+            if (TryGetGroupFilter(egid.groupID, out var groupFilter))
+            {
+                return groupFilter.Exists(egid.entityID);
+            }
+            return false;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GroupFilters GetGroupFilter(ExclusiveGroupStruct group)
+        public bool TryGetGroupFilter(ExclusiveGroupStruct group, out GroupFilters groupFilter)
+        {
+            return _filtersPerGroup.TryGetValue(group, out groupFilter);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public GroupFilters GetOrCreateGroupFilter(ExclusiveGroupStruct group)
         {
             if (_filtersPerGroup.TryGetValue(group, out var groupFilter) == false)
             {
