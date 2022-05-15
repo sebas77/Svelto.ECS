@@ -55,17 +55,17 @@ namespace Svelto.ECS
                 var numberOfFilters = listOfFilters.count;
                 for (int filterIndex = 0; filterIndex < numberOfFilters; ++filterIndex)
                 {
-                    //we are going to remove multiple entities, this means that the dictionary count would decrease 
+                    //we are going to remove multiple entities, this means that the dictionary count would decrease
                     //for each entity removed from each filter
                     //we need to keep a copy to reset to the original count for each filter
                     var currentLastIndex = (uint)fromDic.count - 1;
                     var filters          = _persistentEntityFilters.unsafeValues;
                     var persistentFilter = filters[listOfFilters[filterIndex]]._filtersPerGroup;
-                    
+
                     if (persistentFilter.TryGetValue(fromGroup, out var groupFilter))
                     {
                         var entitiesCount = entityIDs.count;
-                        
+
                         for (int entityIndex = 0; entityIndex < entitiesCount; ++entityIndex)
                         {
                             uint fromentityID = entityIDs[entityIndex].Item1;
@@ -96,7 +96,7 @@ namespace Svelto.ECS
             /// entities are actually removed from the dictionary.
             for (int filterIndex = 0; filterIndex < numberOfFilters; ++filterIndex)
             {
-                //we are going to remove multiple entities, this means that the dictionary count would decrease 
+                //we are going to remove multiple entities, this means that the dictionary count would decrease
                 //for each entity removed from each filter
                 //we need to keep a copy to reset to the original count for each filter
                 var currentLastIndex = fromDictionaryCount;
@@ -116,7 +116,7 @@ namespace Svelto.ECS
                             var toIndex = toComponentsDictionary.GetIndex(toEntityID);
 
                             if (groupFilterTo.isValid == false)
-                                groupFilterTo = persistentFilter.GetGroupFilter(toGroup);
+                                groupFilterTo = persistentFilter.GetOrCreateGroupFilter(toGroup);
 
                             groupFilterTo.Add(toEntityID, toIndex);
                         }
