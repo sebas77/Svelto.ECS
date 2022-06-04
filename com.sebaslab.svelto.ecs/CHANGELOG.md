@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file. Changes are
 * The point above may result in a performance boost in the Filters updates during submission
 * Code is again 2019 compatible (this may have been broken for a while)
 * Fix a crash wit the EntityCollection deconstruction while trying to deconstruct an empty collection
+* Breaking: EntityFilterCollection GetGroupFilter will throw an exception if the filter doesn't exist. Use GetOrCreateGroupFilter in case.
+* Breaking: LocatorMap has been renamed to EntityReferenceMap
+* Breaking: GetEntityLocatorMap has been renamed to GetEntityReferenceMap
 
 
 ## [3.3.1] - 26-04-2022
