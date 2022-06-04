@@ -70,21 +70,21 @@ namespace Svelto.ECS
             _componentsToBuild = Construct(extraEntities.count, extraEntities.ToArrayFast(out _));
         }
 
-        public void Add<T>() where T : struct, IEntityComponent
+        public void Add<T>() where T : struct, IBaseEntityComponent
         {
             IComponentBuilder[] extraEntities = { new ComponentBuilder<T>() };
             _componentsToBuild = Construct(extraEntities.Length, extraEntities);
         }
 
-        public void Add<T, U>() where T : struct, IEntityComponent where U : struct, IEntityComponent
+        public void Add<T, U>() where T : struct, IBaseEntityComponent where U : struct, IBaseEntityComponent
         {
             IComponentBuilder[] extraEntities = { new ComponentBuilder<T>(), new ComponentBuilder<U>() };
             _componentsToBuild = Construct(extraEntities.Length, extraEntities);
         }
 
-        public void Add<T, U, V>() where T : struct, IEntityComponent
-                                   where U : struct, IEntityComponent
-                                   where V : struct, IEntityComponent
+        public void Add<T, U, V>() where T : struct, IBaseEntityComponent
+                                   where U : struct, IBaseEntityComponent
+                                   where V : struct, IBaseEntityComponent
         {
             IComponentBuilder[] extraEntities =
             {

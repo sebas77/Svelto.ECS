@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS
 {
-    public readonly ref struct NativeEntityFilterIterator<T> where T : unmanaged, IEntityComponent
+    public readonly ref struct NativeEntityFilterIterator<T> where T : unmanaged, IBaseEntityComponent
     {
         internal NativeEntityFilterIterator(NativeEntityFilterCollection<T> filter)
         {

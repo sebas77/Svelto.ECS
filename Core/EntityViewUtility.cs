@@ -13,7 +13,7 @@ namespace Svelto.ECS
 
         public ECSTuple(T1 implementor, T2 v)
         {
-            instance = implementor;
+            instance                = implementor;
             numberOfImplementations = v;
         }
     }
@@ -22,31 +22,28 @@ namespace Svelto.ECS
     static class EntityComponentUtility
     {
         const string DUPLICATE_IMPLEMENTOR_ERROR =
-            "<color=teal>Svelto.ECS</color> the same component is implemented with more than one implementor. This is "
-          + "considered an error and MUST be fixed. ";
+            "<color=teal>Svelto.ECS</color> the same component is implemented with more than one implementor. This is " +
+            "considered an error and MUST be fixed. ";
 
         const string NULL_IMPLEMENTOR_ERROR =
-            "<color=teal>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid "
-          + "performance loss ";
+            "<color=teal>Svelto.ECS</color> Null implementor, please be careful about the implementors passed to avoid " +
+            "performance loss ";
 
         const string NOT_FOUND_EXCEPTION =
             "<color=teal>Svelto.ECS</color> Implementor not found for an EntityComponent. ";
 
-        public static void SetEntityViewComponentImplementors<T>
-        (this IComponentBuilder componentBuilder, ref T entityComponent
-       , FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> entityComponentBlazingFastReflection
-       , IEnumerable<object> implementors
-#if DEBUG && !PROFILE_SVELTO
-      ,Dictionary<Type, ECSTuple<object, int>> implementorsByType
-#else
-      ,  Dictionary<Type, object> implementorsByType
-#endif
-       , Dictionary<Type, Type[]> cachedTypeInterfaces)
+        internal static void SetEntityViewComponentImplementors<T>(this IComponentBuilder componentBuilder,
+            ref T entityComponent, IEnumerable<object> implementors,
+            ComponentBuilder<T>.EntityViewComponentCache localCache) where T : struct, IBaseEntityComponent
         {
-            DBC.ECS.Check.Require(implementors != null, NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent "
-                                , componentBuilder
-                                 .GetEntityComponentType().ToString()));
+            DBC.ECS.Check.Require(implementors != null,
+                NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent ",
+                    componentBuilder.GetEntityComponentType().ToString()));
             
+            var cachedTypeInterfaces                 = localCache.cachedTypes;
+            var implementorsByType                   = localCache.implementorsByType;
+            var entityComponentBlazingFastReflection = localCache.cachedFields;
+
             foreach (var implementor in implementors)
             {
                 DBC.ECS.Check.Require(implementor != null, "invalid null implementor used to build an entity");
@@ -95,16 +92,16 @@ namespace Svelto.ECS
 
                 if (implementorsByType.TryGetValue(fieldType, out implementor) == false)
                 {
-                    var e = new ECSException(NOT_FOUND_EXCEPTION + " Component Type: " + fieldType.Name
-                                           + " - EntityComponent: " + componentBuilder.GetEntityComponentType().Name);
+                    var e = new ECSException(NOT_FOUND_EXCEPTION + " Component Type: " + fieldType.Name +
+                        " - EntityComponent: " + componentBuilder.GetEntityComponentType().Name);
 
                     throw e;
                 }
 #if DEBUG && !PROFILE_SVELTO
                 if (implementor.numberOfImplementations > 1)
                     throw new ECSException(DUPLICATE_IMPLEMENTOR_ERROR.FastConcat(
-                        "Component Type: ", fieldType.Name, " implementor: ", implementor.instance.ToString()) +
-                                           " - EntityComponent: " + componentBuilder.GetEntityComponentType().Name);
+                            "Component Type: ", fieldType.Name, " implementor: ", implementor.instance.ToString()) +
+                        " - EntityComponent: " + componentBuilder.GetEntityComponentType().Name);
 #endif
 #if DEBUG && !PROFILE_SVELTO
                 fieldSetter.Value(ref entityComponent, implementor.instance);

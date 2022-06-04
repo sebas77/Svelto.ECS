@@ -11,10 +11,10 @@ namespace Svelto.ECS
     /// <typeparam name="T2"></typeparam>
     /// <typeparam name="T3"></typeparam>
     /// <typeparam name="T4"></typeparam>
-    public readonly ref struct GroupsEnumerable<T1, T2, T3, T4> where T1 : struct, IEntityComponent
-                                                                where T2 : struct, IEntityComponent
-                                                                where T3 : struct, IEntityComponent
-                                                                where T4 : struct, IEntityComponent
+    public readonly ref struct GroupsEnumerable<T1, T2, T3, T4> where T1 : struct, IBaseEntityComponent
+                                                                where T2 : struct, IBaseEntityComponent
+                                                                where T3 : struct, IBaseEntityComponent
+                                                                where T4 : struct, IBaseEntityComponent
     {
         public GroupsEnumerable(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
         {
@@ -92,9 +92,9 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly ref struct GroupsEnumerable<T1, T2, T3> where T1 : struct, IEntityComponent
-                                                            where T2 : struct, IEntityComponent
-                                                            where T3 : struct, IEntityComponent
+    public readonly ref struct GroupsEnumerable<T1, T2, T3> where T1 : struct, IBaseEntityComponent
+                                                            where T2 : struct, IBaseEntityComponent
+                                                            where T3 : struct, IBaseEntityComponent
     {
         public GroupsEnumerable(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
         {
@@ -175,7 +175,7 @@ namespace Svelto.ECS
     }
 
     public readonly ref struct GroupsEnumerable<T1, T2>
-        where T1 : struct, IEntityComponent where T2 : struct, IEntityComponent
+        where T1 : struct, IBaseEntityComponent where T2 : struct, IBaseEntityComponent
     {
         public GroupsEnumerable(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
         {
@@ -253,7 +253,7 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly ref struct GroupsEnumerable<T1> where T1 : struct, IEntityComponent
+    public readonly ref struct GroupsEnumerable<T1> where T1 : struct, IBaseEntityComponent
     {
         public GroupsEnumerable(EntitiesDB db, in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
         {

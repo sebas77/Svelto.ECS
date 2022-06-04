@@ -2,7 +2,7 @@
 #endif
 namespace Svelto.ECS.Serialization
 {
-    public interface IComponentSerializer<T> where T : unmanaged, IEntityComponent
+    public interface IComponentSerializer<T> where T : unmanaged, IBaseEntityComponent
     {
         bool Serialize(in T value, ISerializationData serializationData);
         bool Deserialize(ref T value, ISerializationData serializationData);

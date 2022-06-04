@@ -16,7 +16,7 @@ namespace Svelto.ECS
         public          EGID            EGID => _ID;
         public readonly EntityReference reference;
 
-        public void Init<T>(T initializer) where T : struct, IEntityComponent
+        public void Init<T>(T initializer) where T : struct, IBaseEntityComponent
         {
             if (_group.TryGetValue(new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
                     out var typeSafeDictionary) == false)
@@ -32,7 +32,7 @@ namespace Svelto.ECS
                 dictionary.GetDirectValueByRef(findElementIndex) = initializer;
         }
 
-        public ref T GetOrAdd<T>() where T : struct, IEntityComponent
+        public ref T GetOrAdd<T>() where T : struct, IBaseEntityComponent
         {
             ref var entityDictionary = ref _group.GetOrAdd(
                 new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE), TypeSafeDictionaryFactory<T>.Create);
@@ -41,13 +41,13 @@ namespace Svelto.ECS
             return ref dictionary.GetOrAdd(_ID.entityID);
         }
 
-        public ref T Get<T>() where T : struct, IEntityComponent
+        public ref T Get<T>() where T : struct, IBaseEntityComponent
         {
             return ref (_group[new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE)] as ITypeSafeDictionary<T>)
                .GetValueByRef(_ID.entityID);
         }
 
-        public bool Has<T>() where T : struct, IEntityComponent
+        public bool Has<T>() where T : struct, IBaseEntityComponent
         {
             if (_group.TryGetValue(new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
                     out var typeSafeDictionary))

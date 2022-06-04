@@ -99,7 +99,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         
         void PreSubmissionPhase(ref JobHandle jobHandle, PlatformProfiler profiler)
         {
-            using (profiler.Sample("Complete All Pending Jobs")) jobHandle.Complete();
+            using (profiler.Sample("Complete All Pending Jobs")) jobHandle.Complete(); //sync-point
             
             _entityCommandBuffer = new EntityCommandBuffer((Allocator)Common.Allocator.TempJob);
             

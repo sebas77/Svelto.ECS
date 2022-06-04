@@ -82,16 +82,8 @@ namespace Svelto.ECS
         {
             (_thisSubmissionInfo, _lastSubmittedInfo) = (_lastSubmittedInfo, _thisSubmissionInfo);
 
-            ///todo: we found a case where entities with reference to other entities were removed
-            /// in the same frame where the referenced entities are remove too.
-            /// the callback of the referencing entities were assuming that the reference at that point
-            /// would be invalid. However since the callbacks were called before the groups are removed
-            /// the reference were still valid, which was not expected.
-            /// If the referenced entities were removed one by one instead that with the group, by chance
-            /// it instead worked because the entities were removed before the callbacks were called.
-            /// this is why RemoveGroup is happeing before RemoveEntities, however the real fix
-            /// should be to update all the references before removing the entities from the dictionaries
-            /// and call the callbacks
+            /// todo: entity references should be updated before calling all the methods to avoid callbacks handling
+            /// references that should be marked as invalid.
             foreach (var (group, caller) in _lastSubmittedInfo._groupsToRemove)
             {
                 try

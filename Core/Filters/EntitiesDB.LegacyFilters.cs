@@ -32,14 +32,14 @@ namespace Svelto.ECS
             }
 
             public ref LegacyFilterGroup CreateOrGetFilterForGroup<T>(int filterID, ExclusiveGroupStruct groupID)
-                where T : struct, IEntityComponent
+                where T : struct, IBaseEntityComponent
             {
                 var refWrapper = TypeRefWrapper<T>.wrapper;
 
                 return ref CreateOrGetFilterForGroup(filterID, groupID, refWrapper);
             }
 
-            public bool HasFiltersForGroup<T>(ExclusiveGroupStruct groupID) where T : struct, IEntityComponent
+            public bool HasFiltersForGroup<T>(ExclusiveGroupStruct groupID) where T : struct, IBaseEntityComponent
             {
                 if (_filtersLegacy.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == false)
                     return false;
@@ -48,7 +48,7 @@ namespace Svelto.ECS
             }
 
             public bool HasFilterForGroup<T>(int filterID, ExclusiveGroupStruct groupID)
-                where T : struct, IEntityComponent
+                where T : struct, IBaseEntityComponent
             {
                 if (_filtersLegacy.TryGetValue(TypeRefWrapper<T>.wrapper, out var fasterDictionary) == false)
                     return false;
@@ -60,7 +60,7 @@ namespace Svelto.ECS
             }
 
             public ref LegacyGroupFilters CreateOrGetFiltersForGroup<T>(ExclusiveGroupStruct groupID)
-                where T : struct, IEntityComponent
+                where T : struct, IBaseEntityComponent
             {
                 var fasterDictionary = _filtersLegacy.GetOrAdd(TypeRefWrapper<T>.wrapper,
                     () => new FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>());
@@ -70,7 +70,7 @@ namespace Svelto.ECS
             }
 
             public ref LegacyGroupFilters GetFiltersForGroup<T>(ExclusiveGroupStruct groupID)
-                where T : struct, IEntityComponent
+                where T : struct, IBaseEntityComponent
             {
 #if DEBUG && !PROFILE_SVELTO
                 if (_filtersLegacy.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
@@ -84,7 +84,7 @@ namespace Svelto.ECS
             }
 
             public ref LegacyFilterGroup GetFilterForGroup<T>(int filterId, ExclusiveGroupStruct groupID)
-                where T : struct, IEntityComponent
+                where T : struct, IBaseEntityComponent
             {
 #if DEBUG && !PROFILE_SVELTO
                 if (_filtersLegacy.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
@@ -97,7 +97,7 @@ namespace Svelto.ECS
             }
 
             public bool TryGetFilterForGroup<T>(int filterId, ExclusiveGroupStruct groupID,
-                out LegacyFilterGroup groupLegacyFilter) where T : struct, IEntityComponent
+                out LegacyFilterGroup groupLegacyFilter) where T : struct, IBaseEntityComponent
             {
                 groupLegacyFilter = default;
 
@@ -114,7 +114,7 @@ namespace Svelto.ECS
             }
 
             public bool TryGetFiltersForGroup<T>(ExclusiveGroupStruct groupID,
-                out LegacyGroupFilters legacyGroupFilters) where T : struct, IEntityComponent
+                out LegacyGroupFilters legacyGroupFilters) where T : struct, IBaseEntityComponent
             {
                 legacyGroupFilters = default;
 
@@ -166,7 +166,7 @@ namespace Svelto.ECS
                     fasterDictionary[@group].DisposeFilter(resetFilterID);
             }
 
-            public bool TryRemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
+            public bool TryRemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IBaseEntityComponent
             {
                 if (TryGetFilterForGroup<T>(filtersID, egid.groupID, out var filter))
                     return filter.TryRemove(egid.entityID);
@@ -174,7 +174,7 @@ namespace Svelto.ECS
                 return false;
             }
 
-            public void RemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IEntityComponent
+            public void RemoveEntityFromFilter<T>(int filtersID, EGID egid) where T : struct, IBaseEntityComponent
             {
                 ref var filter = ref GetFilterForGroup<T>(filtersID, egid.groupID);
 

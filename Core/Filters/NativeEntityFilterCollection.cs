@@ -4,7 +4,7 @@ using Svelto.ECS.Native;
 
 namespace Svelto.ECS
 {
-    public struct NativeEntityFilterCollection<T> where T : unmanaged, IEntityComponent
+    public struct NativeEntityFilterCollection<T> where T : unmanaged, IBaseEntityComponent
     {
         internal NativeEntityFilterCollection(NativeEGIDMultiMapper<T> mmap)
         {

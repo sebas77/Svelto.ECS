@@ -9,7 +9,7 @@ namespace Svelto.ECS.Native
 {
     public static class UnityNativeEntityDBExtensions
     {
-        static NativeEGIDMapper<T> ToNativeEGIDMapper<T>(this TypeSafeDictionary<T> dic,
+        static NativeEGIDMapper<T> ToNativeEGIDMapper<T>(this UnmanagedTypeSafeDictionary<T> dic,
             ExclusiveGroupStruct groupStructId) where T : unmanaged, IEntityComponent
         {
             var mapper = new NativeEGIDMapper<T>(groupStructId, dic.implUnmgd);
@@ -24,7 +24,7 @@ namespace Svelto.ECS.Native
             if (entitiesDb.SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
                 throw new EntityGroupNotFoundException(typeof(T), groupStructId.ToName());
 
-            return (typeSafeDictionary as TypeSafeDictionary<T>).ToNativeEGIDMapper(groupStructId);
+            return (typeSafeDictionary as UnmanagedTypeSafeDictionary<T>).ToNativeEGIDMapper(groupStructId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,7 +37,7 @@ namespace Svelto.ECS.Native
                 typeSafeDictionary.count == 0)
                 return false;
 
-            mapper = (typeSafeDictionary as TypeSafeDictionary<T>).ToNativeEGIDMapper(groupStructId);
+            mapper = (typeSafeDictionary as UnmanagedTypeSafeDictionary<T>).ToNativeEGIDMapper(groupStructId);
 
             return true;
         }
@@ -45,24 +45,20 @@ namespace Svelto.ECS.Native
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         ///Note: if I use a SharedNativeSveltoDictionary for implUnmg, I may be able to cache NativeEGIDMultiMapper
         /// and reuse it
+        /// TODO: the ability to retain a NativeEGIDMultiMapper thanks to the use of shareable arrays
+        /// must be unit tested!
         public static NativeEGIDMultiMapper<T> QueryNativeMappedEntities<T>(this EntitiesDB entitiesDb,
                     LocalFasterReadOnlyList<ExclusiveGroupStruct> groups, Allocator allocator)
-            where T : unmanaged, IEntityComponent
+            where T : unmanaged, IBaseEntityComponent
         {
-            var dictionary = new SveltoDictionary<
-                    /*key  */ExclusiveGroupStruct,  
-                    /*value*/SharedNative<SveltoDictionary<uint, T, NativeStrategy<SveltoDictionaryNode<uint>>, NativeStrategy<T>, NativeStrategy<int>>>, 
-                    /*strategy to store the key*/  NativeStrategy<SveltoDictionaryNode<ExclusiveGroupStruct>>, 
-                    /*strategy to store the value*/NativeStrategy<
-                             SharedNative<SveltoDictionary<uint, T, NativeStrategy<SveltoDictionaryNode<uint>>, NativeStrategy<T>, NativeStrategy<int>>>>
-                  , NativeStrategy<int>>  
+            var dictionary = new SveltoDictionaryNative<ExclusiveGroupStruct, SharedSveltoDictionaryNative<uint, T>>  
                     ((uint) groups.count, allocator);
         
             foreach (var group in groups)
             {
                 if (entitiesDb.SafeQueryEntityDictionary<T>(group, out var typeSafeDictionary) == true)
                     //if (typeSafeDictionary.count > 0)
-                        dictionary.Add(group, ((TypeSafeDictionary<T>)typeSafeDictionary).implUnmgd);
+                        dictionary.Add(group, ((UnmanagedTypeSafeDictionary<T>)typeSafeDictionary).implUnmgd);
             }
             
             return new NativeEGIDMultiMapper<T>(dictionary);

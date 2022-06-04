@@ -18,7 +18,7 @@ namespace Svelto.ECS
         void FillFromByteArray(EntityInitializer init, NativeBag buffer);
     }
 
-    class Filler<T> : IFiller where T : struct, IEntityComponent
+    class Filler<T> : IFiller where T : struct, IBaseEntityComponent
     {
         static Filler()
         {
@@ -50,7 +50,7 @@ namespace Svelto.ECS
             TYPE_IDS = new Svelto.DataStructures.FasterList<IFiller>();
         }
 
-        internal static void Register<T>(IFiller entityBuilder) where T : struct, IEntityComponent
+        internal static void Register<T>(IFiller entityBuilder) where T : struct, IBaseEntityComponent
         {
             var location = EntityComponentID<T>.ID.Data = GlobalTypeID.NextID<T>();
             TYPE_IDS.AddAt(location, entityBuilder);

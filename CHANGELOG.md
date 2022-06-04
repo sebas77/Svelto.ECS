@@ -1,11 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
-## [3.3.1] - 26-2022
+## [3.3.2] - 04-06-2022
+
+* Internal refactoring to support future features. Currently it may translate to a small performance boost
+* IEntityComponent and IEntityViewComponent now implements IBaseEntityComponent. This shouldn't affect existing code
+* Improve thread-safety of entity building
+* Fixed serious bug that affected the integrity of the EntityIDs values during RemoveEX callbacks
+* The point above may result in a performance boost in the Filters updates during submission
+* Code is again 2019 compatible (this may have been broken for a while)
+* Fix a crash wit the EntityCollection deconstruction while trying to deconstruct an empty collection
+
+
+## [3.3.1] - 26-04-2022
 
 * Fixed serious bug that would affect the new IReactOnRemoveEx callbacks
 
-## [3.3.0] - 04-2022
+## [3.3.0] - 11-04-2022
 
 * INeedEGID and INeedEntityReference interfaces are not deprecated, but still available for backwards compatibility through the define SLOW_SVELTO_SUBMISSION
 * There are some minor breaking changes, you may need to rename a bunch of methods calls
