@@ -21,7 +21,6 @@ namespace Svelto.ECS
             SharedDictonary.Init();
             SerializationDescriptorMap.Init();
 
-
             _swapEntities   = SwapEntities;
             _removeEntities = RemoveEntities;
             _removeGroup    = RemoveGroup;
@@ -41,8 +40,9 @@ namespace Svelto.ECS
             _entitiesOperations                  = new EntitiesOperations();
             _idChecker                           = new FasterDictionary<ExclusiveGroupStruct, HashSet<uint>>();
 
-            _cachedRangeOfSubmittedIndices                 = new FasterList<(uint, uint)>();
-            _cachedIndicesToSwapBeforeSubmissionForFilters = new FasterDictionary<uint, uint>();
+            _cachedRangeOfSubmittedIndices        = new FasterList<(uint, uint)>();
+            _transientEntityIDsLeftAndAffectedByRemoval    = new FasterList<uint>();
+            _transientEntityIDsLeftWithoutDuplicates = new FasterDictionary<uint, int>();
             
             _multipleOperationOnSameEGIDChecker            = new FasterDictionary<EGID, uint>();
 #if UNITY_NATIVE //because of the thread count, ATM this is only for unity
@@ -62,7 +62,6 @@ namespace Svelto.ECS
                 new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnSwap>>>();
             _reactiveEnginesSwapEx =
                 new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnSwapEx>>>();
-
             _reactiveEnginesDispose =
                 new FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnDispose>>>();
 

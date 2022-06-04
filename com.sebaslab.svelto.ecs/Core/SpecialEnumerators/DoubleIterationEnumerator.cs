@@ -2,7 +2,7 @@ using System;
 
 namespace Svelto.ECS
 {
-    public readonly ref struct DoubleEntitiesEnumerator<T1> where T1 : struct, IEntityComponent
+    public readonly ref struct DoubleEntitiesEnumerator<T1> where T1 : struct, IBaseEntityComponent
     {
         public DoubleEntitiesEnumerator(GroupsEnumerable<T1> groupsEnumerable) { _groupsEnumerable = groupsEnumerable; }
 
@@ -130,8 +130,8 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly ref struct DoubleIterationEnumerator<T1, T2> where T1 : struct, IEntityComponent
-                                                                where T2 : struct, IEntityComponent
+    public readonly ref struct DoubleIterationEnumerator<T1, T2> where T1 : struct, IBaseEntityComponent
+                                                                where T2 : struct, IBaseEntityComponent
     {
         public DoubleIterationEnumerator(GroupsEnumerable<T1, T2> groupsEnumerable)
         {
@@ -268,9 +268,9 @@ namespace Svelto.ECS
     /// <typeparam name="T1"></typeparam>
     /// <typeparam name="T2"></typeparam>
     /// <typeparam name="T3"></typeparam>
-    public readonly ref struct DoubleEntitiesEnumerator<T1, T2, T3> where T1 : struct, IEntityComponent
-                                                                    where T2 : struct, IEntityComponent
-                                                                    where T3 : struct, IEntityComponent
+    public readonly ref struct DoubleEntitiesEnumerator<T1, T2, T3> where T1 : struct, IBaseEntityComponent
+                                                                    where T2 : struct, IBaseEntityComponent
+                                                                    where T3 : struct, IBaseEntityComponent
     {
         public DoubleEntitiesEnumerator(GroupsEnumerable<T1, T2, T3> groupsEnumerable)
         {
@@ -409,10 +409,10 @@ namespace Svelto.ECS
     /// <typeparam name="T2"></typeparam>
     /// <typeparam name="T3"></typeparam>
     /// <typeparam name="T4"></typeparam>
-    public readonly ref struct DoubleEntitiesEnumerator<T1, T2, T3, T4> where T1 : struct, IEntityComponent
-                                                                        where T2 : struct, IEntityComponent
-                                                                        where T3 : struct, IEntityComponent
-                                                                        where T4 : struct, IEntityComponent
+    public readonly ref struct DoubleEntitiesEnumerator<T1, T2, T3, T4> where T1 : struct, IBaseEntityComponent
+                                                                        where T2 : struct, IBaseEntityComponent
+                                                                        where T3 : struct, IBaseEntityComponent
+                                                                        where T4 : struct, IBaseEntityComponent
     {
         public DoubleEntitiesEnumerator(GroupsEnumerable<T1, T2, T3, T4> groupsEnumerable)
         {

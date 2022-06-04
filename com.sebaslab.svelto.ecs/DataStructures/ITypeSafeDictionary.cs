@@ -4,7 +4,7 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS.Internal
 {
-    public interface ITypeSafeDictionary<TValue> : ITypeSafeDictionary where TValue : IEntityComponent
+    public interface ITypeSafeDictionary<TValue> : ITypeSafeDictionary where TValue : IBaseEntityComponent
     {
         void Add(uint egidEntityId, in TValue entityComponent);
         
@@ -14,7 +14,7 @@ namespace Svelto.ECS.Internal
         IBuffer<TValue> GetValues(out uint count);
         ref TValue      GetDirectValueByRef(uint key);
         ref TValue      GetValueByRef(uint key);
-        EntityIDs       entityIDs { get; }
+        IEntityIDs      entityIDs { get; }
     }
 
     public interface ITypeSafeDictionary : IDisposable
@@ -24,10 +24,16 @@ namespace Svelto.ECS.Internal
         ITypeSafeDictionary Create();
 
         void AddEntitiesToDictionary
-        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId, in EnginesRoot.EntityReferenceMap entityLocator);
-        void RemoveEntitiesFromDictionary(FasterList<(uint, string)> infosToProcess);
-        void SwapEntitiesBetweenDictionaries(FasterList<(uint, uint, string)> infosToProcess,
-         ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup, ITypeSafeDictionary toComponentsDictionary);
+        (ITypeSafeDictionary toDictionary, ExclusiveGroupStruct groupId
+#if SLOW_SVELTO_SUBMISSION                             
+       , in EnginesRoot.EntityReferenceMap entityLocator
+#endif         
+         );
+        void RemoveEntitiesFromDictionary
+         (FasterList<(uint, string)> infosToProcess, FasterList<uint> entityIDsAffectedByRemoval);
+        void SwapEntitiesBetweenDictionaries
+        (FasterList<(uint, uint, string)> infosToProcess, ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup
+       , ITypeSafeDictionary toComponentsDictionary, FasterList<uint> entityIDsAffectedByRemoval);
         
         //------------
 

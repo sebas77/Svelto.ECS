@@ -3,7 +3,7 @@ using Svelto.ECS;
 
 public static class DefaultSerializerUtils
 {
-    public static unsafe void CopyToByteArray<T>(in T src, byte[] data, uint offsetDst) where T : unmanaged, IEntityComponent
+    public static unsafe void CopyToByteArray<T>(in T src, byte[] data, uint offsetDst) where T : unmanaged, IBaseEntityComponent
     {
 #if DEBUG && !PROFILE_SVELTO
         if (data.Length - offsetDst < sizeof(T))
@@ -29,7 +29,7 @@ public static class DefaultSerializerUtils
         }
     }
 
-    public static unsafe T CopyFromByteArray<T>(byte[] data, uint offsetSrc) where T : unmanaged, IEntityComponent
+    public static unsafe T CopyFromByteArray<T>(byte[] data, uint offsetSrc) where T : unmanaged, IBaseEntityComponent
     {
         T dst = default;
 

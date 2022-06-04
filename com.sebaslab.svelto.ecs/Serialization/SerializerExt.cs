@@ -4,7 +4,7 @@ namespace Svelto.ECS.Serialization
     {
         public static bool SerializeSafe<T>
             (this IComponentSerializer<T> componentSerializer, in T value, ISerializationData serializationData)
-            where T : unmanaged, IEntityComponent
+            where T : unmanaged, IBaseEntityComponent
         {
 #if DEBUG && !PROFILE_SVELTO
             uint posBefore = serializationData.dataPos;
@@ -24,7 +24,7 @@ namespace Svelto.ECS.Serialization
 
         public static bool DeserializeSafe<T>
             (this IComponentSerializer<T> componentSerializer, ref T value, ISerializationData serializationData)
-            where T : unmanaged, IEntityComponent
+            where T : unmanaged, IBaseEntityComponent
         {
 #if DEBUG && !PROFILE_SVELTO
             uint posBefore = serializationData.dataPos;

@@ -1,6 +1,6 @@
 ﻿namespace Svelto.ECS
 {
-    public abstract class GenericEntityDescriptor<T> : IEntityDescriptor where T : struct,  IEntityComponent
+    public abstract class GenericEntityDescriptor<T> : IEntityDescriptor where T : struct,  IBaseEntityComponent
     {
         static readonly IComponentBuilder[] _componentBuilders;
         static GenericEntityDescriptor() { _componentBuilders = new IComponentBuilder[] {new ComponentBuilder<T>()}; }
@@ -9,7 +9,7 @@
     }
 
     public abstract class GenericEntityDescriptor<T, U> : IEntityDescriptor
-        where T : struct,  IEntityComponent where U : struct,  IEntityComponent
+        where T : struct,  IBaseEntityComponent where U : struct,  IBaseEntityComponent
     {
         static readonly IComponentBuilder[] _componentBuilders;
 
@@ -22,7 +22,7 @@
     }
 
     public abstract class GenericEntityDescriptor<T, U, V> : IEntityDescriptor
-        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
+        where T : struct,  IBaseEntityComponent where U : struct,  IBaseEntityComponent where V : struct,  IBaseEntityComponent
     {
         static readonly IComponentBuilder[] _componentBuilders;
 
@@ -40,8 +40,8 @@
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W> : IEntityDescriptor
-        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
-        where W : struct,  IEntityComponent
+        where T : struct,  IBaseEntityComponent where U : struct,  IBaseEntityComponent where V : struct,  IBaseEntityComponent
+        where W : struct,  IBaseEntityComponent
     {
         static readonly IComponentBuilder[] _componentBuilders;
 
@@ -60,8 +60,8 @@
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X> : IEntityDescriptor
-        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
-        where W : struct,  IEntityComponent where X : struct,  IEntityComponent
+        where T : struct,  IBaseEntityComponent where U : struct,  IBaseEntityComponent where V : struct,  IBaseEntityComponent
+        where W : struct,  IBaseEntityComponent where X : struct,  IBaseEntityComponent
     {
         static readonly IComponentBuilder[] _componentBuilders;
 
@@ -81,8 +81,8 @@
     }
 
     public abstract class GenericEntityDescriptor<T, U, V, W, X, Y> : IEntityDescriptor
-        where T : struct,  IEntityComponent where U : struct,  IEntityComponent where V : struct,  IEntityComponent
-        where W : struct,  IEntityComponent where X : struct,  IEntityComponent where Y : struct,  IEntityComponent
+        where T : struct,  IBaseEntityComponent where U : struct,  IBaseEntityComponent where V : struct,  IBaseEntityComponent
+        where W : struct,  IBaseEntityComponent where X : struct,  IBaseEntityComponent where Y : struct,  IBaseEntityComponent
     {
         static readonly IComponentBuilder[] _componentBuilders;
 

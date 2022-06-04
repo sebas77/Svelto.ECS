@@ -26,11 +26,11 @@ namespace Svelto.ECS.SveltoOnDOTS
         public void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<DOTSEntityComponent> collection,
             ExclusiveGroupStruct _, ExclusiveGroupStruct toGroup)
         {
-            var (buffer, entityIDs, _) = collection;
+            var (entities, entityIDs, _) = collection;
 
             for (uint i = rangeOfEntities.start; i < rangeOfEntities.end; i++)
             {
-                ref var entityComponent = ref buffer[i];
+                ref var entityComponent = ref entities[i];
                 ECB.SetSharedComponent(entityComponent.dotsEntity, new DOTSSveltoGroupID(toGroup));
 
                 ECB.SetComponent(entityComponent.dotsEntity, new DOTSSveltoEGID

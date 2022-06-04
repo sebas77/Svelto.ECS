@@ -4,7 +4,7 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public struct Consumer<T> : IDisposable where T : unmanaged, IEntityComponent
+    public struct Consumer<T> : IDisposable where T : unmanaged, IBaseEntityComponent
     {
         internal Consumer(string name, uint capacity) : this()
         {

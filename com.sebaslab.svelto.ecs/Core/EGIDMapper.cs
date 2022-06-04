@@ -8,7 +8,7 @@ namespace Svelto.ECS
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public readonly struct EGIDMapper<T> : IEGIDMapper where T : struct, IEntityComponent
+    public readonly struct EGIDMapper<T> : IEGIDMapper where T : struct, IBaseEntityComponent
     {
         public int                  count      => _map.count;
         public ExclusiveGroupStruct groupID    { get; }

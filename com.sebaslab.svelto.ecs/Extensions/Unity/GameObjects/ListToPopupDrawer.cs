@@ -18,14 +18,17 @@ public class ListToPopupDrawer : PropertyDrawer
 
         if (atb.classType.GetField(atb.listName, BindingFlags.Static | BindingFlags.NonPublic) != null)
         {
-            stringList = atb.classType.GetField(atb.listName, BindingFlags.Static | BindingFlags.NonPublic).GetValue(atb.classType) as List<Type>;
+            stringList =
+                atb.classType.GetField(atb.listName, BindingFlags.Static | BindingFlags.NonPublic)
+                   .GetValue(atb.classType) as List<Type>;
         }
 
         if (stringList != null && stringList.Count != 0)
         {
-            int selectedIndex = Mathf.Max(0, stringList.FindIndex(t => t.Name == property.stringValue)); 
-            
-            selectedIndex = EditorGUI.Popup(position, property.name, selectedIndex, stringList.Select(t => t.Name).ToArray());
+            int selectedIndex = Mathf.Max(0, stringList.FindIndex(t => t.Name == property.stringValue));
+
+            selectedIndex = EditorGUI.Popup(position, property.name, selectedIndex
+                                          , stringList.Select(t => t.Name).ToArray());
 
             property.stringValue = stringList[selectedIndex].Name;
             (property.serializedObject.targetObject as EntityDescriptorHolder).type =

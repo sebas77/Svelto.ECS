@@ -29,7 +29,7 @@ namespace Svelto.ECS
         public static int counter;        
     }
     
-    public class ComponentID<T> where T : struct, IEntityComponent
+    public class ComponentID<T> where T : struct, IBaseEntityComponent
     {
         public static readonly SharedStaticWrapper<int, ComponentID<T>> id;
 
@@ -45,7 +45,7 @@ namespace Svelto.ECS
         }
     }
 
-    public class ComponentBuilder<T> : IComponentBuilder where T : struct, IEntityComponent
+    public class ComponentBuilder<T> : IComponentBuilder where T : struct, IBaseEntityComponent
     {
         internal static readonly Type ENTITY_COMPONENT_TYPE;
         internal static readonly bool IS_ENTITY_VIEW_COMPONENT;
@@ -104,6 +104,8 @@ namespace Svelto.ECS
 
         public bool isUnmanaged => IS_UNMANAGED;
 
+        static ThreadLocal<EntityViewComponentCache> _localCache = new ThreadLocal<EntityViewComponentCache>(() => new EntityViewComponentCache());
+
         public void BuildEntityAndAddToList(ITypeSafeDictionary dictionary, EGID egid, IEnumerable<object> implementors)
         {
             var castedDic = dictionary as ITypeSafeDictionary<T>;
@@ -115,8 +117,7 @@ namespace Svelto.ECS
                 Check.Require(castedDic.ContainsKey(egid.entityID) == false,
                     $"building an entity with already used entity id! id: '{(ulong)egid}', {ENTITY_COMPONENT_NAME}");
 
-                this.SetEntityViewComponentImplementors(ref entityComponent, EntityViewComponentCache.cachedFields,
-                    implementors, EntityViewComponentCache.implementorsByType, EntityViewComponentCache.cachedTypes);
+                this.SetEntityViewComponentImplementors(ref entityComponent, implementors, _localCache.Value);
 
                 castedDic.Add(egid.entityID, entityComponent);
             }
@@ -156,22 +157,18 @@ namespace Svelto.ECS
 
         readonly T _initializer;
 
-        /// <summary>
-        ///     Note: this static class will hold forever the references of the entities implementors. These references
-        ///     are not even cleared when the engines root is destroyed, as they are static references.
-        ///     It must be seen as an application-wide cache system. Honestly, I am not sure if this may cause leaking
-        ///     issues in some kind of applications. To remember.
-        /// </summary>
-        static class EntityViewComponentCache
+        internal class EntityViewComponentCache
         {
-            internal static readonly FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> cachedFields;
-            internal static readonly Dictionary<Type, Type[]>                                cachedTypes;
+            internal readonly FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>> cachedFields;
+            internal readonly Dictionary<Type, Type[]>                                cachedTypes;
+            
+            //this is just a local static cache that is cleared after every use
 #if DEBUG && !PROFILE_SVELTO
-            internal static readonly Dictionary<Type, ECSTuple<object, int>> implementorsByType;
+            internal readonly Dictionary<Type, ECSTuple<object, int>> implementorsByType;
 #else
-            internal static readonly Dictionary<Type, object> implementorsByType;
+            internal readonly Dictionary<Type, object> implementorsByType;
 #endif
-            static EntityViewComponentCache()
+            internal EntityViewComponentCache()
             {
                 cachedFields = new FasterList<KeyValuePair<Type, FastInvokeActionCast<T>>>();
 

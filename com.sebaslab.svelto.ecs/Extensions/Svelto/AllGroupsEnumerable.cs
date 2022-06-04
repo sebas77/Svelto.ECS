@@ -9,7 +9,7 @@ namespace Svelto.ECS
     /// that can be burstifiable
     /// </summary>
     /// <typeparam name="T1"></typeparam>
-    public readonly struct AllGroupsEnumerable<T1> where T1 : struct, IEntityComponent
+    public readonly struct AllGroupsEnumerable<T1> where T1 : struct, IBaseEntityComponent
     {
         public ref struct GroupCollection
         {
@@ -45,8 +45,8 @@ namespace Svelto.ECS
 
                     if (typeSafeDictionary.count == 0)
                         continue;
-                    _array.collection = new EntityCollection<T1>(typeSafeDictionary.GetValues(out var count), count,
-                        typeSafeDictionary.entityIDs);
+                    _array.collection = new EntityCollection<T1>(typeSafeDictionary.GetValues(out var count),
+                        typeSafeDictionary.entityIDs, count);
                     _array.@group = group.key;
                     return true;
                 }

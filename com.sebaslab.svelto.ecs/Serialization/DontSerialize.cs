@@ -1,6 +1,6 @@
 namespace Svelto.ECS.Serialization
 {
-    public class DontSerialize<T> : IComponentSerializer<T> where T : unmanaged, IEntityComponent
+    public class DontSerialize<T> : IComponentSerializer<T> where T : unmanaged, IBaseEntityComponent
     {
         public uint size => 0;
 
