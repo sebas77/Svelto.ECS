@@ -98,14 +98,19 @@ Svelto.ECS is an Open Source Project provided as it is, no support is guaranteed
 ## Official Examples (A.K.A. where is the documentation?)
 Documentation is costly to mantain so check the highly documented and simple mini-examples. Please study them all regardless the platform you intend to use Svelto with.
 
-* **Mini Examples**: [https://github.com/sebas77/Svelto.MiniExamples](https://github.com/sebas77/Svelto.MiniExamples)
-* **Unit Tests**: [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests)
+First of all please check the wiki page:
+
+https://github.com/sebas77/Svelto.ECS/wiki
 
 After that, you can get all the help you need from the official chat:
 
 **Official Discord Server \(join to get help from me for free!\)**
 
 * [https://discord.gg/3qAdjDb](https://discord.gg/3qAdjDb) 
+
+but don't forget to check the FAQ AKA Discussions first (all the FAQ like questions will be redirected to Discussions)
+
+https://github.com/sebas77/Svelto.ECS/discussions
 
 ## Official Articles
 **Theory related articles (from the most recent to the oldest, read from the oldest if you are new to it):**
