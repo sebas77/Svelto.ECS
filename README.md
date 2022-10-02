@@ -79,7 +79,7 @@ _Svelto.ECS is lean, it hasn't been designed to move a whole engine from OOP to 
 
 **Svelto.ECS is fully compatible with DOTS Burst and Jobs.**
 
-Svelto.ECS is compatible with Unity 2019.3.x cycle as long as it's not used with DOTS ECS. 
+Svelto.ECS is compatible with Unity 2019.3.x cycle as long as it's not used with any DOTS package (including collections). It is compatible with all the versions of Unity from 2020 and above.
 Svelto.ECS is also designed to use DOTS ECS as engine library, using the SveltoOnDOTS wrapper. This wrapper is designed to take advantage of DOTS for engine related operations, like rendering, physics and so on. When DOTS ECS integration is necessary, Svelto.ECS will always target the last stable unity version with the most up to date DOTS package.
 
 ## Why using Svelto.ECS without Unity?
