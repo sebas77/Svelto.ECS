@@ -1,3 +1,12 @@
 # These are supported funding model platforms
 
 github: sebas77
+
+links:
+  - type: github
+    user: sebas77
+    project: Svelto.ECS
+  - type: paypal
+    url: https://paypal.me/SMandala
+
+image: https://i0.wp.com/www.sebaslab.com/wp-content/uploads/2015/03/logo2-1.png
