@@ -77,7 +77,7 @@ Svelto.ECS wasn't born just from the needs of a large team, but also as a result
 
 
 ## Why using Svelto.ECS with Unity?
-Svelto.ECS doens't use a traditional archetype model like DOTS ECS does. The novel hybrid approach based on groups instead than archetypes has been designed to allow the user to take the right decision when it comes to state managements. Handling entities states just with components can quickly lead to very intensive structural changes operation, so groups have been introduced to avoid the wild explosion of states permutations.
+Svelto.ECS doens't use a traditional archetype model like DOTS ECS does. The novel hybrid approach based on groups instead than archetypes has been designed to allow the user to take the right decision when it comes to state managements. Svelto.ECS doesn't allow archetypes to change dynamically, the user cannot add or remove components after the entitiy is created. Handling entities states with components can quickly lead to very intensive structural changes operations, so groups have been introduced to avoid the wild explosion of states permutations and let the user see more explicitly the cost of the their decisions.
 
 Filters have been added to make the states handling even more flexibile, avoiding incurring in heave structural changes that can happen with Svelto.ECS too. DOTS engineers realised this too and for this reason they have introduced the new *Enableable components* which are still less flexible than the Svelto.ECS filters.
 
