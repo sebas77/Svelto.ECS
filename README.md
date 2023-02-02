@@ -81,7 +81,7 @@ Svelto.ECS doens't use a traditional archetype model like DOTS ECS does. The nov
 
 Filters have been added to make the states handling even more flexibile, avoiding incurring in heave structural changes that can happen with Svelto.ECS too. DOTS engineers realised this too and for this reason they have introduced the new *Enableable components* which are still less flexible than the Svelto.ECS filters.
 
-Thanks for the explicit user of Groups and Filters, the Svelto user is able to find the right trade off to handle entities states.
+Thanks to the explicit use of Groups and Filters, the Svelto user is able to find the right trade off to handle entities states.
 
 _Svelto.ECS is lean. It hasn't been designed to move a whole engine such as Unity from OOP to ECS, therefore it doesn't suffer from unjustifiable complexity overhead to try to solve problems that often are not linked to gameplay development. Svelto.ECS is fundamentally feature complete at this point of writing and new features in new versions are more nice to have than fundamental._
 
