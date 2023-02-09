@@ -5,7 +5,10 @@ Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainab
 ## Svelto.ECS in pills
 Svelto.ECS is easy to start with, but full of tricks for expert users. The hardest problem to overcome is usually to shift mentality from OOP programming to ECS programming more than using the framework itself. If you want to read an ECS faq, you can check this article: https://github.com/SanderMertens/ecs-faq
 
-### Svelto.ECS at glance: 
+### Svelto.ECS at glance
+
+simplest setup:
+
 ```csharp
     public class SimpleContext
     {
