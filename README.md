@@ -78,6 +78,12 @@ learn more about svelto on the Wiki page: https://github.com/sebas77/Svelto.ECS/
 ## Svelto.ECS philosophy
 Svelto.ECS wasn't born just from the needs of a large team, but also as a result of years of reasoning behind software engineering applied to game development. Svelto.ECS hasn't been created just to write faster code, it has been designed to help developing better code. Performance gains is just one of the benefits in using Svelto.ECS, as ECS is a great way to write cache-friendly code. Svelto.ECS has been developed with the idea of ECS being a paradigm and not just a pattern, helping the user to shift away from Object Oriented Programming with consequent improvements on the code design and code maintainability. Svelto.ECS is the result of years of iteration of the ECS paradigm applied to real game development with the intent to be as foolproof as possible. Svelto.ECS has been designed to be used by a medium-size/large team working on long term projects where the cost of maintainability is relevant.
 
+## Is it Archetype? Is it Sparse set? No it's something else :O
+**Svelto.ECS** is loosely based on the **Archetype** idea. The main difference compared to any other Archetype-based model is that Svelto Archetypes are static, meaning that users cannot add or remove components at runtime. There are many design reasons behind this decision, including the fact that users are often not aware of the costs of structural changes.
+
+While other frameworks typically limit user freedom to avoid exposing flaws in the archetype-based concept, Svelto.ECS introduces the concept of **groups**. This is simply an explicit way for the user to define sets of entities and iterate through them as quickly as possible.
+
+**GroupCompounds** build on this idea by allowing users to change the "state"/"set"/"group" according to tags that serve effectively as adjective or state identifiers.
 
 ## Why using Svelto.ECS with Unity?
 Svelto.ECS doens't use a traditional archetype model like DOTS ECS does. The novel hybrid approach based on groups instead than archetypes has been designed to allow the user to take the right decision when it comes to states management. Svelto.ECS doesn't allow archetypes to change dynamically, the user cannot add or remove components after the entity is created. Handling entities states with components can quickly lead to very intensive structural changes operations, so groups have been introduced to avoid the wild explosion of states permutations and let the user see explicitly the cost of their decisions.
