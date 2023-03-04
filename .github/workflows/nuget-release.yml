@@ -53,7 +53,7 @@ jobs:
       run: unzip temp/bin/release/Svelto.ECS.${{ env.PKG_VERSION }}.nupkg -d temp/bin/release
 
     - name: copy release DLL to temp folder
-      run: sudo cp temp/bin/release/lib/netstandard2.0/Svelto.ECS.dll temp/bin/release
+      run: sudo cp temp/bin/release/lib/netstandard2.1/Svelto.ECS.dll temp/bin/release
 
     # Compile into nuget package
     - name: build nuget package
