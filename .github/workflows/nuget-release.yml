@@ -43,7 +43,7 @@ jobs:
       run: unzip temp/bin/debug/Svelto.ECS.${{ env.PKG_VERSION }}.nupkg -d temp/bin/debug
 
     - name: copy debug DLL to temp folder
-      run: sudo cp temp/bin/debug/lib/netstandard2.0/Svelto.ECS.dll temp/bin/debug
+      run: sudo cp temp/bin/debug/lib/netstandard2.1/Svelto.ECS.dll temp/bin/debug
 
     # Build for Release
     - name: create package for Release configuration
