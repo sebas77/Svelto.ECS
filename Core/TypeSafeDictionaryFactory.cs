@@ -4,18 +4,10 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    static class TypeSafeDictionaryFactory<T> where T : struct, IBaseEntityComponent
+    static class TypeSafeDictionaryFactory<T> where T : struct, _IInternalEntityComponent
     {
-        static readonly bool isUnmanaged = typeof(T).IsUnmanagedEx()
+        static readonly bool isUnmanaged = TypeCache<T>.isUnmanaged
                                         && typeof(IEntityViewComponent).IsAssignableFrom(typeof(T)) == false;
-
-        public static ITypeSafeDictionary Create()
-        {
-            if (isUnmanaged)
-                return new UnmanagedTypeSafeDictionary<T>(1);
-            
-            return new ManagedTypeSafeDictionary<T>(1);
-        }
 
         public static ITypeSafeDictionary Create(uint size)
         {

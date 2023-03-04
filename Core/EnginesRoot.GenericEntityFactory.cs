@@ -14,6 +14,7 @@ namespace Svelto.ECS
                 _enginesRoot = new Svelto.DataStructures.WeakReference<EnginesRoot>(weakReference);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public EntityInitializer BuildEntity<T>
             (uint entityID, ExclusiveBuildGroup groupStructId, IEnumerable<object> implementors = null
            , [CallerMemberName] string caller = null) where T : IEntityDescriptor, new()
@@ -23,6 +24,7 @@ namespace Svelto.ECS
                                                      , TypeCache<T>.type, implementors, caller);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public EntityInitializer BuildEntity<T>
             (EGID egid, IEnumerable<object> implementors = null
            , [CallerMemberName] string caller = null) where T : IEntityDescriptor, new()
@@ -31,6 +33,7 @@ namespace Svelto.ECS
                                                      , TypeCache<T>.type, implementors, caller);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public EntityInitializer BuildEntity<T>
             (EGID egid, T entityDescriptor, IEnumerable<object> implementors
            , [CallerMemberName] string caller = null) where T : IEntityDescriptor
@@ -39,6 +42,7 @@ namespace Svelto.ECS
                                                      , implementors, caller);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public EntityInitializer BuildEntity<T>
             (uint entityID, ExclusiveBuildGroup groupStructId, T descriptorEntity, IEnumerable<object> implementors
            , [CallerMemberName] string caller = null) where T : IEntityDescriptor
@@ -48,18 +52,20 @@ namespace Svelto.ECS
                                                      , implementors, caller);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public EntityInitializer BuildEntity
+            (EGID egid, IComponentBuilder[] componentsToBuild, Type type, IEnumerable<object> implementors = null
+              , [CallerMemberName] string caller = null)
+            {
+                return _enginesRoot.Target.BuildEntity(egid, componentsToBuild, type, implementors, caller);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void PreallocateEntitySpace<T>(ExclusiveGroupStruct groupStructId, uint numberOfEntities)
                 where T : IEntityDescriptor, new()
             {
                 _enginesRoot.Target.Preallocate(groupStructId, numberOfEntities
                                               , EntityDescriptorTemplate<T>.descriptor.componentsToBuild);
-            }
-
-            public EntityInitializer BuildEntity
-            (EGID egid, IComponentBuilder[] componentsToBuild, Type type, IEnumerable<object> implementors = null
-           , [CallerMemberName] string caller = null)
-            {
-                return _enginesRoot.Target.BuildEntity(egid, componentsToBuild, type, implementors, caller);
             }
 
 #if UNITY_NATIVE

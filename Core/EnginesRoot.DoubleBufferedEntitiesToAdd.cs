@@ -54,8 +54,8 @@ namespace Svelto.ECS
                     }
                 
                     //reset the number of entities created so far
-                    _lastNumberEntitiesCreatedPerGroup.FastClear();
-                    lastComponentsToAddPerGroup.FastClear();
+                    _lastNumberEntitiesCreatedPerGroup.Clear();
+                    lastComponentsToAddPerGroup.Clear();
                 
                     return;
                 }
@@ -81,12 +81,12 @@ namespace Svelto.ECS
                         for (var j = 0; j < componentTypesCount; ++j)
                             componentTypesDictionary[j].Dispose();
                 
-                        componentDictionariesPerType[i].FastClear();
+                        componentDictionariesPerType[i].Clear();
                     }
                 }
 
                 //reset the number of entities created so far
-                _lastNumberEntitiesCreatedPerGroup.FastClear();
+                _lastNumberEntitiesCreatedPerGroup.Clear();
 
           //      _totalEntitiesToAdd = 0;
             }

@@ -1,9 +1,9 @@
 using System;
-using Svelto.ECS;
+using Svelto.ECS.Internal;
 
 public static class DefaultSerializerUtils
 {
-    public static unsafe void CopyToByteArray<T>(in T src, byte[] data, uint offsetDst) where T : unmanaged, IBaseEntityComponent
+    public static unsafe void CopyToByteArray<T>(in T src, byte[] data, uint offsetDst) where T : unmanaged, _IInternalEntityComponent
     {
 #if DEBUG && !PROFILE_SVELTO
         if (data.Length - offsetDst < sizeof(T))
@@ -29,7 +29,7 @@ public static class DefaultSerializerUtils
         }
     }
 
-    public static unsafe T CopyFromByteArray<T>(byte[] data, uint offsetSrc) where T : unmanaged, IBaseEntityComponent
+    public static unsafe T CopyFromByteArray<T>(byte[] data, uint offsetSrc) where T : unmanaged, _IInternalEntityComponent
     {
         T dst = default;
 

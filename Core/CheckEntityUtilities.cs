@@ -4,7 +4,6 @@ using System.Diagnostics;
 #endif
 using System;
 using System.Collections.Generic;
-using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -86,9 +85,9 @@ namespace Svelto.ECS
 #if DONT_USE
         [Conditional("MEANINGLESS")]
 #endif
-        void ClearDebugChecks() { _multipleOperationOnSameEGIDChecker.FastClear(); }
+        void ClearDebugChecks() { _multipleOperationOnSameEGIDChecker.Clear(); }
 
-        readonly FasterDictionary<EGID, uint>                          _multipleOperationOnSameEGIDChecker;
-        readonly FasterDictionary<ExclusiveGroupStruct, HashSet<uint>> _idChecker;
+        readonly Svelto.DataStructures.FasterDictionary<EGID, uint>                          _multipleOperationOnSameEGIDChecker;
+        readonly Svelto.DataStructures.FasterDictionary<ExclusiveGroupStruct, HashSet<uint>> _idChecker;
     }
 }

@@ -3,18 +3,12 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Svelto.Common;
 using Svelto.DataStructures;
-using Svelto.ECS.Hybrid;
 
 namespace Svelto.ECS.Internal
 {
-    public sealed class ManagedTypeSafeDictionary<TValue> : ITypeSafeDictionary<TValue>
-        where TValue : struct, IBaseEntityComponent
+    sealed class ManagedTypeSafeDictionary<TValue> : ITypeSafeDictionary<TValue>
+        where TValue : struct, _IInternalEntityComponent
     {
-        static readonly Type _type = typeof(TValue);
-#if SLOW_SVELTO_SUBMISSION
-        static readonly bool _hasEgid = typeof(INeedEGID).IsAssignableFrom(_type);
-        static readonly bool _hasReference = typeof(INeedEntityReference).IsAssignableFrom(_type);
-#endif
         static readonly ThreadLocal<IEntityIDs> cachedEntityIDM =
             new ThreadLocal<IEntityIDs>(() => new ManagedEntityIDs());
 
@@ -24,7 +18,7 @@ namespace Svelto.ECS.Internal
                 new SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>, ManagedStrategy<TValue>,
                     ManagedStrategy<int>>(size, Allocator.Managed);
         }
-
+        
         public IEntityIDs entityIDs
         {
             get
@@ -99,7 +93,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ITypeSafeDictionary Create()
         {
-            return TypeSafeDictionaryFactory<TValue>.Create(1);
+            return new ManagedTypeSafeDictionary<TValue>(1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -289,7 +283,7 @@ namespace Svelto.ECS.Internal
         }
 
         /// <summary>
-        ///     Execute all the engine IReactOnDispose for eahc component registered in the DB when it's disposed of
+        ///     Execute all the engine IReactOnDispose for each component registered in the DB when it's disposed of
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesDisposeCallbacks_Group

@@ -3,6 +3,7 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
+    //TODO there is an overlap between these methods and Group Compound Includes
     public static class ExclusiveGroupExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

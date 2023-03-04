@@ -17,14 +17,13 @@ namespace Svelto.ECS
         internal static readonly ThreadLocal<bool> skipStaticCompoundConstructorsWith2Tags = new ThreadLocal<bool>();
     }
 
-    interface ITouchedByReflection
-    {
-    }
+    interface ITouchedByReflection { }
 
-    public abstract class GroupCompound<G1, G2, G3, G4> : ITouchedByReflection where G1 : GroupTag<G1>
-        where G2 : GroupTag<G2>
-        where G3 : GroupTag<G3>
-        where G4 : GroupTag<G4>
+    public abstract class GroupCompound<G1, G2, G3, G4>: ITouchedByReflection
+            where G1 : GroupTag<G1>
+            where G2 : GroupTag<G2>
+            where G3 : GroupTag<G3>
+            where G4 : GroupTag<G4>
     {
         static GroupCompound()
         {
@@ -32,22 +31,26 @@ namespace Svelto.ECS
             if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0 &&
                 GroupCompoundInitializer.skipStaticCompoundConstructorsWith4Tags.Value == false)
             {
-                var
-                    group =
-                        new ExclusiveGroup(); //todo: it's a bit of a waste to create a class here even if this is a static constructor
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(
+                    typeof(GroupCompound<G1, G2, G3, G4>).TypeHandle);
+                var group = new ExclusiveGroup(
+                    GroupTag<G1>.bitmask | GroupTag<G2>.bitmask | GroupTag<G3>.bitmask | GroupTag<G4>.bitmask
+                  | bitmask);
 
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 _Groups.Add(group);
 
-#if DEBUG && !PROFILE_SVELTO
+#if DEBUG
                 var name =
-                    $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name} ID {(uint)group.id}";
+                        $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name}-{typeof(G4).Name} ID {(uint)group.id}";
                 GroupNamesMap.idToName[group] = name;
 #endif
                 //The hashname is independent from the actual group ID. this is fundamental because it is want
                 //guarantees the hash to be the same across different machines
                 GroupHashMap.RegisterGroup(group, typeof(GroupCompound<G1, G2, G3, G4>).FullName);
 
+                //ToArrayFast is theoretically not correct, but since multiple 0s are ignored and we don't care if we 
+                //add one, we avoid an allocation
                 _GroupsHashSet = new HashSet<ExclusiveGroupStruct>(_Groups.ToArrayFast(out _));
 
                 GroupCompoundInitializer.skipStaticCompoundConstructorsWith4Tags.Value = true;
@@ -127,12 +130,14 @@ namespace Svelto.ECS
         }
 
         public static FasterReadOnlyList<ExclusiveGroupStruct> Groups =>
-            new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
+                new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
 
         public static bool Includes(ExclusiveGroupStruct group)
         {
+            DBC.ECS.Check.Require(group != ExclusiveGroupStruct.Invalid, "invalid group passed");
+
             return _GroupsHashSet.Contains(group);
         }
 
@@ -149,29 +154,33 @@ namespace Svelto.ECS
         }
 
         static readonly FasterList<ExclusiveGroupStruct> _Groups;
-        static readonly HashSet<ExclusiveGroupStruct>    _GroupsHashSet;
+        static readonly HashSet<ExclusiveGroupStruct> _GroupsHashSet;
 
         //we are changing this with Interlocked, so it cannot be readonly
         static int isInitializing;
+        protected internal static ExclusiveGroupBitmask bitmask;
     }
 
-    public abstract class GroupCompound<G1, G2, G3> : ITouchedByReflection where G1 : GroupTag<G1>
-        where G2 : GroupTag<G2>
-        where G3 : GroupTag<G3>
+    public abstract class GroupCompound<G1, G2, G3>: ITouchedByReflection
+            where G1 : GroupTag<G1>
+            where G2 : GroupTag<G2>
+            where G3 : GroupTag<G3>
     {
         static GroupCompound()
         {
             if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0 &&
                 GroupCompoundInitializer.skipStaticCompoundConstructorsWith3Tags.Value == false)
             {
-                var
-                    group =
-                        new ExclusiveGroup(); //todo: it's a bit of a waste to create a class here even if this is a static constructor
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(
+                    typeof(GroupCompound<G1, G2, G3>).TypeHandle);
+
+                var group = new ExclusiveGroup(
+                    GroupTag<G1>.bitmask | GroupTag<G2>.bitmask | GroupTag<G3>.bitmask | bitmask);
 
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 _Groups.Add(group);
 
-#if DEBUG && !PROFILE_SVELTO
+#if DEBUG
                 var name = $"Compound: {typeof(G1).Name}-{typeof(G2).Name}-{typeof(G3).Name} ID {(uint)group.id}";
                 GroupNamesMap.idToName[group] = name;
 #endif
@@ -212,12 +221,14 @@ namespace Svelto.ECS
         }
 
         public static FasterReadOnlyList<ExclusiveGroupStruct> Groups =>
-            new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
+                new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
 
         public static bool Includes(ExclusiveGroupStruct group)
         {
+            DBC.ECS.Check.Require(group != ExclusiveGroupStruct.Invalid, "invalid group passed");
+
             return _GroupsHashSet.Contains(group);
         }
 
@@ -234,27 +245,31 @@ namespace Svelto.ECS
         }
 
         static readonly FasterList<ExclusiveGroupStruct> _Groups;
-        static readonly HashSet<ExclusiveGroupStruct>    _GroupsHashSet;
+        static readonly HashSet<ExclusiveGroupStruct> _GroupsHashSet;
 
         //we are changing this with Interlocked, so it cannot be readonly
         static int isInitializing;
+        protected internal static ExclusiveGroupBitmask bitmask;
     }
 
-    public abstract class GroupCompound<G1, G2> : ITouchedByReflection where G1 : GroupTag<G1> where G2 : GroupTag<G2>
+    public abstract class GroupCompound<G1, G2>: ITouchedByReflection
+            where G1 : GroupTag<G1>
+            where G2 : GroupTag<G2>
     {
         static GroupCompound()
         {
             if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0 &&
                 GroupCompoundInitializer.skipStaticCompoundConstructorsWith2Tags.Value == false)
             {
-                var
-                    group =
-                        new ExclusiveGroup(); //todo: it's a bit of a waste to create a class here even if this is a static constructor
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(
+                    typeof(GroupCompound<G1, G2>).TypeHandle);
+
+                var group = new ExclusiveGroup(GroupTag<G1>.bitmask | GroupTag<G2>.bitmask | bitmask);
 
                 _Groups = new FasterList<ExclusiveGroupStruct>(1);
                 _Groups.Add(group);
 
-#if DEBUG && !PROFILE_SVELTO
+#if DEBUG
                 GroupNamesMap.idToName[group] = $"Compound: {typeof(G1).Name}-{typeof(G2).Name} ID {group.id}";
 #endif
                 //The hashname is independent from the actual group ID. this is fundamental because it is want
@@ -264,9 +279,10 @@ namespace Svelto.ECS
                 _GroupsHashSet = new HashSet<ExclusiveGroupStruct>(_Groups.ToArrayFast(out _));
 
                 GroupCompoundInitializer.skipStaticCompoundConstructorsWith2Tags.Value = true;
-                GroupCompound<G2, G1>._Groups                                          = _Groups;
+                GroupCompound<G2, G1>._Groups = _Groups;
                 GroupCompoundInitializer.skipStaticCompoundConstructorsWith2Tags.Value = false;
-                GroupCompound<G2, G1>._GroupsHashSet                                   = _GroupsHashSet;
+
+                GroupCompound<G2, G1>._GroupsHashSet = _GroupsHashSet;
 
                 //every abstract group preemptively adds this group, it may or may not be empty in future
                 GroupTag<G1>.Add(group);
@@ -275,12 +291,15 @@ namespace Svelto.ECS
         }
 
         public static FasterReadOnlyList<ExclusiveGroupStruct> Groups =>
-            new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
+                new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
 
+        //TODO there is an overlap between this method and ExclusiveGroupExtensions FoundIn
         public static bool Includes(ExclusiveGroupStruct group)
         {
+            DBC.ECS.Check.Require(group != ExclusiveGroupStruct.Invalid, "invalid group passed");
+
             return _GroupsHashSet.Contains(group);
         }
 
@@ -297,9 +316,10 @@ namespace Svelto.ECS
         }
 
         static readonly FasterList<ExclusiveGroupStruct> _Groups;
-        static readonly HashSet<ExclusiveGroupStruct>    _GroupsHashSet;
+        static readonly HashSet<ExclusiveGroupStruct> _GroupsHashSet;
 
         static int isInitializing;
+        protected internal static ExclusiveGroupBitmask bitmask;
     }
 
     /// <summary>
@@ -309,23 +329,35 @@ namespace Svelto.ECS
     ///     groups with the same adjective, a group tag needs to hold all the groups sharing it.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class GroupTag<T> : ITouchedByReflection where T : GroupTag<T>
+    public abstract class GroupTag<T>: ITouchedByReflection
+            where T : GroupTag<T>
     {
         static GroupTag()
         {
             if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0)
             {
-                var group = new ExclusiveGroup();
+                //Allow to call GroupTag static constructors like
+//                public class Dead: GroupTag<Dead>
+//                {
+//                    static Dead()
+//                    {
+//                        bitmask = ExclusiveGroupBitmask.DISABLED_BIT;
+//                    }
+//                };
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(T).TypeHandle);
+
+                var group = new ExclusiveGroup(bitmask);
                 _Groups.Add(group);
 
-#if DEBUG && !PROFILE_SVELTO
+#if DEBUG
                 var typeInfo = typeof(T);
-                var name     = $"Compound: {typeInfo.Name} ID {(uint)group.id}";
-
+                var name = $"Compound: {typeInfo.Name} ID {(uint)group.id}";
+#if !PROFILE_SVELTO
                 var typeInfoBaseType = typeInfo.BaseType;
                 if (typeInfoBaseType.GenericTypeArguments[0] !=
                     typeInfo) //todo: this should shield from using a pattern different than public class GROUP_NAME : GroupTag<GROUP_NAME> {} however I am not sure it's working
                     throw new ECSException("Invalid Group Tag declared");
+#endif
 
                 GroupNamesMap.idToName[group] = name;
 #endif
@@ -338,12 +370,14 @@ namespace Svelto.ECS
         }
 
         public static FasterReadOnlyList<ExclusiveGroupStruct> Groups =>
-            new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
+                new FasterReadOnlyList<ExclusiveGroupStruct>(_Groups);
 
         public static ExclusiveBuildGroup BuildGroup => new ExclusiveBuildGroup(_Groups[0]);
 
         public static bool Includes(ExclusiveGroupStruct group)
         {
+            DBC.ECS.Check.Require(group != ExclusiveGroupStruct.Invalid, "invalid group passed");
+
             return _GroupsHashSet.Contains(group);
         }
 
@@ -361,9 +395,10 @@ namespace Svelto.ECS
         }
 
         static readonly FasterList<ExclusiveGroupStruct> _Groups = new FasterList<ExclusiveGroupStruct>(1);
-        static readonly HashSet<ExclusiveGroupStruct>    _GroupsHashSet;
+        static readonly HashSet<ExclusiveGroupStruct> _GroupsHashSet;
 
         //we are changing this with Interlocked, so it cannot be readonly
         static int isInitializing;
+        protected internal static ExclusiveGroupBitmask bitmask;
     }
 }

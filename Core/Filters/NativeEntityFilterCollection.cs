@@ -1,10 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 using Svelto.DataStructures.Native;
+using Svelto.ECS.Internal;
 using Svelto.ECS.Native;
 
 namespace Svelto.ECS
 {
-    public struct NativeEntityFilterCollection<T> where T : unmanaged, IBaseEntityComponent
+    public struct NativeEntityFilterCollection<T> where T : unmanaged, _IInternalEntityComponent
     {
         internal NativeEntityFilterCollection(NativeEGIDMultiMapper<T> mmap)
         {
@@ -114,8 +115,8 @@ namespace Svelto.ECS
 
             internal void Clear()
             {
-                _indexToEntityId.FastClear();
-                _entityIDToDenseIndex.FastClear();
+                _indexToEntityId.Clear();
+                _entityIDToDenseIndex.Clear();
             }
 
             internal bool HasEntity(uint entityId) => _entityIDToDenseIndex.ContainsKey(entityId);

@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Svelto.ECS.Experimental
+namespace Svelto.ECS.ResourceManager
 {
     /// <summary>
     /// Todo: the entityDB should be aware of the ECSString and recycle it on entity removal

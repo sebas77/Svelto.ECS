@@ -4,7 +4,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public readonly ref struct EntityCollection<T> where T : struct, IBaseEntityComponent
+    public readonly ref struct EntityCollection<T> where T : struct, _IInternalEntityComponent
     {
         public EntityCollection(IBuffer<T> buffer, IEntityIDs entityIDs, uint count) : this()
         {
@@ -21,8 +21,8 @@ namespace Svelto.ECS
         internal readonly IEntityIDs  _entityIDs;
     }
 
-    public readonly ref struct EntityCollection<T1, T2> where T1 : struct, IBaseEntityComponent
-                                                        where T2 : struct, IBaseEntityComponent
+    public readonly ref struct EntityCollection<T1, T2> where T1 : struct, _IInternalEntityComponent
+                                                        where T2 : struct, _IInternalEntityComponent
     {
         internal EntityCollection(in EntityCollection<T1> array1, in EntityCollection<T2> array2)
         {
@@ -45,9 +45,9 @@ namespace Svelto.ECS
         }
     }
 
-    public readonly ref struct EntityCollection<T1, T2, T3> where T3 : struct, IBaseEntityComponent
-                                                            where T2 : struct, IBaseEntityComponent
-                                                            where T1 : struct, IBaseEntityComponent
+    public readonly ref struct EntityCollection<T1, T2, T3> where T3 : struct, _IInternalEntityComponent
+                                                            where T2 : struct, _IInternalEntityComponent
+                                                            where T1 : struct, _IInternalEntityComponent
     {
         internal EntityCollection
             (in EntityCollection<T1> array1, in EntityCollection<T2> array2, in EntityCollection<T3> array3)
@@ -78,10 +78,10 @@ namespace Svelto.ECS
         public int count => (int)buffer1.count;
     }
 
-    public readonly ref struct EntityCollection<T1, T2, T3, T4> where T1 : struct, IBaseEntityComponent
-                                                                where T2 : struct, IBaseEntityComponent
-                                                                where T3 : struct, IBaseEntityComponent
-                                                                where T4 : struct, IBaseEntityComponent
+    public readonly ref struct EntityCollection<T1, T2, T3, T4> where T1 : struct, _IInternalEntityComponent
+                                                                where T2 : struct, _IInternalEntityComponent
+                                                                where T3 : struct, _IInternalEntityComponent
+                                                                where T4 : struct, _IInternalEntityComponent
     {
         internal EntityCollection
         (in EntityCollection<T1> array1, in EntityCollection<T2> array2, in EntityCollection<T3> array3

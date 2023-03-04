@@ -177,10 +177,11 @@ namespace Svelto.ECS
         //                        <EntityComponentType                            <groupID  <entityID, EntityComponent>>>
         internal readonly FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>>
             _groupsPerEntity;
-
+#if SVELTO_LEGACY_FILTERS
         //The filters stored for each component and group
         internal readonly FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>>
             _groupFilters;
+#endif
 
         readonly EntitiesDB _entitiesDB;
 

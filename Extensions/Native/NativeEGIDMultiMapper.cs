@@ -1,7 +1,6 @@
 using System;
-using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
-using Svelto.ECS.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Native
 {
@@ -14,7 +13,7 @@ namespace Svelto.ECS.Native
     ///WARNING: REMEMBER THIS MUST BE DISPOSED OF, AS IT USES NATIVE MEMORY. IT WILL LEAK MEMORY OTHERWISE
     /// 
     /// </summary>
-    public struct NativeEGIDMultiMapper<T> : IDisposable where T : unmanaged, IBaseEntityComponent
+    public struct NativeEGIDMultiMapper<T> : IDisposable where T : unmanaged, _IInternalEntityComponent
     {
         public NativeEGIDMultiMapper(in SveltoDictionaryNative<ExclusiveGroupStruct, SharedSveltoDictionaryNative<uint, T>> dictionary)
         {

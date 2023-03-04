@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 using Attribute = System.Attribute;
 
 namespace Svelto.ECS.Serialization
@@ -11,7 +12,7 @@ namespace Svelto.ECS.Serialization
     {}
 
     public class PartialSerializer<T> : IComponentSerializer<T>
-        where T : unmanaged, IBaseEntityComponent
+        where T : unmanaged, _IInternalEntityComponent
     {
         static PartialSerializer()
         {

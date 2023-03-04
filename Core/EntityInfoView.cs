@@ -1,6 +1,9 @@
+using Svelto.ECS.Hybrid;
+using Svelto.ECS.Internal;
+
 namespace Svelto.ECS
 {
-    struct EntityInfoComponent: IBaseEntityComponent
+    struct EntityInfoComponent: IManagedComponent
     {
         public IComponentBuilder[] componentsToBuild;
     }

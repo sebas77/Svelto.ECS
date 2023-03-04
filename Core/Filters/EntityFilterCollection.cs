@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures.Native;
+using Svelto.ECS.Internal;
 using Svelto.ECS.Native;
 
 namespace Svelto.ECS
@@ -22,28 +23,28 @@ namespace Svelto.ECS
         public EntityFilterIterator GetEnumerator()  => new EntityFilterIterator(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Add<T>(EGID egid, NativeEGIDMapper<T> mmap) where T : unmanaged, IBaseEntityComponent
+        public bool Add<T>(EGID egid, NativeEGIDMapper<T> mmap) where T : unmanaged, _IInternalEntityComponent
         {
             DBC.ECS.Check.Require(mmap.groupID == egid.groupID, "not compatible NativeEgidMapper used");
 
             return Add(egid, mmap.GetIndex(egid.entityID));
         }
 
-        public bool Add<T>(EGID egid, NativeEGIDMultiMapper<T> mmap) where T : unmanaged, IBaseEntityComponent
+        public bool Add<T>(EGID egid, NativeEGIDMultiMapper<T> mmap) where T : unmanaged, _IInternalEntityComponent
         {
             return Add(egid, mmap.GetIndex(egid));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Add(EGID egid, uint toIndex)
+        public bool Add(EGID egid, uint indexInComponentArray)
         {
-            return GetOrCreateGroupFilter(egid.groupID).Add(egid.entityID, toIndex);
+            return GetOrCreateGroupFilter(egid.groupID).Add(egid.entityID, indexInComponentArray);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(uint entityID, ExclusiveGroupStruct groupId, uint index)
+        public void Add(uint entityID, ExclusiveGroupStruct groupId, uint indexInComponentArray)
         {
-            Add(new EGID(entityID, groupId), index);
+            Add(new EGID(entityID, groupId), indexInComponentArray);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,6 +85,20 @@ namespace Svelto.ECS
             }
 
             return groupFilter;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public GroupFilters CreateGroupFilter(ExclusiveBuildGroup group)
+        {
+            if (_filtersPerGroup.TryGetValue(group, out var groupFilter) == false)
+            {
+                groupFilter = new GroupFilters(group);
+                _filtersPerGroup.Add(group, groupFilter);
+                
+                return groupFilter;
+            }
+
+            throw new ECSException("group already linked to filter {group}");
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -146,10 +161,11 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Add(uint entityId, uint entityIndex)
+            public bool Add(uint entityId, uint indexInComponentArray)
             {
                 //TODO: when sentinels are finished, we need to add AsWriter here
-                return _entityIDToDenseIndex.TryAdd(entityId, entityIndex, out _);
+                //cannot write in parallel
+                return _entityIDToDenseIndex.TryAdd(entityId, indexInComponentArray, out _);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -183,7 +199,7 @@ namespace Svelto.ECS
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal void Clear()
             {
-                _entityIDToDenseIndex.FastClear();
+                _entityIDToDenseIndex.Clear();
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

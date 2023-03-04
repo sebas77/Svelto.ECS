@@ -13,6 +13,6 @@ namespace Svelto.ECS.Serialization
         void Deserialize(ISerializationData serializationData, in EntityInitializer initializer
                        , int serializationType);
 
-        uint Size(int serializationType);
+        int Size(int serializationType);
     }
 }

@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
-using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Native
@@ -49,7 +48,7 @@ namespace Svelto.ECS.Native
         /// must be unit tested!
         public static NativeEGIDMultiMapper<T> QueryNativeMappedEntities<T>(this EntitiesDB entitiesDb,
                     LocalFasterReadOnlyList<ExclusiveGroupStruct> groups, Allocator allocator)
-            where T : unmanaged, IBaseEntityComponent
+            where T : unmanaged, _IInternalEntityComponent
         {
             var dictionary = new SveltoDictionaryNative<ExclusiveGroupStruct, SharedSveltoDictionaryNative<uint, T>>  
                     ((uint) groups.count, allocator);

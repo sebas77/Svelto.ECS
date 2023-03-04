@@ -18,9 +18,9 @@ namespace Svelto.ECS
             {
                 try
                 {
-                    var typeOfExclusiveGroup       = typeof(ExclusiveGroup);
+                    var typeOfExclusiveGroup = typeof(ExclusiveGroup);
                     var typeOfExclusiveGroupStruct = typeof(ExclusiveGroupStruct);
-                    var typeOfExclusiveBuildGroup  = typeof(ExclusiveBuildGroup);
+                    var typeOfExclusiveBuildGroup = typeof(ExclusiveBuildGroup);
 
                     foreach (Type type in AssemblyUtility.GetTypesSafe(assembly))
                     {
@@ -40,36 +40,37 @@ namespace Svelto.ECS
 
                             foreach (var field in fields)
                             {
-                                if (field.IsStatic 
-                                     && (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType) 
-                                     || typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType) 
+                                if (field.IsStatic
+                                 && (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType)
+                                     || typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType)
                                      || typeOfExclusiveBuildGroup.IsAssignableFrom(field.FieldType)))
                                 {
-                                    uint groupID;
+                                    uint groupIDAndBitMask;
 
                                     if (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType))
                                     {
                                         var group = (ExclusiveGroup)field.GetValue(null);
-                                        groupID = ((ExclusiveGroupStruct)@group).id;
+                                        groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
                                     }
-                                    else
-                                    if (typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType))
+                                    else if (typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType))
                                     {
                                         var group = (ExclusiveGroupStruct)field.GetValue(null);
-                                        groupID = @group.id;
+                                        groupIDAndBitMask = @group.ToIDAndBitmask();
                                     }
                                     else
                                     {
                                         var group = (ExclusiveBuildGroup)field.GetValue(null);
-                                        groupID = ((ExclusiveGroupStruct)@group).id;
+                                        groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
                                     }
 
                                     {
-                                        ExclusiveGroupStruct group = new ExclusiveGroupStruct(groupID);
+                                        var bitMask = (byte)(groupIDAndBitMask >> 24);
+                                        var groupID = groupIDAndBitMask & 0xFFFFFF;
+                                        ExclusiveGroupStruct group = new ExclusiveGroupStruct(groupID, bitMask);
 #if DEBUG && !PROFILE_SVELTO
                                         if (GroupNamesMap.idToName.ContainsKey(@group) == false)
                                             GroupNamesMap.idToName[@group] =
-                                                $"{type.FullName}.{field.Name} {@group.id})";
+                                                    $"{type.FullName}.{field.Name} {@group.id})";
 #endif
                                         //The hashname is independent from the actual group ID. this is fundamental because it is want
                                         //guarantees the hash to be the same across different machines

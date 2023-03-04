@@ -24,7 +24,7 @@ namespace Svelto.ECS
         
         public override string ToString()
         {
-            return this.group.ToName();
+            return group.ToName();
         }
 
         internal ExclusiveGroupStruct @group    { get; }

@@ -31,14 +31,14 @@ namespace Svelto.ECS
                      | serializationData.data[serializationData.dataPos++] << 24);
 
                 uint groupID = (uint)
-                    (serializationData.data[serializationData.dataPos++]
+                    (serializationData.data[serializationData.dataPos++]    
                      | serializationData.data[serializationData.dataPos++] << 8
-                     | serializationData.data[serializationData.dataPos++] << 16
-                     | serializationData.data[serializationData.dataPos++] << 24);
+                     | serializationData.data[serializationData.dataPos++] << 16);
+                var byteMask = serializationData.data[serializationData.dataPos++];
 
                 entityComponentsCount = serializationData.data[serializationData.dataPos++];
 
-                egid = new EGID(entityID, new ExclusiveGroupStruct(groupID));
+                egid = new EGID(entityID, new ExclusiveGroupStruct(groupID, byteMask));
             }
 
             internal void Copy(ISerializationData serializationData)

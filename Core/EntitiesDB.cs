@@ -20,7 +20,7 @@ namespace Svelto.ECS
 
         EntityCollection<T> InternalQueryEntities<T>
             (FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType)
-            where T : struct, IBaseEntityComponent
+            where T : struct, _IInternalEntityComponent
         {
             uint       count = 0;
             IBuffer<T> buffer;
@@ -46,7 +46,7 @@ namespace Svelto.ECS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public EntityCollection<T> QueryEntities<T>(ExclusiveGroupStruct groupStructId)
-            where T : struct, IBaseEntityComponent
+            where T : struct, _IInternalEntityComponent
         {
             if (groupEntityComponentsDB.TryGetValue(groupStructId, out var entitiesInGroupPerType) == false)
             {
@@ -57,7 +57,7 @@ namespace Svelto.ECS
         }
 
         public EntityCollection<T1, T2> QueryEntities<T1, T2>(ExclusiveGroupStruct groupStruct)
-            where T1 : struct, IBaseEntityComponent where T2 : struct, IBaseEntityComponent
+            where T1 : struct, _IInternalEntityComponent where T2 : struct, _IInternalEntityComponent
         {
             if (groupEntityComponentsDB.TryGetValue(groupStruct, out var entitiesInGroupPerType) == false)
             {
@@ -75,16 +75,16 @@ namespace Svelto.ECS
                                       .FastConcat("'. Entity 2: ' count: ".FastConcat(T2entities.count)
                                                                           .FastConcat(" ", typeof(T2).ToString())
                                                                           .FastConcat(
-                                                                               "' group: ", groupStruct.ToName())));
+                                                                               "' group: ", groupStruct.ToName())).FastConcat(" this means that you are mixing descriptors in the same group that do not share the components that you are querying"));
 #endif
 
             return new EntityCollection<T1, T2>(T1entities, T2entities);
         }
 
         public EntityCollection<T1, T2, T3> QueryEntities<T1, T2, T3>(ExclusiveGroupStruct groupStruct)
-            where T1 : struct, IBaseEntityComponent
-            where T2 : struct, IBaseEntityComponent
-            where T3 : struct, IBaseEntityComponent
+            where T1 : struct, _IInternalEntityComponent
+            where T2 : struct, _IInternalEntityComponent
+            where T3 : struct, _IInternalEntityComponent
         {
             if (groupEntityComponentsDB.TryGetValue(groupStruct, out var entitiesInGroupPerType) == false)
             {
@@ -105,17 +105,17 @@ namespace Svelto.ECS
                                            " Entity 2: ".FastConcat(typeof(T2).ToString()).FastConcat(" count: ")
                                                         .FastConcat(T2entities.count)
                                                         .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString()))
-                                                        .FastConcat(" count: ").FastConcat(T3entities.count)));
+                                                        .FastConcat(" count: ").FastConcat(T3entities.count)).FastConcat(" this means that you are mixing descriptors in the same group that do not share the components that you are querying"));
 #endif
 
             return new EntityCollection<T1, T2, T3>(T1entities, T2entities, T3entities);
         }
 
         public EntityCollection<T1, T2, T3, T4> QueryEntities<T1, T2, T3, T4>(ExclusiveGroupStruct groupStruct)
-            where T1 : struct, IBaseEntityComponent
-            where T2 : struct, IBaseEntityComponent
-            where T3 : struct, IBaseEntityComponent
-            where T4 : struct, IBaseEntityComponent
+            where T1 : struct, _IInternalEntityComponent
+            where T2 : struct, _IInternalEntityComponent
+            where T3 : struct, _IInternalEntityComponent
+            where T4 : struct, _IInternalEntityComponent
         {
             if (groupEntityComponentsDB.TryGetValue(groupStruct, out var entitiesInGroupPerType) == false)
             {
@@ -141,49 +141,49 @@ namespace Svelto.ECS
                                                         .FastConcat(" Entity 3: ".FastConcat(typeof(T3).ToString()))
                                                         .FastConcat(" count: ").FastConcat(T3entities.count)
                                                         .FastConcat(" Entity 4: ".FastConcat(typeof(T4).ToString()))
-                                                        .FastConcat(" count: ").FastConcat(T4entities.count)));
+                                                        .FastConcat(" count: ").FastConcat(T4entities.count)).FastConcat(" this means that you are mixing descriptors in the same group that do not share the components that you are querying"));
 #endif
 
             return new EntityCollection<T1, T2, T3, T4>(T1entities, T2entities, T3entities, T4entities);
         }
 
         public GroupsEnumerable<T> QueryEntities<T>
-            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T : struct, IBaseEntityComponent
+            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T : struct, _IInternalEntityComponent
         {
             return new GroupsEnumerable<T>(this, groups);
         }
 
         /// <summary>
         /// Note: Remember that EntityViewComponents are always put at the end of the generic parameters tuple.
-        /// It won't compile otherwise
+        /// The Query entity code won't inexplicably compile otherwise
         /// </summary>
         /// <returns></returns>
         public GroupsEnumerable<T1, T2> QueryEntities<T1, T2>(in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups)
-            where T1 : struct, IBaseEntityComponent where T2 : struct, IBaseEntityComponent
+            where T1 : struct, _IInternalEntityComponent where T2 : struct, _IInternalEntityComponent
         {
             return new GroupsEnumerable<T1, T2>(this, groups);
         }
 
         public GroupsEnumerable<T1, T2, T3> QueryEntities<T1, T2, T3>
-            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T1 : struct, IBaseEntityComponent
-                                                                      where T2 : struct, IBaseEntityComponent
-                                                                      where T3 : struct, IBaseEntityComponent
+            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T1 : struct, _IInternalEntityComponent
+                                                                      where T2 : struct, _IInternalEntityComponent
+                                                                      where T3 : struct, _IInternalEntityComponent
         {
             return new GroupsEnumerable<T1, T2, T3>(this, groups);
         }
 
         public GroupsEnumerable<T1, T2, T3, T4> QueryEntities<T1, T2, T3, T4>
-            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T1 : struct, IBaseEntityComponent
-                                                                      where T2 : struct, IBaseEntityComponent
-                                                                      where T3 : struct, IBaseEntityComponent
-                                                                      where T4 : struct, IBaseEntityComponent
+            (in LocalFasterReadOnlyList<ExclusiveGroupStruct> groups) where T1 : struct, _IInternalEntityComponent
+                                                                      where T2 : struct, _IInternalEntityComponent
+                                                                      where T3 : struct, _IInternalEntityComponent
+                                                                      where T4 : struct, _IInternalEntityComponent
         {
             return new GroupsEnumerable<T1, T2, T3, T4>(this, groups);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EGIDMapper<T> QueryMappedEntities<T>(ExclusiveGroupStruct groupStructId)
-            where T : struct, IBaseEntityComponent
+            where T : struct, _IInternalEntityComponent
         {
             if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false)
                 throw new EntityGroupNotFoundException(typeof(T), groupStructId.ToName());
@@ -193,7 +193,7 @@ namespace Svelto.ECS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryQueryMappedEntities<T>
-            (ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper) where T : struct, IBaseEntityComponent
+            (ExclusiveGroupStruct groupStructId, out EGIDMapper<T> mapper) where T : struct, _IInternalEntityComponent
         {
             mapper = default;
             if (SafeQueryEntityDictionary<T>(groupStructId, out var typeSafeDictionary) == false
@@ -206,7 +206,7 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Exists<T>(EGID entityGID) where T : struct, IBaseEntityComponent
+        public bool Exists<T>(EGID entityGID) where T : struct, _IInternalEntityComponent
         {
             if (SafeQueryEntityDictionary<T>(entityGID.groupID, out var casted) == false)
                 return false;
@@ -215,7 +215,7 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Exists<T>(uint id, ExclusiveGroupStruct group) where T : struct, IBaseEntityComponent
+        public bool Exists<T>(uint id, ExclusiveGroupStruct group) where T : struct, _IInternalEntityComponent
         {
             if (SafeQueryEntityDictionary<T>(group, out var casted) == false)
                 return false;
@@ -236,13 +236,13 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool HasAny<T>(ExclusiveGroupStruct groupStruct) where T : struct, IBaseEntityComponent
+        public bool HasAny<T>(ExclusiveGroupStruct groupStruct) where T : struct, _IInternalEntityComponent
         {
             return Count<T>(groupStruct) > 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Count<T>(ExclusiveGroupStruct groupStruct) where T : struct, IBaseEntityComponent
+        public int Count<T>(ExclusiveGroupStruct groupStruct) where T : struct, _IInternalEntityComponent
         {
             if (SafeQueryEntityDictionary<T>(groupStruct, out var typeSafeDictionary) == false)
                 return 0;
@@ -250,17 +250,15 @@ namespace Svelto.ECS
             return (int)typeSafeDictionary.count;
         }
 
-        public bool FoundInGroups<T1>() where T1 : IBaseEntityComponent
+        public bool FoundInGroups<T1>() where T1 : _IInternalEntityComponent
         {
             return groupsPerComponent.ContainsKey(TypeRefWrapper<T1>.wrapper);
         }
 
-        public bool IsDisposing => _enginesRoot._isDisposing;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool SafeQueryEntityDictionary<T>
         (out ITypeSafeDictionary typeSafeDictionary
-       , FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType) where T : IBaseEntityComponent
+       , FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType) where T : _IInternalEntityComponent
         {
             if (entitiesInGroupPerType.TryGetValue(new RefWrapperType(TypeCache<T>.type), out var safeDictionary)
              == false)
@@ -277,7 +275,7 @@ namespace Svelto.ECS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool SafeQueryEntityDictionary<T>
-            (ExclusiveGroupStruct group, out ITypeSafeDictionary typeSafeDictionary) where T : IBaseEntityComponent
+            (ExclusiveGroupStruct group, out ITypeSafeDictionary typeSafeDictionary) where T : _IInternalEntityComponent
         {
             if (UnsafeQueryEntityDictionary(group, TypeCache<T>.type, out var safeDictionary) == false)
             {
