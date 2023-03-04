@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
 ## [3.4.0] - 03-2023
-~~~~
+
 * removed static caches used in performance critical paths as they were causing unexpected performance issues (the fetching of static data is slower than i imagined)
 * add Native prefix in front of the native memory utilities method names
 * largely improved the console logger system
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file. Changes are
 * Fix reported bugs
 * Minor Svelto Dictionary improvements
 * Added ValueContainer, a simple int, Tvalue dictionary based on sparse set. It has very specific use cases at the moment. Mainly to be used for the new ECS OOP Abstraction resoruce manager
-
+* Added IReactOnSubmissionStarted interface
 
 ## [3.3.2] - 04-06-2022
 
