@@ -1,10 +1,10 @@
 #if SLOW_SVELTO_SUBMISSION
 namespace Svelto.ECS.Internal
 {
-    delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, IBaseEntityComponent;
-    delegate void SetReferenceWithoutBoxingActionCast<T>(ref T target, EntityReference egid) where T : struct, IBaseEntityComponent;
+    delegate void SetEGIDWithoutBoxingActionCast<T>(ref T target, EGID egid) where T : struct, _IInternalEntityComponent;
+    delegate void SetReferenceWithoutBoxingActionCast<T>(ref T target, EntityReference egid) where T : struct, _IInternalEntityComponent;
 
-    static class SetEGIDWithoutBoxing<T> where T : struct, IBaseEntityComponent
+    static class SetEGIDWithoutBoxing<T> where T : struct, _IInternalEntityComponent
     {
         public static readonly SetEGIDWithoutBoxingActionCast<T>      SetIDWithoutBoxing  = MakeSetter();
         public static readonly SetReferenceWithoutBoxingActionCast<T> SetRefWithoutBoxing = MakeSetterReference();

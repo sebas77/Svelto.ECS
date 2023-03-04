@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Serialization
 {
@@ -84,6 +85,6 @@ namespace Svelto.ECS.Serialization
 
         T DeserializeEntityComponent<T>(ISerializationData serializationData,
             ISerializableEntityDescriptor entityDescriptor, int serializationType) 
-            where T : unmanaged, IBaseEntityComponent;
+            where T : unmanaged, IEntityComponent;
     }
 }

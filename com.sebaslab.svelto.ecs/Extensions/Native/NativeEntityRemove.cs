@@ -1,5 +1,5 @@
 #if UNITY_NATIVE
-using Svelto.ECS.DataStructures;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS.Native
 {
@@ -16,7 +16,7 @@ namespace Svelto.ECS.Native
 
         public void RemoveEntity(EGID egid, int threadIndex)
         {
-            var simpleNativeBag = _removeQueue.GetBuffer(threadIndex);
+            var simpleNativeBag = _removeQueue.GetBag(threadIndex);
             
             simpleNativeBag.Enqueue(_indexRemove);
             simpleNativeBag.Enqueue(egid);

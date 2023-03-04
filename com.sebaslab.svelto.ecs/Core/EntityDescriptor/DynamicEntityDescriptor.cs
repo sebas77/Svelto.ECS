@@ -1,5 +1,6 @@
 using System;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -70,21 +71,21 @@ namespace Svelto.ECS
             _componentsToBuild = Construct(extraEntities.count, extraEntities.ToArrayFast(out _));
         }
 
-        public void Add<T>() where T : struct, IBaseEntityComponent
+        public void Add<T>() where T : struct, _IInternalEntityComponent
         {
             IComponentBuilder[] extraEntities = { new ComponentBuilder<T>() };
             _componentsToBuild = Construct(extraEntities.Length, extraEntities);
         }
 
-        public void Add<T, U>() where T : struct, IBaseEntityComponent where U : struct, IBaseEntityComponent
+        public void Add<T, U>() where T : struct, _IInternalEntityComponent where U : struct, _IInternalEntityComponent
         {
             IComponentBuilder[] extraEntities = { new ComponentBuilder<T>(), new ComponentBuilder<U>() };
             _componentsToBuild = Construct(extraEntities.Length, extraEntities);
         }
 
-        public void Add<T, U, V>() where T : struct, IBaseEntityComponent
-                                   where U : struct, IBaseEntityComponent
-                                   where V : struct, IBaseEntityComponent
+        public void Add<T, U, V>() where T : struct, _IInternalEntityComponent
+                                   where U : struct, _IInternalEntityComponent
+                                   where V : struct, _IInternalEntityComponent
         {
             IComponentBuilder[] extraEntities =
             {

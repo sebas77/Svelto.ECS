@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -12,14 +13,14 @@ namespace Svelto.ECS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Consumer<T> GenerateConsumer<T>(string name, uint capacity)
-            where T : unmanaged, IBaseEntityComponent
+            where T : unmanaged, _IInternalEntityComponent
         {
             return _enginesRoot.Target.GenerateConsumer<T>(name, capacity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name, uint capacity)
-            where T : unmanaged, IBaseEntityComponent
+            where T : unmanaged, _IInternalEntityComponent
         {
             return _enginesRoot.Target.GenerateConsumer<T>(group, name, capacity);
         }
@@ -31,9 +32,9 @@ namespace Svelto.ECS
 
     public interface IEntityStreamConsumerFactory
     {
-        Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, IBaseEntityComponent;
+        Consumer<T> GenerateConsumer<T>(string name, uint capacity) where T : unmanaged, _IInternalEntityComponent;
 
         Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct @group, string name, uint capacity)
-            where T : unmanaged, IBaseEntityComponent;
+            where T : unmanaged, _IInternalEntityComponent;
     }
 }

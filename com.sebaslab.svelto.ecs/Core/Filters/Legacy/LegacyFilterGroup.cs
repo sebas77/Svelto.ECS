@@ -1,7 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿#if SVELTO_LEGACY_FILTERS
+using System.Runtime.CompilerServices;
 using Svelto.Common;
 using Svelto.DataStructures.Native;
-using Svelto.ECS.DataStructures;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -125,7 +126,7 @@ namespace Svelto.ECS
             if (_denseListOfIndicesToEntityComponentArray.isValid == false)
                 throw new ECSException($"invalid Filter");
 #endif
-            _indexOfEntityInDenseList.FastClear();
+            _indexOfEntityInDenseList.Clear();
             _reverseEIDs.Clear();
             _denseListOfIndicesToEntityComponentArray.Clear();
         }
@@ -195,7 +196,7 @@ namespace Svelto.ECS
                 }
                 else
                 {
-                    _indexOfEntityInDenseList.FastClear();
+                    _indexOfEntityInDenseList.Clear();
                     _reverseEIDs.Clear();
                     _denseListOfIndicesToEntityComponentArray.Clear();
                 }
@@ -210,3 +211,4 @@ namespace Svelto.ECS
         internal readonly int                  _ID;
     }
 }
+#endif

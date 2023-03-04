@@ -1,5 +1,6 @@
 ﻿using System;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -15,7 +16,7 @@ namespace Svelto.ECS
     struct EntitiesStreams : IDisposable
     {
         internal Consumer<T> GenerateConsumer<T>(string name, uint capacity)
-            where T : unmanaged, IBaseEntityComponent
+            where T : unmanaged, _IInternalEntityComponent
         {
             if (_streams.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
                 _streams[TypeRefWrapper<T>.wrapper] = new EntityStream<T>();
@@ -24,7 +25,7 @@ namespace Svelto.ECS
         }
 
         public Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct group, string name, uint capacity)
-            where T : unmanaged, IBaseEntityComponent
+            where T : unmanaged, _IInternalEntityComponent
         {
             if (_streams.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
                 _streams[TypeRefWrapper<T>.wrapper] = new EntityStream<T>();
@@ -33,12 +34,12 @@ namespace Svelto.ECS
             return typeSafeStream.GenerateConsumer(group, name, capacity);
         }
 
-        internal void PublishEntity<T>(ref T entity, EGID egid) where T : unmanaged, IBaseEntityComponent
+        internal void PublishEntity<T>(ref T entity, EGID egid) where T : unmanaged, _IInternalEntityComponent
         {
             if (_streams.TryGetValue(TypeRefWrapper<T>.wrapper, out var typeSafeStream))
                 (typeSafeStream as EntityStream<T>).PublishEntity(ref entity, egid);
             else
-                Console.LogDebug("No Consumers are waiting for this entity to change ", typeof(T));
+                Console.LogDebug($"No Consumers are waiting for this entity to change {typeof(T)}");
         }
 
         public void Dispose()

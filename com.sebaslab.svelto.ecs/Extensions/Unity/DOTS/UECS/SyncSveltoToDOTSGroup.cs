@@ -49,10 +49,9 @@ namespace Svelto.ECS.SveltoOnDOTS
     //
     // Tim Johansson  2 hours ago
     // Yes, you would have to do it every time
+    public class SyncSveltoToDOTSGroup: UnsortedJobifiedEnginesGroup<SyncSveltoToDOTSEngine> { }
 
-    public class SyncSveltoToDOTSGroup : UnsortedJobifiedEnginesGroup<SyncSveltoToDOTSEngine> {}
-
-    public abstract partial class SyncSveltoToDOTSEngine : SystemBase, IJobifiedEngine
+    public abstract partial class SyncSveltoToDOTSEngine: SystemBase, IJobifiedEngine
     {
         //The dependency returned is enough for the Svelto Engines running after this to take in consideration
         //the Systembase jobs. The svelto engines do not need to take in consideration the new dependencies created
@@ -71,14 +70,14 @@ namespace Svelto.ECS.SveltoOnDOTS
         {
             //SysteBase jobs that will use this Dependency will wait for inputDeps to be completed before to execute
             Dependency = JobHandle.CombineDependencies(Dependency, _inputDeps);
-            
+
             OnSveltoUpdate();
         }
 
         protected abstract void OnSveltoUpdate();
 
         public abstract string name { get; }
-        
+
         JobHandle _inputDeps;
     }
 }

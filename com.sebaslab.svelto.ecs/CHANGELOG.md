@@ -1,10 +1,29 @@
 # Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
+## [3.4.0] - 03-2023
+~~~~
+* removed static caches used in performance critical paths as they were causing unexpected performance issues (the fetching of static data is slower than i imagined)
+* add Native prefix in front of the native memory utilities method names
+* largely improved the console logger system
+* minor improvements to the platform profiler structs
+* improvements to the ThreadSafeObjectPool class (some refactoring too)
+* added several datastructures previously belonging to Svelto.ECS
+* all the FastClear methods are gone. The standard clear method now is aware of the type used and will clear it in the fastest way possible
+* MemClear is added in case memory needs to be cleared explicitly
+* added new SveltoStream, Unmanaged and Managed stream classes, their use case will be documented one day
+* renamed the Svelto.Common.DataStructures namespace to Svelto.DataStructures
+* added FixedTypedArray* methods. Fixed size arrays embedded in structs are now possible
+* FasterList extension to convert to Span and ByteSpan
+* Fix reported bugs
+* Minor Svelto Dictionary improvements
+* Added ValueContainer, a simple int, Tvalue dictionary based on sparse set. It has very specific use cases at the moment. Mainly to be used for the new ECS OOP Abstraction resoruce manager
+
+
 ## [3.3.2] - 04-06-2022
 
 * Internal refactoring to support future features. Currently it may translate to a small performance boost
-* IEntityComponent and IEntityViewComponent now implements IBaseEntityComponent. This shouldn't affect existing code
+* IEntityComponent and IEntityViewComponent now implements _IInternalEntityComponent. This shouldn't affect existing code
 * Improve thread-safety of entity building
 * Fixed serious bug that affected the integrity of the EntityIDs values during RemoveEX callbacks
 * The point above may result in a performance boost in the Filters updates during submission

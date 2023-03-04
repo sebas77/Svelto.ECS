@@ -1,3 +1,5 @@
+using Svelto.ECS.Internal;
+
 namespace Svelto.ECS
 {
     /// <summary>
@@ -53,15 +55,15 @@ namespace Svelto.ECS
             return this;
         }
 
-        protected void Add<T>() where T : struct, IBaseEntityComponent
+        protected void Add<T>() where T : struct, _IInternalEntityComponent
         {
             _dynamicDescriptor.Add<T>();
         }
-        protected void Add<T, U>() where T : struct,  IBaseEntityComponent where U : struct,  IBaseEntityComponent
+        protected void Add<T, U>() where T : struct,  _IInternalEntityComponent where U : struct,  _IInternalEntityComponent
         {
             _dynamicDescriptor.Add<T, U>();
         }
-        protected void Add<T, U, V>() where T : struct,  IBaseEntityComponent where U : struct,  IBaseEntityComponent where V : struct,  IBaseEntityComponent
+        protected void Add<T, U, V>() where T : struct,  _IInternalEntityComponent where U : struct,  _IInternalEntityComponent where V : struct,  _IInternalEntityComponent
         {
             _dynamicDescriptor.Add<T, U, V>();
         }

@@ -1,4 +1,5 @@
-﻿using Svelto.DataStructures;
+﻿#if SVELTO_LEGACY_FILTERS
+using Svelto.DataStructures;
 using Svelto.ECS.Native;
 
 namespace Svelto.ECS
@@ -14,3 +15,4 @@ namespace Svelto.ECS
         }
     }
 }
+#endif

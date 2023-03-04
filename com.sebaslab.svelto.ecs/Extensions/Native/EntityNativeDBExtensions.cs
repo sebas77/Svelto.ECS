@@ -104,6 +104,9 @@ namespace Svelto.ECS
             return ref entitiesDb.QueryEntity<T>(new EGID(id, group));
         }
 
+        /// <summary>
+        /// Expects that only one entity of type T exists in the group 
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T QueryUniqueEntity<T>
             (this EntitiesDB entitiesDb, ExclusiveGroupStruct group) where T : unmanaged, IEntityComponent
@@ -146,6 +149,13 @@ namespace Svelto.ECS
 
             array = default;
             return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static AllGroupsEnumerable<T1> QueryEntities<T1>(this EntitiesDB db)
+                where T1 :unmanaged, IEntityComponent
+        {
+            return new AllGroupsEnumerable<T1>(db);
         }
     }
 }

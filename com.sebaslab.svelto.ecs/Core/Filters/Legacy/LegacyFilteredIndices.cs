@@ -1,5 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using Svelto.ECS.DataStructures;
+﻿#if SVELTO_LEGACY_FILTERS
+using System.Runtime.CompilerServices;
+using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
@@ -36,3 +37,4 @@ namespace Svelto.ECS
         readonly int                          _count;
     }
 }
+#endif

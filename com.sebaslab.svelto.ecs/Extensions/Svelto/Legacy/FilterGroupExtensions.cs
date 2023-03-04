@@ -1,4 +1,5 @@
-﻿using Svelto.ECS.Native;
+﻿#if SVELTO_LEGACY_FILTERS
+using Svelto.ECS.Native;
 
 namespace Svelto.ECS
 {
@@ -17,3 +18,4 @@ namespace Svelto.ECS
 
     }
 }
+#endif

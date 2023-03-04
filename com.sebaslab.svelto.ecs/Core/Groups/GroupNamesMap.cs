@@ -3,12 +3,12 @@ using Svelto.ECS;
 
 static class GroupNamesMap
 {
-#if DEBUG && !PROFILE_SVELTO
+#if DEBUG
     static GroupNamesMap() { idToName = new Dictionary<ExclusiveGroupStruct, string>(); }
 
     internal static readonly Dictionary<ExclusiveGroupStruct, string> idToName;
 #endif
-#if DEBUG && !PROFILE_SVELTO
+#if DEBUG
     public static string ToName(this in ExclusiveGroupStruct group)
     {
         Dictionary<ExclusiveGroupStruct, string> idToName = GroupNamesMap.idToName;

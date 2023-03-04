@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+#pragma warning disable CS0660, CS0661
 
 namespace Svelto.ECS
 {
@@ -11,7 +12,7 @@ namespace Svelto.ECS
     //the type doesn't implement IEqualityComparer, what implements it is a custom comparer
     public readonly struct ExclusiveGroupStruct : IEquatable<ExclusiveGroupStruct>, IComparable<ExclusiveGroupStruct>
     {
-        public static readonly ExclusiveGroupStruct Invalid = default; //must stay here because of Burst
+        public static readonly ExclusiveGroupStruct Invalid; //must stay here because of Burst
 
         public ExclusiveGroupStruct(byte[] data, uint pos):this()
         {
@@ -24,13 +25,7 @@ namespace Svelto.ECS
 
             DBC.ECS.Check.Ensure(id < _globalId, "Invalid group ID deserialiased");
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
-        {
-            return obj is ExclusiveGroupStruct other && Equals(other);
-        }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
@@ -146,7 +141,7 @@ namespace Svelto.ECS
             _idInternal = groupID;
         }
         
-        ExclusiveGroupStruct(uint groupID, byte bytemask):this()
+        internal ExclusiveGroupStruct(uint groupID, byte bytemask):this()
         {
 #if DEBUG && !PROFILE_SVELTO          
             if (groupID >= 0xFFFFFF)

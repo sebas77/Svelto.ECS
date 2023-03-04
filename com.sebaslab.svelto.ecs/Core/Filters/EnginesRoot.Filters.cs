@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using Svelto.DataStructures;
+﻿using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
-using Svelto.ECS.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -67,7 +65,7 @@ namespace Svelto.ECS
                 var filters         = _persistentEntityFilters.unsafeValues;
                 
                 //remove duplicates
-                _transientEntityIDsLeftWithoutDuplicates.FastClear();
+                _transientEntityIDsLeftWithoutDuplicates.Clear();
                 var entityAffectedCount = entityIDsLeftAndAffectedByRemoval.count;
                 for (int i = 0; i < entityAffectedCount; i++)
                 {
@@ -129,7 +127,7 @@ namespace Svelto.ECS
                 var numberOfFilters = listOfFilters.count;
                 
                 //remove duplicates
-                _transientEntityIDsLeftWithoutDuplicates.FastClear();
+                _transientEntityIDsLeftWithoutDuplicates.Clear();
                 var entityAffectedCount = entityIDsLeftAndAffectedByRemoval.count;
                 for (int i = 0; i < entityAffectedCount; i++)
                 {

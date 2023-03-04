@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
+using Svelto.ECS.Hybrid;
+using Svelto.ECS.Internal;
 using Svelto.Utilities;
 
 namespace Svelto.ECS
@@ -34,7 +36,7 @@ namespace Svelto.ECS
 
         internal static void SetEntityViewComponentImplementors<T>(this IComponentBuilder componentBuilder,
             ref T entityComponent, IEnumerable<object> implementors,
-            ComponentBuilder<T>.EntityViewComponentCache localCache) where T : struct, IBaseEntityComponent
+            ComponentBuilder<T>.EntityViewComponentCache localCache) where T : struct, _IInternalEntityComponent
         {
             DBC.ECS.Check.Require(implementors != null,
                 NULL_IMPLEMENTOR_ERROR.FastConcat(" entityComponent ",

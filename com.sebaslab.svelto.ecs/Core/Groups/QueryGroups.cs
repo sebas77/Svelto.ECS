@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Experimental
 {
@@ -49,7 +50,7 @@ namespace Svelto.ECS.Experimental
 
         public FasterList<ExclusiveGroupStruct> Evaluate()
         {
-            _groups.FastClear();
+            _groups.Clear();
 
             foreach (var item in _sets) _groups.Add(item);
 
@@ -210,7 +211,7 @@ namespace Svelto.ECS.Experimental
         readonly FasterReadOnlyList<ExclusiveGroupStruct> _group;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Count<T>(EntitiesDB entitiesDB) where T : struct, IBaseEntityComponent
+        public int Count<T>(EntitiesDB entitiesDB) where T : struct, _IInternalEntityComponent
         {
             var count = 0;
 
@@ -220,7 +221,7 @@ namespace Svelto.ECS.Experimental
             return count;
         }
 
-        public int Max<T>(EntitiesDB entitiesDB) where T : struct, IBaseEntityComponent
+        public int Max<T>(EntitiesDB entitiesDB) where T : struct, _IInternalEntityComponent
         {
             var max = 0;
 

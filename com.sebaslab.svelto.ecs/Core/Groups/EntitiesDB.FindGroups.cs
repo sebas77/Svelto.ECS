@@ -7,10 +7,10 @@ namespace Svelto.ECS
 {
     public partial class EntitiesDB
     {
-        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1>() where T1 : IBaseEntityComponent
+        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1>(bool ignoreDisabledBit = false) where T1 : _IInternalEntityComponent
         {
             FasterList<ExclusiveGroupStruct> result = localgroups.Value.groupArray;
-            result.FastClear();
+            result.Clear();
             if (groupsPerComponent.TryGetValue(TypeRefWrapper<T1>.wrapper
                                           , out FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary> result1)
              == false)
@@ -22,20 +22,19 @@ namespace Svelto.ECS
             for (int j = 0; j < result1Count; j++)
             {
                 var group = fasterDictionaryNodes1[j].key;
-                if (group.IsEnabled())
-                {
-                    result.Add(group);
-                }
+                if (ignoreDisabledBit == false && group.IsEnabled() == false) continue;
+                
+                result.Add(group);
             }
 
             return result;
         }
 
-        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1, T2>()
-            where T1 : IBaseEntityComponent where T2 : IBaseEntityComponent
+        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1, T2>(bool ignoreDisabledBit = false)
+            where T1 : _IInternalEntityComponent where T2 : _IInternalEntityComponent
         {
             FasterList<ExclusiveGroupStruct> result = localgroups.Value.groupArray;
-            result.FastClear();
+            result.Clear();
             if (groupsPerComponent.TryGetValue(TypeRefWrapper<T1>.wrapper
                                           , out FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary> result1)
              == false)
@@ -53,7 +52,7 @@ namespace Svelto.ECS
             for (int i = 0; i < result1Count; i++)
             {
                 var groupID = fasterDictionaryNodes1[i].key;
-                if (!groupID.IsEnabled()) continue;
+                if (ignoreDisabledBit == false && groupID.IsEnabled() == false) continue;
 
                 for (int j = 0; j < result2Count; j++)
                 {
@@ -82,8 +81,8 @@ namespace Svelto.ECS
         /// <typeparam name="T2"></typeparam>
         /// <typeparam name="T3"></typeparam>
         /// <returns></returns>
-        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1, T2, T3>()
-            where T1 : IBaseEntityComponent where T2 : IBaseEntityComponent where T3 : IBaseEntityComponent
+        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1, T2, T3>(bool ignoreDisabledBit = false)
+            where T1 : _IInternalEntityComponent where T2 : _IInternalEntityComponent where T3 : _IInternalEntityComponent
         {
             FasterList<FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> localArray =
                 localgroups.Value.listOfGroups;
@@ -98,7 +97,7 @@ namespace Svelto.ECS
                 return new LocalFasterReadOnlyList<ExclusiveGroupStruct>(
                     FasterReadOnlyList<ExclusiveGroupStruct>.DefaultEmptyList);
 
-            localgroups.Value.groups.FastClear();
+            localgroups.Value.groups.Clear();
 
             FasterDictionary<ExclusiveGroupStruct, ExclusiveGroupStruct> localGroups = localgroups.Value.groups;
 
@@ -114,10 +113,9 @@ namespace Svelto.ECS
 
             foreach (var value in localArray[startIndex])
             {
-                if (value.key.IsEnabled())
-                {
-                    localGroups.Add(value.key, value.key);
-                }
+                if (ignoreDisabledBit == false && value.key.IsEnabled() == false) continue;
+                
+                localGroups.Add(value.key, value.key);
             }
 
             var groupData = localArray[++startIndex % 3];
@@ -132,11 +130,11 @@ namespace Svelto.ECS
                                                                    , (uint) localGroups.count);
         }
 
-        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1, T2, T3, T4>()
-            where T1 : IBaseEntityComponent
-            where T2 : IBaseEntityComponent
-            where T3 : IBaseEntityComponent
-            where T4 : IBaseEntityComponent
+        public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1, T2, T3, T4>(bool ignoreDisabledBit = false)
+            where T1 : _IInternalEntityComponent
+            where T2 : _IInternalEntityComponent
+            where T3 : _IInternalEntityComponent
+            where T4 : _IInternalEntityComponent
         {
             FasterList<FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> localArray =
                 localgroups.Value.listOfGroups;
@@ -154,26 +152,27 @@ namespace Svelto.ECS
                 return new LocalFasterReadOnlyList<ExclusiveGroupStruct>(
                     FasterReadOnlyList<ExclusiveGroupStruct>.DefaultEmptyList);
 
-            localgroups.Value.groups.FastClear();
+            localgroups.Value.groups.Clear();
 
-            FasterDictionary<ExclusiveGroupStruct, ExclusiveGroupStruct> localGroups = localgroups.Value.groups;
+            var localGroups = localgroups.Value.groups;
 
             int startIndex = 0;
             int min        = int.MaxValue;
 
             for (int i = 0; i < 4; i++)
-                if (localArray[i].count < min)
+            {
+                var fasterDictionary = localArray[i];
+                if (fasterDictionary.count < min)
                 {
-                    min        = localArray[i].count;
+                    min        = fasterDictionary.count;
                     startIndex = i;
                 }
+            }
 
             foreach (var value in localArray[startIndex])
             {
-                if (value.key.IsEnabled())
-                {
-                    localGroups.Add(value.key, value.key);
-                }
+                if (ignoreDisabledBit == false && value.key.IsEnabled() == false) continue;
+                localGroups.Add(value.key, value.key);
             }
 
             var groupData = localArray[++startIndex & 3]; //&3 == %4

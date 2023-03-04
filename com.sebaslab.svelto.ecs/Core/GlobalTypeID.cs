@@ -1,6 +1,7 @@
 using System.Threading;
 using Svelto.Common;
-using Svelto.ECS.DataStructures;
+using Svelto.DataStructures;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -18,11 +19,11 @@ namespace Svelto.ECS
         void FillFromByteArray(EntityInitializer init, NativeBag buffer);
     }
 
-    class Filler<T> : IFiller where T : struct, IBaseEntityComponent
+    class Filler<T> : IFiller where T : struct, _IInternalEntityComponent
     {
         static Filler()
         {
-            DBC.ECS.Check.Require(TypeType.isUnmanaged<T>() == true, "invalid type used");
+            DBC.ECS.Check.Require(TypeCache<T>.isUnmanaged == true, "invalid type used");
         }
 
         //it's an internal interface
@@ -50,7 +51,7 @@ namespace Svelto.ECS
             TYPE_IDS = new Svelto.DataStructures.FasterList<IFiller>();
         }
 
-        internal static void Register<T>(IFiller entityBuilder) where T : struct, IBaseEntityComponent
+        internal static void Register<T>(IFiller entityBuilder) where T : struct, _IInternalEntityComponent
         {
             var location = EntityComponentID<T>.ID.Data = GlobalTypeID.NextID<T>();
             TYPE_IDS.AddAt(location, entityBuilder);

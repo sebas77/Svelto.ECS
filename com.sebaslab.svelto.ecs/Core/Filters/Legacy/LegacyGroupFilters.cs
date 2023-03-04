@@ -1,4 +1,5 @@
-﻿using Svelto.DataStructures;
+﻿#if SVELTO_LEGACY_FILTERS
+using Svelto.DataStructures;
 using Svelto.DataStructures.Native;
 
 namespace Svelto.ECS
@@ -69,7 +70,7 @@ namespace Svelto.ECS
             foreach (var filter in _legacyFilters)
                 filter.value.Dispose();
 
-            _legacyFilters.FastClear();
+            _legacyFilters.Clear();
         }
 
         internal ref LegacyFilterGroup CreateOrGetFilter(int filterID)
@@ -102,3 +103,4 @@ namespace Svelto.ECS
         SharedSveltoDictionaryNative<int, LegacyFilterGroup> _legacyFilters;
     }
 }
+#endif
