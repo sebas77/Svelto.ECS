@@ -19,7 +19,7 @@
     "svelto.ecs"
   ],
   "name": "com.sebaslab.svelto.ecs",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "type": "library",
-  "unity": "2019.3"
+  "unity": "2020.3"
 }

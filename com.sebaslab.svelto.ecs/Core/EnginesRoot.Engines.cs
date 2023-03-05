@@ -330,7 +330,7 @@ namespace Svelto.ECS
         {
             public EntitiesSubmitter(EnginesRoot enginesRoot): this()
             {
-                _enginesRoot = new Svelto.DataStructures.WeakReference<EnginesRoot>(enginesRoot);
+                _enginesRoot = new DataStructures.WeakReference<EnginesRoot>(enginesRoot);
             }
 
             internal void SubmitEntities()
@@ -360,7 +360,6 @@ namespace Svelto.ECS
 #if UNITY_NATIVE
                         enginesRootTarget.FlushNativeOperations(profiler);
 #endif
-                        //todo: proper unit test structural changes made as result of add/remove callbacks
                         while (enginesRootTarget.HasMadeNewStructuralChangesInThisIteration()
                             && iterations++ < MAX_SUBMISSION_ITERATIONS)
                         {
@@ -385,7 +384,7 @@ namespace Svelto.ECS
                 }
             }
 
-            readonly Svelto.DataStructures.WeakReference<EnginesRoot> _enginesRoot;
+            readonly DataStructures.WeakReference<EnginesRoot> _enginesRoot;
         }
 
         ~EnginesRoot()

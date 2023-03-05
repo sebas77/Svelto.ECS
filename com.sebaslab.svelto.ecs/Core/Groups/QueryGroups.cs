@@ -6,7 +6,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS.Experimental
 {
-    internal struct GroupsList
+    struct GroupsList
     {
         public static GroupsList Init()
         {

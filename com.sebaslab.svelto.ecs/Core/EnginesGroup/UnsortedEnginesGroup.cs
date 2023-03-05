@@ -15,13 +15,13 @@ namespace Svelto.ECS
     {
         protected UnsortedEnginesGroup()
         {
-            _name              = "UnsortedEnginesGroup - "+this.GetType().Name;
+            _name              = "UnsortedEnginesGroup - "+GetType().Name;
             _instancedSequence = new FasterList<Interface>();
         }
         
         protected UnsortedEnginesGroup(FasterList<Interface> engines)
         {
-            _name              = "UnsortedEnginesGroup - "+this.GetType().Name;
+            _name              = "UnsortedEnginesGroup - "+GetType().Name;
             _instancedSequence = engines;
         }
 
@@ -59,13 +59,13 @@ namespace Svelto.ECS
     {
         protected UnsortedEnginesGroup()
         {
-            _name              = "UnsortedEnginesGroup - "+this.GetType().Name;
+            _name              = "UnsortedEnginesGroup - "+GetType().Name;
             _instancedSequence = new FasterList<Interface>();
         }
         
         protected UnsortedEnginesGroup(FasterList<Interface> engines)
         {
-            _name              = "UnsortedEnginesGroup - "+this.GetType().Name;
+            _name              = "UnsortedEnginesGroup - "+GetType().Name;
             _instancedSequence = engines;
         }
 

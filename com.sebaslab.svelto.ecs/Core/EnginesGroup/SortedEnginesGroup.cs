@@ -47,7 +47,7 @@ namespace Svelto.ECS
     {
         protected SortedEnginesGroup(FasterList<Interface> engines)
         {
-            _name = "SortedEnginesGroup - "+this.GetType().Name;
+            _name = "SortedEnginesGroup - "+GetType().Name;
             _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
         }
 
@@ -80,7 +80,7 @@ namespace Svelto.ECS
     {
         protected SortedEnginesGroup(FasterList<Interface> engines)
         {
-            _name = "SortedEnginesGroup - "+this.GetType().Name;
+            _name = "SortedEnginesGroup - "+GetType().Name;
             _instancedSequence = new Sequence<Interface, SequenceOrder>(engines);
         }
 

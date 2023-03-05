@@ -224,7 +224,7 @@ namespace DBC.ECS
 #endregion // Implementation
     }      // End Check
 
-    internal class Trace
+    class Trace
     {
         internal static void Assert(bool assertion, string v)
         {

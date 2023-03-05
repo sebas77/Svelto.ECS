@@ -3,7 +3,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    internal interface ITypeSafeStream
+    interface ITypeSafeStream
     {
         void Dispose();
     }

@@ -205,6 +205,9 @@ namespace Svelto.ECS
             return true;
         }
 
+        /// <summary>
+        /// determine if component with specific ID exists in group
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists<T>(EGID entityGID) where T : struct, _IInternalEntityComponent
         {
@@ -214,6 +217,9 @@ namespace Svelto.ECS
             return casted != null && casted.ContainsKey(entityGID.entityID);
         }
 
+        /// <summary>
+        /// determine if component with specific ID exists in group
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Exists<T>(uint id, ExclusiveGroupStruct group) where T : struct, _IInternalEntityComponent
         {
@@ -223,6 +229,9 @@ namespace Svelto.ECS
             return casted != null && casted.ContainsKey(id);
         }
 
+        /// <summary>
+        /// determine if group exists and is not empty
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ExistsAndIsNotEmpty(ExclusiveGroupStruct gid)
         {
@@ -235,12 +244,18 @@ namespace Svelto.ECS
             return false;
         }
 
+        /// <summary>
+        /// determine if entities we specific components are found in group
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasAny<T>(ExclusiveGroupStruct groupStruct) where T : struct, _IInternalEntityComponent
         {
             return Count<T>(groupStruct) > 0;
         }
 
+        /// <summary>
+        /// count the number of components in a group
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count<T>(ExclusiveGroupStruct groupStruct) where T : struct, _IInternalEntityComponent
         {
