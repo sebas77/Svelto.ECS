@@ -25,10 +25,10 @@ namespace Svelto.ECS
         {
 #if DEBUG && !PROFILE_SVELTO
             if (_map == null)
-                throw new System.Exception(
+                throw new Exception(
                     "Not initialized EGIDMapper in this group ".FastConcat(typeof(T).ToString()));
             if (_map.TryFindIndex(entityID, out var findIndex) == false)
-                throw new System.Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
+                throw new Exception("Entity not found in this group ".FastConcat(typeof(T).ToString()));
 #else
             _map.TryFindIndex(entityID, out var findIndex);
 #endif

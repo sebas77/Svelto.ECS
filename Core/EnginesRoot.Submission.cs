@@ -11,6 +11,9 @@ namespace Svelto.ECS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void SingleSubmission(PlatformProfiler profiler)
         {
+            //clear the data checks before the submission. We want to allow structural changes inside the callbacks
+            ClearChecksForMultipleOperationsOnTheSameEgid();
+            
             _entitiesOperations.ExecuteRemoveAndSwappingOperations(
                 _swapEntities,
                 _removeEntities,
@@ -19,8 +22,9 @@ namespace Svelto.ECS
                 this);
 
             AddEntities(profiler);
-
-            ClearDebugChecks(); //this must be done first as I need the carry the last states after the submission
+            
+            //clear the data checks after the submission, so if structural changes happened inside the callback, the debug structure is reset for the next frame operations
+            ClearChecksForMultipleOperationsOnTheSameEgid();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -476,7 +480,7 @@ namespace Svelto.ECS
 
                 fromDictionary.AddEntitiesToDictionary(toDictionary, toGroupId
 #if SLOW_SVELTO_SUBMISSION
-                                         , this.entityLocator
+                                         , entityLocator
 #endif
                 );
             }

@@ -47,7 +47,7 @@ namespace Svelto.ECS
                 IDeserializationFactory factory = serializationDescriptorMap.GetSerializationFactory(descriptorHash);
 
                 return factory.BuildDeserializedEntity(egid, serializationData, entityDescriptor, serializationType,
-                    this, this._enginesRoot.GenerateEntityFactory(), _enginesRoot is SerializingEnginesRoot);
+                    this, _enginesRoot.GenerateEntityFactory(), _enginesRoot is SerializingEnginesRoot);
             }
 
             public void DeserializeEntity(ISerializationData serializationData, int serializationType)
@@ -147,7 +147,7 @@ namespace Svelto.ECS
                 }
                 catch
                 {
-                    Svelto.Console.LogError(
+                    Console.LogError(
                         $"something went wrong while deserializing entity {entityDescriptor.realType}");
 
                     throw;
@@ -201,7 +201,7 @@ namespace Svelto.ECS
 
             internal EntitySerialization(EnginesRoot enginesRoot)
             {
-                _root = new Svelto.DataStructures.WeakReference<EnginesRoot>(enginesRoot);
+                _root = new DataStructures.WeakReference<EnginesRoot>(enginesRoot);
             }
 
             void SerializeEntityComponent(EGID entityGID, ISerializableComponentBuilder componentBuilder,
@@ -239,7 +239,7 @@ namespace Svelto.ECS
             }
 
             EnginesRoot                                               _enginesRoot => _root.Target;
-            readonly Svelto.DataStructures.WeakReference<EnginesRoot> _root;
+            readonly DataStructures.WeakReference<EnginesRoot> _root;
         }
 
         public IEntitySerialization GenerateEntitySerializer()

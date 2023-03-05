@@ -104,7 +104,7 @@ namespace Svelto.ECS
                 enginesRootTarget.CheckAddEntityID(toEGID, TypeCache<T>.type, caller);
 
                 enginesRootTarget.QueueSwapEntityOperation(fromEGID, toEGID
-                                                         , this._enginesRoot.Target.FindRealComponents<T>(fromEGID)
+                                                         , _enginesRoot.Target.FindRealComponents<T>(fromEGID)
                                                          , caller);
             }
 

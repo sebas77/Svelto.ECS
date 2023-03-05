@@ -48,7 +48,7 @@ namespace Svelto.ECS
         {
             id.Data = Interlocked.Increment(ref BurstCompatibleCounter.counter);
             
-            DBC.ECS.Check.Ensure(id.Data < ushort.MaxValue, "too many types registered, HOW :)");
+            Check.Ensure(id.Data < ushort.MaxValue, "too many types registered, HOW :)");
         }
     }
 

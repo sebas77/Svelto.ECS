@@ -92,6 +92,6 @@ namespace Svelto.ECS.Internal
         uint GetIndex(uint valueEntityId);
         bool TryFindIndex(uint entityGidEntityId, out uint index);
 
-        void KeysEvaluator(System.Action<uint> action);
+        void KeysEvaluator(Action<uint> action);
     }
 }

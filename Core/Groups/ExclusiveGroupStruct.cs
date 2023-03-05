@@ -48,11 +48,11 @@ namespace Svelto.ECS
         public bool Equals(ExclusiveGroupStruct other)
         {
 #if DEBUG && !PROFILE_SVELTO
-            if ((other.id != this.id || other._bytemask == this._bytemask) == false)
+            if ((other.id != id || other._bytemask == _bytemask) == false)
                 throw new ECSException(
                     "if the groups are correctly initialised, two groups with the same ID and different bitmask cannot exist");
 #endif            
-            return other.id == this.id;
+            return other.id == id;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

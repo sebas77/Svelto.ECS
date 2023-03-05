@@ -25,5 +25,5 @@ namespace Svelto.ECS.Hybrid
     }
 
     // Used to validate the use of this struct on the component builder check fields.
-    internal interface IValueReferenceInternal {}
+    interface IValueReferenceInternal {}
 }
