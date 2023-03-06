@@ -1,7 +1,7 @@
 # Svelto.ECS Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
-## [3.4.1] - 03-2023
+## [3.4.2] - 03-2023
 
 * removed static caches used in performance critical paths as they were causing unexpected performance issues (the fetching of static data is slower than i imagined)
 * add Native prefix in front of the native memory utilities method names
@@ -19,6 +19,17 @@ All notable changes to this project will be documented in this file. Changes are
 * Minor Svelto Dictionary improvements
 * Added ValueContainer, a simple int, Tvalue dictionary based on sparse set. It has very specific use cases at the moment. Mainly to be used for the new ECS OOP Abstraction resoruce manager
 * Added IReactOnSubmissionStarted interface
+
+### SveltoOnDOTS changes
+
+* update to DOTS 1.0 (but still compatible with 0.51, although slower)
+* Deprecated the use of EntityCommandBuffer since was very slow
+* added faster batched DOTS operations, new DOTS creation patterns introduced (old one still compatible as long as EntityCommandBuffer was not used)
+* ISveltoOnDOTSSubmission interface exists only to allow the user to submit entities On DOTS explicitly, use this instead of 
+* SveltoOnDOTSHandleCreationEngine is no more, you want to use ISveltoOnDOTSStructuralEngine and its DOTSOperations instead wherever EntityManager was used before
+* ISveltoOnDOTSStructuralEngine is no more, you want to use ISveltoOnDOTSStructuralEngine and its DOTSOperations instead
+* in all the case above, if you were relying on Update you probably want to use OnPostSubmission instead
+* DOTSOperations new AddJobToComplete method will allow to register jobs from inside ISveltoOnDOTSStructuralEngines that will be completed at the end of the submission
 
 ## [3.3.2] - 04-06-2022
 

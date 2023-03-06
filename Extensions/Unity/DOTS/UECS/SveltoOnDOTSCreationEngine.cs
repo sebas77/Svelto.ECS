@@ -10,7 +10,10 @@ namespace Svelto.ECS.SveltoOnDOTS
         DOTSOperationsForSvelto DOTSOperations { get; set; }
 
         string name { get; }
-        
+
+        //use case is i.e. to create archetypes once
+        void OnOperationsReady();
+        //use case is i.e. to operate once per submission on entities just created
         void OnPostSubmission();
     }
 }
