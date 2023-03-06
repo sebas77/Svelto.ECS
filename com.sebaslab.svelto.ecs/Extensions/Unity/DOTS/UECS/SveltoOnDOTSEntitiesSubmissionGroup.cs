@@ -1,12 +1,11 @@
 #if UNITY_ECS
-#if !UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP_RUNTIME_WORLD
+#if !UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP_RUNTIME_WORLD && !UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP
 #error SveltoOnDOTS required the user to take over the DOTS world control and explicitly create it. UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP must be defined
 #endif
 using System;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Schedulers;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 
@@ -25,7 +24,7 @@ namespace Svelto.ECS.SveltoOnDOTS
     ///     ISveltoOnDOTSStructuralEngine can use DOTSOperationsForSvelto in their add/remove/moove callbacks
     /// </summary>
     [DisableAutoCreation]
-    public sealed partial class SveltoOnDOTSEntitiesSubmissionGroup: SystemBase, IQueryingEntitiesEngine, ISveltoOnDOTSSubmission
+    public sealed partial class SveltoOnDOTSEntitiesSubmissionGroup: SystemBase, IQueryingEntitiesEngine, ISveltoOnDOTSSubmission 
     {
         public SveltoOnDOTSEntitiesSubmissionGroup(SimpleEntitiesSubmissionScheduler submissionScheduler)
         {
@@ -47,7 +46,11 @@ namespace Svelto.ECS.SveltoOnDOTS
                 using (profiler.Sample("Complete All Pending Jobs"))
                 {
                     jobHandle.Complete(); //sync-point
+#if UNITY_ECS_100
                     EntityManager.CompleteAllTrackedJobs();
+#else                    
+                    EntityManager.CompleteAllJobs();
+#endif
                 }
 
                 //Submit Svelto Entities, calls Add/Remove/MoveTo that can be used by the DOTS ECSSubmissionEngines
@@ -64,7 +67,10 @@ namespace Svelto.ECS.SveltoOnDOTS
         {
             _submissionEngines.Add(engine);
             if (World != null)
+            {
                 engine.DOTSOperations = _dotsOperationsForSvelto;
+                engine.OnOperationsReady();
+            }
         }
 
         protected override void OnCreate()
@@ -76,7 +82,10 @@ namespace Svelto.ECS.SveltoOnDOTS
             
                 //initialise engines field while world was null
                 foreach (var engine in _submissionEngines)
+                {
                     engine.DOTSOperations = _dotsOperationsForSvelto;
+                    engine.OnOperationsReady();
+                }
             }
         }
 

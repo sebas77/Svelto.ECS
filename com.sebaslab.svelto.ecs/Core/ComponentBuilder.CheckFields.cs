@@ -80,7 +80,7 @@ namespace Svelto.ECS
                             // Getters of ValueReference must be refs, which would cause a failure on the common check.
                             if (properties[j].CanRead == true && propertyType.IsByRef == false)
                             {
-                                ProcessError(MSG, entityComponentType, propertyType);
+                                ProcessError($"{MSG} Getters of ValueReference must be byref", entityComponentType, propertyType);
                             }
 
                             continue;

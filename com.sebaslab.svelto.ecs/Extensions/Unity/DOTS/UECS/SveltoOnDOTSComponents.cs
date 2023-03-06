@@ -30,16 +30,16 @@ namespace Svelto.ECS.SveltoOnDOTS
     /// <summary>
     /// DOTS component to keep track of the associated Svelto.ECS entity
     /// </summary>
-    public struct DOTSSveltoReference: IComponentData
+    public struct DOTSSveltoEGID: IComponentData
     {
-        public EntityReference entityReference;
+        public EGID egid;
 
-        public DOTSSveltoReference(EntityReference eEntityReference)
+        public DOTSSveltoEGID(EGID egid)
         {
-            entityReference = eEntityReference;
+            this.egid = egid;
         }
     }
-
+    
     /// <summary>
     /// DOTS component to be able to query all the DOTS entities found in a Svelto.ECS group
     /// </summary>
