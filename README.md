@@ -210,7 +210,7 @@ Best option is to fork and clone [https://github.com/sebas77/Svelto.ECS.Tests](h
 Hey, thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, the more we are, the better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: *A visual debugger and more unit tests are needed*. Other platforms other than Unity could get some love too: Stride Game, Godot, monogame, FNA or whatever supports c#. Porting to other languages, especially c++, would be awesome but probably pointless. Please check the lane dedicated to the community tasks list here: https://github.com/users/sebas77/projects/3 and let me know if you want to take something on!
 
 ## Svelto Framework is used to develop the following products\(\*\):
-![Robocraft 2](https://user-images.githubusercontent.com/945379/185896584-6a38d0de-1765-4d55-a4a5-d5785adb0eaa.png)
+![Robocraft](https://user-images.githubusercontent.com/945379/225630614-20dbdf8e-2d7f-48d5-8e04-39e6d43a43ab.png)
 ![Techblox](https://user-images.githubusercontent.com/945379/123062411-65ee3600-d404-11eb-8dca-d30c28ed909d.png)
 ![Gamecraft](https://user-images.githubusercontent.com/945379/163145452-3e8d959a-1453-4373-8010-38bb7717f79e.png)
 ![Robocraft Infinity](https://user-images.githubusercontent.com/945379/163145385-7635f193-b69b-4508-a391-f41a3331122c.png)
