@@ -174,27 +174,6 @@ The folders Svelto.ECS and Svelto.Common, where present, are submodules pointing
 
 or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
 
-**Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Dependency System is:**
-
-Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. For this reason I decided to let my packages to point to the unsafe dll distribution from openUPM
-
-to solve the unsafe dependency you need to add the following scopedRegistries in manifest.json:
-```
-  {
-    "scopedRegistries": [
-        {
-            "name": "package.openupm.com",
-            "url": "https://package.openupm.com",
-            "scopes": [
-                "com.sebaslab.svelto.common",
-                "com.sebaslab.svelto.ecs",
-                "org.nuget.system.runtime.compilerservices.unsafe"
-            ]
-        }
-    ]
-}
-```
-
 this is shown in this example too: https://github.com/sebas77/Svelto.MiniExamples/tree/master/UPM-Integration/UPM
 
 ## Svelto distributed as Nuget
