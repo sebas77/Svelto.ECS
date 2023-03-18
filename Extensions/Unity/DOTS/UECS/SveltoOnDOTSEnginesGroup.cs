@@ -20,7 +20,7 @@ namespace Svelto.ECS.SveltoOnDOTS
     /// Submission of Entities to be executed
     /// Svelto Add/Remove callbacks to be called
     /// ISveltoOnDOTSStructuralEngine to be executed
-    /// DOTS ECS engines to executed
+    /// DOTS ECS engines to be executed
     /// Synchronizations engines to be executed (DOTS ECS To Svelto)
     /// </summary>
     [Sequenced(nameof(JobifiedSveltoEngines.SveltoOnDOTS))]
@@ -39,6 +39,11 @@ namespace Svelto.ECS.SveltoOnDOTS
         /// for the user to add pure DOTS ECS SystemBase/ISystem systems to the DOTS ECS world
         /// </summary>
         public World world { get; private set; }
+        
+        /// <summary>
+        /// for the user to be able to explicitly submit entities. When SveltoOnDOTS is used, you must use this way, you cannot
+        /// submit entities directly from the EnginesRoot submission scheduler
+        /// </summary>
         public ISveltoOnDOTSSubmission submitter => _sveltoDotsEntitiesSubmissionGroup;
 
         public JobHandle Execute(JobHandle inputDeps)

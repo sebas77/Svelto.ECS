@@ -144,13 +144,12 @@ https://github.com/sebas77/Svelto.ECS/discussions
 
 **Practical articles**
 
+* [Svelto.ECS 3.4 – Svelto On DOTS ECS update](https://www.sebaslab.com/svelto-ecs-3-4-svelto-on-dots-ecs-update/)
 * [Svelto.ECS 3.3 and the new Filters API](https://www.sebaslab.com/svelto-ecs-3-3-and-the-new-filters-api/)
-* [Svelto.ECS Internals: How to avoid boxing when using structs with reflection](https://www.sebaslab.com/casting-a-struct-into-an-interface-inside-a-generic-method-without-boxing/)
-* [Svelto ECS 3.0 Internals: profiling the Entity Collection](https://www.sebaslab.com/svelto-ecs-3-0-internals-the-entity-collection/)
-* [Svelto ECS 3.0 Internals: Support Native Memory Natively](https://www.sebaslab.com/svelto-ecs-3-0-internals-support-native-memory-natively/)
-* [Svelto MiniExamples: GUI and Services Layer with Unity](https://www.sebaslab.com/svelto-miniexamples-gui-and-services-layer/)
+* [What’s new in Svelto.ECS 3.0](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)
+* [Svelto MiniExample 7: Stride Engine demo](https://www.sebaslab.com/svelto-miniexample-7-stride-engine-demo/)
+* [Svelto Mini Examples: The Unity Survival Example](https://www.sebaslab.com/the-new-svelto-ecs-survival-mini-example/)
 * [Svelto Mini (Unity) Examples: Doofuses Must Eat](https://www.sebaslab.com/svelto-mini-examples-doofuses-must-eat/)
-* [Svelto Mini Examples: The Unity Survival Example](http://www.sebaslab.com/learning-svelto-ecs-by-example-the-unity-survival-example/)
 * [Learning Svelto.ECS by example – The Vanilla Example](http://www.sebaslab.com/learning-svelto-ecs-by-example-the-vanilla-example/)
 * [Porting a boid simulation from UnityECS/Jobs to Svelto.ECS/Tasks](https://www.sebaslab.com/porting-a-boid-simulation-from-unityecs-to-svelto-ecs/)
 * [Svelto.ECS+Tasks to write Data Oriented, Cache Friendly, Multi-Threaded code](http://www.sebaslab.com/svelto-ecs-svelto-tasks-to-write-data-oriented-cache-friendly-multi-threaded-code-in-unity/)
@@ -162,10 +161,10 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 **Svelto Community Extensions**
 
-* [Svelto.ECS inspector](https://github.com/akrogame/svelto-ecs-inspector)
-* [Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS](https://github.com/cathei/Svelto.ECS.Schema)
-* [Being able to swap entities between a subset of compound tags to another subset of compound tags](https://gist.github.com/jlreymendez/c2f441aaf6ac7b5f233ecd990314e9cc)
-* [Automatic way to control svelto engines order without having to pass in a string using attributes](https://gist.github.com/dragonslaya84/88e6bb998eda8fe4ee912f01d67feec9)
+* [***Svelto.ECS inspector***](https://github.com/akrogame/svelto-ecs-inspector)
+* [***Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS***](https://github.com/cathei/Svelto.ECS.Schema)
+* [***Being able to swap entities between a subset of compound tags to another subset of compound tags***](https://gist.github.com/jlreymendez/c2f441aaf6ac7b5f233ecd990314e9cc)
+* [***Automatic way to control svelto engines order without having to pass in a string using attributes***](https://gist.github.com/dragonslaya84/88e6bb998eda8fe4ee912f01d67feec9)
 
 
 ## How to clone the repository:
@@ -210,7 +209,7 @@ Best option is to fork and clone [https://github.com/sebas77/Svelto.ECS.Tests](h
 Hey, thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, the more we are, the better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: *A visual debugger and more unit tests are needed*. Other platforms other than Unity could get some love too: Stride Game, Godot, monogame, FNA or whatever supports c#. Porting to other languages, especially c++, would be awesome but probably pointless. Please check the lane dedicated to the community tasks list here: https://github.com/users/sebas77/projects/3 and let me know if you want to take something on!
 
 ## Svelto Framework is used to develop the following products\(\*\):
-![Robocraft 2](https://user-images.githubusercontent.com/945379/185896584-6a38d0de-1765-4d55-a4a5-d5785adb0eaa.png)
+![Robocraft](https://user-images.githubusercontent.com/945379/225630614-20dbdf8e-2d7f-48d5-8e04-39e6d43a43ab.png)
 ![Techblox](https://user-images.githubusercontent.com/945379/123062411-65ee3600-d404-11eb-8dca-d30c28ed909d.png)
 ![Gamecraft](https://user-images.githubusercontent.com/945379/163145452-3e8d959a-1453-4373-8010-38bb7717f79e.png)
 ![Robocraft Infinity](https://user-images.githubusercontent.com/945379/163145385-7635f193-b69b-4508-a391-f41a3331122c.png)
