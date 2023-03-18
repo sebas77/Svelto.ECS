@@ -1,5 +1,5 @@
 #if PROFILE_SVELTO && DEBUG
-#warning the global define PROFILE_SVELTO should be used only when it's necessary to profile in order to reduce the overhead of debug code. Normally remove this define to get insights when errors happen
+#warning the global define PROFILE_SVELTO should be used only when it's necessary to profile in order to reduce the overhead of debug code. While debugging remove this define to get insights when errors happen
 #endif
 
 using System;

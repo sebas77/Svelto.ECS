@@ -177,7 +177,6 @@ namespace Svelto.ECS.SveltoOnDOTS
             _EManager.AddComponent<T>(DOTSEntities);
         }
 
-        //can't support publicly the version without DOTSSveltoEGID now
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         NativeArray<Entity> CreateDOTSEntityFromSveltoBatched(Entity prefab, (uint rangeStart, uint rangeEnd) range,
             ExclusiveGroupStruct groupID, NB<DOTSEntityComponent> DOSTEntityComponents)
@@ -197,7 +196,8 @@ namespace Svelto.ECS.SveltoOnDOTS
                     _EManager.AddSharedComponentData(nativeArray[i], new DOTSSveltoGroupID(groupID));
                 }
 #endif
-
+                //Set Svelto DOTSEntityComponent dotsEntity field to the DOTS entity
+                //Svelto entities track the DOTS entities through this component
                 var setDOTSEntityComponentsJob = new SetDOTSEntityComponents
                 {
                     sveltoStartIndex = range.rangeStart,
@@ -219,9 +219,11 @@ namespace Svelto.ECS.SveltoOnDOTS
             {
                 var count = (int)(range.rangeEnd - range.rangeStart);
                 
+                //DOTS entities track Svelto entities through this component
                 _EManager.AddComponent<DOTSSveltoEGID>(nativeArray);
 
-                var SetDOTSSveltoEGIDJob = new SetDOTSSveltoEGID
+                //set the DOTSSveltoEGID values
+                var setDOTSSveltoEGIDJob = new SetDOTSSveltoEGID
                 {
                     sveltoStartIndex = range.rangeStart,
                     createdEntities = nativeArray,
@@ -229,7 +231,7 @@ namespace Svelto.ECS.SveltoOnDOTS
                     ids = sveltoIds,
                     groupID = groupID
                 };
-                creationJob = *_jobHandle = JobHandle.CombineDependencies(*_jobHandle, SetDOTSSveltoEGIDJob.ScheduleParallel(count, default));
+                creationJob = *_jobHandle = JobHandle.CombineDependencies(*_jobHandle, setDOTSSveltoEGIDJob.ScheduleParallel(count, default));
 
                 return nativeArray;
             }
