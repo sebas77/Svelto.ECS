@@ -1,4 +1,5 @@
-﻿using Svelto.DataStructures;
+﻿using System;
+using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
@@ -18,9 +19,9 @@ namespace Svelto.ECS
                 var entitiesCreatedPerGroupA = new FasterDictionary<ExclusiveGroupStruct, uint>();
                 var entitiesCreatedPerGroupB = new FasterDictionary<ExclusiveGroupStruct, uint>();
                 var entityComponentsToAddBufferA =
-                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>();
+                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>>();
                 var entityComponentsToAddBufferB =
-                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>();
+                    new FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>>();
 
                 _currentNumberEntitiesCreatedPerGroup = entitiesCreatedPerGroupA;
                 _lastNumberEntitiesCreatedPerGroup   = entitiesCreatedPerGroupB;
@@ -149,17 +150,14 @@ namespace Svelto.ECS
                 (ExclusiveGroupStruct groupID, uint numberOfEntities, IComponentBuilder[] entityComponentsToBuild)
             {
                 void PreallocateDictionaries
-                    (FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>> dic)
+                    (FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>> dic)
                 {
                     var group = dic.GetOrAdd(
-                        groupID, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
+                        groupID, () => new FasterDictionary<ComponentID, ITypeSafeDictionary>());
 
                     foreach (var componentBuilder in entityComponentsToBuild)
                     {
-                        var entityComponentType = componentBuilder.GetEntityComponentType();
-                        var safeDictionary = group.GetOrAdd(new RefWrapperType(entityComponentType)
-                                                             , () => componentBuilder
-                                                                  .CreateDictionary(numberOfEntities));
+                        var safeDictionary = group.GetOrAdd(componentBuilder.getComponentID, () => componentBuilder.CreateDictionary(numberOfEntities));
                         componentBuilder.Preallocate(safeDictionary, numberOfEntities);
                     }
                 }
@@ -191,10 +189,10 @@ namespace Svelto.ECS
             //Before I tried for the third time to use a SparseSet instead of FasterDictionary, remember that
             //while group indices are sequential, they may not be used in a sequential order. Sparseset needs
             //entities to be created sequentially (the index cannot be managed externally)
-            internal FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+            internal FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>>
                 currentComponentsToAddPerGroup;
 
-            FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+            FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>>
                 lastComponentsToAddPerGroup;
 
             /// <summary>
@@ -212,7 +210,7 @@ namespace Svelto.ECS
     struct OtherComponentsToAddPerGroupEnumerator
     {
         public OtherComponentsToAddPerGroupEnumerator
-        (FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+        (FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>>
              lastComponentsToAddPerGroup
        , FasterDictionary<ExclusiveGroupStruct, uint> otherNumberEntitiesCreatedPerGroup)
         {
@@ -246,7 +244,7 @@ namespace Svelto.ECS
         public GroupInfo Current { get; private set; }
 
         //cannot be read only as they will be modified by MoveNext
-        readonly FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+        readonly FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>>
             _lastComponentsToAddPerGroup;
 
         SveltoDictionaryKeyValueEnumerator<ExclusiveGroupStruct, uint,
@@ -258,6 +256,6 @@ namespace Svelto.ECS
     struct GroupInfo
     {
         public ExclusiveGroupStruct                                  group;
-        public FasterDictionary<RefWrapperType, ITypeSafeDictionary> components;
+        public FasterDictionary<ComponentID, ITypeSafeDictionary> components;
     }
 }

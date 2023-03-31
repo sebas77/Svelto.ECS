@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using DBC.ECS;
 using Svelto.Common;
@@ -28,14 +30,42 @@ namespace Svelto.ECS
     {
         public static int counter;        
     }
-    
-    public class ComponentID<T> where T : struct, _IInternalEntityComponent
+
+    static public class ComponentTypeMap
     {
-        public static readonly SharedStaticWrapper<int, ComponentID<T>> id;
+        static readonly FasterDictionary<RefWrapper<Type>, ComponentID> _componentTypeMap = new FasterDictionary<RefWrapper<Type>, ComponentID>();
+        static readonly FasterDictionary<ComponentID, Type> _reverseComponentTypeMap = new FasterDictionary<ComponentID, Type>();
+
+        public static void Add(Type type, ComponentID idData)
+        {
+            _componentTypeMap.Add(type, idData);
+            _reverseComponentTypeMap.Add(idData, type);
+        }
+
+        public static ComponentID FetchID(Type type)
+        {
+            return _componentTypeMap[type];
+        }
+
+        public static Type FetchType(ComponentID id)
+        {
+            return _reverseComponentTypeMap[id];
+        }
+    }
+
+    public class ComponentTypeID<T> where T : struct, _IInternalEntityComponent
+    {
+        static readonly SharedStaticWrapper<ComponentID, ComponentTypeID<T>> _id;
+
+        public static ComponentID id
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _id.Data;
+        }
 
         //todo: any reason to not do this? If I don't, I cannot Create filters in ready functions and
         //I have to remove the CreateFilter method
-        static ComponentID()
+        static ComponentTypeID()
         {
             Init();
         }
@@ -46,10 +76,52 @@ namespace Svelto.ECS
 #endif
         static void Init()
         {
-            id.Data = Interlocked.Increment(ref BurstCompatibleCounter.counter);
-            
-            Check.Ensure(id.Data < ushort.MaxValue, "too many types registered, HOW :)");
+            _id.Data = Interlocked.Increment(ref BurstCompatibleCounter.counter);
+            ComponentTypeMap.Add(typeof(T), id);
         }
+    }
+
+    sealed class ComponentIDDebugProxy
+    {
+        public ComponentIDDebugProxy(ComponentID id)
+        {
+            this._id = id;
+        }
+        
+        public Type type => ComponentTypeMap.FetchType(_id);
+
+        readonly ComponentID _id;
+    }
+    
+    [DebuggerTypeProxy(typeof(ComponentIDDebugProxy))]
+    public struct ComponentID: IEquatable<ComponentID>
+    {
+        public static implicit operator int(ComponentID id)
+        {
+            return id._id;
+        }
+        
+        public static implicit operator uint(ComponentID id)
+        {
+            return (uint)id._id;
+        }
+        
+        public static implicit operator ComponentID(int id)
+        {
+            return new ComponentID() {_id = id};
+        }
+
+        public bool Equals(ComponentID other)
+        {
+            return _id == other._id;
+        }
+
+        public override int GetHashCode()
+        {
+            return _id;
+        }
+        
+        int _id;
     }
 
     public class ComponentBuilder<T> : IComponentBuilder where T : struct, _IInternalEntityComponent
@@ -57,7 +129,6 @@ namespace Svelto.ECS
         internal static readonly Type ENTITY_COMPONENT_TYPE;
         internal static readonly bool IS_ENTITY_VIEW_COMPONENT;
 
-        static readonly T      DEFAULT_IT;
         static readonly string ENTITY_COMPONENT_NAME;
         static readonly bool   IS_UNMANAGED;
 #if SLOW_SVELTO_SUBMISSION            
@@ -68,7 +139,6 @@ namespace Svelto.ECS
         static ComponentBuilder()
         {
             ENTITY_COMPONENT_TYPE = typeof(T);
-            DEFAULT_IT = default;
             IS_ENTITY_VIEW_COMPONENT = typeof(IEntityViewComponent).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
 #if SLOW_SVELTO_SUBMISSION            
             HAS_EGID = typeof(INeedEGID).IsAssignableFrom(ENTITY_COMPONENT_TYPE);
@@ -100,7 +170,7 @@ namespace Svelto.ECS
 
         public ComponentBuilder()
         {
-            _initializer = DEFAULT_IT;
+            _initializer = default;
         }
 
         public ComponentBuilder(in T initializer) : this()
@@ -109,6 +179,7 @@ namespace Svelto.ECS
         }
 
         public bool isUnmanaged => IS_UNMANAGED;
+        public ComponentID getComponentID => ComponentTypeID<T>.id;
 
         static readonly ThreadLocal<EntityViewComponentCache> _localCache = new ThreadLocal<EntityViewComponentCache>(() => new EntityViewComponentCache());
 

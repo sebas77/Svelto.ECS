@@ -16,7 +16,7 @@ namespace Svelto.ECS.Serialization
     {
         static SerializableEntityDescriptor()
         {
-            IComponentBuilder[] defaultEntities = EntityDescriptorTemplate<TType>.descriptor.componentsToBuild;
+            IComponentBuilder[] defaultEntities = EntityDescriptorTemplate<TType>.realDescriptor.componentsToBuild;
 
             var hashNameAttribute = Type.GetCustomAttribute<HashNameAttribute>();
             if (hashNameAttribute == null)
@@ -49,13 +49,12 @@ namespace Svelto.ECS.Serialization
 
             /////
             var entitiesToSerialize = new FasterList<ISerializableComponentBuilder>();
-            EntityComponentsToSerializeMap = new FasterDictionary<RefWrapperType, ISerializableComponentBuilder>();
+            EntityComponentsToSerializeMap = new FasterDictionary<ComponentID, ISerializableComponentBuilder>();
             foreach (IComponentBuilder e in defaultEntities)
             {
                 if (e is ISerializableComponentBuilder serializableEntityBuilder)
                 {
-                    var entityType = serializableEntityBuilder.GetEntityComponentType();
-                    EntityComponentsToSerializeMap[new RefWrapperType(entityType)] = serializableEntityBuilder;
+                    EntityComponentsToSerializeMap[serializableEntityBuilder.getComponentID] = serializableEntityBuilder;
                     entitiesToSerialize.Add(serializableEntityBuilder);
                 }
             }
@@ -99,7 +98,7 @@ namespace Svelto.ECS.Serialization
         public ISerializableComponentBuilder[] componentsToSerialize => EntitiesToSerialize;
 
         static readonly IComponentBuilder[]                                             ComponentsToBuild;
-        static readonly FasterDictionary<RefWrapperType, ISerializableComponentBuilder> EntityComponentsToSerializeMap;
+        static readonly FasterDictionary<ComponentID, ISerializableComponentBuilder> EntityComponentsToSerializeMap;
         static readonly ISerializableComponentBuilder[]                                 EntitiesToSerialize;
 
         static readonly uint Hash;

@@ -32,8 +32,7 @@ namespace Svelto.ECS.Native
             EntityReference reference = _entityLocator.ClaimReference();
             NativeBag bagPerEntityPerThread = _addOperationQueue.GetBag(threadIndex + 1);
 
-            bagPerEntityPerThread.Enqueue(
-                _operationIndex); //each native operation is stored in an array, each request to perform a native operation in a queue. _index is the index of the operation in the array that will be dequeued later 
+            bagPerEntityPerThread.Enqueue(_operationIndex); //each native operation is stored in an array, each request to perform a native operation in a queue. _index is the index of the operation in the array that will be dequeued later 
             bagPerEntityPerThread.Enqueue(new EGID(eindex, exclusiveBuildGroup));
             bagPerEntityPerThread.Enqueue(reference);
 

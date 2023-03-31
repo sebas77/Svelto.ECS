@@ -18,25 +18,29 @@ namespace Svelto.ECS
         internal Consumer<T> GenerateConsumer<T>(string name, uint capacity)
             where T : unmanaged, _IInternalEntityComponent
         {
-            if (_streams.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
-                _streams[TypeRefWrapper<T>.wrapper] = new EntityStream<T>();
+            var componentId = ComponentTypeID<T>.id;
+            
+            if (_streams.ContainsKey(componentId) == false)
+                _streams[componentId] = new EntityStream<T>();
 
-            return (_streams[TypeRefWrapper<T>.wrapper] as EntityStream<T>).GenerateConsumer(name, capacity);
+            return (_streams[componentId] as EntityStream<T>).GenerateConsumer(name, capacity);
         }
 
         public Consumer<T> GenerateConsumer<T>(ExclusiveGroupStruct group, string name, uint capacity)
             where T : unmanaged, _IInternalEntityComponent
         {
-            if (_streams.ContainsKey(TypeRefWrapper<T>.wrapper) == false)
-                _streams[TypeRefWrapper<T>.wrapper] = new EntityStream<T>();
+            var componentId = ComponentTypeID<T>.id;
+            
+            if (_streams.ContainsKey(componentId) == false)
+                _streams[componentId] = new EntityStream<T>();
 
-            var typeSafeStream = (EntityStream<T>) _streams[TypeRefWrapper<T>.wrapper];
+            var typeSafeStream = (EntityStream<T>) _streams[componentId];
             return typeSafeStream.GenerateConsumer(group, name, capacity);
         }
 
         internal void PublishEntity<T>(ref T entity, EGID egid) where T : unmanaged, _IInternalEntityComponent
         {
-            if (_streams.TryGetValue(TypeRefWrapper<T>.wrapper, out var typeSafeStream))
+            if (_streams.TryGetValue(ComponentTypeID<T>.id, out var typeSafeStream))
                 (typeSafeStream as EntityStream<T>).PublishEntity(ref entity, egid);
             else
                 Console.LogDebug($"No Consumers are waiting for this entity to change {typeof(T)}");
@@ -51,11 +55,11 @@ namespace Svelto.ECS
         public static EntitiesStreams Create()
         {
             var stream = new EntitiesStreams();
-            stream._streams = FasterDictionary<RefWrapperType, ITypeSafeStream>.Construct();
+            stream._streams = FasterDictionary<ComponentID, ITypeSafeStream>.Construct();
 
             return stream;
         }
 
-        FasterDictionary<RefWrapperType, ITypeSafeStream> _streams;
+        FasterDictionary<ComponentID, ITypeSafeStream> _streams;
     }
 }

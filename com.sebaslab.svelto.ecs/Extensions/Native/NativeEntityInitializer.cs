@@ -20,7 +20,7 @@ namespace Svelto.ECS.Native
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Init<T>(in T component) where T : unmanaged, IEntityComponent
         {
-            uint componentID = EntityComponentID<T>.ID.Data;
+            uint componentID = ComponentTypeID<T>.id;
 
             _unsafeBuffer.AccessReserved<uint>(_componentsToInitializeCounterRef)++; //increase the number of components that have been initialised by the user
 

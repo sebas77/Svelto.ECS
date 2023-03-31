@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Svelto.DataStructures;
 
@@ -5,7 +6,7 @@ namespace Svelto.ECS.Internal
 {
     static class EntityFactory
     {
-        public static FasterDictionary<RefWrapperType, ITypeSafeDictionary> BuildGroupedEntities
+        public static FasterDictionary<ComponentID, ITypeSafeDictionary> BuildGroupedEntities
         (EGID egid, EnginesRoot.DoubleBufferedEntitiesToAdd groupEntitiesToAdd, IComponentBuilder[] componentsToBuild
        , IEnumerable<object> implementors
 #if DEBUG && !PROFILE_SVELTO
@@ -14,7 +15,7 @@ namespace Svelto.ECS.Internal
         )
         {
             var group = groupEntitiesToAdd.currentComponentsToAddPerGroup.GetOrAdd(
-                egid.groupID, () => new FasterDictionary<RefWrapperType, ITypeSafeDictionary>());
+                egid.groupID, () => new FasterDictionary<ComponentID, ITypeSafeDictionary>());
 
             //track the number of entities created so far in the group.
             groupEntitiesToAdd.IncrementEntityCount(egid.groupID);
@@ -29,7 +30,7 @@ namespace Svelto.ECS.Internal
         }
 
         static void BuildEntitiesAndAddToGroup
-        (EGID entityID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> @group
+        (EGID entityID, FasterDictionary<ComponentID, ITypeSafeDictionary> @group
        , IComponentBuilder[] componentBuilders, IEnumerable<object> implementors
 #if DEBUG && !PROFILE_SVELTO
        , System.Type descriptorType
@@ -64,12 +65,10 @@ namespace Svelto.ECS.Internal
             }
         }
 
-        static void BuildEntity
-        (EGID entityID, FasterDictionary<RefWrapperType, ITypeSafeDictionary> group
-       , IComponentBuilder componentBuilder, IEnumerable<object> implementors)
+        static void BuildEntity(EGID entityID, FasterDictionary<ComponentID, ITypeSafeDictionary> group, 
+            IComponentBuilder componentBuilder, IEnumerable<object> implementors)
         {
-            var entityComponentType = componentBuilder.GetEntityComponentType();
-            ITypeSafeDictionary safeDictionary = group.GetOrAdd(new RefWrapperType(entityComponentType)
+            ITypeSafeDictionary safeDictionary = group.GetOrAdd(componentBuilder.getComponentID
                                                  , (ref IComponentBuilder cb) => cb.CreateDictionary(1)
                                                  , ref componentBuilder);
 
