@@ -1,6 +1,14 @@
 # Svelto.ECS Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
+## [3.4.4] - 04-2023
+
+* refactored internal datastructures 
+* added IReactOnDisposeEx interface
+* added code to warmup all the entity descriptors at startup to avoid first time allocations when an entitydescriptor is used for the very first time
+* added the option to iterate transient filters per component like it already happens with persistent filters. Transient filters are tracked optionally. 
+* fixed huge bug in the filter enumerator, truly surprised this never showed up
+
 ## [3.4.2] - 03-2023
 
 * removed static caches used in performance critical paths as they were causing unexpected performance issues (the fetching of static data is slower than i imagined)
