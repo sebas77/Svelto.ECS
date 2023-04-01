@@ -145,6 +145,7 @@ https://github.com/sebas77/Svelto.ECS/discussions
 **Practical articles**
 
 * [Svelto.ECS 3.4 – Svelto On DOTS ECS update](https://www.sebaslab.com/svelto-ecs-3-4-svelto-on-dots-ecs-update/)
+* [Svelto.ECS 3.4 – Svelto On DOTS ECS update](https://www.sebaslab.com/svelto-ecs-3-4-svelto-on-dots-ecs-update/)
 * [Svelto.ECS 3.3 and the new Filters API](https://www.sebaslab.com/svelto-ecs-3-3-and-the-new-filters-api/)
 * [What’s new in Svelto.ECS 3.0](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)
 * [Svelto MiniExample 7: Stride Engine demo](https://www.sebaslab.com/svelto-miniexample-7-stride-engine-demo/)
