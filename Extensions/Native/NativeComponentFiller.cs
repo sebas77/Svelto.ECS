@@ -1,19 +1,9 @@
-using System.Threading;
 using Svelto.Common;
 using Svelto.DataStructures;
 using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public class GlobalTypeID
-    {
-        internal static uint NextID<T>() { return (uint) (Interlocked.Increment(ref value) - 1); }
-
-        static GlobalTypeID() { value = 0; }
-
-        static int value;
-    }
-
     interface IFiller
     {
         void FillFromByteArray(EntityInitializer init, NativeBag buffer);
@@ -36,12 +26,6 @@ namespace Svelto.ECS
     }
 
 #if UNITY_NATIVE //at the moment I am still considering NativeOperations useful only for Unity
-    static class EntityComponentID<T>
-    {
-        internal static readonly Unity.Burst.SharedStatic<uint> ID =
-            Unity.Burst.SharedStatic<uint>.GetOrCreate<GlobalTypeID, T>();
-    }
-
     static class EntityComponentIDMap
     {
         static readonly Svelto.DataStructures.FasterList<IFiller> TYPE_IDS;
@@ -53,11 +37,11 @@ namespace Svelto.ECS
 
         internal static void Register<T>(IFiller entityBuilder) where T : struct, _IInternalEntityComponent
         {
-            var location = EntityComponentID<T>.ID.Data = GlobalTypeID.NextID<T>();
+            ComponentID location = ComponentTypeID<T>.id;
             TYPE_IDS.AddAt(location, entityBuilder);
         }
 
-        internal static IFiller GetTypeFromID(uint typeId) { return TYPE_IDS[typeId]; }
+        internal static IFiller GetBuilderFromID(uint typeId) { return TYPE_IDS[typeId]; }
     }
 #endif
 }

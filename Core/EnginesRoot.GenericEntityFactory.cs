@@ -20,7 +20,7 @@ namespace Svelto.ECS
            , [CallerMemberName] string caller = null) where T : IEntityDescriptor, new()
             {
                 return _enginesRoot.Target.BuildEntity(new EGID(entityID, groupStructId)
-                                                     , EntityDescriptorTemplate<T>.descriptor.componentsToBuild
+                                                     , EntityDescriptorTemplate<T>.realDescriptor.componentsToBuild
                                                      , TypeCache<T>.type, implementors, caller);
             }
 
@@ -29,7 +29,7 @@ namespace Svelto.ECS
             (EGID egid, IEnumerable<object> implementors = null
            , [CallerMemberName] string caller = null) where T : IEntityDescriptor, new()
             {
-                return _enginesRoot.Target.BuildEntity(egid, EntityDescriptorTemplate<T>.descriptor.componentsToBuild
+                return _enginesRoot.Target.BuildEntity(egid, EntityDescriptorTemplate<T>.realDescriptor.componentsToBuild
                                                      , TypeCache<T>.type, implementors, caller);
             }
 
@@ -65,7 +65,7 @@ namespace Svelto.ECS
                 where T : IEntityDescriptor, new()
             {
                 _enginesRoot.Target.Preallocate(groupStructId, numberOfEntities
-                                              , EntityDescriptorTemplate<T>.descriptor.componentsToBuild);
+                                              , EntityDescriptorTemplate<T>.realDescriptor.componentsToBuild);
             }
 
 #if UNITY_NATIVE

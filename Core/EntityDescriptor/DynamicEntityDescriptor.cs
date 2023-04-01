@@ -16,7 +16,7 @@ namespace Svelto.ECS
     {
         internal DynamicEntityDescriptor(bool isExtendible) : this()
         {
-            var defaultEntities = EntityDescriptorTemplate<TType>.descriptor.componentsToBuild;
+            var defaultEntities = EntityDescriptorTemplate<TType>.realDescriptor.componentsToBuild;
             var length          = defaultEntities.Length;
 
             if (FetchEntityInfoComponent(defaultEntities) == -1)
@@ -56,7 +56,7 @@ namespace Svelto.ECS
 
         public void ExtendWith<T>() where T : IEntityDescriptor, new()
         {
-            var extraEntities = EntityDescriptorTemplate<T>.descriptor.componentsToBuild;
+            var extraEntities = EntityDescriptorTemplate<T>.realDescriptor.componentsToBuild;
 
             _componentsToBuild = Construct(extraEntities.Length, extraEntities);
         }

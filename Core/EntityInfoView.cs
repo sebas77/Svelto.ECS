@@ -1,5 +1,4 @@
 using Svelto.ECS.Hybrid;
-using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {

@@ -19,7 +19,7 @@ namespace Svelto.ECS
         }
 
         EntityCollection<T> InternalQueryEntities<T>
-            (FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType)
+            (FasterDictionary<ComponentID, ITypeSafeDictionary> entitiesInGroupPerType)
             where T : struct, _IInternalEntityComponent
         {
             uint       count = 0;
@@ -236,7 +236,7 @@ namespace Svelto.ECS
         public bool ExistsAndIsNotEmpty(ExclusiveGroupStruct gid)
         {
             if (groupEntityComponentsDB.TryGetValue(
-                    gid, out FasterDictionary<RefWrapperType, ITypeSafeDictionary> group) == true)
+                    gid, out FasterDictionary<ComponentID, ITypeSafeDictionary> group) == true)
             {
                 return group.count > 0;
             }
@@ -265,17 +265,17 @@ namespace Svelto.ECS
             return (int)typeSafeDictionary.count;
         }
 
-        public bool FoundInGroups<T1>() where T1 : _IInternalEntityComponent
+        public bool FoundInGroups<T>() where T : struct, _IInternalEntityComponent
         {
-            return groupsPerComponent.ContainsKey(TypeRefWrapper<T1>.wrapper);
+            return groupsPerComponent.ContainsKey(ComponentTypeID<T>.id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool SafeQueryEntityDictionary<T>
         (out ITypeSafeDictionary typeSafeDictionary
-       , FasterDictionary<RefWrapperType, ITypeSafeDictionary> entitiesInGroupPerType) where T : _IInternalEntityComponent
+       , FasterDictionary<ComponentID, ITypeSafeDictionary> entitiesInGroupPerType) where T : struct, _IInternalEntityComponent
         {
-            if (entitiesInGroupPerType.TryGetValue(new RefWrapperType(TypeCache<T>.type), out var safeDictionary)
+            if (entitiesInGroupPerType.TryGetValue(ComponentTypeID<T>.id, out var safeDictionary)
              == false)
             {
                 typeSafeDictionary = default;
@@ -290,9 +290,9 @@ namespace Svelto.ECS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool SafeQueryEntityDictionary<T>
-            (ExclusiveGroupStruct group, out ITypeSafeDictionary typeSafeDictionary) where T : _IInternalEntityComponent
+            (ExclusiveGroupStruct group, out ITypeSafeDictionary typeSafeDictionary) where T : struct, _IInternalEntityComponent
         {
-            if (UnsafeQueryEntityDictionary(group, TypeCache<T>.type, out var safeDictionary) == false)
+            if (UnsafeQueryEntityDictionary(group, ComponentTypeID<T>.id, out var safeDictionary) == false)
             {
                 typeSafeDictionary = default;
                 return false;
@@ -306,7 +306,7 @@ namespace Svelto.ECS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool UnsafeQueryEntityDictionary
-            (ExclusiveGroupStruct group, Type type, out ITypeSafeDictionary typeSafeDictionary)
+            (ExclusiveGroupStruct group, ComponentID id, out ITypeSafeDictionary typeSafeDictionary)
         {
             //search for the group
             if (groupEntityComponentsDB.TryGetValue(group, out var entitiesInGroupPerType) == false)
@@ -316,7 +316,7 @@ namespace Svelto.ECS
             }
 
             //search for the indexed entities in the group
-            return entitiesInGroupPerType.TryGetValue(new RefWrapperType(type), out typeSafeDictionary);
+            return entitiesInGroupPerType.TryGetValue(id, out typeSafeDictionary);
         }
 
         static readonly FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary> _emptyDictionary =
@@ -330,14 +330,14 @@ namespace Svelto.ECS
         //group, then indexable per type, then indexable per EGID. however the TypeSafeDictionary can return an array of
         //values directly, that can be iterated over, so that is possible to iterate over all the entity components of
         //a specific type inside a specific group.
-        FasterDictionary<ExclusiveGroupStruct, FasterDictionary<RefWrapperType, ITypeSafeDictionary>>
+        FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>>
             groupEntityComponentsDB => _enginesRoot._groupEntityComponentsDB;
 
         //for each entity view type, return the groups (dictionary of entities indexed by entity id) where they are
         //found indexed by group id. TypeSafeDictionary are never created, they instead point to the ones hold
         //by _groupEntityComponentsDB
         //                        <EntityComponentType                            <groupID  <entityID, EntityComponent>>>
-        FasterDictionary<RefWrapperType, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> groupsPerComponent =>
+        FasterDictionary<ComponentID, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>> groupsPerComponent =>
             _enginesRoot._groupsPerEntity;
 
         EnginesRoot.EntityReferenceMap _entityReferencesMap;

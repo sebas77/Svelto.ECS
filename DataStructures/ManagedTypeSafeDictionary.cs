@@ -9,13 +9,13 @@ namespace Svelto.ECS.Internal
     sealed class ManagedTypeSafeDictionary<TValue> : ITypeSafeDictionary<TValue>
         where TValue : struct, _IInternalEntityComponent
     {
+        //todo: would this be better to not be static to avoid overhead?
         static readonly ThreadLocal<IEntityIDs> cachedEntityIDM =
             new ThreadLocal<IEntityIDs>(() => new ManagedEntityIDs());
 
         public ManagedTypeSafeDictionary(uint size)
         {
-            implMgd =
-                new SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>, ManagedStrategy<TValue>,
+            implMgd = new SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>, ManagedStrategy<TValue>,
                     ManagedStrategy<int>>(size, Allocator.Managed);
         }
         
@@ -181,7 +181,7 @@ namespace Svelto.ECS.Internal
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesAddCallbacks
-        (FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAdd>>> entityComponentEnginesDB
+        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnAdd>>> entityComponentEnginesDB
        , ITypeSafeDictionary toDic, ExclusiveGroupStruct toGroup, in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesAddCallbacks(ref implMgd, (ITypeSafeDictionary<TValue>)toDic
@@ -207,7 +207,7 @@ namespace Svelto.ECS.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesRemoveCallbacks
         (FasterList<(uint, string)> infosToProcess
-       , FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnRemove>>> reactiveEnginesRemove
+       , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemove>>> reactiveEnginesRemove
        , ExclusiveGroupStruct fromGroup, in PlatformProfiler sampler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesRemoveCallbacks(infosToProcess, ref implMgd, reactiveEnginesRemove
@@ -219,7 +219,7 @@ namespace Svelto.ECS.Internal
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesAddEntityCallbacksFast
-        (FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnAddEx>>> reactiveEnginesAdd
+        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnAddEx>>> reactiveEnginesAdd
        , ExclusiveGroupStruct groupID, (uint, uint) rangeOfSubmittedEntitiesIndicies, in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesAddEntityCallbacksFast(
@@ -257,14 +257,14 @@ namespace Svelto.ECS.Internal
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesSwapCallbacks_Group
-        (FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnSwap>>> reactiveEnginesSwap
-       , FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnSwapEx>>> reactiveEnginesSwapEx
+        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnSwap>>> reactiveEnginesSwap
+       , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnSwapEx>>> reactiveEnginesSwapEx
        , ITypeSafeDictionary toDictionary, ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup
        , in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesSwapCallbacks_Group(
-                ref implMgd, (ITypeSafeDictionary<TValue>)toDictionary, toGroup, fromGroup, this, reactiveEnginesSwap
-              , reactiveEnginesSwapEx, count, entityIDs, in profiler);
+                ref implMgd, (ITypeSafeDictionary<TValue>)toDictionary, toGroup, fromGroup, reactiveEnginesSwap
+              , reactiveEnginesSwapEx, entityIDs, in profiler);
         }
 
         /// <summary>
@@ -273,12 +273,12 @@ namespace Svelto.ECS.Internal
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesRemoveCallbacks_Group
-        (FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnRemove>>> reactiveEnginesRemove
-       , FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnRemoveEx>>> reactiveEnginesRemoveEx
+        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemove>>> reactiveEnginesRemove
+       , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemoveEx>>> reactiveEnginesRemoveEx
        , ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesRemoveCallbacks_Group(
-                ref implMgd, this, reactiveEnginesRemove, reactiveEnginesRemoveEx, count, entityIDs, group
+                ref implMgd, reactiveEnginesRemove, reactiveEnginesRemoveEx, entityIDs, group
               , in profiler);
         }
 
@@ -287,10 +287,12 @@ namespace Svelto.ECS.Internal
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesDisposeCallbacks_Group
-        (FasterDictionary<RefWrapperType, FasterList<ReactEngineContainer<IReactOnDispose>>> engines
-       , ExclusiveGroupStruct group, in PlatformProfiler profiler)
+        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> reactiveEnginesDispose,
+        FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDisposeEx>>> reactiveEnginesDisposeEx,
+        ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
-            TypeSafeDictionaryMethods.ExecuteEnginesDisposeCallbacks_Group(ref implMgd, engines, group, in profiler);
+            TypeSafeDictionaryMethods.ExecuteEnginesDisposeCallbacks_Group(
+                ref implMgd, reactiveEnginesDispose, reactiveEnginesDisposeEx, entityIDs, group, in profiler);
         }
 
         SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>, ManagedStrategy<TValue>,

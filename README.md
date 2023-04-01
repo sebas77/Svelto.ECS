@@ -3,7 +3,7 @@
 Real ECS framework for c\#. Enables to write encapsulated, decoupled, maintainable, highly efficient, data oriented, cache friendly, code without pain. Although the framework is platform agnostic \(compatible with c\# 7 and above and .net standard 2.0 and above\), it comes with several Unity extensions.
 
 ## Svelto.ECS in pills
-Svelto.ECS is easy to start with, but full of tricks for expert users. The hardest problem to overcome is usually to shift mentality from OOP programming to ECS programming more than using the framework itself. If you want to read an ECS faq, you can check this article: https://github.com/SanderMertens/ecs-faq
+Svelto.ECS is easy to start with, but full of tricks for expert users. The hardest problem to overcome is usually to shift mentality from OOP programming to ECS programming rather than using the framework itself. If you would like to read an ECS faq, you can check this article: https://github.com/SanderMertens/ecs-faq
 
 ### Svelto.ECS at glance
 
@@ -144,6 +144,7 @@ https://github.com/sebas77/Svelto.ECS/discussions
 
 **Practical articles**
 
+* [Svelto ECS 3.4 internals: How to integrate ComputeSharp](https://www.sebaslab.com/svelto-ecs-3-4-internals-how-to-integrate-computesharp/)
 * [Svelto.ECS 3.4 – Svelto On DOTS ECS update](https://www.sebaslab.com/svelto-ecs-3-4-svelto-on-dots-ecs-update/)
 * [Svelto.ECS 3.3 and the new Filters API](https://www.sebaslab.com/svelto-ecs-3-3-and-the-new-filters-api/)
 * [What’s new in Svelto.ECS 3.0](https://www.sebaslab.com/whats-new-in-svelto-ecs-3-0/)
@@ -173,27 +174,6 @@ The folders Svelto.ECS and Svelto.Common, where present, are submodules pointing
 ## Svelto distributed as Unity Package through OpenUPM [![openupm](https://img.shields.io/npm/v/com.sebaslab.svelto.ecs?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.sebaslab.svelto.ecs/)
 
 or just install the package that comes from the link https://package-installer.glitch.me/v1/installer/OpenUPM/com.sebaslab.svelto.ecs?registry=https%3A%2F%2Fpackage.openupm.com
-
-**Note on the System.Runtime.CompilerServices.Unsafe.dll dependency and the bit of a mess that Unity Package Dependency System is:**
-
-Unity Package System has a big deficiency when it comes to dll dependency solving: two packages cannot point to the same dependency from different sources. For this reason I decided to let my packages to point to the unsafe dll distribution from openUPM
-
-to solve the unsafe dependency you need to add the following scopedRegistries in manifest.json:
-```
-  {
-    "scopedRegistries": [
-        {
-            "name": "package.openupm.com",
-            "url": "https://package.openupm.com",
-            "scopes": [
-                "com.sebaslab.svelto.common",
-                "com.sebaslab.svelto.ecs",
-                "org.nuget.system.runtime.compilerservices.unsafe"
-            ]
-        }
-    ]
-}
-```
 
 this is shown in this example too: https://github.com/sebas77/Svelto.MiniExamples/tree/master/UPM-Integration/UPM
 

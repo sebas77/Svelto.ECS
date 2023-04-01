@@ -17,8 +17,8 @@ namespace Svelto.ECS
 
         public uint count { get; }
 
-        internal readonly IBufferBase _buffer;
-        internal readonly IEntityIDs  _entityIDs;
+        public readonly IBufferBase _buffer;
+        public readonly IEntityIDs  _entityIDs;
     }
 
     public readonly ref struct EntityCollection<T1, T2> where T1 : struct, _IInternalEntityComponent

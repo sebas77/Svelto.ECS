@@ -12,5 +12,6 @@ namespace Svelto.ECS
 
         Type                GetEntityComponentType();
         bool                isUnmanaged { get; }
+        ComponentID getComponentID { get; }
     }
 }

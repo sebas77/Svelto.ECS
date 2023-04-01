@@ -143,9 +143,9 @@ namespace Svelto.ECS
 
                             var typeID = buffer.Dequeue<uint>();
 
-                            IFiller entityBuilder = EntityComponentIDMap.GetTypeFromID(typeID);
+                            IFiller componentBuilder = EntityComponentIDMap.GetBuilderFromID(typeID);
                             //after the typeID, I expect the serialized component
-                            entityBuilder.FillFromByteArray(init, buffer);
+                            componentBuilder.FillFromByteArray(init, buffer);
                         }
                     }
                 }
