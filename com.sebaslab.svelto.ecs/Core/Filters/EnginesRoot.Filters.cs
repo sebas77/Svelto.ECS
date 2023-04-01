@@ -8,10 +8,12 @@ namespace Svelto.ECS
     {
         void InitFilters()
         {
-            _transientEntityFilters  = new SharedSveltoDictionaryNative<long, EntityFilterCollection>(0);
-            _persistentEntityFilters = new SharedSveltoDictionaryNative<long, EntityFilterCollection>(0);
+            _transientEntityFilters  = new SharedSveltoDictionaryNative<CombinedFilterComponentID, EntityFilterCollection>(0);
+            _persistentEntityFilters = new SharedSveltoDictionaryNative<CombinedFilterComponentID, EntityFilterCollection>(0);
             _indicesOfPersistentFiltersUsedByThisComponent =
-                new SharedSveltoDictionaryNative<NativeRefWrapperType, NativeDynamicArrayCast<int>>(0);
+                new SharedSveltoDictionaryNative<ComponentID, NativeDynamicArrayCast<int>>(0);
+            _indicesOfTransientFiltersUsedByThisComponent =
+                    new SharedSveltoDictionaryNative<ComponentID, NativeDynamicArrayCast<int>>(0);
         }
 
         void DisposeFilters()
@@ -20,7 +22,12 @@ namespace Svelto.ECS
             {
                 filter.value.Dispose();
             }
-
+            
+            foreach (var filter in _indicesOfTransientFiltersUsedByThisComponent)
+            {
+                filter.value.Dispose();
+            }
+            
             foreach (var filter in _persistentEntityFilters)
             {
                 filter.value.Dispose();
@@ -34,6 +41,7 @@ namespace Svelto.ECS
             _transientEntityFilters.Dispose();
             _persistentEntityFilters.Dispose();
             _indicesOfPersistentFiltersUsedByThisComponent.Dispose();
+            _indicesOfTransientFiltersUsedByThisComponent.Dispose();
         }
 
         void ClearTransientFilters()
@@ -54,12 +62,12 @@ namespace Svelto.ECS
         /// <param name="fromDic"></param>
         /// <param name="entityIDsLeftAndAffectedByRemoval"></param>
         void RemoveEntitiesFromPersistentFilters
-        (FasterList<(uint entityID, string)> entityIDsRemoved, ExclusiveGroupStruct fromGroup, RefWrapperType refWrapperType
+        (FasterList<(uint entityID, string)> entityIDsRemoved, ExclusiveGroupStruct fromGroup, ComponentID refWrapperType
        , ITypeSafeDictionary fromDic, FasterList<uint> entityIDsLeftAndAffectedByRemoval)
         {
             //is there any filter used by this component?
             if (_indicesOfPersistentFiltersUsedByThisComponent.TryGetValue(
-                    new NativeRefWrapperType(refWrapperType), out NativeDynamicArrayCast<int> listOfFilters) == true)
+                    refWrapperType, out NativeDynamicArrayCast<int> listOfFilters) == true)
             {
                 var numberOfFilters = listOfFilters.count;
                 var filters         = _persistentEntityFilters.unsafeValues;
@@ -117,11 +125,11 @@ namespace Svelto.ECS
         void SwapEntityBetweenPersistentFilters
         (FasterList<(uint, uint, string)> fromEntityToEntityIDs, ITypeSafeDictionary fromDic
        , ITypeSafeDictionary toDic, ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup
-       , RefWrapperType refWrapperType, FasterList<uint> entityIDsLeftAndAffectedByRemoval)
+       , ComponentID refWrapperType, FasterList<uint> entityIDsLeftAndAffectedByRemoval)
         {
             //is there any filter used by this component?
             if (_indicesOfPersistentFiltersUsedByThisComponent.TryGetValue(
-                    new NativeRefWrapperType(refWrapperType), out NativeDynamicArrayCast<int> listOfFilters) == true)
+                    refWrapperType, out NativeDynamicArrayCast<int> listOfFilters) == true)
             {
                 DBC.ECS.Check.Require(listOfFilters.count > 0, "why are you calling this with an empty list?");
                 var numberOfFilters = listOfFilters.count;
@@ -181,10 +189,10 @@ namespace Svelto.ECS
             }
         }
 
-        internal SharedSveltoDictionaryNative<long, EntityFilterCollection> _transientEntityFilters;
-        internal SharedSveltoDictionaryNative<long, EntityFilterCollection> _persistentEntityFilters;
+        internal SharedSveltoDictionaryNative<CombinedFilterComponentID, EntityFilterCollection> _transientEntityFilters;
+        internal SharedSveltoDictionaryNative<CombinedFilterComponentID, EntityFilterCollection> _persistentEntityFilters;
 
-        internal SharedSveltoDictionaryNative<NativeRefWrapperType, NativeDynamicArrayCast<int>>
-            _indicesOfPersistentFiltersUsedByThisComponent;
+        internal SharedSveltoDictionaryNative<ComponentID, NativeDynamicArrayCast<int>> _indicesOfPersistentFiltersUsedByThisComponent;
+        public SharedSveltoDictionaryNative<ComponentID, NativeDynamicArrayCast<int>> _indicesOfTransientFiltersUsedByThisComponent;
     }
 }

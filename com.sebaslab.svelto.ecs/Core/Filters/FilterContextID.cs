@@ -2,9 +2,9 @@
 {
     public struct FilterContextID
     {
-        public readonly uint id;
+        public readonly ushort id;
 
-        internal FilterContextID(uint id)
+        internal FilterContextID(ushort id)
         {
             DBC.ECS.Check.Require(id < ushort.MaxValue, "too many types registered, HOW :)");
 

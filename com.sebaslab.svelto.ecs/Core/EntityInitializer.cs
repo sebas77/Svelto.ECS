@@ -6,7 +6,7 @@ namespace Svelto.ECS
 {
     public readonly ref struct EntityInitializer
     {
-        public EntityInitializer(EGID id, FasterDictionary<RefWrapperType, ITypeSafeDictionary> group,
+        public EntityInitializer(EGID id, FasterDictionary<ComponentID, ITypeSafeDictionary> group,
             in EntityReference reference)
         {
             _group = group;
@@ -20,7 +20,7 @@ namespace Svelto.ECS
         public void Init<T>(T initializer) where T : struct, _IInternalEntityComponent
         {
             if (_group.TryGetValue(
-                    new RefWrapperType(TypeCache<T>.type),
+                    ComponentTypeID<T>.id,
                     out var typeSafeDictionary) == false)
                 return;
 
@@ -34,10 +34,10 @@ namespace Svelto.ECS
                 dictionary.GetDirectValueByRef(findElementIndex) = initializer;
         }
 
-        internal ref T GetOrAdd<T>() where T : unmanaged, IEntityComponent
+        internal ref T GetOrAdd<T>() where T : struct, _IInternalEntityComponent
         {
             ref var entityDictionary = ref _group.GetOrAdd(
-                new RefWrapperType(ComponentBuilder<T>.ENTITY_COMPONENT_TYPE),
+                ComponentTypeID<T>.id,
                 () => new UnmanagedTypeSafeDictionary<T>(1));
             var dictionary = (ITypeSafeDictionary<T>)entityDictionary;
 
@@ -46,14 +46,14 @@ namespace Svelto.ECS
 
         public ref T Get<T>() where T : struct, _IInternalEntityComponent
         {
-            return ref (_group[new RefWrapperType(TypeCache<T>.type)] as ITypeSafeDictionary<T>)
+            return ref (_group[ComponentTypeID<T>.id] as ITypeSafeDictionary<T>)
                .GetValueByRef(_ID.entityID);
         }
 
         public bool Has<T>() where T : struct, _IInternalEntityComponent
         {
             if (_group.TryGetValue(
-                    new RefWrapperType(TypeCache<T>.type),
+                    ComponentTypeID<T>.id,
                     out var typeSafeDictionary))
             {
                 var dictionary = (ITypeSafeDictionary<T>)typeSafeDictionary;
@@ -66,6 +66,6 @@ namespace Svelto.ECS
         }
 
         readonly EGID _ID;
-        readonly FasterDictionary<RefWrapperType, ITypeSafeDictionary> _group;
+        readonly FasterDictionary<ComponentID, ITypeSafeDictionary> _group;
     }
 }

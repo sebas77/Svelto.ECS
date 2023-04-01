@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
-using Svelto.ECS.Internal;
 using Svelto.ECS.Serialization;
 
 namespace Svelto.ECS
@@ -208,7 +207,7 @@ namespace Svelto.ECS
                 ISerializationData serializationData, int serializationType)
             {
                 ExclusiveGroupStruct groupId    = entityGID.groupID;
-                Type                 entityType = componentBuilder.GetEntityComponentType();
+                var                 entityType = componentBuilder.getComponentID;
                 if (!_enginesRoot._entitiesDB.UnsafeQueryEntityDictionary(groupId, entityType, out var safeDictionary))
                 {
                     throw new Exception("Entity Serialization failed");
@@ -230,7 +229,7 @@ namespace Svelto.ECS
                 foreach (var serializableEntityBuilder in entityDescriptor.componentsToSerialize)
                 {
                     entitiesInGroupPerType.TryGetValue(
-                        new RefWrapperType(serializableEntityBuilder.GetEntityComponentType()), out var safeDictionary);
+                        serializableEntityBuilder.getComponentID, out var safeDictionary);
 
                     serializationData.BeginNextEntityComponent();
                     serializableEntityBuilder.Deserialize(egid.entityID, safeDictionary, serializationData,
