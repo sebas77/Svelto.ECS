@@ -64,6 +64,8 @@ namespace Svelto.ECS
                 new FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnSwapEx>>>();
             _reactiveEnginesDispose =
                 new FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>>();
+            _reactiveEnginesDisposeEx =
+                new FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDisposeEx>>>();
 
             _reactiveEnginesSubmission = new FasterList<IReactOnSubmission>();
             _reactiveEnginesSubmissionStarted = new FasterList<IReactOnSubmissionStarted>();
@@ -151,6 +153,10 @@ namespace Svelto.ECS
                 if (engine is IReactOnDispose viewEngineDispose)
                     CheckReactEngineComponents(
                         typeof(IReactOnDispose<>), viewEngineDispose, _reactiveEnginesDispose, type.Name);
+                
+                if (engine is IReactOnDisposeEx viewEngineDisposeEx)
+                    CheckReactEngineComponents(
+                        typeof(IReactOnDisposeEx<>), viewEngineDisposeEx, _reactiveEnginesDisposeEx, type.Name);
 
                 if (engine is IReactOnSwap viewEngineSwap)
 #pragma warning disable CS0612
@@ -263,7 +269,7 @@ namespace Svelto.ECS
                             ITypeSafeDictionary typeSafeDictionary = entityList.value;
 
                             typeSafeDictionary.ExecuteEnginesDisposeCallbacks_Group(
-                                _reactiveEnginesDispose, groups.key,
+                                _reactiveEnginesDispose, _reactiveEnginesDisposeEx, groups.key,
                                 profiler);
                         }
                         catch (Exception e)
@@ -300,6 +306,7 @@ namespace Svelto.ECS
                 _reactiveEnginesAdd.Clear();
                 _reactiveEnginesRemove.Clear();
                 _reactiveEnginesDispose.Clear();
+                _reactiveEnginesDisposeEx.Clear();
                 _reactiveEnginesSubmission.Clear();
                 _reactiveEnginesSubmissionStarted.Clear();
 
@@ -410,6 +417,7 @@ namespace Svelto.ECS
         readonly FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnSwap>>> _reactiveEnginesSwap;
         readonly FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnSwapEx>>> _reactiveEnginesSwapEx;
         readonly FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> _reactiveEnginesDispose;
+        readonly FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDisposeEx>>> _reactiveEnginesDisposeEx;
 
         readonly FasterList<IReactOnSubmission> _reactiveEnginesSubmission;
         readonly FasterList<IReactOnSubmissionStarted> _reactiveEnginesSubmissionStarted;

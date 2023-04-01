@@ -275,8 +275,8 @@ namespace Svelto.ECS.Internal
        , in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesSwapCallbacks_Group(
-                ref implUnmgd.dictionary, (ITypeSafeDictionary<TValue>)toDictionary, toGroup, fromGroup, this
-              , reactiveEnginesSwap, reactiveEnginesSwapEx, count, entityIDs, in profiler);
+                ref implUnmgd.dictionary, (ITypeSafeDictionary<TValue>)toDictionary, toGroup, fromGroup
+              , reactiveEnginesSwap, reactiveEnginesSwapEx, entityIDs, in profiler);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace Svelto.ECS.Internal
        , ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesRemoveCallbacks_Group(
-                ref implUnmgd.dictionary, this, reactiveEnginesRemove, reactiveEnginesRemoveEx, count, entityIDs, group
+                ref implUnmgd.dictionary, reactiveEnginesRemove, reactiveEnginesRemoveEx, entityIDs, group
               , in profiler);
         }
 
@@ -299,11 +299,12 @@ namespace Svelto.ECS.Internal
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesDisposeCallbacks_Group
-        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> engines
+        ( FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> reactiveEnginesDispose
+        , FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDisposeEx>>> reactiveEnginesDisposeEx
        , ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesDisposeCallbacks_Group(
-                ref implUnmgd.dictionary, engines, group, in profiler);
+                ref implUnmgd.dictionary, reactiveEnginesDispose, reactiveEnginesDisposeEx, entityIDs, group, in profiler);
         }
 
         internal SharedSveltoDictionaryNative<uint, TValue> implUnmgd;

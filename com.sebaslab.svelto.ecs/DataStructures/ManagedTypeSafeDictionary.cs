@@ -263,8 +263,8 @@ namespace Svelto.ECS.Internal
        , in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesSwapCallbacks_Group(
-                ref implMgd, (ITypeSafeDictionary<TValue>)toDictionary, toGroup, fromGroup, this, reactiveEnginesSwap
-              , reactiveEnginesSwapEx, count, entityIDs, in profiler);
+                ref implMgd, (ITypeSafeDictionary<TValue>)toDictionary, toGroup, fromGroup, reactiveEnginesSwap
+              , reactiveEnginesSwapEx, entityIDs, in profiler);
         }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace Svelto.ECS.Internal
        , ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
             TypeSafeDictionaryMethods.ExecuteEnginesRemoveCallbacks_Group(
-                ref implMgd, this, reactiveEnginesRemove, reactiveEnginesRemoveEx, count, entityIDs, group
+                ref implMgd, reactiveEnginesRemove, reactiveEnginesRemoveEx, entityIDs, group
               , in profiler);
         }
 
@@ -287,10 +287,12 @@ namespace Svelto.ECS.Internal
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExecuteEnginesDisposeCallbacks_Group
-        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> engines
-       , ExclusiveGroupStruct group, in PlatformProfiler profiler)
+        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> reactiveEnginesDispose,
+        FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDisposeEx>>> reactiveEnginesDisposeEx,
+        ExclusiveGroupStruct group, in PlatformProfiler profiler)
         {
-            TypeSafeDictionaryMethods.ExecuteEnginesDisposeCallbacks_Group(ref implMgd, engines, group, in profiler);
+            TypeSafeDictionaryMethods.ExecuteEnginesDisposeCallbacks_Group(
+                ref implMgd, reactiveEnginesDispose, reactiveEnginesDisposeEx, entityIDs, group, in profiler);
         }
 
         SveltoDictionary<uint, TValue, ManagedStrategy<SveltoDictionaryNode<uint>>, ManagedStrategy<TValue>,

@@ -76,12 +76,13 @@ namespace Svelto.ECS.Internal
          ITypeSafeDictionary toEntitiesDictionary, ExclusiveGroupStruct fromGroupId, ExclusiveGroupStruct toGroupId,
          in PlatformProfiler platformProfiler);
         void ExecuteEnginesRemoveCallbacks_Group(
-         FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemove>>> engines,
+         FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemove>>> reactiveEnginesRemove,
          FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnRemoveEx>>> reactiveEnginesRemoveEx,
          ExclusiveGroupStruct @group, in PlatformProfiler profiler);
         void ExecuteEnginesDisposeCallbacks_Group
-        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> engines
-       , ExclusiveGroupStruct group, in PlatformProfiler profiler);
+        (FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDispose>>> reactiveEnginesDispose,
+         FasterDictionary<ComponentID, FasterList<ReactEngineContainer<IReactOnDisposeEx>>> reactiveEnginesDisposeEx,
+        ExclusiveGroupStruct group, in PlatformProfiler profiler);
 
         void IncreaseCapacityBy(uint size);
         void EnsureCapacity(uint size);

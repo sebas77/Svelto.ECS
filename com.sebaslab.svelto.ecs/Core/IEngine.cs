@@ -40,6 +40,10 @@ namespace Svelto.ECS.Internal
     public interface IReactOnSwapEx : IReactEngine
     {
     }
+    
+    public interface IReactOnDisposeEx : IReactEngine
+    {
+    }
 
     public interface IReactOnDispose : IReactEngine
     {
@@ -131,6 +135,12 @@ namespace Svelto.ECS
     {
         void MovedTo((uint start, uint end) rangeOfEntities, in EntityCollection<T> entities,
             ExclusiveGroupStruct fromGroup, ExclusiveGroupStruct toGroup);
+    }
+    
+    public interface IReactOnDisposeEx<T> : IReactOnDisposeEx where T : struct, _IInternalEntityComponent
+    {
+        void Remove((uint start, uint end) rangeOfEntities, in EntityCollection<T> entities,
+            ExclusiveGroupStruct groupID);
     }
 
     /// <summary>
