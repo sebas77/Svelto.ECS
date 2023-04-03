@@ -38,7 +38,7 @@ namespace Svelto.ECS
 
         protected ExtendibleEntityDescriptor()
         {
-            _dynamicDescriptor = new DynamicEntityDescriptor<TType>(true);
+            _dynamicDescriptor = DynamicEntityDescriptor<TType>.CreateDynamicEntityDescriptor();
         }
 
         protected ExtendibleEntityDescriptor<TType> ExtendWith<T>() where T : IEntityDescriptor, new()

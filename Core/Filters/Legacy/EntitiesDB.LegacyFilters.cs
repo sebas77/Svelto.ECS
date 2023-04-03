@@ -127,6 +127,7 @@ namespace Svelto.ECS
             }
 
             public void ClearFilter<T>(int filterID, ExclusiveGroupStruct exclusiveGroupStruct)
+                    where T : struct, _IInternalEntityComponent
             {
                 if (_filtersLegacy.TryGetValue(ComponentTypeID<T>.id, out var fasterDictionary))
                 {
@@ -137,14 +138,14 @@ namespace Svelto.ECS
                 }
             }
 
-            public void ClearFilters<T>(int filterID)
+            public void ClearFilters<T>(int filterID) where T : struct, _IInternalEntityComponent
             {
                 if (_filtersLegacy.TryGetValue(ComponentTypeID<T>.id, out var fasterDictionary))
                     foreach (var filtersPerGroup in fasterDictionary)
                         filtersPerGroup.value.ClearFilter(filterID);
             }
 
-            public void DisposeFilters<T>(ExclusiveGroupStruct exclusiveGroupStruct)
+            public void DisposeFilters<T>(ExclusiveGroupStruct exclusiveGroupStruct) where T : struct, _IInternalEntityComponent
             {
                 if (_filtersLegacy.TryGetValue(ComponentTypeID<T>.id, out var fasterDictionary))
                 {
@@ -153,7 +154,7 @@ namespace Svelto.ECS
                 }
             }
 
-            public void DisposeFilters<T>()
+            public void DisposeFilters<T>() where T : struct, _IInternalEntityComponent
             {
                 if (_filtersLegacy.TryGetValue(ComponentTypeID<T>.id, out var fasterDictionary))
                     foreach (var filtersPerGroup in fasterDictionary)
@@ -162,7 +163,7 @@ namespace Svelto.ECS
                 _filtersLegacy.Remove(ComponentTypeID<T>.id);
             }
 
-            public void DisposeFilterForGroup<T>(int resetFilterID, ExclusiveGroupStruct group)
+            public void DisposeFilterForGroup<T>(int resetFilterID, ExclusiveGroupStruct group) where T : struct, _IInternalEntityComponent
             {
                 if (_filtersLegacy.TryGetValue(ComponentTypeID<T>.id, out var fasterDictionary))
                     fasterDictionary[@group].DisposeFilter(resetFilterID);
@@ -185,14 +186,13 @@ namespace Svelto.ECS
 
             public bool AddEntityToFilter<N>(int filtersID, EGID egid, N mapper) where N : IEGIDMapper
             {
-                ref var filter =
-                    ref CreateOrGetFilterForGroup(filtersID, egid.groupID, new RefWrapperType(mapper.entityType));
+                ref var filter = ref CreateOrGetFilterForGroup(filtersID, egid.groupID, ComponentTypeMap.FetchID(mapper.entityType));
 
                 return filter.Add(egid.entityID, mapper);
             }
 
             internal ref LegacyFilterGroup CreateOrGetFilterForGroup(int filterID, ExclusiveGroupStruct groupID,
-                RefWrapperType refWrapper)
+                ComponentID refWrapper)
             {
                 var fasterDictionary = _filtersLegacy.GetOrAdd(refWrapper,
                     () => new FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>());

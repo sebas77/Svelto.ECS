@@ -16,7 +16,7 @@ namespace Svelto.ECS.Serialization
                 ? entityDescriptor.componentsToSerialize
                 : entityDescriptor.componentsToBuild;
 
-            var initializer = factory.BuildEntity(egid, entityDescriptorEntitiesToSerialize, TypeCache<T>.type);
+            var initializer = (factory as IEntitySerializationFactory).BuildEntity(egid, entityDescriptorEntitiesToSerialize, TypeCache<T>.type);
 
             entitySerialization.DeserializeEntityComponents(serializationData, entityDescriptor, ref initializer,
                 serializationType);

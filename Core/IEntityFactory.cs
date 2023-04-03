@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Svelto.ECS
@@ -51,11 +50,6 @@ namespace Svelto.ECS
 
         EntityInitializer BuildEntity<T>(EGID egid, T entityDescriptor, IEnumerable<object> implementors = null,
             [System.Runtime.CompilerServices.CallerMemberName] string caller = null) where T : IEntityDescriptor;
-
-        //Todo: analyze if this can be internal or just related to serialization
-        EntityInitializer BuildEntity(EGID egid, IComponentBuilder[] componentsToBuild, Type descriptorType,
-            IEnumerable<object> implementors = null,
-            [System.Runtime.CompilerServices.CallerMemberName] string caller = null);
 
 #if UNITY_NATIVE
         Svelto.ECS.Native.NativeEntityFactory ToNative<T>([System.Runtime.CompilerServices.CallerMemberName] string callerName

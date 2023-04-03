@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
@@ -15,35 +16,47 @@ namespace Svelto.ECS
             List<Assembly> assemblies = AssemblyUtility.GetCompatibleAssemblies();
             foreach (Assembly assembly in assemblies)
             {
-                    var typeOfEntityDescriptors = typeof(IEntityDescriptor);
+                var typeOfEntityDescriptors = typeof(IEntityDescriptor);
 
-                    foreach (Type type in AssemblyUtility.GetTypesSafe(assembly))
+                foreach (Type type in AssemblyUtility.GetTypesSafe(assembly))
+                {
+                    if (type.IsInterface == false && typeOfEntityDescriptors.IsAssignableFrom(type)) //IsClass and IsSealed and IsAbstract means only static classes
                     {
-                        if (typeOfEntityDescriptors.IsAssignableFrom(type)) //IsClass and IsSealed and IsAbstract means only static classes
+                        try
                         {
+                            //the main goal of this iteration is to warm up the component builders and descriptors
+                            //note: I could have just instanced the entity descriptor, but in this way I will warm up the EntityDescriptorTemplate too
                             var warmup = typeof(EntityDescriptorTemplate<>).MakeGenericType(type);
-                            try
-                            {
-                                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(warmup.TypeHandle);
-                            }
-                            catch
-                            {
-                                continue;
-                            }
 
-                            PropertyInfo field = warmup.GetProperty("descriptor", BindingFlags.Static | BindingFlags.Public);
-                            object value = field.GetValue(null); // pass null because the field is static
-
-// cast the value to your descriptor type
-                            IEntityDescriptor descriptor = (IEntityDescriptor)value;
-                            foreach (IComponentBuilder component in descriptor.componentsToBuild)
-                            {
-                                var typeArguments = component.GetEntityComponentType();
-                                var warmup2 = typeof(ComponentTypeID<>).MakeGenericType(typeArguments);
-                                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(warmup2.TypeHandle);
-                            }
+                            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(warmup.TypeHandle);
+                        }
+                        catch (Exception e)
+                        {
+                            continue;
                         }
                     }
+                }
+                
+                var typeOfComponents = typeof(_IInternalEntityComponent);
+
+                //the main goal of this iteration is to warm up the component IDs
+                foreach (Type type in AssemblyUtility.GetTypesSafe(assembly))
+                {
+                    if (type.IsInterface == false && typeOfComponents.IsAssignableFrom(type)) //IsClass and IsSealed and IsAbstract means only static classes
+                    {
+                        try
+                        {
+                            var componentType = typeof(ComponentTypeID<>).MakeGenericType(type);
+                            //is called only once ever, even if runs multiple times.
+                            //this warms up the component builder. There could be different implementation of components builders for the same component type in theory
+                            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(componentType.TypeHandle);
+                        }
+                        catch (Exception e)
+                        {
+                            continue;
+                        }
+                    }
+                }
             }
         }
     }
