@@ -14,40 +14,48 @@ namespace Svelto.ECS
     /// <typeparam name="TType"></typeparam>
     public struct DynamicEntityDescriptor<TType> : IDynamicEntityDescriptor where TType : IEntityDescriptor, new()
     {
-        internal DynamicEntityDescriptor(bool isExtendible) : this()
+        public static DynamicEntityDescriptor<TType> CreateDynamicEntityDescriptor()
         {
+            var entityDescriptor = new DynamicEntityDescriptor<TType>();
+            
             var defaultEntities = EntityDescriptorTemplate<TType>.realDescriptor.componentsToBuild;
             var length          = defaultEntities.Length;
 
             if (FetchEntityInfoComponent(defaultEntities) == -1)
             {
-                _componentsToBuild = new IComponentBuilder[length + 1];
+                entityDescriptor._componentsToBuild = new IComponentBuilder[length + 1];
 
-                Array.Copy(defaultEntities, 0, _componentsToBuild, 0, length);
+                Array.Copy(defaultEntities, 0, entityDescriptor._componentsToBuild, 0, length);
                 //assign it after otherwise the previous copy will overwrite the value in case the item
                 //is already present
-                _componentsToBuild[length] = new ComponentBuilder<EntityInfoComponent>(new EntityInfoComponent
+                entityDescriptor._componentsToBuild[length] = new ComponentBuilder<EntityInfoComponent>(new EntityInfoComponent
                 {
-                    componentsToBuild = _componentsToBuild
+                    componentsToBuild = entityDescriptor._componentsToBuild
                 });
             }
             else
             {
-                _componentsToBuild = new IComponentBuilder[length];
+                entityDescriptor._componentsToBuild = new IComponentBuilder[length];
 
-                Array.Copy(defaultEntities, 0, _componentsToBuild, 0, length);
+                Array.Copy(defaultEntities, 0, entityDescriptor._componentsToBuild, 0, length);
             }
+
+            return entityDescriptor;
         }
 
-        public DynamicEntityDescriptor(IComponentBuilder[] extraEntityBuilders) : this(true)
+        public DynamicEntityDescriptor(IComponentBuilder[] extraEntityBuilders)
         {
+            this = CreateDynamicEntityDescriptor();
+            
             var extraEntitiesLength = extraEntityBuilders.Length;
 
             _componentsToBuild = Construct(extraEntitiesLength, extraEntityBuilders);
         }
 
-        public DynamicEntityDescriptor(FasterList<IComponentBuilder> extraEntityBuilders) : this(true)
+        public DynamicEntityDescriptor(FasterList<IComponentBuilder> extraEntityBuilders) 
         {
+            this = CreateDynamicEntityDescriptor();
+            
             var extraEntities       = extraEntityBuilders.ToArrayFast(out _);
             var extraEntitiesLength = extraEntityBuilders.count;
 

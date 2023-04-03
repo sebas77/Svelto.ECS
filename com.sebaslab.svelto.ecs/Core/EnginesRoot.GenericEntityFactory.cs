@@ -7,7 +7,7 @@ namespace Svelto.ECS
 {
     public partial class EnginesRoot
     {
-        class GenericEntityFactory : IEntityFactory
+        class GenericEntityFactory : IEntityFactory, IEntitySerializationFactory
         {
             public GenericEntityFactory(EnginesRoot weakReference)
             {
