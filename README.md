@@ -187,6 +187,42 @@ the Hello World example uses the nuget package directly: https://github.com/seba
 ## In case of bugs
 Best option is to fork and clone [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests), add new tests to reproduce the problem and request a pull. I will then fix the issue. Also feel free to contact me on Discord.
 
+## Unity Installation Note:
+
+if you are installing Svelto.ECS manually and not through OUPM, you need to add this in your manifest:
+```
+,
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "org.nuget.system.runtime.compilerservices.unsafe"
+      ]
+    }
+  ]
+```
+
+looking like:
+
+```
+{
+  "dependencies": {
+...
+  },
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "org.nuget.system.runtime.compilerservices.unsafe"
+      ]
+    }
+  ]
+}
+
+```
+
 ## I like the project, how can I help?
 Hey, thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, the more we are, the better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: *A visual debugger and more unit tests are needed*. Other platforms other than Unity could get some love too: Stride Game, Godot, monogame, FNA or whatever supports c#. Porting to other languages, especially c++, would be awesome but probably pointless. Please check the lane dedicated to the community tasks list here: https://github.com/users/sebas77/projects/3 and let me know if you want to take something on!
 
