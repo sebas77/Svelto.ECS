@@ -16,8 +16,8 @@ namespace Svelto.ECS
     {
         static EnginesRoot()
         {
-            EntityDescriptorsWarmup.Init();
-            GroupHashMap.Init();
+            EntityDescriptorsWarmup.WarmUp();
+            GroupHashMap.WarmUp();
             //SharedDictonary.Init();
             SerializationDescriptorMap.Init();
 

@@ -20,6 +20,11 @@ namespace Svelto.ECS
             get => _id.Data;
         }
 
+        /// <summary>
+        /// c# Static constructors are guaranteed to be thread safe
+        /// The runtime guarantees that a static constructor is only called once. So even if a type is called by multiple threads at the same time,
+        /// the static constructor is always executed one time. To get a better understanding how this works, it helps to know what purpose it serves.
+        /// </summary>
         static ComponentTypeID()
         {
             Init();

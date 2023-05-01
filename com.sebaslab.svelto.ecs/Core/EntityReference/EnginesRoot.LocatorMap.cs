@@ -173,10 +173,10 @@ namespace Svelto.ECS
             public bool TryGetEGID(EntityReference reference, out EGID egid)
             {
                 egid = default;
-#if DEBUG && !PROFILE_SVELTO                
+     
                 if (reference == EntityReference.Invalid)
                     return false;
-#endif
+
                 // Make sure we are querying for the current version of the locator.
                 // Otherwise the locator is pointing to a removed entity.
                 ref var entityReferenceMapElement = ref _entityReferenceMap[reference.index];

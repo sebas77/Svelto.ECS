@@ -1,18 +1,19 @@
 using System;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
-    public static class ComponentTypeMap
+    static class ComponentTypeMap
     {
-        static readonly FasterDictionary<RefWrapper<Type>, ComponentID> _componentTypeMap = new FasterDictionary<RefWrapper<Type>, ComponentID>();
-        static readonly FasterDictionary<ComponentID, Type> _reverseComponentTypeMap = new FasterDictionary<ComponentID, Type>();
+        static readonly ConcurrentDictionary<Type, ComponentID> _componentTypeMap = new ConcurrentDictionary<Type, ComponentID>();
+        static readonly ConcurrentDictionary<ComponentID, Type> _reverseComponentTypeMap = new ConcurrentDictionary<ComponentID, Type>();
 
         public static void Add(Type type, ComponentID idData)
         {
-            _componentTypeMap.Add(type, idData);
-            _reverseComponentTypeMap.Add(idData, type);
+            _componentTypeMap.TryAdd(type, idData);
+            _reverseComponentTypeMap.TryAdd(idData, type);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
