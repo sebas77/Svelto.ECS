@@ -45,7 +45,7 @@ namespace Svelto.ECS
 
         public DynamicEntityDescriptor(IComponentBuilder[] extraEntityBuilders)
         {
-            this = CreateDynamicEntityDescriptor();
+            this = DynamicEntityDescriptor<TType>.CreateDynamicEntityDescriptor();
             
             var extraEntitiesLength = extraEntityBuilders.Length;
 
@@ -54,7 +54,7 @@ namespace Svelto.ECS
 
         public DynamicEntityDescriptor(FasterList<IComponentBuilder> extraEntityBuilders) 
         {
-            this = CreateDynamicEntityDescriptor();
+            this = DynamicEntityDescriptor<TType>.CreateDynamicEntityDescriptor();
             
             var extraEntities       = extraEntityBuilders.ToArrayFast(out _);
             var extraEntitiesLength = extraEntityBuilders.count;

@@ -1,10 +1,10 @@
 # Svelto.ECS Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
-## [3.4.5] - 04-2023
-* improved code after internal data refactoring and fixed some bugs
-* Added static DynamicEntityDescriptor method to create a new DynamicEntityDescriptor without passing an array of components
-* factory method to build entities without entity descriptor is now internal
+## [3.4.6] - 05-2023
+
+* SveltoOnDOTS bug fixes/improvements
+* Comments and code cleanup
 
 ## [3.4.4] - 04-2023
 

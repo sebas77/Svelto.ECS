@@ -85,6 +85,8 @@ While other frameworks typically limit user freedom to avoid exposing flaws in t
 
 **GroupCompounds** build on this idea by allowing users to change the "state"/"set"/"group" according to tags that serve effectively as adjective or state identifiers.
 
+Entities can change state moving between sets swapping them in groups explcitly, rather than changing archetype.
+
 ## Why using Svelto.ECS with Unity?
 Svelto.ECS doens't use a traditional archetype model like DOTS ECS does. The novel hybrid approach based on groups instead than archetypes has been designed to allow the user to take the right decision when it comes to states management. Svelto.ECS doesn't allow archetypes to change dynamically, the user cannot add or remove components after the entity is created. Handling entities states with components can quickly lead to very intensive structural changes operations, so groups have been introduced to avoid the wild explosion of states permutations and let the user see explicitly the cost of their decisions.
 

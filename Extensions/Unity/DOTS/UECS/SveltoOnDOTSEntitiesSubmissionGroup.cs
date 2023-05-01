@@ -29,7 +29,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         public SveltoOnDOTSEntitiesSubmissionGroup(SimpleEntitiesSubmissionScheduler submissionScheduler)
         {
             _submissionScheduler = submissionScheduler;
-            _submissionEngines = new FasterList<ISveltoOnDOTSStructuralEngine>();
+            _structuralEngines = new FasterList<ISveltoOnDOTSStructuralEngine>();
         }
 
         public EntitiesDB entitiesDB { get; set; }
@@ -56,7 +56,7 @@ namespace Svelto.ECS.SveltoOnDOTS
                 //Submit Svelto Entities, calls Add/Remove/MoveTo that can be used by the DOTS ECSSubmissionEngines
                 _submissionScheduler.SubmitEntities();
 
-                foreach (var engine in _submissionEngines)
+                foreach (var engine in _structuralEngines)
                     engine.OnPostSubmission();
 
                 _dotsOperationsForSvelto.Complete();
@@ -65,8 +65,8 @@ namespace Svelto.ECS.SveltoOnDOTS
 
         public void Add(ISveltoOnDOTSStructuralEngine engine)
         {
-            _submissionEngines.Add(engine);
-            if (World != null)
+            _structuralEngines.Add(engine);
+            if (_isReady == true)
             {
                 engine.DOTSOperations = _dotsOperationsForSvelto;
                 engine.OnOperationsReady();
@@ -79,9 +79,10 @@ namespace Svelto.ECS.SveltoOnDOTS
             {
                 _jobHandle = (JobHandle*) MemoryUtilities.NativeAlloc((uint)MemoryUtilities.SizeOf<JobHandle>(), Allocator.Persistent);
                 _dotsOperationsForSvelto = new DOTSOperationsForSvelto(World.EntityManager, _jobHandle);
+                _isReady = true;
             
                 //initialise engines field while world was null
-                foreach (var engine in _submissionEngines)
+                foreach (var engine in _structuralEngines)
                 {
                     engine.DOTSOperations = _dotsOperationsForSvelto;
                     engine.OnOperationsReady();
@@ -104,9 +105,10 @@ namespace Svelto.ECS.SveltoOnDOTS
             throw new NotSupportedException("if this is called something broke the original design");
         }
 
-        readonly FasterList<ISveltoOnDOTSStructuralEngine> _submissionEngines;
+        readonly FasterList<ISveltoOnDOTSStructuralEngine> _structuralEngines;
         readonly SimpleEntitiesSubmissionScheduler _submissionScheduler;
         DOTSOperationsForSvelto _dotsOperationsForSvelto;
+        bool _isReady;
         unsafe JobHandle* _jobHandle;
     }
 }

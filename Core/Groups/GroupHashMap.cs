@@ -10,8 +10,12 @@ namespace Svelto.ECS
     {
         /// <summary>
         /// c# Static constructors are guaranteed to be thread safe
+        /// The runtime guarantees that a static constructor is only called once. So even if a type is called by multiple threads at the same time,
+        /// the static constructor is always executed one time. To get a better understanding how this works, it helps to know what purpose it serves.
+        ///
+        /// Warmup the group hash map. This will call all the static constructors of the group types
         /// </summary>
-        internal static void Init()
+        internal static void WarmUp()
         {
             List<Assembly> assemblies = AssemblyUtility.GetCompatibleAssemblies();
             foreach (Assembly assembly in assemblies)
@@ -26,8 +30,8 @@ namespace Svelto.ECS
                     {
                         CheckForGroupCompounds(type);
 
-                        if (type != null && type.IsClass && type.IsSealed &&
-                            type.IsAbstract) //IsClass and IsSealed and IsAbstract means only static classes
+                        //Search inside static types
+                        if (type != null && type.IsClass && type.IsSealed && type.IsAbstract) //IsClass and IsSealed and IsAbstract means only static classes
                         {
                             var subClasses = type.GetNestedTypes();
 
@@ -40,8 +44,8 @@ namespace Svelto.ECS
 
                             foreach (var field in fields)
                             {
-                                if (field.IsStatic
-                                 && (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType)
+                                if (field.IsStatic 
+                                     && (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType)
                                      || typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType)
                                      || typeOfExclusiveBuildGroup.IsAssignableFrom(field.FieldType)))
                                 {
@@ -52,7 +56,8 @@ namespace Svelto.ECS
                                         var group = (ExclusiveGroup)field.GetValue(null);
                                         groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
                                     }
-                                    else if (typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType))
+                                    else 
+                                    if (typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType))
                                     {
                                         var group = (ExclusiveGroupStruct)field.GetValue(null);
                                         groupIDAndBitMask = @group.ToIDAndBitmask();
@@ -94,7 +99,7 @@ namespace Svelto.ECS
         {
             if (typeof(ITouchedByReflection).IsAssignableFrom(type))
             {
-                //this wil call the static constructor, but only once. Static constructors won't be called
+                //this calls the static constructor, but only once. Static constructors won't be called
                 //more than once with this
                 System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.BaseType.TypeHandle);
             }
@@ -107,7 +112,7 @@ namespace Svelto.ECS
         /// <param name="exclusiveGroupStruct"></param>
         /// <param name="name"></param>
         /// <exception cref="ECSException"></exception>
-        public static void RegisterGroup(ExclusiveGroupStruct exclusiveGroupStruct, string name)
+        internal static void RegisterGroup(ExclusiveGroupStruct exclusiveGroupStruct, string name)
         {
             //Group already registered by another field referencing the same group, can happen because
             //the group poked is a group compound which static constructor is already been called at this point
@@ -125,7 +130,7 @@ namespace Svelto.ECS
             _hashByGroups.Add(exclusiveGroupStruct, nameHash);
         }
 
-        internal static uint GetHashFromGroup(ExclusiveGroupStruct groupStruct)
+        public static uint GetHashFromGroup(ExclusiveGroupStruct groupStruct)
         {
 #if DEBUG && !PROFILE_SVELTO
             if (_hashByGroups.ContainsKey(groupStruct) == false)
@@ -135,7 +140,7 @@ namespace Svelto.ECS
             return _hashByGroups[groupStruct];
         }
 
-        internal static ExclusiveGroupStruct GetGroupFromHash(uint groupHash)
+        public static ExclusiveGroupStruct GetGroupFromHash(uint groupHash)
         {
 #if DEBUG && !PROFILE_SVELTO
             if (_groupsByHash.ContainsKey(groupHash) == false)

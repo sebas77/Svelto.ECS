@@ -27,7 +27,10 @@ namespace Svelto.ECS
     {
         static GroupCompound()
         {
-            //avoid race conditions if compounds are using on multiple thread
+            //avoid race conditions if compounds are using on multiple thread. This shouldn't be necessary though since c# static constructors are guaranteed to be thread safe!
+            /// c# Static constructors are guaranteed to be thread safe
+            /// The runtime guarantees that a static constructor is only called once. So even if a type is called by multiple threads at the same time,
+            /// the static constructor is always executed one time. To get a better understanding how this works, it helps to know what purpose it serves.
             if (Interlocked.CompareExchange(ref isInitializing, 1, 0) == 0 &&
                 GroupCompoundInitializer.skipStaticCompoundConstructorsWith4Tags.Value == false)
             {
