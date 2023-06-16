@@ -189,7 +189,11 @@ Best option is to fork and clone [https://github.com/sebas77/Svelto.ECS.Tests](h
 
 ## Unity Installation Note:
 
-if you are installing Svelto.ECS manually and not through OUPM, you need to add this in your manifest:
+if you are installing Svelto.ECS manually and not through OUPM, you need to copy the projecs folders under the Package folder like:
+
+<img width="512" alt="image" src="https://github.com/sebas77/Svelto.ECS/assets/945379/73d02526-f8f6-4aff-88d8-4bd3cdd9deeb">
+
+and add this into your manifest:
 ```
 ,
   "scopedRegistries": [
