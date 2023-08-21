@@ -231,7 +231,7 @@ looking like:
 Hey, thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, the more we are, the better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: *A visual debugger and more unit tests are needed*. Other platforms other than Unity could get some love too: Stride Game, Godot, monogame, FNA or whatever supports c#. Porting to other languages, especially c++, would be awesome but probably pointless. Please check the lane dedicated to the community tasks list here: https://github.com/users/sebas77/projects/3 and let me know if you want to take something on!
 
 ## Svelto Framework is used to develop the following products\(\*\):
-![Toy Trains](https://cdn.akamai.steamstatic.com/steam/apps/2494440/ss_e98f8397467dda6a0a85f5c828d027fc3a71ac8d.1920x1080.jpg?t=1692271457)
+![Toy Trains](https://github.com/sebas77/Svelto.ECS/assets/945379/282494a8-1c0a-43be-8fb7-b2edddcf5938)
 ![Beyond These Stars](https://user-images.githubusercontent.com/945379/235711883-eff208d3-9e1f-45b7-90e5-83c2d7a0a805.png)
 ![Robocraft](https://user-images.githubusercontent.com/945379/225630614-20dbdf8e-2d7f-48d5-8e04-39e6d43a43ab.png)
 ![Techblox](https://user-images.githubusercontent.com/945379/123062411-65ee3600-d404-11eb-8dca-d30c28ed909d.png)
