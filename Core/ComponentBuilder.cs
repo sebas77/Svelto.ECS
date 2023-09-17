@@ -52,7 +52,7 @@ namespace Svelto.ECS
             if (IS_UNMANAGED)
                 EntityComponentIDMap.Register<T>(new Filler<T>());
 #endif
-
+            ComponentTypeID<T>.Init();
             ComponentBuilderUtilities.CheckFields(ENTITY_COMPONENT_TYPE, IS_ENTITY_VIEW_COMPONENT);
 
             if (IS_ENTITY_VIEW_COMPONENT)

@@ -19,9 +19,7 @@ namespace Svelto.ECS
 
         public void Init<T>(T initializer) where T : struct, _IInternalEntityComponent
         {
-            if (_group.TryGetValue(
-                    ComponentTypeID<T>.id,
-                    out var typeSafeDictionary) == false)
+            if (_group.TryGetValue(ComponentTypeID<T>.id, out var typeSafeDictionary) == false)
                 return;
 
             var dictionary = (ITypeSafeDictionary<T>)typeSafeDictionary;
@@ -29,16 +27,14 @@ namespace Svelto.ECS
             if (ComponentBuilder<T>.HAS_EGID)
                 SetEGIDWithoutBoxing<T>.SetIDWithoutBoxing(ref initializer, _ID);
 #endif
-
             if (dictionary.TryFindIndex(_ID.entityID, out var findElementIndex))
                 dictionary.GetDirectValueByRef(findElementIndex) = initializer;
         }
 
-        internal ref T GetOrAdd<T>() where T : struct, _IInternalEntityComponent
+        internal ref T GetOrAdd<T>() where T : unmanaged, _IInternalEntityComponent
         {
-            ref var entityDictionary = ref _group.GetOrAdd(
-                ComponentTypeID<T>.id,
-                () => new UnmanagedTypeSafeDictionary<T>(1));
+            ref var entityDictionary = ref _group.GetOrAdd(ComponentTypeID<T>.id, () => new UnmanagedTypeSafeDictionary<T>(1));
+            
             var dictionary = (ITypeSafeDictionary<T>)entityDictionary;
 
             return ref dictionary.GetOrAdd(_ID.entityID);
@@ -46,15 +42,12 @@ namespace Svelto.ECS
 
         public ref T Get<T>() where T : struct, _IInternalEntityComponent
         {
-            return ref (_group[ComponentTypeID<T>.id] as ITypeSafeDictionary<T>)
-               .GetValueByRef(_ID.entityID);
+            return ref (_group[ComponentTypeID<T>.id] as ITypeSafeDictionary<T>).GetValueByRef(_ID.entityID);
         }
 
         public bool Has<T>() where T : struct, _IInternalEntityComponent
         {
-            if (_group.TryGetValue(
-                    ComponentTypeID<T>.id,
-                    out var typeSafeDictionary))
+            if (_group.TryGetValue(ComponentTypeID<T>.id, out var typeSafeDictionary))
             {
                 var dictionary = (ITypeSafeDictionary<T>)typeSafeDictionary;
 

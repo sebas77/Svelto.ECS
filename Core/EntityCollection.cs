@@ -10,15 +10,15 @@ namespace Svelto.ECS
         {
             DBC.ECS.Check.Require(count == 0 || buffer.isValid, "Buffer is found in impossible state");
 
-            _buffer    = buffer;
-            _entityIDs = entityIDs;
+            this.buffer    = buffer;
+            this.entityIDs = entityIDs;
             this.count = count;
         }
 
         public uint count { get; }
 
-        public readonly IBufferBase _buffer;
-        public readonly IEntityIDs  _entityIDs;
+        public readonly IBufferBase buffer;
+        public readonly IEntityIDs  entityIDs;
     }
 
     public readonly ref struct EntityCollection<T1, T2> where T1 : struct, _IInternalEntityComponent

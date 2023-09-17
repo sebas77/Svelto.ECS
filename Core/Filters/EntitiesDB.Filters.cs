@@ -99,10 +99,10 @@ namespace Svelto.ECS
             /// Create a persistent filter. Persistent filters are not deleted after each submission,
             /// however they have a maintenance cost that must be taken into account and will affect
             /// entities submission performance.
+            /// Persistent filters keep track of the entities group swaps and they are automatically updated accordingly.
             /// </summary>
             /// <typeparam name="T"></typeparam>
             /// <returns></returns>
-
 #if UNITY_BURST && UNITY_COLLECTIONS
             [Unity.Burst.BurstDiscard] //not burst compatible because of  ComponentTypeID<T>.id and GetOrAdd callback;
 #endif

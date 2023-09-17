@@ -4,6 +4,8 @@ using Svelto.DataStructures;
 
 namespace Svelto.ECS
 {
+    //these are not meant to be held or passed by parameter.
+    //however cannot be ref struct because of DOTS lambda design for entity queries Entities.ForEach
     public struct EntityFilterIndices
     {
         public EntityFilterIndices(NB<uint> indices, uint count)
@@ -13,10 +15,10 @@ namespace Svelto.ECS
             _index   = 0;
         }
 
-        public uint count
+        public int count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _count;
+            get => (int)_count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -40,7 +42,7 @@ namespace Svelto.ECS
             return _indices[Interlocked.Increment(ref _index) - 1];
         }
 
-        readonly NB<uint> _indices;
+        readonly NBInternal<uint> _indices;
         readonly uint     _count;
         int               _index;
     }

@@ -55,8 +55,7 @@ namespace Svelto.ECS
 
                     dictionary.KeysEvaluator((key) =>
                     {
-                        _enginesRoot.Target.CheckRemoveEntityID(new EGID(key, fromGroupID), null, caller);
-                        _enginesRoot.Target.CheckAddEntityID(new EGID(key, toGroupID), null, caller);
+                        _enginesRoot.Target.CheckSwapEntityID(new EGID(key, fromGroupID), new EGID(key, toGroupID), null, caller);
                     });
 #endif
                     _enginesRoot.Target.QueueSwapGroupOperation(fromGroupID, toGroupID, caller);
@@ -100,8 +99,7 @@ namespace Svelto.ECS
 
                 var enginesRootTarget = _enginesRoot.Target;
 
-                enginesRootTarget.CheckRemoveEntityID(fromEGID, TypeCache<T>.type, caller);
-                enginesRootTarget.CheckAddEntityID(toEGID, TypeCache<T>.type, caller);
+                enginesRootTarget.CheckSwapEntityID(fromEGID, toEGID, TypeCache<T>.type, caller);
 
                 enginesRootTarget.QueueSwapEntityOperation(fromEGID, toEGID
                                                          , _enginesRoot.Target.FindRealComponents<T>(fromEGID)
@@ -137,8 +135,7 @@ namespace Svelto.ECS
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void QueueSwapEntityOperation
-            (EGID fromID, EGID toID, IComponentBuilder[] componentBuilders, string caller)
+        void QueueSwapEntityOperation(EGID fromID, EGID toID, IComponentBuilder[] componentBuilders, string caller)
         {
             _entitiesOperations.QueueSwapOperation(fromID, toID, componentBuilders, caller);
         }

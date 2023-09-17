@@ -88,10 +88,8 @@ namespace Svelto.ECS
 
                         ref var nativeSwapOperation = ref _nativeSwapOperations[componentsIndex];
 
-                        CheckRemoveEntityID(entityEGID.@from, nativeSwapOperation.entityDescriptorType
+                        CheckSwapEntityID(entityEGID.@from, entityEGID.to, nativeSwapOperation.entityDescriptorType
                                           , nativeSwapOperation.caller);
-                        CheckAddEntityID(entityEGID.to, nativeSwapOperation.entityDescriptorType
-                                       , nativeSwapOperation.caller);
 
                         QueueSwapEntityOperation(entityEGID.@from, entityEGID.to
                                                , FindRealComponents(entityEGID.@from, nativeSwapOperation.components)

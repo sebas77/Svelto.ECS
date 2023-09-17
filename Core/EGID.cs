@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 
 namespace Svelto.ECS
 {
-    [Serialization.DoNotSerialize]
-    [Serializable]
+    [Serialization.DoNotSerialize] //EGID cannot be serialised with Svelto serialization code
+    [Serializable] //I do not remember why we marked this a Serializable though
     [StructLayout(LayoutKind.Explicit)]
     public struct EGID : IEquatable<EGID>, IComparable<EGID>
     {

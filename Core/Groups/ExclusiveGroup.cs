@@ -46,6 +46,14 @@ namespace Svelto.ECS
             _range = range;
 #endif
         }
+        
+        public ExclusiveGroup(ushort range, ExclusiveGroupBitmask bitmask)
+        {
+            _group = ExclusiveGroupStruct.GenerateWithRange(range, (byte)bitmask);
+#if DEBUG && !PROFILE_SVELTO
+            _range = range;
+#endif
+        }
 
         public static implicit operator ExclusiveGroupStruct(ExclusiveGroup group)
         {
@@ -62,10 +70,10 @@ namespace Svelto.ECS
 #endif
             return group._group + b;
         }
-
+        
         public uint id => _group.id;
 
-        //todo document the use case for this method
+        //todo document the use case for this method. I may honestly set this as a deprecated as it's original scenario is probably not valid anymore
         public static ExclusiveGroupStruct Search(string holderGroupName)
         {
             if (_knownGroups.ContainsKey(holderGroupName) == false)

@@ -61,7 +61,6 @@ namespace Svelto.ECS.Experimental
         HashSet<ExclusiveGroupStruct>    _sets;
     }
 
-    //I am not 100% sure why I made this thread-safe since it cannot be used inside jobs.
     public ref struct QueryGroups
     {
         static readonly ThreadLocal<GroupsList> groups;

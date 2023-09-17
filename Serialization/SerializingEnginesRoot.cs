@@ -1,6 +1,6 @@
 using Svelto.ECS.Schedulers;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Serialization
 {
     public class SerializingEnginesRoot : EnginesRoot
     {

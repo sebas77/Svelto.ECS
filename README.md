@@ -187,10 +187,52 @@ the Hello World example uses the nuget package directly: https://github.com/seba
 ## In case of bugs
 Best option is to fork and clone [https://github.com/sebas77/Svelto.ECS.Tests](https://github.com/sebas77/Svelto.ECS.Tests), add new tests to reproduce the problem and request a pull. I will then fix the issue. Also feel free to contact me on Discord.
 
+## Unity Installation Note:
+
+if you are installing Svelto.ECS manually and not through OUPM, you need to copy the projecs folders under the Package folder like:
+
+<img width="512" alt="image" src="https://github.com/sebas77/Svelto.ECS/assets/945379/73d02526-f8f6-4aff-88d8-4bd3cdd9deeb">
+
+and add this into your manifest:
+```
+,
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "org.nuget.system.runtime.compilerservices.unsafe"
+      ]
+    }
+  ]
+```
+
+looking like:
+
+```
+{
+  "dependencies": {
+...
+  },
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "org.nuget.system.runtime.compilerservices.unsafe"
+      ]
+    }
+  ]
+}
+
+```
+
 ## I like the project, how can I help?
 Hey, thanks a lot for considering this. You can help in several ways. The simplest is to talk about Svelto.ECS and spread the word, the more we are, the better it is for the community. Then you can help with the documentation, updating the wiki or writing your own articles. Svelto.ECS has all the features needed to make a game with the ECS pattern, but some areas are lacking: *A visual debugger and more unit tests are needed*. Other platforms other than Unity could get some love too: Stride Game, Godot, monogame, FNA or whatever supports c#. Porting to other languages, especially c++, would be awesome but probably pointless. Please check the lane dedicated to the community tasks list here: https://github.com/users/sebas77/projects/3 and let me know if you want to take something on!
 
 ## Svelto Framework is used to develop the following products\(\*\):
+![Toy Trains](https://github.com/sebas77/Svelto.ECS/assets/945379/282494a8-1c0a-43be-8fb7-b2edddcf5938)
+![Beyond These Stars](https://user-images.githubusercontent.com/945379/235711883-eff208d3-9e1f-45b7-90e5-83c2d7a0a805.png)
 ![Robocraft](https://user-images.githubusercontent.com/945379/225630614-20dbdf8e-2d7f-48d5-8e04-39e6d43a43ab.png)
 ![Techblox](https://user-images.githubusercontent.com/945379/123062411-65ee3600-d404-11eb-8dca-d30c28ed909d.png)
 ![Gamecraft](https://user-images.githubusercontent.com/945379/163145452-3e8d959a-1453-4373-8010-38bb7717f79e.png)

@@ -13,7 +13,7 @@ namespace Svelto.ECS
                     $"trying adding an entity {entityID} to filter {mapper.entityType} - {legacyFilter._ID} with group {legacyFilter._exclusiveGroupStruct}, but entity is not found! ");
         #endif
 
-            return legacyFilter.InternalAdd(entityID, mapper.GetIndex(legacyFilter._exclusiveGroupStruct, entityID));
+            return legacyFilter.InternalAdd(entityID, mapper.GetIndex(new EGID(entityID, legacyFilter._exclusiveGroupStruct)));
         }
 
     }

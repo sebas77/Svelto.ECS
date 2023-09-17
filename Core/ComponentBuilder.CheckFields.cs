@@ -6,6 +6,7 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Svelto.ECS.Hybrid;
+using Svelto.ECS.Serialization;
 
 namespace Svelto.ECS
 {
@@ -154,13 +155,11 @@ namespace Svelto.ECS
         static readonly Type STRINGBUILDERTYPE          = typeof(System.Text.StringBuilder);
 
         internal static readonly Type ENTITY_INFO_COMPONENT = typeof(EntityInfoComponent);
+        
         public static ComponentID ENTITY_INFO_COMPONENT_ID
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return ComponentTypeID<EntityInfoComponent>.id;
-            }
+            get => ComponentTypeID<EntityInfoComponent>.id;
         }
     }
 }

@@ -121,7 +121,18 @@ namespace Svelto.ECS
         {
             var newValue = Interlocked.Add(ref _staticGlobalID, (int)range);
             
-            ExclusiveGroupStruct groupStruct = new ExclusiveGroupStruct((uint) newValue - (uint)range);
+            ExclusiveGroupStruct groupStruct = new ExclusiveGroupStruct((uint)newValue - (uint)range);
+            
+            DBC.ECS.Check.Require(_globalId < ExclusiveGroup.MaxNumberOfExclusiveGroups, "too many exclusive groups created");
+
+            return groupStruct;
+        }
+        
+        public static ExclusiveGroupStruct GenerateWithRange(ushort range, byte bitmask)
+        {
+            var newValue = Interlocked.Add(ref _staticGlobalID, (int)range);
+            
+            ExclusiveGroupStruct groupStruct = new ExclusiveGroupStruct((uint)newValue - (uint)range, bitmask);
             
             DBC.ECS.Check.Require(_globalId < ExclusiveGroup.MaxNumberOfExclusiveGroups, "too many exclusive groups created");
 

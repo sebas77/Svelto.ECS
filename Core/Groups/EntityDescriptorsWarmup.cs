@@ -20,7 +20,7 @@ namespace Svelto.ECS
 
                 foreach (Type type in AssemblyUtility.GetTypesSafe(assembly))
                 {
-                    if (type.IsInterface == false && typeOfEntityDescriptors.IsAssignableFrom(type)) //IsClass and IsSealed and IsAbstract means only static classes
+                    if (type.IsInterface == false && type.IsAbstract == false && type.IsGenericType == false && typeOfEntityDescriptors.IsAssignableFrom(type)) 
                     {
                         try
                         {
