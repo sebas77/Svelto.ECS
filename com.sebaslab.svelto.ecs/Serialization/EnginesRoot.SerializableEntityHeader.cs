@@ -1,3 +1,5 @@
+using Svelto.ECS.Serialization;
+
 namespace Svelto.ECS
 {
     public partial class EnginesRoot

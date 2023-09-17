@@ -17,7 +17,7 @@ namespace Svelto.ECS
 
 
     [DebuggerTypeProxy(typeof(ComponentIDDebugProxy))]
-    public struct ComponentID: IEquatable<ComponentID>
+    public struct ComponentID: IEquatable<ComponentID>, IComparable<ComponentID>
     {
         public static implicit operator int(ComponentID id)
         {
@@ -45,6 +45,11 @@ namespace Svelto.ECS
         public override int GetHashCode()
         {
             return _id;
+        }
+        
+        public int CompareTo(ComponentID other)
+        {
+            return _id.CompareTo(other._id);
         }
 
         int _id;

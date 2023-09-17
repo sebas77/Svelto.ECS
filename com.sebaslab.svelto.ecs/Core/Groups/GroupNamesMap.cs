@@ -7,8 +7,7 @@ static class GroupNamesMap
     static GroupNamesMap() { idToName = new Dictionary<ExclusiveGroupStruct, string>(); }
 
     internal static readonly Dictionary<ExclusiveGroupStruct, string> idToName;
-#endif
-#if DEBUG
+
     public static string ToName(this in ExclusiveGroupStruct group)
     {
         Dictionary<ExclusiveGroupStruct, string> idToName = GroupNamesMap.idToName;

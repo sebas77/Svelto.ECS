@@ -8,5 +8,10 @@ namespace Svelto.ECS
             base(message, exception)
         {
         }
+        
+        public TypeSafeDictionaryException(string message) : 
+                base(message)
+        {
+        }
     }
 }

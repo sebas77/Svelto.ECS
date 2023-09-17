@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Svelto.ECS.Serialization;
 
@@ -20,77 +22,68 @@ namespace Svelto.ECS
             List<Assembly> assemblies = AssemblyUtility.GetCompatibleAssemblies();
             foreach (Assembly assembly in assemblies)
             {
-                try
+                var typeOfExclusiveGroup = typeof(ExclusiveGroup);
+                var typeOfExclusiveGroupStruct = typeof(ExclusiveGroupStruct);
+                var typeOfExclusiveBuildGroup = typeof(ExclusiveBuildGroup);
+
+                var typesSafe = AssemblyUtility.GetTypesSafe(assembly);
+                foreach (Type type in typesSafe)
                 {
-                    var typeOfExclusiveGroup = typeof(ExclusiveGroup);
-                    var typeOfExclusiveGroupStruct = typeof(ExclusiveGroupStruct);
-                    var typeOfExclusiveBuildGroup = typeof(ExclusiveBuildGroup);
+                    CheckForGroupCompounds(type);
 
-                    foreach (Type type in AssemblyUtility.GetTypesSafe(assembly))
+                    //Search inside static types
+                    if (type != null && type.IsClass && type.IsSealed
+                     && type.IsAbstract) //IsClass and IsSealed and IsAbstract means only static classes
                     {
-                        CheckForGroupCompounds(type);
+                        var subClasses = type.GetNestedTypes();
 
-                        //Search inside static types
-                        if (type != null && type.IsClass && type.IsSealed && type.IsAbstract) //IsClass and IsSealed and IsAbstract means only static classes
+                        foreach (var subclass in subClasses)
                         {
-                            var subClasses = type.GetNestedTypes();
+                            CheckForGroupCompounds(subclass);
+                        }
 
-                            foreach (var subclass in subClasses)
+                        var fields = type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+                        foreach (var field in fields)
+                        {
+                            if ((typeOfExclusiveGroup.IsAssignableFrom(field.FieldType)
+                                 || typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType)
+                                 || typeOfExclusiveBuildGroup.IsAssignableFrom(field.FieldType)))
                             {
-                                CheckForGroupCompounds(subclass);
-                            }
+                                uint groupIDAndBitMask;
 
-                            var fields = type.GetFields();
-
-                            foreach (var field in fields)
-                            {
-                                if (field.IsStatic 
-                                     && (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType)
-                                     || typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType)
-                                     || typeOfExclusiveBuildGroup.IsAssignableFrom(field.FieldType)))
+                                if (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType))
                                 {
-                                    uint groupIDAndBitMask;
+                                    var group = (ExclusiveGroup)field.GetValue(null);
+                                    groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
+                                }
+                                else if (typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType))
+                                {
+                                    var group = (ExclusiveGroupStruct)field.GetValue(null);
+                                    groupIDAndBitMask = @group.ToIDAndBitmask();
+                                }
+                                else
+                                {
+                                    var group = (ExclusiveBuildGroup)field.GetValue(null);
+                                    groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
+                                }
 
-                                    if (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType))
-                                    {
-                                        var group = (ExclusiveGroup)field.GetValue(null);
-                                        groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
-                                    }
-                                    else 
-                                    if (typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType))
-                                    {
-                                        var group = (ExclusiveGroupStruct)field.GetValue(null);
-                                        groupIDAndBitMask = @group.ToIDAndBitmask();
-                                    }
-                                    else
-                                    {
-                                        var group = (ExclusiveBuildGroup)field.GetValue(null);
-                                        groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
-                                    }
-
-                                    {
-                                        var bitMask = (byte)(groupIDAndBitMask >> 24);
-                                        var groupID = groupIDAndBitMask & 0xFFFFFF;
-                                        ExclusiveGroupStruct group = new ExclusiveGroupStruct(groupID, bitMask);
+                                {
+                                    var bitMask = (byte)(groupIDAndBitMask >> 24);
+                                    var groupID = groupIDAndBitMask & 0xFFFFFF;
+                                    ExclusiveGroupStruct group = new ExclusiveGroupStruct(groupID, bitMask);
 #if DEBUG && !PROFILE_SVELTO
                                         if (GroupNamesMap.idToName.ContainsKey(@group) == false)
                                             GroupNamesMap.idToName[@group] =
                                                     $"{type.FullName}.{field.Name} {@group.id})";
 #endif
-                                        //The hashname is independent from the actual group ID. this is fundamental because it is want
-                                        //guarantees the hash to be the same across different machines
-                                        RegisterGroup(@group, $"{type.FullName}.{field.Name}");
-                                    }
+                                    //The hashname is independent from the actual group ID. this is fundamental because it is want
+                                    //guarantees the hash to be the same across different machines
+                                    RegisterGroup(@group, $"{type.FullName}.{field.Name}");
                                 }
                             }
                         }
                     }
-                }
-                catch
-                {
-                    Console.LogDebugWarning(
-                        "something went wrong while gathering group names on the assembly: ".FastConcat(
-                            assembly.FullName));
                 }
             }
         }
@@ -101,7 +94,29 @@ namespace Svelto.ECS
             {
                 //this calls the static constructor, but only once. Static constructors won't be called
                 //more than once with this
-                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.BaseType.TypeHandle);
+                CallStaticConstructorsRecursively(type);
+            }
+
+            static void CallStaticConstructorsRecursively(Type type)
+            {
+                // Check if the current type has a static constructor
+//                type.TypeInitializer.Invoke(null, null); //calling Invoke will force the static constructor to be called even if already called, this is a problem because GroupTag and Compound throw an exception if called multiple times
+                RuntimeHelpers.RunClassConstructor(type.TypeHandle); //this will call the static constructor only once
+                    
+#if DEBUG && !PROFILE_SVELTO
+                if (type.GetInterfaces().Contains(type) == false)
+                {
+                    if (type.IsSealed == false)
+                        Svelto.Console.LogWarning(
+                            $"Group compound/tag {type} is not sealed. GroupCompounds and Tags cannot be inherited, consider marking it sealed");
+                }
+#endif
+                // Recursively check the base types
+                Type baseType = type.BaseType;
+                if (baseType != null && baseType != typeof(object)) //second if means we got the the end of the hierarchy
+                {
+                    CallStaticConstructorsRecursively(baseType);
+                }
             }
         }
 

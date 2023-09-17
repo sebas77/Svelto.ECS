@@ -37,7 +37,7 @@ namespace Svelto.ECS
                 while (++_indexGroup < _groups.count)
                 {
                     var exclusiveGroupStruct = _groups[_indexGroup];
-                    if (!exclusiveGroupStruct.IsEnabled())
+                    if (exclusiveGroupStruct.IsEnabled() == false)
                         continue;
 
                     var entityCollection = _entitiesDB.QueryEntities<T1, T2, T3, T4>(exclusiveGroupStruct);
@@ -117,7 +117,7 @@ namespace Svelto.ECS
                 while (++_indexGroup < _groups.count)
                 {
                     var exclusiveGroupStruct = _groups[_indexGroup];
-                    if (!exclusiveGroupStruct.IsEnabled())
+                    if (exclusiveGroupStruct.IsEnabled() == false)
                         continue;
 
                     EntityCollection<T1, T2, T3> entityCollection = _entitiesDB.QueryEntities<T1, T2, T3>(exclusiveGroupStruct);
@@ -198,7 +198,7 @@ namespace Svelto.ECS
                 while (++_indexGroup < _groups.count)
                 {
                     var exclusiveGroupStruct = _groups[_indexGroup];
-                    if (!exclusiveGroupStruct.IsEnabled())
+                    if (exclusiveGroupStruct.IsEnabled() == false)
                         continue;
 
                     var entityCollection = _db.QueryEntities<T1, T2>(exclusiveGroupStruct);
@@ -277,7 +277,7 @@ namespace Svelto.ECS
                 {
                     var exclusiveGroupStruct = _groups[_indexGroup];
                     
-                    if (!exclusiveGroupStruct.IsEnabled())
+                    if (exclusiveGroupStruct.IsEnabled() == false)
                         continue;
 
                     var entityCollection = _db.QueryEntities<T1>(exclusiveGroupStruct);

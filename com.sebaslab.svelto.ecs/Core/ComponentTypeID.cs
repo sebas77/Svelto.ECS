@@ -5,7 +5,7 @@ using Svelto.ECS.Internal;
 
 namespace Svelto.ECS
 {
-    public static class BurstCompatibleCounter
+    static class BurstCompatibleCounter
     {
         public static int counter;        
     }
@@ -34,8 +34,10 @@ namespace Svelto.ECS
         [Unity.Burst.BurstDiscard] 
         //SharedStatic values must be initialized from not burstified code
 #endif
-        static void Init()
+        internal static void Init()
         {
+            if (_id.Data != 0)
+                return;
             _id.Data = Interlocked.Increment(ref BurstCompatibleCounter.counter);
             ComponentTypeMap.Add(typeof(T), id);
         }

@@ -1,6 +1,6 @@
 using Svelto.DataStructures;
 
-namespace Svelto.ECS
+namespace Svelto.ECS.Serialization
 {
     public class SimpleSerializationData : ISerializationData
     {

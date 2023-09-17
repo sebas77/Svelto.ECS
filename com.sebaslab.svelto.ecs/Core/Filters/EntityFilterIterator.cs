@@ -2,11 +2,11 @@
 {
     public ref struct EntityFilterIterator
     {
-        internal EntityFilterIterator(EntityFilterCollection  filter)
+        internal EntityFilterIterator(EntityFilterCollection filter)
         {
-            _filter     = filter;
+            _filter = filter;
             _indexGroup = -1;
-            _current    = default;
+            _current = default;
         }
 
         public bool MoveNext()
@@ -15,7 +15,8 @@
             {
                 _current = _filter.GetGroup(_indexGroup);
 
-                if (_current.count > 0) break;
+                if (_current.count > 0 && _current.group.IsEnabled() == true)
+                    break;
             }
 
             return _indexGroup < _filter.groupCount;
@@ -28,8 +29,8 @@
 
         public RefCurrent Current => new RefCurrent(_current);
 
-        int                                 _indexGroup;
-        readonly EntityFilterCollection     _filter;
+        int _indexGroup;
+        readonly EntityFilterCollection _filter;
         EntityFilterCollection.GroupFilters _current;
 
         public readonly ref struct RefCurrent
@@ -42,7 +43,15 @@
             public void Deconstruct(out EntityFilterIndices indices, out ExclusiveGroupStruct group)
             {
                 indices = _filter.indices;
-                group   = _filter.group;
+                group = _filter.group;
+            }
+
+            public void Deconstruct(out EntityFilterIndices indices, out ExclusiveGroupStruct group,
+                out EntityFilterCollection.GroupFilters groupFilter)
+            {
+                indices = _filter.indices;
+                group = _filter.group;
+                groupFilter = _filter;
             }
 
             readonly EntityFilterCollection.GroupFilters _filter;

@@ -119,8 +119,7 @@ namespace Svelto.ECS
                 uint descriptorHash = serializableEntityComponent.descriptorHash;
                 var entityDescriptor = serializationDescriptorMap.GetDescriptorFromHash(descriptorHash);
 
-                _enginesRoot.CheckRemoveEntityID(fromEGID, entityDescriptor.realType, caller);
-                _enginesRoot.CheckAddEntityID(toEGID, entityDescriptor.realType, caller);
+                _enginesRoot.CheckSwapEntityID(fromEGID, toEGID, entityDescriptor.realType, caller);
 
                 /// Serializable Entity Descriptors can be extended so we need to use FindRealComponents
                 _enginesRoot.QueueSwapEntityOperation(fromEGID, toEGID,

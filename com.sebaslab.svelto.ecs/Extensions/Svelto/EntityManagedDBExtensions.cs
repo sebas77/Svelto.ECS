@@ -52,7 +52,7 @@ namespace Svelto.ECS
             if (safeDictionary.TryFindIndex(entityGID.entityID, out index) == false)
                 return false;
 
-            buffer = (MB<T>) (safeDictionary as ITypeSafeDictionary<T>).GetValues(out _);
+            buffer = (MBInternal<T>) (safeDictionary as ITypeSafeDictionary<T>).GetValues(out _);
 
             return true;
         }
@@ -98,7 +98,7 @@ namespace Svelto.ECS
         {
             if (mapper._map.TryFindIndex(entityID, out index))
             {
-                return (MB<T>) mapper._map.GetValues(out _);
+                return (MBInternal<T>) mapper._map.GetValues(out _);
             }
 
             throw new ECSException("Entity not found");
@@ -112,7 +112,7 @@ namespace Svelto.ECS
             index = default;
             if (mapper._map != null && mapper._map.TryFindIndex(entityID, out index))
             {
-                array = (MB<T>) mapper._map.GetValues(out _);
+                array = (MBInternal<T>) mapper._map.GetValues(out _);
                 return true;
             }
 
