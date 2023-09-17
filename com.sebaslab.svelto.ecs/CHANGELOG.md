@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. Changes are
 * Unity DOTS: added CreateDOTSToSveltoSyncEngine method in SveltoOnDOTSEnginesGroup
 * Refactor: split NB/MB struct from their internal logic that must be used only by the framework. Eventually NB and MB structs must be ref, as they are not supposed to be held (they may become invalid over the time). However due to the current DOTS patterns this is not possible. In future a sentinel pattern will allow to lease these buffers with the assumption that they can't be modified while held (and if a modification happens an exception will throw)
  * Improved managed EGIDMultiMapper. A MultiMapper can improve components fetching performance
- * Renamed IDisposingEngine interface to IDisposableEngine
+ * Renamed IDisposableEngine interface to IDisposableEngine
  * added EntityReference Exists method to validate it against a given entity database
  * BUG FIXED: IReactOnDisposeEx callbacks were not correctly called
  * BUG FIXED: fixed serious bug that would pass wrong entities indices to the moveTO callback under specific conditions
