@@ -103,7 +103,7 @@ Svelto.ECS is partially compatible with Unity 2019.3.x cycle as long as it's not
 Svelto.ECS is designed to take full advantange of the DOTS modules and to use specifically DOTS ECS as an engine library, through the (optional) SveltoOnDOTS wrapper. 
 
 ## Why using Svelto.ECS without Unity?
-There are so many c# game engines out there (Stride, Flax, Monogame, FlatRedBall, Evergine, UnrealCLR, UniEngine just to mention some) and Svelto.ECS is compatible with all of them! 
+There are so many c# game engines out there (Stride, Flax, Monogame, FlatRedBall, Evergine, Godot, UniEngine just to mention some) and Svelto.ECS is compatible with all of them! 
 
 ## Performance considerations
 Aside from resizing the database absolutely when necessary, all the Svelto operations are memory allocation free. Some containers may need to be preallocated (and then disposed) but those are already advanced scenarios. When using pure ECS (no EntityViewComponents) components are stored in native collections across all the platforms, which means gaining some performance from losing the managed memory checks. With pure ECS, iterating components is automatically cache-friendly.
