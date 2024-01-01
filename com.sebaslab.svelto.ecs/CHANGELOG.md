@@ -1,7 +1,7 @@
 # Svelto.ECS Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
-## [3.5.0] - 09-2023
+## [3.5.0-pre] - 09-2023
 
 * Introduced Serialization namespace for the serialization code
 * Unity: dropped 2020 support, minimum requirement is no 2021.3
