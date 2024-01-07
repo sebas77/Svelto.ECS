@@ -29,11 +29,7 @@ namespace Svelto.ECS.SveltoOnDOTS
     {
         public SveltoOnDOTSEnginesGroup(EnginesRoot enginesRoot)
         {
-            DBC.ECS.Check.Require(
-                enginesRoot.scheduler is SimpleEntitiesSubmissionScheduler
-              , "The Engines root must use a EntitiesSubmissionScheduler scheduler implementation");
-
-            CreateUnityECSWorldForSvelto(enginesRoot.scheduler as SimpleEntitiesSubmissionScheduler, enginesRoot);
+            CreateUnityECSWorldForSvelto(enginesRoot.scheduler, enginesRoot);
         }
         
         /// <summary>
@@ -121,7 +117,7 @@ namespace Svelto.ECS.SveltoOnDOTS
             world.Dispose();
         }
 
-        void CreateUnityECSWorldForSvelto(SimpleEntitiesSubmissionScheduler scheduler, EnginesRoot enginesRoot)
+        void CreateUnityECSWorldForSvelto(EntitiesSubmissionScheduler scheduler, EnginesRoot enginesRoot)
         {
             world = new World("Svelto<>DOTS world");
 

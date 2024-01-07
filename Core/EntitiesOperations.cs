@@ -33,8 +33,15 @@ namespace Svelto.ECS
 
         public void QueueRemoveOperation(EGID fromEgid, IComponentBuilder[] componentBuilders, string caller)
         {
+            // Check if the entity is already queued for removal
+            if (_thisSubmissionInfo._entitiesRemoved.Contains(fromEgid))
+            {
+                // If it is, skip the rest of the function
+                return;
+            }
+            
             _thisSubmissionInfo._entitiesRemoved.Add(fromEgid);
-            RevertSwapOperation(fromEgid);
+            RevertSwapOperationIfPreviouslyQueued(fromEgid);
 
             //todo: limit the number of dictionaries that can be cached 
             //recycle or create dictionaries of components per group
@@ -49,7 +56,7 @@ namespace Svelto.ECS
                        .Add((fromEgid.entityID, caller));
             }
 
-            void RevertSwapOperation(EGID fromEgid)
+            void RevertSwapOperationIfPreviouslyQueued(EGID fromEgid)
             {
                 if (_thisSubmissionInfo._entitiesSwapped.Remove(fromEgid, out (EGID fromEgid, EGID toEgid) val)) //Remove supersedes swap, check comment in IEntityFunctions.cs
                 {

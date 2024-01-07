@@ -7,6 +7,10 @@ namespace Svelto.ECS
 {
     public partial class EntitiesDB
     {
+        /// <summary>
+        /// Return all the groups where the entity component is found. It's a linear operation, but usually the number of groups are very low
+        /// By default Groups marked as disabled are not returned, however this can be overridden using the ignoreDisabledBit parameter
+        /// </summary>
         public LocalFasterReadOnlyList<ExclusiveGroupStruct> FindGroups<T1>(bool ignoreDisabledBit = false) where T1 : struct, _IInternalEntityComponent
         {
             FasterList<ExclusiveGroupStruct> result = localgroups.Value.groupArray;
@@ -123,6 +127,7 @@ namespace Svelto.ECS
             if (localGroups.count == 0)
                 return new LocalFasterReadOnlyList<ExclusiveGroupStruct>(
                     FasterReadOnlyList<ExclusiveGroupStruct>.DefaultEmptyList);
+            
             groupData = localArray[++startIndex % 3];
             localGroups.Intersect(groupData);
 
@@ -180,11 +185,13 @@ namespace Svelto.ECS
             if (localGroups.count == 0)
                 return new LocalFasterReadOnlyList<ExclusiveGroupStruct>(
                     FasterReadOnlyList<ExclusiveGroupStruct>.DefaultEmptyList);
+            
             groupData = localArray[++startIndex & 3];
             localGroups.Intersect(groupData);
             if (localGroups.count == 0)
                 return new LocalFasterReadOnlyList<ExclusiveGroupStruct>(
                     FasterReadOnlyList<ExclusiveGroupStruct>.DefaultEmptyList);
+            
             groupData = localArray[++startIndex & 3];
             localGroups.Intersect(groupData);
 

@@ -76,6 +76,7 @@ namespace Svelto.ECS
             bool isAllowed = false;
             if (_multipleOperationOnSameEGIDChecker.TryGetValue(egid, out var operationType) == true)
             {
+                //remove supersedes swap and remove operations, this means remove is allowed if the previous operation was swap or remove on the same submission
                 isAllowed = operationType == OperationType.Remove || operationType == OperationType.SwapFrom;
 
                 if (isAllowed)
