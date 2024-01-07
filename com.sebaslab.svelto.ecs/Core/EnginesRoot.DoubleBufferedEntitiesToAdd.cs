@@ -152,13 +152,17 @@ namespace Svelto.ECS
                 void PreallocateDictionaries
                     (FasterDictionary<ExclusiveGroupStruct, FasterDictionary<ComponentID, ITypeSafeDictionary>> dic)
                 {
+                    //get the set of entities in the group ID
                     var group = dic.GetOrAdd(
                         groupID, () => new FasterDictionary<ComponentID, ITypeSafeDictionary>());
 
+                    //for each component of the entities in the group
                     foreach (var componentBuilder in entityComponentsToBuild)
                     {
-                        var safeDictionary = group.GetOrAdd(componentBuilder.getComponentID, () => componentBuilder.CreateDictionary(numberOfEntities));
-                        componentBuilder.Preallocate(safeDictionary, numberOfEntities);
+                        //get the dictionary of entities for the component type
+                        var components = group.GetOrAdd(componentBuilder.getComponentID, () => componentBuilder.CreateDictionary(numberOfEntities));
+                        
+                        componentBuilder.Preallocate(components, numberOfEntities);
                     }
                 }
 

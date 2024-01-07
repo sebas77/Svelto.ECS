@@ -92,6 +92,11 @@ namespace Svelto.ECS
 #endif
         }
 
+        /// <summary>
+        ///Ready is a callback that can be used to signal that an engine is ready to be used because the entitiesDB is now available
+        ///usually engines are ready to be used when they are added to the enginesRoot, but in some special cases, it is possible to
+        ///wait for the user input to signal that engines are ready to be used
+        /// </summary>
         protected EnginesRoot(EntitiesSubmissionScheduler entitiesComponentScheduler,
             EnginesReadyOption enginesWaitForReady): this(entitiesComponentScheduler)
         {
@@ -116,7 +121,7 @@ namespace Svelto.ECS
             return _isDisposed == false;
         }
         
-        public void AddEngine(IEngine engine)
+        public void AddEngine(IEngine engine, bool addSubEngines = true)
         {
             var type = engine.GetType();
             var refWrapper = new RefWrapperType(type);
@@ -174,6 +179,7 @@ namespace Svelto.ECS
                 if (engine is IReactOnSubmissionStarted submissionEngineStarted)
                     _reactiveEnginesSubmissionStarted.Add(submissionEngineStarted);
                 
+                if (addSubEngines)
                 if (engine is IGroupEngine stepGroupEngine)
                     foreach (var stepEngine in stepGroupEngine.engines)
                         AddEngine(stepEngine);
@@ -187,6 +193,7 @@ namespace Svelto.ECS
                 if (engine is IQueryingEntitiesEngine queryableEntityComponentEngine)
                     queryableEntityComponentEngine.entitiesDB = _entitiesDB;
 
+                //Ready is a callback that can be used to signal that the engine is ready to be used because the entitiesDB is now available
                 if (_enginesWaitForReady == EnginesReadyOption.ReadyAsAdded && engine is IGetReadyEngine getReadyEngine)
                     getReadyEngine.Ready();
             }
@@ -432,6 +439,9 @@ namespace Svelto.ECS
         bool _isDisposed;
     }
 
+    //Ready is a callback that can be used to signal that an engine is ready to be used because the entitiesDB is now available
+    //usually engines are ready to be used when they are added to the enginesRoot, but in some special cases, it is possible to
+    //wait for the user input to signal that the engine is ready to be used
     public enum EnginesReadyOption
     {
         ReadyAsAdded,

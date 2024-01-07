@@ -42,9 +42,8 @@ namespace Svelto.ECS
         public ExclusiveGroup(ushort range)
         {
             _group = ExclusiveGroupStruct.GenerateWithRange(range);
-#if DEBUG && !PROFILE_SVELTO
+
             _range = range;
-#endif
         }
         
         public ExclusiveGroup(ushort range, ExclusiveGroupBitmask bitmask)
@@ -90,9 +89,8 @@ namespace Svelto.ECS
         static readonly Dictionary<string, ExclusiveGroupStruct> _knownGroups =
             new Dictionary<string, ExclusiveGroupStruct>();
 
-#if DEBUG && !PROFILE_SVELTO
-        readonly ushort _range;
-#endif
+        internal readonly ushort _range;
+
         readonly ExclusiveGroupStruct _group;
     }
 }

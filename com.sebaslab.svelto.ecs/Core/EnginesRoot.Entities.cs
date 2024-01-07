@@ -90,14 +90,16 @@ namespace Svelto.ECS
                     var entityComponentBuilder = entityComponentsToBuild[index];
                     var entityComponentType = entityComponentBuilder.getComponentID;
 
-                    var dbList = group.GetOrAdd(entityComponentType, () => entityComponentBuilder.CreateDictionary(size));
-                    entityComponentBuilder.Preallocate(dbList, size);
+                    var components = group.GetOrAdd(entityComponentType, () => entityComponentBuilder.CreateDictionary(size));
+                    if (components.count != 0)
+                        throw new ECSException("Entity already created in this group, cannot preallocate");
+                    entityComponentBuilder.Preallocate(components, size);
 
                     if (_groupsPerEntity.TryGetValue(entityComponentType, out var groupedGroup) == false)
                         groupedGroup = _groupsPerEntity[entityComponentType] =
                                 new FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>();
 
-                    groupedGroup[groupID] = dbList;
+                    groupedGroup[groupID] = components;
                 }
             }
 

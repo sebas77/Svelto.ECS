@@ -217,12 +217,12 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Add(uint entityId, uint indexInComponentArray)
+            public bool Add(uint entityId, uint indexInComponentArray)
             {
-                //TODO: check what happens (unit test) if adding the same entityID twice
+                //it's a TryAdd because there is no reason to not replace the index if the entity is already there
                 //TODO: when sentinels are finished, we need to add AsWriter here
                 //cannot write in parallel
-                _entityIDToDenseIndex.Add(entityId, indexInComponentArray);
+                return _entityIDToDenseIndex.TryAdd(entityId, indexInComponentArray, out _);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

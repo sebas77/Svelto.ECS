@@ -52,10 +52,12 @@ namespace Svelto.ECS
                             {
                                 uint groupIDAndBitMask;
 
+                                int range = 0;
                                 if (typeOfExclusiveGroup.IsAssignableFrom(field.FieldType))
                                 {
                                     var group = (ExclusiveGroup)field.GetValue(null);
                                     groupIDAndBitMask = ((ExclusiveGroupStruct)@group).ToIDAndBitmask();
+                                    range = @group._range;
                                 }
                                 else if (typeOfExclusiveGroupStruct.IsAssignableFrom(field.FieldType))
                                 {
@@ -73,13 +75,24 @@ namespace Svelto.ECS
                                     var groupID = groupIDAndBitMask & 0xFFFFFF;
                                     ExclusiveGroupStruct group = new ExclusiveGroupStruct(groupID, bitMask);
 #if DEBUG && !PROFILE_SVELTO
-                                        if (GroupNamesMap.idToName.ContainsKey(@group) == false)
-                                            GroupNamesMap.idToName[@group] =
-                                                    $"{type.FullName}.{field.Name} {@group.id})";
+                                    if (GroupNamesMap.idToName.ContainsKey(@group) == false)
+                                        GroupNamesMap.idToName[@group] =
+                                                $"{type.FullName}.{field.Name} id: {@group.id}";
 #endif
                                     //The hashname is independent from the actual group ID. this is fundamental because it is want
                                     //guarantees the hash to be the same across different machines
                                     RegisterGroup(@group, $"{type.FullName}.{field.Name}");
+
+                                    for (uint i = 1; i < range; i++)
+                                    {
+                                        var exclusiveGroupStruct = group + i;
+#if DEBUG && !PROFILE_SVELTO                                        
+                                        if (GroupNamesMap.idToName.ContainsKey(exclusiveGroupStruct) == false)
+                                            GroupNamesMap.idToName[exclusiveGroupStruct] =
+                                                    $"{type.FullName}.{field.Name} id: {@group.id + i}";
+#endif
+                                        RegisterGroup(exclusiveGroupStruct, $"{type.FullName}.{field.Name} id: {@group.id + i}");
+                                    }
                                 }
                             }
                         }
@@ -102,15 +115,7 @@ namespace Svelto.ECS
                 // Check if the current type has a static constructor
 //                type.TypeInitializer.Invoke(null, null); //calling Invoke will force the static constructor to be called even if already called, this is a problem because GroupTag and Compound throw an exception if called multiple times
                 RuntimeHelpers.RunClassConstructor(type.TypeHandle); //this will call the static constructor only once
-                    
-#if DEBUG && !PROFILE_SVELTO
-                if (type.GetInterfaces().Contains(type) == false)
-                {
-                    if (type.IsSealed == false)
-                        Svelto.Console.LogWarning(
-                            $"Group compound/tag {type} is not sealed. GroupCompounds and Tags cannot be inherited, consider marking it sealed");
-                }
-#endif
+
                 // Recursively check the base types
                 Type baseType = type.BaseType;
                 if (baseType != null && baseType != typeof(object)) //second if means we got the the end of the hierarchy
@@ -121,7 +126,7 @@ namespace Svelto.ECS
         }
 
         /// <summary>
-        /// The hashname is independent from the actual group ID. this is fundamental because it is want
+        /// The hashname is independent from the actual group ID. this is fundamental because it
         /// guarantees the hash to be the same across different machines
         /// </summary>
         /// <param name="exclusiveGroupStruct"></param>

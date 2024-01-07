@@ -60,6 +60,7 @@ namespace Svelto.ECS
 
     public interface IGetReadyEngine : IEngine
     {
+        //Ready is a callback that can be used to signal that the engine is ready to be used because the entitiesDB is now available
         void Ready();
     }
 

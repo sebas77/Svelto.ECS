@@ -26,7 +26,7 @@ namespace Svelto.ECS.SveltoOnDOTS
     [DisableAutoCreation]
     public sealed partial class SveltoOnDOTSEntitiesSubmissionGroup: SystemBase, IQueryingEntitiesEngine, ISveltoOnDOTSSubmission 
     {
-        public SveltoOnDOTSEntitiesSubmissionGroup(SimpleEntitiesSubmissionScheduler submissionScheduler)
+        public SveltoOnDOTSEntitiesSubmissionGroup(EntitiesSubmissionScheduler submissionScheduler)
         {
             _submissionScheduler = submissionScheduler;
             _structuralEngines = new FasterList<ISveltoOnDOTSStructuralEngine>();
@@ -106,7 +106,7 @@ namespace Svelto.ECS.SveltoOnDOTS
         }
 
         readonly FasterList<ISveltoOnDOTSStructuralEngine> _structuralEngines;
-        readonly SimpleEntitiesSubmissionScheduler _submissionScheduler;
+        readonly EntitiesSubmissionScheduler _submissionScheduler;
         DOTSOperationsForSvelto _dotsOperationsForSvelto;
         bool _isReady;
         unsafe JobHandle* _jobHandle;
