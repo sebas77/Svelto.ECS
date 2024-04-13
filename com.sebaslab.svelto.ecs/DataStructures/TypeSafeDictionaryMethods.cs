@@ -134,7 +134,7 @@ namespace Svelto.ECS.Internal
                     }
                     catch
                     {
-                        Console.LogError("Code crashed inside Remove callback ".FastConcat(entityComponentsEngines[i].name));
+                        Console.LogError("Code crashed inside Dispose callback ".FastConcat(entityComponentsEngines[i].name));
 
                         throw;
                     }
@@ -160,7 +160,7 @@ namespace Svelto.ECS.Internal
                         }
                         catch
                         {
-                            Console.LogError("Code crashed inside Remove callback ".FastConcat(reactiveEnginesDisposeExPerType[i].name));
+                            Console.LogError("Code crashed inside Dispose callback ".FastConcat(reactiveEnginesDisposeExPerType[i].name));
 
                             throw;
                         }
@@ -376,7 +376,7 @@ namespace Svelto.ECS.Internal
                 }
                 catch (Exception)
                 {
-                    Console.LogError("Code crashed inside MoveTo callback ".FastConcat(reactiveEnginesSwapPerType[i].name));
+                    Console.LogError("Code crashed inside Swap callback ".FastConcat(reactiveEnginesSwapPerType[i].name));
 
                     throw;
                 }
@@ -569,7 +569,7 @@ namespace Svelto.ECS.Internal
                 }
                 catch (Exception e)
                 {
-                    Console.LogException(e, "Code crashed inside Add callback ".FastConcat(callbackEngines[i].name));
+                    Console.LogException(e, "Code crashed inside Swap callback ".FastConcat(callbackEngines[i].name));
 
                     throw;
                 }
@@ -595,7 +595,7 @@ namespace Svelto.ECS.Internal
                 }
                 catch (Exception e)
                 {
-                    Console.LogException(e, "Code crashed inside Add callback ".FastConcat(fasterList[i].name));
+                    Console.LogException(e, "Code crashed inside Remove callback ".FastConcat(fasterList[i].name));
 
                     throw;
                 }
