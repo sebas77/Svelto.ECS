@@ -433,10 +433,12 @@ namespace Svelto.ECS.Internal
                         //remove Ex callbacks. Basically I am copying back the deleted value
                         //at the end of the array, so I can use as range count, count + number of deleted entities
                         //I need to swap the keys too to have matching EntityIDs
-                        if (index != fromDictionary.count)
+                        var fromDictionaryCount = fromDictionary.count;
+                        var fromDictionaryUnsafeKeys = fromDictionary.unsafeKeys;
+                        if (index != fromDictionaryCount)
                         {
-                            fromDictionary.unsafeValues[(uint)fromDictionary.count] = value;
-                            fromDictionary.unsafeKeys[(uint)fromDictionary.count] = new SveltoDictionaryNode<uint>(id, 0);
+                            fromDictionary.unsafeValues[(uint)fromDictionaryCount] = value;
+                            fromDictionaryUnsafeKeys[(uint)fromDictionaryCount] = new SveltoDictionaryNode<uint>(id, 0);
                         }
 
                         //when a component is removed from a component array, a remove swap back happens. This means
@@ -445,7 +447,7 @@ namespace Svelto.ECS.Internal
                         //of the deleted component 
                         //entityIDsAffectedByRemoval tracks all the entitiesID of the components that need to be updated
                         //in the filters because their indices in the array changed. 
-                        entityIDsAffectedByRemoveAtSwapBack[fromDictionary.unsafeKeys[index].key] = index;
+                        entityIDsAffectedByRemoveAtSwapBack[fromDictionaryUnsafeKeys[index].key] = index;
                     }
 #if DEBUG && !PROFILE_SVELTO                    
                 }

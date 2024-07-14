@@ -61,19 +61,19 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection GetOrCreatePersistentFilter<T>(int filterID, FilterContextID filterContextId)
+            public EntityFilterCollection GetOrCreatePersistentFilter<T>(int filterID, FilterContextID filterContextId)
                     where T : struct, _IInternalEntityComponent
             {
-                return ref GetOrCreatePersistentFilter<T>(new CombinedFilterID(filterID, filterContextId));
+                return GetOrCreatePersistentFilter<T>(new CombinedFilterID(filterID, filterContextId));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection GetOrCreatePersistentFilter<T>(CombinedFilterID filterID) where T : struct, _IInternalEntityComponent
+            public EntityFilterCollection GetOrCreatePersistentFilter<T>(CombinedFilterID filterID) where T : struct, _IInternalEntityComponent
             {
                 var componentAndFilterID = Internal_FilterHelper.CombineFilterIDWithComponentID<T>(filterID);
 
                 if (_persistentEntityFilters.TryFindIndex(componentAndFilterID, out var index) == true)
-                    return ref _persistentEntityFilters.GetDirectValueByRef(index);
+                    return _persistentEntityFilters.GetDirectValueByRef(index);
 
                 _persistentEntityFilters.Add(componentAndFilterID, new EntityFilterCollection(filterID));
 
@@ -92,7 +92,7 @@ namespace Svelto.ECS
                     array.Add(lastIndex);
                 }
 
-                return ref _persistentEntityFilters.GetDirectValueByRef((uint)lastIndex);
+                return _persistentEntityFilters.GetDirectValueByRef((uint)lastIndex);
             }
 
             /// <summary>
@@ -107,7 +107,7 @@ namespace Svelto.ECS
             [Unity.Burst.BurstDiscard] //not burst compatible because of  ComponentTypeID<T>.id and GetOrAdd callback;
 #endif
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection CreatePersistentFilter<T>(CombinedFilterID filterID)
+            public EntityFilterCollection CreatePersistentFilter<T>(CombinedFilterID filterID)
                     where T : struct, _IInternalEntityComponent
             {
                 var componentAndFilterID = Internal_FilterHelper.CombineFilterIDWithComponentID<T>(filterID);
@@ -123,7 +123,7 @@ namespace Svelto.ECS
 
                 _indicesOfPersistentFiltersUsedByThisComponent.GetOrAdd(ComponentTypeID<T>.id, _builder).Add(lastIndex);
 
-                return ref _persistentEntityFilters.GetDirectValueByRef((uint)lastIndex);
+                return _persistentEntityFilters.GetDirectValueByRef((uint)lastIndex);
             }
 
             static NativeDynamicArrayCast<int> Builder()
@@ -132,20 +132,20 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection GetPersistentFilter<T>(int filterID, FilterContextID filterContextId)
+            public EntityFilterCollection GetPersistentFilter<T>(int filterID, FilterContextID filterContextId)
                     where T : struct, _IInternalEntityComponent
             {
-                return ref GetPersistentFilter<T>(new CombinedFilterID(filterID, filterContextId));
+                return GetPersistentFilter<T>(new CombinedFilterID(filterID, filterContextId));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection GetPersistentFilter<T>(CombinedFilterID filterID)
+            public EntityFilterCollection GetPersistentFilter<T>(CombinedFilterID filterID)
                     where T : struct, _IInternalEntityComponent
             {
                 var componentAndFilterID = Internal_FilterHelper.CombineFilterIDWithComponentID<T>(filterID);
 
                 if (_persistentEntityFilters.TryFindIndex(componentAndFilterID, out var index) == true)
-                    return ref _persistentEntityFilters.GetDirectValueByRef(index);
+                    return _persistentEntityFilters.GetDirectValueByRef(index);
 
                 throw new ECSException("filter not found");
             }
@@ -220,26 +220,26 @@ namespace Svelto.ECS
             /// <typeparam name="T"></typeparam>
             /// <returns></returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection GetOrCreateTransientFilter<T>(CombinedFilterID combinedFilterID, bool trackFilter = false)
+            public EntityFilterCollection GetOrCreateTransientFilter<T>(CombinedFilterID combinedFilterID, bool trackFilter = false)
                     where T : struct, _IInternalEntityComponent
             {
                 var componentAndFilterID = Internal_FilterHelper.CombineFilterIDWithComponentID<T>(combinedFilterID);
 
                 if (_transientEntityFilters.TryFindIndex(componentAndFilterID, out var index))
-                    return ref _transientEntityFilters.GetDirectValueByRef(index);
+                    return _transientEntityFilters.GetDirectValueByRef(index);
 
-                return ref InternalCreateTransientFilter<T>(combinedFilterID, componentAndFilterID, trackFilter);
+                return InternalCreateTransientFilter<T>(combinedFilterID, componentAndFilterID, trackFilter);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection GetOrCreateTransientFilter<T>(int filterID, FilterContextID filterContextId)
+            public EntityFilterCollection GetOrCreateTransientFilter<T>(int filterID, FilterContextID filterContextId)
                     where T : struct, _IInternalEntityComponent
             {
-                return ref GetOrCreateTransientFilter<T>(new CombinedFilterID(filterID, filterContextId));
+                return GetOrCreateTransientFilter<T>(new CombinedFilterID(filterID, filterContextId));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection CreateTransientFilter<T>(CombinedFilterID combinedFilterID, bool trackFilter = false)
+            public EntityFilterCollection CreateTransientFilter<T>(CombinedFilterID combinedFilterID, bool trackFilter = false)
                     where T : struct, _IInternalEntityComponent
             {
                 CombinedFilterComponentID componentAndFilterID = Internal_FilterHelper.CombineFilterIDWithComponentID<T>(combinedFilterID);
@@ -247,7 +247,7 @@ namespace Svelto.ECS
                 if (_transientEntityFilters.TryFindIndex(componentAndFilterID, out _))
                     throw new ECSException($"filter already exists {TypeCache<T>.name}");
 #endif
-                return ref InternalCreateTransientFilter<T>(combinedFilterID, componentAndFilterID, trackFilter);
+                return InternalCreateTransientFilter<T>(combinedFilterID, componentAndFilterID, trackFilter);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -267,14 +267,14 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref EntityFilterCollection GetTransientFilter<T>(CombinedFilterID filterID)
+            public EntityFilterCollection GetTransientFilter<T>(CombinedFilterID filterID)
                     where T : struct, _IInternalEntityComponent
             {
                 var componentAndFilterID = Internal_FilterHelper.CombineFilterIDWithComponentID<T>(filterID);
 
                 if (_transientEntityFilters.TryFindIndex(componentAndFilterID, out var index))
                 {
-                    return ref _transientEntityFilters.GetDirectValueByRef(index);
+                    return _transientEntityFilters.GetDirectValueByRef(index);
                 }
 
                 throw new ECSException($"no filters associated with the type {TypeCache<T>.name}");
@@ -326,7 +326,7 @@ namespace Svelto.ECS
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            ref EntityFilterCollection InternalCreateTransientFilter<T>(CombinedFilterID filterID, CombinedFilterComponentID componentAndFilterID,
+            EntityFilterCollection InternalCreateTransientFilter<T>(CombinedFilterID filterID, CombinedFilterComponentID componentAndFilterID,
                 bool trackFilter)
                     where T : struct, _IInternalEntityComponent
             {
@@ -336,12 +336,11 @@ namespace Svelto.ECS
 
                 if (trackFilter)
                 {
-                    var typeRef = ComponentTypeID<T>.id;
                     var lastIndex = _transientEntityFilters.count - 1;
                     _indicesOfTransientFiltersUsedByThisComponent.GetOrAdd(ComponentTypeID<T>.id, _builder).Add(lastIndex);
                 }
 
-                return ref _transientEntityFilters.GetDirectValueByRef((uint)(_transientEntityFilters.count - 1));
+                return _transientEntityFilters.GetDirectValueByRef((uint)(_transientEntityFilters.count - 1));
             }
 
             public struct EntityFilterCollectionsEnumerator
@@ -371,10 +370,10 @@ namespace Svelto.ECS
                     return false;
                 }
 
-                public ref EntityFilterCollection Current
+                public EntityFilterCollection Current
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                    get => ref _sharedSveltoDictionaryNative.GetDirectValueByRef((uint)_currentIndex - 1);
+                    get => _sharedSveltoDictionaryNative.GetDirectValueByRef((uint)_currentIndex - 1);
                 }
 
                 readonly NativeDynamicArrayCast<int> _getDirectValueByRef;

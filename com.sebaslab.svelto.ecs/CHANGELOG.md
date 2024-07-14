@@ -1,18 +1,25 @@
 # Svelto.ECS Changelog
 All notable changes to this project will be documented in this file. Changes are listed in random order of importance.
 
+## [3.5.2] - 07-2024
+
+* Minor serialization code improvements
+* Remove legacy filters once for all
+* breaking change: GetOrCreate*Filter, Create*Filter, Get*Filter don't return by ref anymore to fix reported bug
+* references are now updated at the end of the submission frame so they are accessible inside callbacks
+
 ## [3.5.1] - 01-2024
 
 * Remove UnityEntitySubmissionScheduler, it was never needed, the user can use the standard EntitySubmissionScheduler and tick it manually
 * Dropped the idea to specialise EntitiesSubmissionScheduler. In hindsight it was never necessary.
 * Added better support for range exclusive groups, now they are correctly registered in the group hash map
-* Removed announg Group compound/tag {type} is not sealed warning
+* Removed annoying Group compound/tag {type} is not sealed warning
 * Merged Cuyi's workaround to be able to query compound groups in abstract engine. Never had the time to implement a better solution
 * It is now possible again to add an entity multiple times inside a filter (it will be overriden)
 * Fixed issue https://github.com/sebas77/Svelto.ECS/issues/123
 * Fixed issue https://github.com/sebas77/Svelto.ECS/issues/122
 * Fixed issue https://github.com/sebas77/Svelto.ECS/issues/121
-* AddEngine now adds engines contained in a GroupEngine to the EnginesGroup optionally~~~~
+* AddEngine now adds engines contained in a GroupEngine to the EnginesGroup optionally
 
 ## [3.5.0] - 09-2023
 

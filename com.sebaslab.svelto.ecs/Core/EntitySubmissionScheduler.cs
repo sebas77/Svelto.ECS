@@ -19,6 +19,7 @@ namespace Svelto.ECS.Schedulers
 
         public void Dispose() { }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void SubmitEntities()
         {
             try

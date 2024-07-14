@@ -16,6 +16,8 @@ namespace Svelto.ECS.Serialization
             where T : unmanaged, IEntityComponent
     {
         public static uint SIZE => (uint)MemoryUtilities.SizeOf<T>();
+
+        protected SerializableComponentBuilder() { }
         
         public void Serialize(uint entityID, ITypeSafeDictionary dictionary, ISerializationData serializationData
           , int serializationType)

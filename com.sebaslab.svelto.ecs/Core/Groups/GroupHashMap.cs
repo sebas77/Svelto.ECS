@@ -141,8 +141,8 @@ namespace Svelto.ECS
 
             var nameHash = DesignatedHash.Hash(Encoding.ASCII.GetBytes(name));
 
-            if (_groupsByHash.ContainsKey(nameHash))
-                throw new ECSException($"Group hash collision with {name} and {_groupsByHash[nameHash]}");
+            if (_groupsByHash.TryGetValue(nameHash, out var value))
+                throw new ECSException($"Group hash collision with {name} and {value}");
 
             Console.LogDebug($"Registering group {name} with ID {exclusiveGroupStruct.id} to {nameHash}");
 
