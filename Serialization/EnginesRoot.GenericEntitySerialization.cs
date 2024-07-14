@@ -25,7 +25,8 @@ namespace Svelto.ECS
                     new SerializableEntityHeader(descriptorHash, egid, (byte)entityComponentsToSerialise.Length);
                 header.Copy(serializationData);
 
-                for (int index = 0; index < entityComponentsToSerialise.Length; index++)
+                var length = entityComponentsToSerialise.Length;
+                for (int index = 0; index < length; index++)
                 {
                     var entityBuilder = entityComponentsToSerialise[index];
 

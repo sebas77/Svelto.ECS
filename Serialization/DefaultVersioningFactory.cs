@@ -6,15 +6,17 @@ namespace Svelto.ECS.Serialization
 #if ENABLE_IL2CPP
     [UnityEngine.Scripting.Preserve]
 #endif    
-    public class DefaultVersioningFactory<T> : IDeserializationFactory where T : IEntityDescriptor, new()
+    public class DefaultVersioningFactory<T> : IDeserializationFactory where T : ISerializableEntityDescriptor, new()
     {
         public EntityInitializer BuildDeserializedEntity(EGID egid, ISerializationData serializationData,
             ISerializableEntityDescriptor entityDescriptor, int serializationType,
             IEntitySerialization entitySerialization, IEntityFactory factory, bool enginesRootIsDeserializationOnly)
         {
+            var newEntityDescriptor = EntityDescriptorTemplate<T>.realDescriptor as  ISerializableEntityDescriptor;
+                    
             var entityDescriptorEntitiesToSerialize = enginesRootIsDeserializationOnly
-                ? entityDescriptor.componentsToSerialize
-                : entityDescriptor.componentsToBuild;
+                ? newEntityDescriptor.componentsToSerialize
+                : newEntityDescriptor.componentsToBuild;
 
             var initializer = (factory as IEntitySerializationFactory).BuildEntity(egid, entityDescriptorEntitiesToSerialize, TypeCache<T>.type);
 

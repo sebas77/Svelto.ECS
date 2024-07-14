@@ -51,16 +51,7 @@ namespace Svelto.ECS
         {
             using (var sampler = new PlatformProfiler("remove Entities"))
             {
-                using (sampler.Sample("Remove Entity References"))
-                {
-                    var count = entitiesRemoved.count;
-                    for (int i = 0; i < count; i++)
-                    {
-                        enginesRoot._entityLocator.RemoveEntityReference(entitiesRemoved[i]);
-                    }
-                }
-
-                using (sampler.Sample("Execute remove callbacks and remove entities"))
+                using (sampler.Sample("Execute obsolete remove callbacks"))
                 {
                     foreach (var entitiesToRemove in removeOperations)
                     {
@@ -155,6 +146,16 @@ namespace Svelto.ECS
                                 rangeEnumerator.Current,
                                 in sampler);
                         }
+                    }
+                }
+                
+                //doing this at the end to be able to use EGID.ToEntityReference inside callbacks
+                using (sampler.Sample("Remove Entity References"))
+                {
+                    var count = entitiesRemoved.count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        enginesRoot._entityLocator.RemoveEntityReference(entitiesRemoved[i]);
                     }
                 }
             }

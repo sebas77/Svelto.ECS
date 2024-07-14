@@ -76,10 +76,7 @@ namespace Svelto.ECS
                 new FasterDictionary<ComponentID, FasterDictionary<ExclusiveGroupStruct, ITypeSafeDictionary>>();
             _groupedEntityToAdd = new DoubleBufferedEntitiesToAdd();
             _entityStreams = EntitiesStreams.Create();
-#if SVELTO_LEGACY_FILTERS
-            _groupFilters =
-                new FasterDictionary<ComponentID, FasterDictionary<ExclusiveGroupStruct, LegacyGroupFilters>>();
-#endif
+
             _entityLocator.InitEntityReferenceMap();
             _entitiesDB = new EntitiesDB(this, _entityLocator);
 
@@ -295,14 +292,6 @@ namespace Svelto.ECS
                 foreach (var groups in _groupEntityComponentsDB)
                     foreach (var entityList in groups.value)
                         entityList.value.Dispose();
-
-#if SVELTO_LEGACY_FILTERS
-                foreach (var type in _groupFilters)
-                    foreach (var group in type.value)
-                        group.value.Dispose();
-
-                _groupFilters.Clear();
-#endif
 
                 DisposeFilters();
 
