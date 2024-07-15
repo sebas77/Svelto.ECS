@@ -259,8 +259,8 @@ Note: I included the IoC articles just to show how I shifted over the years from
 
 * [***Svelto.ECS inspector***](https://github.com/akrogame/svelto-ecs-inspector)
 * [***Svelto.ECS.Schema - Schema and State Machine extensions for Svelto.ECS***](https://github.com/cathei/Svelto.ECS.Schema)
-* [***Being able to swap entities between a subset of compound tags to another subset of compound tags***](https://gist.github.com/jlreymendez/c2f441aaf6ac7b5f233ecd990314e9cc)
 * [***Automatic way to control svelto engines order without having to pass in a string using attributes***](https://gist.github.com/dragonslaya84/88e6bb998eda8fe4ee912f01d67feec9)
+* [***Svelto Doofuses example on 'Roids] (https://github.com/svermeulen/svelto-doofus-sample)
 
 
 ## How to clone the repository:
